@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play } from "lucide-react";
+import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, Phone } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,8 +25,8 @@ const placeholderVideos = [
     id: "1",
     title: "Why Trade Forex?",
     category: "Getting Started",
-    categoryColor: "bg-blue-500",
-    duration: "7 minutes",
+    categoryVariant: "info" as const,
+    duration: "7 min",
     progress: 0,
     status: "Not Started",
   },
@@ -34,8 +34,8 @@ const placeholderVideos = [
     id: "2",
     title: "Timing Your Entries",
     category: "Trading Strategies",
-    categoryColor: "bg-purple-500",
-    duration: "8 minutes",
+    categoryVariant: "purple" as const,
+    duration: "8 min",
     progress: 0,
     status: "Not Started",
   },
@@ -43,8 +43,8 @@ const placeholderVideos = [
     id: "3",
     title: "Risk and Position Management",
     category: "Risk Management",
-    categoryColor: "bg-red-500",
-    duration: "15 minutes",
+    categoryVariant: "destructive" as const,
+    duration: "15 min",
     progress: 0,
     status: "Not Started",
   },
@@ -52,8 +52,8 @@ const placeholderVideos = [
     id: "4",
     title: "Double Top & Double Bottom Patterns",
     category: "Technical Analysis",
-    categoryColor: "bg-green-500",
-    duration: "7 minutes",
+    categoryVariant: "success" as const,
+    duration: "7 min",
     progress: 0,
     status: "Not Started",
   },
@@ -61,8 +61,8 @@ const placeholderVideos = [
     id: "5",
     title: "Small Cap Trading",
     category: "Trading Strategies",
-    categoryColor: "bg-purple-500",
-    duration: "9 minutes",
+    categoryVariant: "purple" as const,
+    duration: "9 min",
     progress: 0,
     status: "Not Started",
   },
@@ -95,7 +95,7 @@ const Dashboard = () => {
   if (!userData) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="text-text-secondary">Loading...</p>
       </div>
     );
   }
@@ -103,29 +103,29 @@ const Dashboard = () => {
   const getQuizLabel = (value: string, type: string) => {
     const labels: Record<string, Record<string, string>> = {
       experience: {
-        beginner: "🌱 Complete beginner",
-        researched: "📚 Researched but never traded",
-        "few-trades": "📈 Made a few trades",
-        regular: "💼 Trade regularly",
+        beginner: "Complete beginner",
+        researched: "Researched but never traded",
+        "few-trades": "Made a few trades",
+        regular: "Trade regularly",
       },
       goal: {
-        "extra-income": "💰 Generate extra income",
-        "replace-income": "🚀 Replace full-time income",
-        wealth: "🏦 Build long-term wealth",
-        hobby: "🎓 Learn as a hobby",
+        "extra-income": "Generate extra income",
+        "replace-income": "Replace full-time income",
+        wealth: "Build long-term wealth",
+        hobby: "Learn as a hobby",
       },
       concern: {
-        "losing-money": "😰 Losing money / Risk management",
-        understanding: "🤔 Not understanding how it works",
-        time: "⏰ Not having enough time",
-        decisions: "🎯 Making bad decisions / Psychology",
-        capital: "💸 Don't have enough capital",
+        "losing-money": "Losing money / Risk management",
+        understanding: "Not understanding how it works",
+        time: "Not having enough time",
+        decisions: "Making bad decisions / Psychology",
+        capital: "Don't have enough capital",
       },
       timeCommitment: {
-        "1-3": "⏱️ 1-3 hours (casual)",
-        "4-6": "📅 4-6 hours (part-time)",
-        "7-10": "💪 7-10 hours (serious commitment)",
-        "10+": "🔥 10+ hours (full-time focus)",
+        "1-3": "1-3 hours per week",
+        "4-6": "4-6 hours per week",
+        "7-10": "7-10 hours per week",
+        "10+": "10+ hours per week",
       },
     };
     return labels[type]?.[value] || value;
@@ -133,117 +133,137 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-slide-up">
-        {/* Welcome Header */}
-        <div className="space-y-4 p-8 rounded-2xl glass-card border-primary/20">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-neon-purple bg-clip-text text-transparent animate-gradient">
-            Welcome back, {userData.firstName}!
-          </h1>
+      <div className="space-y-12">
+        {/* Welcome Section */}
+        <div className="space-y-8 animate-slide-up">
+          <div className="space-y-4">
+            <h1 className="text-5xl md:text-6xl font-bold text-white tracking-tight">
+              Welcome back, {userData.firstName}!
+            </h1>
+            <p className="text-lg text-text-secondary">
+              Let's continue your trading journey
+            </p>
+          </div>
+
+          {/* Progress Bar */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-muted-foreground">Your Progress</span>
-              <span className="text-sm font-semibold text-primary animate-glow">0% Complete</span>
+              <span className="text-sm uppercase tracking-wider text-text-tertiary font-semibold">
+                Your Progress
+              </span>
+              <span className="text-xl font-semibold text-success font-mono">
+                0%
+              </span>
             </div>
-            <Progress value={0} className="h-4" />
-          </div>
-          <p className="text-muted-foreground text-lg">Let's continue your trading journey</p>
-          <div className="flex items-center gap-2 text-sm px-4 py-2 rounded-full bg-primary/10 border border-primary/20 w-fit">
-            <span className="text-2xl">🔥</span>
-            <span className="text-foreground font-medium">
-              0 day streak - Start watching to build your streak!
-            </span>
+            <Progress value={0} className="h-2" />
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-secondary border border-border-hover">
+              <span className="text-xl animate-pulse-subtle">🔥</span>
+              <span className="text-sm text-text-secondary">
+                0 day streak - Watch your first video!
+              </span>
+            </div>
           </div>
         </div>
 
         {/* Quick Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-6 space-y-3 glass-card-hover group">
-            <Video className="h-10 w-10 text-primary group-hover:animate-glow transition-all" />
-            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-primary bg-clip-text text-transparent">
-              0 / {placeholderVideos.length}
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">Videos Watched</p>
-          </Card>
-
-          <Card className="p-6 space-y-3 glass-card-hover group">
-            <Clock className="h-10 w-10 text-neon-purple group-hover:animate-glow transition-all" />
-            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-neon-purple bg-clip-text text-transparent">
-              0h 0m
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">Total Watch Time</p>
-          </Card>
-
-          <Card className="p-6 space-y-3 glass-card-hover group">
-            <TrendingUp className="h-10 w-10 text-neon-cyan group-hover:animate-glow transition-all" />
-            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-neon-cyan bg-clip-text text-transparent">
-              0%
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">Progress</p>
-          </Card>
-
-          <Card className="p-6 space-y-3 glass-card-hover group">
-            <Trophy className="h-10 w-10 text-gradient-pink group-hover:animate-glow transition-all" />
-            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-gradient-pink bg-clip-text text-transparent">
-              0
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">Achievements</p>
-          </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              icon: Video,
+              label: "Videos Watched",
+              value: `0 / ${placeholderVideos.length}`,
+              subtext: "5 videos remaining",
+              color: "success",
+            },
+            {
+              icon: Clock,
+              label: "Total Watch Time",
+              value: "0h 0m",
+              subtext: "Start learning today",
+              color: "info",
+            },
+            {
+              icon: TrendingUp,
+              label: "Progress",
+              value: "0%",
+              subtext: "Complete your first video",
+              color: "warning",
+            },
+            {
+              icon: Trophy,
+              label: "Achievements",
+              value: "0",
+              subtext: "1 badge available",
+              color: "success",
+            },
+          ].map((stat, index) => (
+            <Card
+              key={stat.label}
+              className="p-8 space-y-5 group cursor-pointer"
+              style={{
+                animationDelay: `${0.2 + index * 0.1}s`,
+                animationFillMode: "backwards",
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div
+                  className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
+                >
+                  <stat.icon className={`w-6 h-6 text-${stat.color}`} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm uppercase tracking-widest text-text-tertiary font-semibold">
+                  {stat.label}
+                </p>
+                <p className="text-4xl font-semibold text-white font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
+                  {stat.value}
+                </p>
+                <p className="text-sm text-text-secondary">{stat.subtext}</p>
+              </div>
+            </Card>
+          ))}
         </div>
 
         {/* Trading Profile */}
         {quizAnswers && (
           <Collapsible open={profileOpen} onOpenChange={setProfileOpen}>
-            <Card className="overflow-hidden glass-card border-primary/20">
+            <Card className="overflow-hidden">
               <CollapsibleTrigger asChild>
-                <button className="w-full p-6 flex items-center justify-between hover:bg-primary/5 transition-all duration-300">
-                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                    📋 Your Trading Profile
+                <button className="w-full p-6 flex items-center justify-between hover:bg-secondary/50 transition-colors duration-200 cursor-pointer">
+                  <h2 className="text-xl font-semibold text-white flex items-center gap-3">
+                    <span className="text-2xl">📋</span>
+                    Your Trading Profile
                   </h2>
                   {profileOpen ? (
-                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                    <ChevronUp className="h-5 w-5 text-text-secondary transition-transform duration-200" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                    <ChevronDown className="h-5 w-5 text-text-secondary transition-transform duration-200" />
                   )}
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="px-6 pb-6 space-y-4">
-                  <div className="grid gap-3">
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-foreground min-w-[140px]">Experience:</span>
-                      <span className="text-muted-foreground">
-                        {getQuizLabel(quizAnswers.experience, "experience")}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-foreground min-w-[140px]">Interested in:</span>
-                      <span className="text-muted-foreground">
-                        {quizAnswers.markets?.join(", ") || "Not specified"}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-foreground min-w-[140px]">Primary Goal:</span>
-                      <span className="text-muted-foreground">
-                        {getQuizLabel(quizAnswers.goal, "goal")}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-foreground min-w-[140px]">Main Concern:</span>
-                      <span className="text-muted-foreground">
-                        {getQuizLabel(quizAnswers.concern, "concern")}
-                      </span>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <span className="font-medium text-foreground min-w-[140px]">Time Available:</span>
-                      <span className="text-muted-foreground">
-                        {getQuizLabel(quizAnswers.timeCommitment, "timeCommitment")}
-                      </span>
-                    </div>
+                <div className="px-8 pb-8 pt-2 border-t border-border space-y-5">
+                  <div className="grid gap-5 mt-6">
+                    {[
+                      { label: "Experience", value: getQuizLabel(quizAnswers.experience, "experience") },
+                      { label: "Interested in", value: quizAnswers.markets?.join(", ") || "Not specified" },
+                      { label: "Primary Goal", value: getQuizLabel(quizAnswers.goal, "goal") },
+                      { label: "Main Concern", value: getQuizLabel(quizAnswers.concern, "concern") },
+                      { label: "Time Available", value: getQuizLabel(quizAnswers.timeCommitment, "timeCommitment") },
+                    ].map((item) => (
+                      <div key={item.label} className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <span className="text-sm uppercase tracking-wider text-text-tertiary font-semibold min-w-[160px]">
+                          {item.label}
+                        </span>
+                        <span className="text-base text-white font-medium">{item.value}</span>
+                      </div>
+                    ))}
                   </div>
                   <Button
                     variant="outline"
-                    size="sm"
                     onClick={() => console.log("Edit clicked")}
+                    className="mt-6"
                   >
                     Edit My Answers
                   </Button>
@@ -254,41 +274,66 @@ const Dashboard = () => {
         )}
 
         {/* Personalized Video Playlist */}
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground via-primary to-neon-purple bg-clip-text text-transparent">
-              🎥 Your Personalized Learning Path
+        <div className="space-y-8">
+          <div className="space-y-3">
+            <h2 className="text-4xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span className="text-3xl">🎥</span>
+              Your Personalized Learning Path
             </h2>
-            <p className="text-muted-foreground text-lg">Based on your answers, these videos are perfect for you</p>
+            <p className="text-lg text-text-secondary">
+              Based on your answers, these videos are perfect for you
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {placeholderVideos.map((video, index) => (
               <Card
                 key={video.id}
-                className="overflow-hidden glass-card-hover border-primary/30 cursor-pointer group"
+                className="overflow-hidden cursor-pointer group"
                 onClick={() => navigate(`/video/${video.id}`)}
-                style={{ animationDelay: `${index * 0.1}s` }}
+                style={{
+                  animationDelay: `${0.1 * index}s`,
+                  animationFillMode: "backwards",
+                }}
               >
-                <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-neon-purple/20 to-neon-cyan/20 flex items-center justify-center overflow-hidden group-hover:from-primary/30 group-hover:via-neon-purple/30 group-hover:to-neon-cyan/30 transition-all duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <Play className="h-16 w-16 text-primary group-hover:scale-125 group-hover:text-neon-purple transition-all duration-500 drop-shadow-lg relative z-10" />
-                </div>
-                <div className="p-5 space-y-3">
-                  <h3 className="font-bold text-foreground text-lg line-clamp-2 group-hover:text-primary transition-colors">{video.title}</h3>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className={`${video.categoryColor} text-white backdrop-blur-sm`}>{video.category}</Badge>
-                    <span className="text-sm text-muted-foreground font-medium">⏱ {video.duration}</span>
-                  </div>
-                  {video.progress > 0 && (
-                    <div className="space-y-1">
-                      <Progress value={video.progress} className="h-1" />
-                      <p className="text-xs text-muted-foreground">{video.progress}% complete</p>
+                {/* Thumbnail */}
+                <div className="relative aspect-video bg-gradient-to-br from-secondary to-card overflow-hidden">
+                  <div className="absolute inset-0 bg-success/5 group-hover:bg-success/10 transition-colors duration-500" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-success/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-success/30 transition-all duration-300">
+                      <Play className="w-8 h-8 text-success ml-1" fill="currentColor" />
                     </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">{video.status}</Badge>
-                    <Button size="sm">Watch Now</Button>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-8 space-y-4">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <Badge variant={video.categoryVariant}>{video.category}</Badge>
+                    <span className="text-sm text-text-tertiary font-mono flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      {video.duration}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-semibold text-white group-hover:text-success transition-colors duration-200 line-clamp-2">
+                    {video.title}
+                  </h3>
+
+                  <div className="space-y-3">
+                    <div className="h-1.5 bg-border rounded-full overflow-hidden">
+                      <div
+                        className="h-full success-gradient transition-all duration-1000"
+                        style={{ width: `${video.progress}%` }}
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-text-tertiary">{video.status}</span>
+                      <Button size="sm" variant="primary" className="group-hover:scale-105 transition-transform">
+                        Watch Now →
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -297,90 +342,147 @@ const Dashboard = () => {
         </div>
 
         {/* Learning Roadmap Preview */}
-        <Card className="p-8 space-y-6 glass-card border-primary/20">
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground via-neon-cyan to-primary bg-clip-text text-transparent">
-              🗺️ Your Personalized Roadmap
+        <Card className="p-12 space-y-8">
+          <div className="space-y-3">
+            <h2 className="text-4xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span className="text-3xl">🗺️</span>
+              Your Personalized Roadmap
             </h2>
-            <p className="text-muted-foreground text-lg">Follow this path to reach your trading goals</p>
+            <p className="text-lg text-text-secondary">
+              Follow this step-by-step path to success
+            </p>
           </div>
 
-          <div className="space-y-3">
-            <div className="border-l-4 border-primary pl-4 py-2">
-              <h3 className="font-semibold text-foreground mb-2">WEEK 1-2: FOUNDATIONS</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-success">
-                  <span>✅</span>
-                  <span>Create account (completed)</span>
+          <div className="space-y-6">
+            {/* Phase 1 - Active */}
+            <div className="relative pl-8 border-l-4 border-success">
+              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-success border-4 border-background animate-pulse-subtle" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-semibold text-white uppercase tracking-wider">
+                    Phase 1: Getting Started
+                  </h3>
+                  <Badge variant="success">Active</Badge>
                 </div>
-                <div className="flex items-center gap-2 text-primary">
-                  <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                  <span>Watch first video (current)</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span>⬜</span>
-                  <span>Complete beginner module</span>
-                </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <span>⬜</span>
-                  <span>Take first quiz</span>
+                <p className="text-sm text-text-tertiary uppercase tracking-wider">Week 1-2 • 10% Complete</p>
+
+                <div className="space-y-3 mt-6">
+                  {[
+                    { done: true, text: "Create your account", icon: "✅" },
+                    { done: false, current: true, text: "Watch your first video", icon: "⏳" },
+                    { done: false, text: "Complete beginner module", icon: "⬜" },
+                    { done: false, text: "Take your first quiz", icon: "⬜" },
+                  ].map((step, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-center gap-3 text-base ${
+                        step.done
+                          ? "text-success"
+                          : step.current
+                          ? "text-info"
+                          : "text-text-tertiary"
+                      }`}
+                    >
+                      <span className="text-lg">{step.icon}</span>
+                      <span className={step.current ? "font-medium" : ""}>{step.text}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
-            <div className="border-l-4 border-muted pl-4 py-2 opacity-50">
-              <h3 className="font-semibold text-foreground mb-2">WEEK 3-4: BUILDING SKILLS</h3>
-              <p className="text-sm text-muted-foreground">🔒 Locked - Complete Week 1-2 first</p>
+            {/* Phase 2 - Locked */}
+            <div className="relative pl-8 border-l-4 border-border opacity-40">
+              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-border border-4 border-background" />
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-xl font-semibold text-white uppercase tracking-wider">
+                    Phase 2: Building Skills
+                  </h3>
+                  <Badge variant="secondary">Locked</Badge>
+                </div>
+                <p className="text-sm text-text-tertiary uppercase tracking-wider">Week 3-4</p>
+                <p className="text-base text-text-secondary">🔒 Complete Phase 1 to unlock</p>
+              </div>
             </div>
           </div>
 
-          <Button onClick={() => navigate("/roadmap")} className="w-full">
+          <Button
+            onClick={() => navigate("/roadmap")}
+            className="w-full"
+            size="lg"
+          >
             View Full Roadmap
           </Button>
         </Card>
 
-        {/* Stock Analyzer Teaser */}
-        <Card className="p-8 space-y-6 glass-card border-neon-cyan/30 relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-neon-purple/10 to-neon-cyan/10 opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
-          <div className="relative z-10 text-center space-y-2">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-neon-cyan bg-clip-text text-transparent">
-              📊 AI Stock Analyzer
+        {/* AI Stock Analyzer Teaser */}
+        <Card className="p-12 space-y-8 text-center relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent" />
+          <div className="relative z-10 space-y-3">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-info/10 flex items-center justify-center mb-6">
+              <span className="text-4xl">📊</span>
+            </div>
+            <h2 className="text-4xl font-bold text-white tracking-tight">
+              AI Stock Analyzer
             </h2>
-            <p className="text-muted-foreground text-lg">Analyze any stock in real-time</p>
+            <p className="text-lg text-text-secondary max-w-md mx-auto">
+              Analyze any stock in real-time with advanced AI technology
+            </p>
           </div>
 
-          <div className="relative z-10">
-            <Input 
-              placeholder="Enter stock symbol (e.g., AAPL, TSLA)" 
-              disabled 
-              className="bg-background/50 backdrop-blur-sm border-primary/30"
+          <div className="max-w-md mx-auto space-y-4 relative z-10">
+            <Input
+              placeholder="Enter symbol (e.g., AAPL, TSLA)"
+              disabled
+              className="h-14 text-base bg-secondary border-border-hover rounded-xl"
             />
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3 relative z-10">
-            <Button disabled className="flex-1">Analyze</Button>
-            <Button onClick={() => navigate("/analyzer")} variant="outline" className="flex-1">
-              Go to Analyzer →
-            </Button>
+            <div className="flex gap-3">
+              <Button disabled className="flex-1" size="lg">
+                Analyze
+              </Button>
+              <Button
+                onClick={() => navigate("/analyzer")}
+                variant="outline"
+                className="flex-1"
+                size="lg"
+              >
+                Go to Analyzer →
+              </Button>
+            </div>
           </div>
         </Card>
 
-        {/* CTA */}
-        <Card className="p-12 text-center space-y-6 glass-card border-gradient-pink/30 relative overflow-hidden group animate-glow-pulse">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-neon-purple/20 to-gradient-pink/20 opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
-          <div className="relative z-10 space-y-3">
-            <h2 className="text-4xl font-bold bg-gradient-to-r from-foreground via-primary to-gradient-pink bg-clip-text text-transparent">
-              📞 Ready for 1-on-1 Guidance?
-            </h2>
-            <p className="text-muted-foreground text-lg">Book a free call with a trading specialist</p>
+        {/* Call to Action */}
+        <Card className="p-16 text-center space-y-8 relative overflow-hidden success-glow">
+          <div className="absolute inset-0 success-gradient opacity-10" />
+          <div className="relative z-10 space-y-6">
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-success/10 flex items-center justify-center">
+              <Phone className="w-10 h-10 text-success" />
+            </div>
+            <div className="space-y-3">
+              <h2 className="text-5xl font-bold text-white tracking-tight">
+                Ready for 1-on-1 Guidance?
+              </h2>
+              <p className="text-xl text-text-secondary max-w-xl mx-auto">
+                Book a free call with a trading specialist
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 text-sm text-text-tertiary">
+              <span className="flex items-center gap-2">✓ No sales pitch</span>
+              <span className="flex items-center gap-2">✓ 30-minute session</span>
+              <span className="flex items-center gap-2">✓ 100% free</span>
+            </div>
+
+            <Button
+              onClick={() => console.log("Book call clicked")}
+              className="px-16 animate-pulse-subtle"
+              size="lg"
+            >
+              Book Your Call
+            </Button>
           </div>
-          <Button
-            size="lg"
-            onClick={() => console.log("Book call clicked")}
-            className="bg-gradient-to-r from-primary via-neon-purple to-gradient-pink text-lg px-8 py-6 h-auto relative z-10 hover:scale-105 transition-transform duration-300"
-          >
-            Book Your Call
-          </Button>
         </Card>
       </div>
     </DashboardLayout>
