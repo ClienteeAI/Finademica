@@ -9,10 +9,19 @@ const HeroSection = () => {
   return (
     <>
       <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-20 overflow-hidden">
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/10 to-purple/20" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(139,92,246,0.1),transparent_50%)]" />
+        {/* Video background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/hero-background.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Dark overlay for better text readability */}
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
         
         <div className="container max-w-5xl mx-auto text-center space-y-8 relative z-10">
           <div className="animate-fade-in">
