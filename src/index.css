@@ -8,51 +8,57 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 222 47% 11%;
+    --background: 222 47% 8%;
     --foreground: 210 40% 98%;
 
-    --card: 217 33% 17%;
+    --card: 217 33% 12%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 217 33% 17%;
+    --popover: 217 33% 12%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 217 91% 60%;
     --primary-foreground: 222 47% 11%;
 
-    --secondary: 217 33% 17%;
+    --secondary: 217 33% 15%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 17%;
+    --muted: 217 33% 15%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 250 70% 60%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 25%;
-    --input: 217 33% 25%;
+    --border: 217 33% 20%;
+    --input: 217 33% 15%;
     --ring: 217 91% 60%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
-    /* Premium gradients */
-    --gradient-start: 222 47% 11%;
-    --gradient-mid: 250 50% 20%;
-    --gradient-end: 217 91% 30%;
+    /* Futuristic gradients */
+    --gradient-blue: 217 91% 60%;
+    --gradient-purple: 250 70% 60%;
+    --gradient-cyan: 190 95% 60%;
+    --gradient-pink: 320 85% 65%;
     
     /* Purple accent */
     --purple: 250 70% 60%;
     --purple-foreground: 210 40% 98%;
     
     /* Glass effect */
-    --glass-bg: 217 33% 17%;
+    --glass-bg: 217 33% 12%;
     --glass-border: 217 33% 25%;
     
+    /* Neon effects */
+    --neon-blue: 217 91% 60%;
+    --neon-purple: 250 70% 60%;
+    --neon-cyan: 190 95% 60%;
+    
     /* Success/Error */
-    --success: 142 76% 36%;
+    --success: 142 76% 45%;
     --error: 0 84% 60%;
   }
 }
@@ -64,5 +70,78 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(230 45% 10%) 50%, hsl(222 47% 8%) 100%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass-card {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(59, 130, 246, 0.1) inset;
+  }
+  
+  .glass-card-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-card-hover:hover {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 20px 60px rgba(59, 130, 246, 0.2), 0 0 0 1px rgba(59, 130, 246, 0.2) inset;
+    transform: translateY(-2px);
+  }
+  
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card)) 100%);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, hsl(var(--neon-blue)) 0%, hsl(var(--neon-purple)) 50%, hsl(var(--neon-cyan)) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.6;
+  }
+  
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(139, 92, 246, 0.2);
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 8s ease infinite;
+  }
+  
+  @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-glow {
+    animation: glow 3s ease-in-out infinite;
+  }
+  
+  @keyframes glow {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.8));
+    }
   }
 }
