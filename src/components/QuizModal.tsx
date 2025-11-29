@@ -128,33 +128,9 @@ const QuizModal = ({ open, onOpenChange }: QuizModalProps) => {
     }
   };
 
-  const handleSubmit = async () => {
-    const getLabel = (questionIndex: number, value: string) => {
-      const q = questions[questionIndex];
-      const option = q.options.find(opt => opt.value === value);
-      return option?.label || value;
-    };
-    
-    try {
-      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'no-cors',
-        body: JSON.stringify({
-          experience_level: getLabel(0, answers.experience),
-          markets_interested: answers.markets.map(m => getLabel(1, m)),
-          primary_goal: getLabel(2, answers.goal),
-          main_concern: getLabel(3, answers.concern),
-          time_available: getLabel(4, answers.timeCommitment),
-          timestamp: new Date().toISOString(),
-          source: 'AI Trading Pro Academy',
-          raw_quiz_data: answers
-        }),
-      });
-    } catch (error) {
-      console.error("Error sending quiz data:", error);
-    }
-
+  const handleSubmit = () => {
+    // Just show loading screen, don't send webhook yet
+    // Webhook will be sent after signup form with all data
     setShowLoading(true);
   };
 
