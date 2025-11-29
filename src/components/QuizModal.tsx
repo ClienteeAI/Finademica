@@ -136,11 +136,30 @@ const QuizModal = ({ open, onOpenChange }: QuizModalProps) => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Simulate API call
+    
+    // Send data to webhook
+    try {
+      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'no-cors',
+        body: JSON.stringify({
+          timestamp: new Date().toISOString(),
+          quizAnswers: answers,
+          source: 'AI Trading Pro Academy - Quiz'
+        }),
+      });
+      console.log("Quiz data sent to webhook:", answers);
+    } catch (error) {
+      console.error("Error sending to webhook:", error);
+    }
+    
+    // Show loading animation
     setTimeout(() => {
-      console.log("Quiz submitted:", answers);
       setIsSubmitting(false);
       onOpenChange(false);
       // Reset for next time
