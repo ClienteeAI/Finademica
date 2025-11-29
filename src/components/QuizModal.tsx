@@ -139,6 +139,36 @@ const QuizModal = ({ open, onOpenChange }: QuizModalProps) => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     
+    // Get human-readable labels for answers
+    const getLabel = (questionId: number, value: string) => {
+      const question = questions.find(q => q.id === questionId);
+      const option = question?.options.find(opt => opt.value === value);
+      return option?.label || value;
+    };
+    
+    const formattedAnswers = {
+      experience: {
+        value: answers.experience,
+        label: getLabel(1, answers.experience)
+      },
+      markets: {
+        values: answers.markets,
+        labels: answers.markets.map(m => getLabel(2, m))
+      },
+      goal: {
+        value: answers.goal,
+        label: getLabel(3, answers.goal)
+      },
+      concern: {
+        value: answers.concern,
+        label: getLabel(4, answers.concern)
+      },
+      timeCommitment: {
+        value: answers.timeCommitment,
+        label: getLabel(5, answers.timeCommitment)
+      }
+    };
+    
     // Send data to webhook
     try {
       await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
@@ -149,11 +179,12 @@ const QuizModal = ({ open, onOpenChange }: QuizModalProps) => {
         mode: 'no-cors',
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
-          quizAnswers: answers,
-          source: 'AI Trading Pro Academy - Quiz'
+          source: 'AI Trading Pro Academy - Quiz',
+          quizAnswers: formattedAnswers,
+          rawAnswers: answers
         }),
       });
-      console.log("Quiz data sent to webhook:", answers);
+      console.log("Quiz data sent to webhook:", formattedAnswers);
     } catch (error) {
       console.error("Error sending to webhook:", error);
     }
