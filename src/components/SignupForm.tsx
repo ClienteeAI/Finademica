@@ -54,23 +54,95 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const getQuizLabels = () => {
+    const questionLabels = [
+      [
+        { value: "beginner", label: "🌱 Complete beginner (never traded)" },
+        { value: "researched", label: "📚 I've researched but never traded" },
+        { value: "few-trades", label: "📈 I've made a few trades" },
+        { value: "regular", label: "💼 I trade regularly" }
+      ],
+      [
+        { value: "stocks", label: "📊 Stocks" },
+        { value: "forex", label: "💱 Forex" },
+        { value: "crypto", label: "₿ Cryptocurrency" },
+        { value: "commodities", label: "🛢️ Commodities" }
+      ],
+      [
+        { value: "extra-income", label: "💰 Generate extra income" },
+        { value: "replace-income", label: "🚀 Replace my full-time income" },
+        { value: "wealth", label: "🏦 Build long-term wealth" },
+        { value: "hobby", label: "🎓 Learn as a hobby" }
+      ],
+      [
+        { value: "losing-money", label: "😰 Losing money / Risk management" },
+        { value: "understanding", label: "🤔 Not understanding how it works" },
+        { value: "time", label: "⏰ Not having enough time" },
+        { value: "decisions", label: "🎯 Making bad decisions / Psychology" },
+        { value: "capital", label: "💸 Don't have enough capital to start" }
+      ],
+      [
+        { value: "1-3", label: "⏱️ 1-3 hours (casual)" },
+        { value: "4-6", label: "📅 4-6 hours (part-time)" },
+        { value: "7-10", label: "💪 7-10 hours (serious commitment)" },
+        { value: "10+", label: "🔥 10+ hours (full-time focus)" }
+      ]
+    ];
+
+    return {
+      experience: {
+        value: quizAnswers.experience,
+        label: questionLabels[0].find(o => o.value === quizAnswers.experience)?.label || quizAnswers.experience
+      },
+      markets: {
+        values: quizAnswers.markets.map(m => 
+          questionLabels[1].find(o => o.value === m)?.label || m
+        )
+      },
+      goal: {
+        value: quizAnswers.goal,
+        label: questionLabels[2].find(o => o.value === quizAnswers.goal)?.label || quizAnswers.goal
+      },
+      concern: {
+        value: quizAnswers.concern,
+        label: questionLabels[3].find(o => o.value === quizAnswers.concern)?.label || quizAnswers.concern
+      },
+      timeCommitment: {
+        value: quizAnswers.timeCommitment,
+        label: questionLabels[4].find(o => o.value === quizAnswers.timeCommitment)?.label || quizAnswers.timeCommitment
+      }
+    };
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validate()) return;
 
-    // Create combined data object
-    const signupData = {
-      email: formData.email,
+    // Create webhook payload
+    const webhookData = {
       firstName: formData.firstName,
       lastName: formData.lastName,
+      email: formData.email,
       phone: formData.phone,
-      quizAnswers,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      source: "AI Trading Pro Academy - Quiz",
+      quizAnswers: getQuizLabels()
     };
 
-    // Log to console (will be webhook later)
-    console.log("Signup Data:", signupData);
+    // Send to webhook
+    try {
+      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'no-cors',
+        body: JSON.stringify(webhookData),
+      });
+      console.log("Signup data sent to webhook successfully");
+    } catch (error) {
+      console.error("Error sending signup data to webhook:", error);
+      // Continue anyway - don't block the user
+    }
 
     // Store in localStorage
     localStorage.setItem("isLoggedIn", "true");
