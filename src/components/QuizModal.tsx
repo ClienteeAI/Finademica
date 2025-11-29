@@ -146,30 +146,7 @@ const QuizModal = ({ open, onOpenChange }: QuizModalProps) => {
       return option?.label || value;
     };
     
-    const formattedAnswers = {
-      experience: {
-        value: answers.experience,
-        label: getLabel(1, answers.experience)
-      },
-      markets: {
-        values: answers.markets,
-        labels: answers.markets.map(m => getLabel(2, m))
-      },
-      goal: {
-        value: answers.goal,
-        label: getLabel(3, answers.goal)
-      },
-      concern: {
-        value: answers.concern,
-        label: getLabel(4, answers.concern)
-      },
-      timeCommitment: {
-        value: answers.timeCommitment,
-        label: getLabel(5, answers.timeCommitment)
-      }
-    };
-    
-    // Send data to webhook
+    // Send data to webhook with each answer as a separate field
     try {
       await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
         method: 'POST',
@@ -180,11 +157,19 @@ const QuizModal = ({ open, onOpenChange }: QuizModalProps) => {
         body: JSON.stringify({
           timestamp: new Date().toISOString(),
           source: 'AI Trading Pro Academy - Quiz',
-          quizAnswers: formattedAnswers,
-          rawAnswers: answers
+          experience: getLabel(1, answers.experience),
+          experienceValue: answers.experience,
+          markets: answers.markets.map(m => getLabel(2, m)).join(', '),
+          marketsValues: answers.markets,
+          goal: getLabel(3, answers.goal),
+          goalValue: answers.goal,
+          concern: getLabel(4, answers.concern),
+          concernValue: answers.concern,
+          timeCommitment: getLabel(5, answers.timeCommitment),
+          timeCommitmentValue: answers.timeCommitment
         }),
       });
-      console.log("Quiz data sent to webhook:", formattedAnswers);
+      console.log("Quiz data sent to webhook");
     } catch (error) {
       console.error("Error sending to webhook:", error);
     }
