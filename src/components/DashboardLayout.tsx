@@ -52,12 +52,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-lg border-b border-border">
+      <nav className="sticky top-0 z-50 bg-card/80 backdrop-blur-2xl border-b border-primary/20 shadow-lg shadow-primary/5">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <span className="text-xl font-bold text-foreground">AI Trading Pro Academy</span>
+            <Link to="/dashboard" className="flex items-center gap-2 group">
+              <span className="text-xl font-bold bg-gradient-to-r from-primary via-neon-purple to-neon-cyan bg-clip-text text-transparent group-hover:animate-gradient">
+                AI Trading Pro Academy
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -66,13 +68,13 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative text-sm font-medium transition-colors hover:text-primary ${
+                  className={`relative text-sm font-semibold transition-all duration-300 hover:text-primary ${
                     isActive(item.path) ? "text-primary" : "text-muted-foreground"
                   }`}
                 >
                   {item.label}
                   {isActive(item.path) && (
-                    <span className="absolute -bottom-[1.45rem] left-0 right-0 h-0.5 bg-primary" />
+                    <span className="absolute -bottom-[1.45rem] left-0 right-0 h-1 bg-gradient-to-r from-primary via-neon-purple to-neon-cyan rounded-full shadow-lg shadow-primary/50" />
                   )}
                 </Link>
               ))}
@@ -82,11 +84,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div className="hidden md:flex items-center gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
+                  <Button variant="ghost" className="flex items-center gap-2 hover:bg-primary/10">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-neon-purple text-primary-foreground flex items-center justify-center font-bold text-lg shadow-lg shadow-primary/30 ring-2 ring-primary/20">
                       {userData.firstName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-sm font-medium">{userData.firstName}</span>
+                    <span className="text-sm font-semibold">{userData.firstName}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">

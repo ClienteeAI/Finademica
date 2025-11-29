@@ -133,23 +133,23 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-8 animate-slide-up">
         {/* Welcome Header */}
-        <div className="space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+        <div className="space-y-4 p-8 rounded-2xl glass-card border-primary/20">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-foreground via-primary to-neon-purple bg-clip-text text-transparent animate-gradient">
             Welcome back, {userData.firstName}!
           </h1>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-muted-foreground">Your Progress</span>
-              <span className="text-sm font-semibold text-primary">0% Complete</span>
+              <span className="text-sm font-semibold text-primary animate-glow">0% Complete</span>
             </div>
-            <Progress value={0} className="h-3" />
+            <Progress value={0} className="h-4" />
           </div>
-          <p className="text-muted-foreground">Let's continue your trading journey</p>
-          <div className="flex items-center gap-2 text-sm">
-            <span>🔥</span>
-            <span className="text-muted-foreground">
+          <p className="text-muted-foreground text-lg">Let's continue your trading journey</p>
+          <div className="flex items-center gap-2 text-sm px-4 py-2 rounded-full bg-primary/10 border border-primary/20 w-fit">
+            <span className="text-2xl">🔥</span>
+            <span className="text-foreground font-medium">
               0 day streak - Start watching to build your streak!
             </span>
           </div>
@@ -157,39 +157,45 @@ const Dashboard = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-6 space-y-2 hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <Video className="h-8 w-8 text-primary" />
-            </div>
-            <p className="text-2xl font-bold text-foreground">0 / {placeholderVideos.length}</p>
-            <p className="text-sm text-muted-foreground">Videos Watched</p>
+          <Card className="p-6 space-y-3 glass-card-hover group">
+            <Video className="h-10 w-10 text-primary group-hover:animate-glow transition-all" />
+            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-primary bg-clip-text text-transparent">
+              0 / {placeholderVideos.length}
+            </p>
+            <p className="text-sm text-muted-foreground font-medium">Videos Watched</p>
           </Card>
 
-          <Card className="p-6 space-y-2 hover:shadow-lg transition-shadow">
-            <Clock className="h-8 w-8 text-primary" />
-            <p className="text-2xl font-bold text-foreground">0h 0m</p>
-            <p className="text-sm text-muted-foreground">Total Watch Time</p>
+          <Card className="p-6 space-y-3 glass-card-hover group">
+            <Clock className="h-10 w-10 text-neon-purple group-hover:animate-glow transition-all" />
+            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-neon-purple bg-clip-text text-transparent">
+              0h 0m
+            </p>
+            <p className="text-sm text-muted-foreground font-medium">Total Watch Time</p>
           </Card>
 
-          <Card className="p-6 space-y-2 hover:shadow-lg transition-shadow">
-            <TrendingUp className="h-8 w-8 text-primary" />
-            <p className="text-2xl font-bold text-foreground">0%</p>
-            <p className="text-sm text-muted-foreground">Progress</p>
+          <Card className="p-6 space-y-3 glass-card-hover group">
+            <TrendingUp className="h-10 w-10 text-neon-cyan group-hover:animate-glow transition-all" />
+            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-neon-cyan bg-clip-text text-transparent">
+              0%
+            </p>
+            <p className="text-sm text-muted-foreground font-medium">Progress</p>
           </Card>
 
-          <Card className="p-6 space-y-2 hover:shadow-lg transition-shadow">
-            <Trophy className="h-8 w-8 text-primary" />
-            <p className="text-2xl font-bold text-foreground">0</p>
-            <p className="text-sm text-muted-foreground">Achievements</p>
+          <Card className="p-6 space-y-3 glass-card-hover group">
+            <Trophy className="h-10 w-10 text-gradient-pink group-hover:animate-glow transition-all" />
+            <p className="text-3xl font-bold bg-gradient-to-br from-foreground to-gradient-pink bg-clip-text text-transparent">
+              0
+            </p>
+            <p className="text-sm text-muted-foreground font-medium">Achievements</p>
           </Card>
         </div>
 
         {/* Trading Profile */}
         {quizAnswers && (
           <Collapsible open={profileOpen} onOpenChange={setProfileOpen}>
-            <Card className="overflow-hidden">
+            <Card className="overflow-hidden glass-card border-primary/20">
               <CollapsibleTrigger asChild>
-                <button className="w-full p-6 flex items-center justify-between hover:bg-muted/50 transition-colors">
+                <button className="w-full p-6 flex items-center justify-between hover:bg-primary/5 transition-all duration-300">
                   <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
                     📋 Your Trading Profile
                   </h2>
@@ -248,27 +254,31 @@ const Dashboard = () => {
         )}
 
         {/* Personalized Video Playlist */}
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">🎥 Your Personalized Learning Path</h2>
-            <p className="text-muted-foreground">Based on your answers, these videos are perfect for you</p>
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground via-primary to-neon-purple bg-clip-text text-transparent">
+              🎥 Your Personalized Learning Path
+            </h2>
+            <p className="text-muted-foreground text-lg">Based on your answers, these videos are perfect for you</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {placeholderVideos.map((video) => (
+            {placeholderVideos.map((video, index) => (
               <Card
                 key={video.id}
-                className="overflow-hidden hover:border-primary/50 transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
+                className="overflow-hidden glass-card-hover border-primary/30 cursor-pointer group"
                 onClick={() => navigate(`/video/${video.id}`)}
+                style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <div className="relative aspect-video bg-muted flex items-center justify-center">
-                  <Play className="h-12 w-12 text-muted-foreground" />
+                <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-neon-purple/20 to-neon-cyan/20 flex items-center justify-center overflow-hidden group-hover:from-primary/30 group-hover:via-neon-purple/30 group-hover:to-neon-cyan/30 transition-all duration-500">
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent via-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <Play className="h-16 w-16 text-primary group-hover:scale-125 group-hover:text-neon-purple transition-all duration-500 drop-shadow-lg relative z-10" />
                 </div>
-                <div className="p-4 space-y-3">
-                  <h3 className="font-semibold text-foreground line-clamp-2">{video.title}</h3>
-                  <div className="flex items-center gap-2">
-                    <Badge className={`${video.categoryColor} text-white`}>{video.category}</Badge>
-                    <span className="text-sm text-muted-foreground">⏱ {video.duration}</span>
+                <div className="p-5 space-y-3">
+                  <h3 className="font-bold text-foreground text-lg line-clamp-2 group-hover:text-primary transition-colors">{video.title}</h3>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge className={`${video.categoryColor} text-white backdrop-blur-sm`}>{video.category}</Badge>
+                    <span className="text-sm text-muted-foreground font-medium">⏱ {video.duration}</span>
                   </div>
                   {video.progress > 0 && (
                     <div className="space-y-1">
@@ -287,10 +297,12 @@ const Dashboard = () => {
         </div>
 
         {/* Learning Roadmap Preview */}
-        <Card className="p-6 space-y-4">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">🗺️ Your Personalized Roadmap</h2>
-            <p className="text-muted-foreground">Follow this path to reach your trading goals</p>
+        <Card className="p-8 space-y-6 glass-card border-primary/20">
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground via-neon-cyan to-primary bg-clip-text text-transparent">
+              🗺️ Your Personalized Roadmap
+            </h2>
+            <p className="text-muted-foreground text-lg">Follow this path to reach your trading goals</p>
           </div>
 
           <div className="space-y-3">
@@ -328,15 +340,24 @@ const Dashboard = () => {
         </Card>
 
         {/* Stock Analyzer Teaser */}
-        <Card className="p-6 space-y-4 bg-gradient-to-br from-primary/10 to-purple/10">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-2">📊 AI Stock Analyzer</h2>
-            <p className="text-muted-foreground">Analyze any stock in real-time</p>
+        <Card className="p-8 space-y-6 glass-card border-neon-cyan/30 relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-neon-purple/10 to-neon-cyan/10 opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
+          <div className="relative z-10 text-center space-y-2">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-foreground to-neon-cyan bg-clip-text text-transparent">
+              📊 AI Stock Analyzer
+            </h2>
+            <p className="text-muted-foreground text-lg">Analyze any stock in real-time</p>
           </div>
 
-          <Input placeholder="Enter stock symbol (e.g., AAPL, TSLA)" disabled />
+          <div className="relative z-10">
+            <Input 
+              placeholder="Enter stock symbol (e.g., AAPL, TSLA)" 
+              disabled 
+              className="bg-background/50 backdrop-blur-sm border-primary/30"
+            />
+          </div>
           
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 relative z-10">
             <Button disabled className="flex-1">Analyze</Button>
             <Button onClick={() => navigate("/analyzer")} variant="outline" className="flex-1">
               Go to Analyzer →
@@ -345,15 +366,18 @@ const Dashboard = () => {
         </Card>
 
         {/* CTA */}
-        <Card className="p-8 text-center space-y-4 bg-gradient-to-r from-primary/20 to-purple/20">
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">📞 Ready for 1-on-1 Guidance?</h2>
-            <p className="text-muted-foreground">Book a free call with a trading specialist</p>
+        <Card className="p-12 text-center space-y-6 glass-card border-gradient-pink/30 relative overflow-hidden group animate-glow-pulse">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-neon-purple/20 to-gradient-pink/20 opacity-50 group-hover:opacity-75 transition-opacity duration-500" />
+          <div className="relative z-10 space-y-3">
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-foreground via-primary to-gradient-pink bg-clip-text text-transparent">
+              📞 Ready for 1-on-1 Guidance?
+            </h2>
+            <p className="text-muted-foreground text-lg">Book a free call with a trading specialist</p>
           </div>
           <Button
             size="lg"
             onClick={() => console.log("Book call clicked")}
-            className="bg-gradient-to-r from-primary to-purple hover:opacity-90"
+            className="bg-gradient-to-r from-primary via-neon-purple to-gradient-pink text-lg px-8 py-6 h-auto relative z-10 hover:scale-105 transition-transform duration-300"
           >
             Book Your Call
           </Button>
