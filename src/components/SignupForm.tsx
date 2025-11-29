@@ -152,6 +152,7 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
       email: formData.email,
       phone: formData.phone
     }));
+    localStorage.setItem("quizAnswers", JSON.stringify(quizAnswers));
 
     // Redirect to dashboard
     navigate("/dashboard");
