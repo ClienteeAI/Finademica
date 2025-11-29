@@ -38,13 +38,22 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
 
-    /* Custom gradient colors */
+    /* Premium gradients */
     --gradient-start: 222 47% 11%;
+    --gradient-mid: 250 50% 20%;
     --gradient-end: 217 91% 30%;
     
-    /* Hero button */
-    --hero-button: 217 91% 60%;
-    --hero-button-hover: 217 91% 55%;
+    /* Purple accent */
+    --purple: 250 70% 60%;
+    --purple-foreground: 210 40% 98%;
+    
+    /* Glass effect */
+    --glass-bg: 217 33% 17%;
+    --glass-border: 217 33% 25%;
+    
+    /* Success/Error */
+    --success: 142 76% 36%;
+    --error: 0 84% 60%;
   }
 }
 

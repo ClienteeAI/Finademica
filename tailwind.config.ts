@@ -47,13 +47,12 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        'gradient-start': "hsl(var(--gradient-start))",
-        'gradient-end': "hsl(var(--gradient-end))",
-        'hero-button': "hsl(var(--hero-button))",
-        'hero-button-hover': "hsl(var(--hero-button-hover))",
-      },
-      backgroundImage: {
-        'gradient-dark-blue': 'linear-gradient(135deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))',
+        purple: {
+          DEFAULT: "hsl(var(--purple))",
+          foreground: "hsl(var(--purple-foreground))",
+        },
+        success: "hsl(var(--success))",
+        error: "hsl(var(--error))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -77,10 +76,21 @@ export default {
             height: "0",
           },
         },
+        "fade-in": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(10px)"
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)"
+          }
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.5s ease-out",
       },
     },
   },
