@@ -215,6 +215,7 @@ export type Database = {
           first_name: string | null
           ghl_contact_id: string | null
           id: string
+          is_admin: boolean | null
           last_login: string | null
           last_name: string | null
           lead_score: number | null
@@ -233,6 +234,7 @@ export type Database = {
           first_name?: string | null
           ghl_contact_id?: string | null
           id?: string
+          is_admin?: boolean | null
           last_login?: string | null
           last_name?: string | null
           lead_score?: number | null
@@ -251,6 +253,7 @@ export type Database = {
           first_name?: string | null
           ghl_contact_id?: string | null
           id?: string
+          is_admin?: boolean | null
           last_login?: string | null
           last_name?: string | null
           lead_score?: number | null

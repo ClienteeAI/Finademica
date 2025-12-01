@@ -21,7 +21,7 @@ interface SignupFormProps {
 
 const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
   const navigate = useNavigate();
-  const client = useClient();
+  const { client } = useClient();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -128,9 +128,9 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
       email: formData.email,
       phone: formData.phone,
       timestamp: new Date().toISOString(),
-      source: `${client.company_name} - Quiz`,
-      clientId: client.id,
-      clientSubdomain: client.subdomain,
+      source: `${client?.company_name} - Quiz`,
+      clientId: client?.id,
+      clientSubdomain: client?.subdomain,
       quizAnswers: getQuizLabels()
     };
 

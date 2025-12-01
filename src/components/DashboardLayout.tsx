@@ -17,7 +17,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const client = useClient();
+  const { client, allClients, isAdminMode, switchClient } = useClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userData, setUserData] = useState<{ firstName: string } | null>(null);
 
@@ -58,19 +58,41 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-18">
             {/* Logo */}
-            <Link to="/dashboard" className="flex items-center gap-3 group">
-              {client.logo_url ? (
-                <img 
-                  src={client.logo_url} 
-                  alt={client.company_name} 
-                  className="h-10 transition-all duration-300 group-hover:scale-105"
-                />
-              ) : (
-                <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-success to-info bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
-                  {client.company_name}
-                </span>
+            <div className="flex items-center gap-6">
+              <Link to="/dashboard" className="flex items-center gap-3 group">
+                {client?.logo_url ? (
+                  <img 
+                    src={client.logo_url} 
+                    alt={client.company_name} 
+                    className="h-10 transition-all duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-success to-info bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
+                    {client?.company_name}
+                  </span>
+                )}
+              </Link>
+
+              {/* ADMIN MODE: Client Switcher */}
+              {isAdminMode && (
+                <div className="flex items-center gap-3 pl-6 border-l border-border">
+                  <span className="px-3 py-1 text-[10px] font-bold bg-purple-600 text-white rounded-full uppercase tracking-wide">
+                    ADMIN MODE
+                  </span>
+                  <select
+                    value={client?.subdomain}
+                    onChange={(e) => switchClient(e.target.value)}
+                    className="px-4 py-2 bg-secondary border border-border rounded-lg text-sm font-medium text-foreground hover:border-border-hover transition-colors cursor-pointer"
+                  >
+                    {allClients.map(c => (
+                      <option key={c.id} value={c.subdomain}>
+                        {c.company_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
-            </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-10">
