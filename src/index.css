@@ -8,6 +8,10 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
+    /* Client Theme Variables (Dynamically Set by ClientProvider) */
+    --client-primary: #00D084;
+    --client-secondary: #0EA5E9;
+
     /* Deep charcoal backgrounds - premium finance aesthetic */
     --background: 221 39% 5%;
     --foreground: 0 0% 100%;
