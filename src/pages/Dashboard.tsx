@@ -12,6 +12,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useClient } from "@/lib/clientContext";
 
 interface UserData {
   firstName: string;
@@ -70,6 +71,7 @@ const placeholderVideos = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { client, isAdminMode } = useClient();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<any>(null);
@@ -134,6 +136,15 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-12">
+        {/* Admin Preview Banner */}
+        {isAdminMode && (
+          <div className="bg-purple-900/20 border border-purple-600 px-6 py-3 rounded-xl backdrop-blur-sm animate-slide-down">
+            <p className="text-sm font-medium text-white">
+              🔧 <strong>Admin Preview Mode</strong> - You're viewing as: <span className="text-purple-400">{client?.company_name}</span>
+            </p>
+          </div>
+        )}
+
         {/* Welcome Section */}
         <div className="space-y-8 animate-slide-up">
           <div className="space-y-4">

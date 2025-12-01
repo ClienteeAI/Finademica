@@ -11,7 +11,14 @@ interface Client {
   company_tagline?: string;
 }
 
-const ClientContext = createContext<Client | null>(null);
+interface ClientContextType {
+  client: Client | null;
+  allClients: Client[];
+  isAdminMode: boolean;
+  switchClient: (subdomain: string) => void;
+}
+
+const ClientContext = createContext<ClientContextType | null>(null);
 
 interface ClientProviderProps {
   children: ReactNode;
@@ -19,54 +26,101 @@ interface ClientProviderProps {
 
 export function ClientProvider({ children }: ClientProviderProps) {
   const [client, setClient] = useState<Client | null>(null);
+  const [allClients, setAllClients] = useState<Client[]>([]);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    detectAndFetchClient();
+    initializeClient();
   }, []);
 
-  async function detectAndFetchClient() {
-    // Detect subdomain
-    // For local dev: Use query param ?client=naga
-    // For production: Extract from subdomain (e.g., naga.yourdomain.com)
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const clientParam = urlParams.get('client');
-    
-    let subdomain = clientParam;
-    
-    // If no query param, try to extract from subdomain
-    if (!subdomain) {
-      const hostname = window.location.hostname;
-      // Check if it's not localhost or IP
-      if (!hostname.includes('localhost') && !hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-        const parts = hostname.split('.');
-        if (parts.length > 2) {
-          subdomain = parts[0]; // Get first part as subdomain
+  async function initializeClient() {
+    // Check if user is admin
+    const userEmail = localStorage.getItem('email');
+    const isAdmin = userEmail === 'petr@clientee.co';
+    setIsAdminMode(isAdmin);
+
+    if (isAdmin) {
+      // Load ALL clients for admin
+      const { data } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('active', true)
+        .order('company_name');
+      
+      setAllClients(data || []);
+
+      // Check if client override in localStorage
+      const savedClient = localStorage.getItem('admin_selected_client');
+      if (savedClient) {
+        const selectedClient = data?.find(c => c.subdomain === savedClient);
+        if (selectedClient) {
+          setClient(selectedClient);
+          applyClientTheme(selectedClient);
+          localStorage.setItem('client_id', selectedClient.id);
+          setLoading(false);
+          return;
         }
+      }
+
+      // Default to first client
+      const firstClient = data?.[0];
+      if (firstClient) {
+        setClient(firstClient);
+        applyClientTheme(firstClient);
+        localStorage.setItem('client_id', firstClient.id);
+      }
+    } else {
+      // Regular user - detect client from subdomain/query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const clientParam = urlParams.get('client');
+      
+      let subdomain = clientParam;
+      
+      // If no query param, try to extract from subdomain
+      if (!subdomain) {
+        const hostname = window.location.hostname;
+        // Check if it's not localhost or IP
+        if (!hostname.includes('localhost') && !hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+          const parts = hostname.split('.');
+          if (parts.length > 2) {
+            subdomain = parts[0]; // Get first part as subdomain
+          }
+        }
+      }
+      
+      // Default to 'naga' for testing
+      subdomain = subdomain || 'naga';
+
+      const { data } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('subdomain', subdomain)
+        .single();
+
+      if (data) {
+        setClient(data);
+        applyClientTheme(data);
+        localStorage.setItem('client_id', data.id);
+      } else {
+        console.error('Client not found:', subdomain);
       }
     }
     
-    // Default to 'naga' for testing
-    subdomain = subdomain || 'naga';
-
-    // Fetch client from Supabase
-    const { data, error } = await supabase
-      .from('clients')
-      .select('*')
-      .eq('subdomain', subdomain)
-      .single();
-
-    if (data) {
-      setClient(data);
-      applyClientTheme(data);
-      // Store client_id for easy access
-      localStorage.setItem('client_id', data.id);
-    } else {
-      console.error('Client not found:', subdomain, error);
-    }
-    
     setLoading(false);
+  }
+
+  function switchClient(subdomain: string) {
+    const newClient = allClients.find(c => c.subdomain === subdomain);
+    if (newClient) {
+      setClient(newClient);
+      applyClientTheme(newClient);
+      localStorage.setItem('admin_selected_client', subdomain);
+      localStorage.setItem('client_id', newClient.id);
+      
+      // Reload page to apply changes everywhere
+      window.location.reload();
+    }
   }
 
   function applyClientTheme(client: Client) {
@@ -100,7 +154,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
   }
 
   return (
-    <ClientContext.Provider value={client}>
+    <ClientContext.Provider value={{ client, allClients, isAdminMode, switchClient }}>
       {children}
     </ClientContext.Provider>
   );
