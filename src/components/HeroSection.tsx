@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useClient } from "@/lib/clientContext";
 import QuizModal from "./QuizModal";
 
 const HeroSection = () => {
+  const client = useClient();
   const [quizOpen, setQuizOpen] = useState(false);
 
   return (
@@ -32,14 +34,11 @@ const HeroSection = () => {
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6">
-              Your Personalized Path to
-              <br />
-              <span className="bg-gradient-to-r from-primary to-purple bg-clip-text text-transparent">
-                Trading Success
-              </span>
+              {client.company_tagline || "Your Personalized Path to Trading Success"}
             </h1>
             
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+              Welcome to <span className="text-foreground font-semibold">{client.company_name}</span>. 
               Answer 5 questions. Get AI-powered video training, custom roadmap, 
               and professional tools - all <span className="text-foreground font-semibold">free</span>.
             </p>

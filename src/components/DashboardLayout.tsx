@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, Settings, LogOut } from "lucide-react";
+import { useClient } from "@/lib/clientContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,6 +17,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const client = useClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userData, setUserData] = useState<{ firstName: string } | null>(null);
 
@@ -56,10 +58,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-18">
             {/* Logo */}
-            <Link to="/dashboard" className="flex items-center gap-2 group">
-              <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-success to-info bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
-                AI Trading Pro Academy
-              </span>
+            <Link to="/dashboard" className="flex items-center gap-3 group">
+              {client.logo_url ? (
+                <img 
+                  src={client.logo_url} 
+                  alt={client.company_name} 
+                  className="h-10 transition-all duration-300 group-hover:scale-105"
+                />
+              ) : (
+                <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-success to-info bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
+                  {client.company_name}
+                </span>
+              )}
             </Link>
 
             {/* Desktop Navigation */}

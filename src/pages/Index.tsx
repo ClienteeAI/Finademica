@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useClient } from "@/lib/clientContext";
 import HeroSection from "@/components/HeroSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import HowItWorks from "@/components/HowItWorks";

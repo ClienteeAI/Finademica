@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eye, EyeOff, Check } from "lucide-react";
+import { useClient } from "@/lib/clientContext";
 
 interface SignupFormProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface SignupFormProps {
 
 const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
   const navigate = useNavigate();
+  const client = useClient();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -126,7 +128,9 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
       email: formData.email,
       phone: formData.phone,
       timestamp: new Date().toISOString(),
-      source: "AI Trading Pro Academy - Quiz",
+      source: `${client.company_name} - Quiz`,
+      clientId: client.id,
+      clientSubdomain: client.subdomain,
       quizAnswers: getQuizLabels()
     };
 
