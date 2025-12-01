@@ -1,16 +1,29 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, LogIn } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import QuizModal from "./QuizModal";
 
 const HeroSection = () => {
   const { client } = useClient();
   const [quizOpen, setQuizOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <>
       <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-20 overflow-hidden">
+        {/* Login button - positioned absolutely in top right */}
+        <div className="absolute top-8 right-8 z-20">
+          <Button 
+            variant="outline"
+            onClick={() => navigate('/login')}
+            className="gap-2"
+          >
+            <LogIn size={18} />
+            Login
+          </Button>
+        </div>
         {/* Video background */}
         <video
           autoPlay
