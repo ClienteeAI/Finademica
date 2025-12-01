@@ -140,7 +140,12 @@ export function ClientProvider({ children }: ClientProviderProps) {
     );
   }
 
-  if (!client) {
+  // Allow login page to render without a valid client
+  const currentPath = window.location.pathname;
+  const publicRoutes = ['/login'];
+  const isPublicRoute = publicRoutes.includes(currentPath);
+
+  if (!client && !isPublicRoute) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4 max-w-md p-8">
