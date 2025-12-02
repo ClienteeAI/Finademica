@@ -39,9 +39,10 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
   }
 
   const aiScore = Number(fields.aiScore) || 0;
-  const bullProb = (fields.bullProbability || 0) * 100;
-  const neutralProb = (fields.neutralProbability || 0) * 100;
-  const bearProb = (fields.bearProbability || 0) * 100;
+  const currentPrice = Number(fields.currentPrice) || 0;
+  const bullProb = (Number(fields.bullProbability) || 0) * 100;
+  const neutralProb = (Number(fields.neutralProbability) || 0) * 100;
+  const bearProb = (Number(fields.bearProbability) || 0) * 100;
 
   const getRiskColor = (risk: string) => {
     switch (risk?.toLowerCase()) {
@@ -72,9 +73,9 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
           </div>
         </div>
         
-        {fields.currentPrice && (
+        {currentPrice > 0 && (
           <div className="text-right">
-            <p className="text-3xl font-bold text-[#1D3557]">${fields.currentPrice.toFixed(2)}</p>
+            <p className="text-3xl font-bold text-[#1D3557]">${currentPrice.toFixed(2)}</p>
             <p className="text-sm text-[#6B7280]">Current Price</p>
           </div>
         )}
