@@ -128,27 +128,26 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
     }
 
     try {
-      // INSERT user into Supabase
-      const { data: newUser, error } = await supabase
-        .from('users')
-        .insert({
-          client_id: client.id,
-          email: formData.email,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone || null,
-          quiz_answers: quizAnswers,
-          is_admin: false
-        })
-        .select()
-        .single();
+      // Create auth user in Supabase (trigger will create public.users row)
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone || null,
+            client_id: client.id
+          }
+        }
+      });
 
-      if (error) {
-        console.error('Supabase error:', error);
-        throw new Error(error.message);
+      if (authError) {
+        console.error('Supabase Auth error:', authError);
+        throw new Error(authError.message);
       }
 
-      console.log('User created in Supabase:', newUser);
+      console.log('Auth user created:', authData.user?.id);
 
       // Create webhook payload
       const webhookData = {
@@ -178,11 +177,11 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
       }
 
       // Save to localStorage
-      localStorage.setItem('email', newUser.email);
-      localStorage.setItem('firstName', newUser.first_name);
-      localStorage.setItem('lastName', newUser.last_name);
+      localStorage.setItem('email', formData.email);
+      localStorage.setItem('firstName', formData.firstName);
+      localStorage.setItem('lastName', formData.lastName);
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userClientId', newUser.client_id);
+      localStorage.setItem('userClientId', client.id);
       localStorage.setItem("quizAnswers", JSON.stringify(quizAnswers));
 
       // Redirect to dashboard
