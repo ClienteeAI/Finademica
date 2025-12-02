@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/collapsible";
 import { useClient } from "@/lib/clientContext";
 import { GamificationSection } from "@/components/GamificationSection";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface UserData {
   firstName: string;
@@ -145,6 +147,45 @@ const Dashboard = () => {
             </p>
           </div>
         )}
+
+        {/* Test Video Completion Webhook Button */}
+        <Card className="p-4 bg-amber-50 border-amber-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-amber-800">🧪 Test Mode</p>
+              <p className="text-xs text-amber-600">Send test data to video completion webhook</p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-amber-400 text-amber-700 hover:bg-amber-100"
+              onClick={async () => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                  toast({ title: "No user", description: "You must be logged in", variant: "destructive" });
+                  return;
+                }
+                const payload = {
+                  user_id: user.id,
+                  video_id: "test-video-123",
+                  event_type: "video_completed"
+                };
+                try {
+                  const response = await fetch("https://clientee.app.n8n.cloud/webhook-test/14bc5880-e57c-44ce-9980-5caf53bf2e53", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                  });
+                  toast({ title: "Test sent!", description: `Status: ${response.status}` });
+                } catch (error) {
+                  toast({ title: "Error", description: String(error), variant: "destructive" });
+                }
+              }}
+            >
+              Send Test Data
+            </Button>
+          </div>
+        </Card>
 
         {/* Welcome Section */}
         <div className="space-y-8 animate-slide-up">
