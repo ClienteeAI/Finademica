@@ -77,11 +77,14 @@ export function ClientProvider({ children }: ClientProviderProps) {
       
       let subdomain = clientParam;
       
-      // If no query param, try to extract from subdomain
+      // If no query param, try to extract from subdomain for real production domains
       if (!subdomain) {
         const hostname = window.location.hostname;
-        // Check if it's not localhost or IP
-        if (!hostname.includes('localhost') && !hostname.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+        const isLocalhostOrIp = hostname.includes('localhost') || hostname.match(/^\d+\.\d+\.\d+\.\d+$/);
+        const isLovablePreview = hostname.includes('lovable.app') || hostname.includes('lovableproject.com');
+
+        // Only treat the first part of the hostname as a client subdomain on real custom domains
+        if (!isLocalhostOrIp && !isLovablePreview) {
           const parts = hostname.split('.');
           if (parts.length > 2) {
             subdomain = parts[0]; // Get first part as subdomain
@@ -89,7 +92,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
       
-      // Default to 'naga' for testing
+      // Default to 'naga' for testing / preview environments
       subdomain = subdomain || 'naga';
 
       const { data } = await supabase
