@@ -8,14 +8,14 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-primary/70 bg-primary/8 text-foreground shadow-[0_0_12px_rgba(34,243,255,0.3)]",
-        secondary: "border-border-glass bg-card/40 backdrop-blur-sm text-text-secondary",
-        info: "border-info/70 bg-info/8 text-info shadow-[0_0_12px_rgba(14,165,233,0.3)]",
-        warning: "border-warning/70 bg-warning/8 text-warning shadow-[0_0_12px_rgba(251,146,60,0.3)]",
-        destructive: "border-error/70 bg-error/8 text-error shadow-[0_0_12px_rgba(239,68,68,0.3)]",
-        success: "border-success/70 bg-success/8 text-success shadow-[0_0_12px_rgba(34,197,94,0.3)]",
-        purple: "border-purple/70 bg-purple/8 text-purple shadow-[0_0_12px_rgba(139,92,246,0.3)]",
-        outline: "border-border-glass bg-transparent backdrop-blur-sm text-text-secondary hover:border-primary/50",
+        default: "border-[#E4C776]/60 bg-[#E4C776]/10 text-[#1E1E1F] shadow-[0_0_10px_rgba(228,199,118,0.2)]",
+        secondary: "border-[#DBE6F0] bg-white/50 backdrop-blur-sm text-[#4A4A4A]",
+        info: "border-[#DBE6F0] bg-[#DBE6F0]/20 text-[#4A4A4A] shadow-[0_0_10px_rgba(219,230,240,0.3)]",
+        warning: "border-[#E4C776]/60 bg-[#E4C776]/15 text-[#1E1E1F] shadow-[0_0_10px_rgba(228,199,118,0.3)]",
+        destructive: "border-error/50 bg-error/10 text-error shadow-[0_0_10px_rgba(239,68,68,0.2)]",
+        success: "border-[#E4C776]/70 bg-[#E4C776]/15 text-[#1E1E1F] shadow-[0_0_10px_rgba(228,199,118,0.3)]",
+        purple: "border-[#D4A5A5]/60 bg-[#D4A5A5]/10 text-[#8B6B6B] shadow-[0_0_10px_rgba(212,165,165,0.2)]",
+        outline: "border-[#DBE6F0] bg-transparent backdrop-blur-sm text-[#4A4A4A] hover:border-[#E4C776]/50",
       },
     },
     defaultVariants: {

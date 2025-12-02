@@ -9,13 +9,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "success-gradient text-background rounded-full hover:scale-105 shadow-[0_0_22px_rgba(34,243,255,0.45)] hover:shadow-[0_0_30px_rgba(34,243,255,0.75)]",
-        primary: "success-gradient text-background rounded-full hover:scale-105 shadow-[0_0_22px_rgba(34,243,255,0.45)] hover:shadow-[0_0_30px_rgba(34,243,255,0.75)]",
+        default: "bg-gradient-to-r from-[#E4C776] to-[#F4D98C] text-[#1E1E1F] rounded-full hover:scale-105 shadow-[0_0_18px_rgba(228,199,118,0.45)] hover:shadow-[0_0_30px_rgba(228,199,118,0.65)]",
+        primary: "bg-gradient-to-r from-[#E4C776] to-[#F4D98C] text-[#1E1E1F] rounded-full hover:scale-105 shadow-[0_0_18px_rgba(228,199,118,0.45)] hover:shadow-[0_0_30px_rgba(228,199,118,0.65)]",
         destructive: "danger-gradient text-white rounded-full hover:scale-105 shadow-[0_0_20px_rgba(239,68,68,0.4)]",
-        outline: "border border-border-glass bg-transparent backdrop-blur-sm hover:bg-card/50 hover:border-primary/50 hover:shadow-[0_0_20px_rgba(34,243,255,0.2)] rounded-full",
-        secondary: "bg-card/60 backdrop-blur-sm border border-border-glass text-foreground hover:bg-card/80 hover:border-primary/30 rounded-full",
-        ghost: "hover:bg-card/50 hover:backdrop-blur-sm rounded-full",
-        link: "text-primary underline-offset-4 hover:underline",
+        outline: "border border-[#E4C776]/50 bg-white/40 backdrop-blur-sm text-[#1E1E1F] hover:bg-white/60 hover:border-[#E4C776] hover:shadow-[0_0_15px_rgba(228,199,118,0.25)] rounded-full",
+        secondary: "bg-white/50 backdrop-blur-sm border border-[#DBE6F0] text-[#4A4A4A] hover:bg-white/70 hover:border-[#E4C776]/40 rounded-full",
+        ghost: "hover:bg-white/50 hover:backdrop-blur-sm text-[#4A4A4A] rounded-full",
+        link: "text-[#E4C776] underline-offset-4 hover:underline hover:text-[#D4B766]",
       },
       size: {
         default: "h-12 px-6 py-3",
