@@ -1,34 +1,145 @@
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Trophy, Target, Flame, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
-// Placeholder data - will be replaced with Supabase data later
-const placeholderData = {
-  level: 7,
-  levelTitle: "Strategic Learner",
-  currentXP: 420,
-  nextLevelXP: 500,
-  avatarStage: 2,
-  avatarTitle: "Emerging Analyst",
-  streak: 4,
-  skills: [
-    { name: "Risk", level: 3, progress: 65, color: "from-[#4DE2E8] to-[#2FB3C6]" },
-    { name: "Mindset", level: 4, progress: 80, color: "from-[#B5A7FF] to-[#D4CBFF]" },
-    { name: "Technical", level: 2, progress: 40, color: "from-[#1D3557] to-[#3D5A80]" },
-    { name: "Fundamental", level: 3, progress: 55, color: "from-[#A7E9FF] to-[#D4E0EC]" },
-    { name: "Money Mgmt", level: 2, progress: 35, color: "from-[#4DE2E8] to-[#A7E9FF]" },
-  ],
-  achievements: [
-    { name: "First Step", description: "Completed your first video.", unlocked: true },
-  ],
-  activeMission: "Watch 2 videos and ask the Mentor 1 question this week.",
+interface SkillData {
+  skill_id: string;
+  name: string;
+  level: number;
+  xp: number;
+}
+
+interface AchievementData {
+  achievement_id: string;
+  key: string;
+  name: string;
+  unlocked_at: string;
+}
+
+interface GamificationData {
+  xp: number;
+  level: number;
+  streak_days: number;
+  skills: SkillData[];
+  achievements: AchievementData[];
+}
+
+// Skill colors mapped by skill name/key
+const skillColors: Record<string, string> = {
+  risk: "from-[#4DE2E8] to-[#2FB3C6]",
+  mindset: "from-[#B5A7FF] to-[#D4CBFF]",
+  technical: "from-[#1D3557] to-[#3D5A80]",
+  fundamental: "from-[#A7E9FF] to-[#D4E0EC]",
+  money_management: "from-[#4DE2E8] to-[#A7E9FF]",
+};
+
+// Level titles based on level
+const getLevelTitle = (level: number): string => {
+  if (level <= 2) return "Novice Trader";
+  if (level <= 4) return "Apprentice Trader";
+  if (level <= 6) return "Rising Analyst";
+  if (level <= 8) return "Strategic Learner";
+  if (level <= 10) return "Market Tactician";
+  return "Master Trader";
+};
+
+// Calculate XP needed for next level (simple formula)
+const getXPForLevel = (level: number): number => {
+  return level * 100;
 };
 
 export function GamificationSection() {
-  const xpPercentage = (placeholderData.currentXP / placeholderData.nextLevelXP) * 100;
+  const [gamificationData, setGamificationData] = useState<GamificationData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchGamificationData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Get the current authenticated user
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (!user) {
+          setError("Not authenticated");
+          setIsLoading(false);
+          return;
+        }
+
+        // Call the get_gamification function
+        const { data, error: rpcError } = await supabase.rpc('get_gamification', {
+          uid: user.id
+        });
+
+        if (rpcError) {
+          console.error("Error fetching gamification data:", rpcError);
+          setError("Could not load gamification data");
+          setIsLoading(false);
+          return;
+        }
+
+        if (data) {
+          setGamificationData(data as unknown as GamificationData);
+        }
+      } catch (err) {
+        console.error("Failed to fetch gamification data:", err);
+        setError("Could not load gamification data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchGamificationData();
+  }, []);
+
+  // Calculate derived values
+  const level = gamificationData?.level ?? 1;
+  const currentXP = gamificationData?.xp ?? 0;
+  const nextLevelXP = getXPForLevel(level + 1);
+  const currentLevelXP = getXPForLevel(level);
+  const xpProgress = currentXP - currentLevelXP;
+  const xpNeeded = nextLevelXP - currentLevelXP;
+  const xpPercentage = xpNeeded > 0 ? Math.min((xpProgress / xpNeeded) * 100, 100) : 0;
+  const levelTitle = getLevelTitle(level);
+  const streak = gamificationData?.streak_days ?? 0;
+  const skills = gamificationData?.skills ?? [];
+  const achievements = gamificationData?.achievements ?? [];
+
+  // Calculate skill progress (XP within current skill level)
+  const getSkillProgress = (skillXP: number, skillLevel: number): number => {
+    const xpForCurrentLevel = skillLevel * 50;
+    const xpForNextLevel = (skillLevel + 1) * 50;
+    const progress = ((skillXP - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
+    return Math.max(0, Math.min(progress, 100));
+  };
+
+  // Error state
+  if (error && !isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
+            <Sparkles className="w-5 h-5 text-[#2FB3C6]" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-[#1D3557] tracking-tight">Trader Progress</h2>
+            <p className="text-sm text-[#6B7280]">Your trading RPG journey</p>
+          </div>
+        </div>
+        <Card className="p-8">
+          <p className="text-sm text-[#6B7280] text-center">{error}</p>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -57,26 +168,40 @@ export function GamificationSection() {
           </div>
 
           <div className="space-y-1">
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-bold text-[#1D3557] font-mono">
-                Level {placeholderData.level}
-              </span>
-            </div>
-            <p className="text-lg text-[#4DE2E8] font-medium">{placeholderData.levelTitle}</p>
-            <p className="text-sm text-[#6B7280] font-mono">
-              {placeholderData.currentXP} / {placeholderData.nextLevelXP} XP to next level
-            </p>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-10 w-32" />
+                <Skeleton className="h-6 w-40" />
+                <Skeleton className="h-4 w-48" />
+              </>
+            ) : (
+              <>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-[#1D3557] font-mono">
+                    Level {level}
+                  </span>
+                </div>
+                <p className="text-lg text-[#4DE2E8] font-medium">{levelTitle}</p>
+                <p className="text-sm text-[#6B7280] font-mono">
+                  {currentXP} / {nextLevelXP} XP to next level
+                </p>
+              </>
+            )}
           </div>
 
           {/* XP Progress Bar */}
           <div className="space-y-2">
             <div className="h-3 bg-[#D4E0EC]/40 rounded-full overflow-hidden backdrop-blur-sm border border-[#D4E0EC]/60">
-              <div
-                className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] relative overflow-hidden shadow-[0_0_12px_rgba(77,226,232,0.4)]"
-                style={{ width: `${xpPercentage}%` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
-              </div>
+              {isLoading ? (
+                <div className="h-full w-0" />
+              ) : (
+                <div
+                  className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] relative overflow-hidden shadow-[0_0_12px_rgba(77,226,232,0.4)] transition-all duration-1000"
+                  style={{ width: `${xpPercentage}%` }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
+                </div>
+              )}
             </div>
           </div>
 
@@ -94,7 +219,11 @@ export function GamificationSection() {
             <h3 className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
               AI Trading Avatar
             </h3>
-            <Badge variant="success" className="text-xs">Stage {placeholderData.avatarStage}</Badge>
+            {isLoading ? (
+              <Skeleton className="h-5 w-16" />
+            ) : (
+              <Badge variant="success" className="text-xs">Stage {Math.floor(level / 3) + 1}</Badge>
+            )}
           </div>
 
           {/* Avatar Placeholder - Glowing Orb */}
@@ -120,14 +249,23 @@ export function GamificationSection() {
           </div>
 
           <div className="text-center space-y-1 relative">
-            <p className="text-lg font-semibold text-[#1D3557]">{placeholderData.avatarTitle}</p>
-            <p className="text-xs text-[#6B7280]">
-              Keep learning to evolve your avatar.
-            </p>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-6 w-32 mx-auto" />
+                <Skeleton className="h-4 w-48 mx-auto" />
+              </>
+            ) : (
+              <>
+                <p className="text-lg font-semibold text-[#1D3557]">{levelTitle}</p>
+                <p className="text-xs text-[#6B7280]">
+                  Keep learning to evolve your avatar.
+                </p>
+              </>
+            )}
           </div>
 
           <p className="text-xs text-[#6B7280] text-center border-t border-[#D4E0EC]/60 pt-3">
-            Next stage unlocks at Level 10
+            Next stage unlocks at Level {(Math.floor(level / 3) + 1) * 3 + 1}
           </p>
         </Card>
 
@@ -140,20 +278,43 @@ export function GamificationSection() {
           </div>
 
           <div className="space-y-3">
-            {placeholderData.skills.map((skill) => (
-              <div key={skill.name} className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-[#1D3557]">{skill.name}</span>
-                  <span className="text-xs text-[#6B7280] font-mono">Lv.{skill.level}</span>
+            {isLoading ? (
+              // Loading skeletons for skills
+              Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Skeleton className="h-3 w-16" />
+                    <Skeleton className="h-3 w-8" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
                 </div>
-                <div className="h-2 bg-[#D4E0EC]/40 rounded-full overflow-hidden border border-[#D4E0EC]/50">
-                  <div
-                    className={cn("h-full rounded-full bg-gradient-to-r", skill.color)}
-                    style={{ width: `${skill.progress}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            ) : skills.length > 0 ? (
+              skills.map((skill) => {
+                const colorKey = skill.name.toLowerCase().replace(/\s+/g, '_');
+                const color = skillColors[colorKey] || "from-[#4DE2E8] to-[#A7E9FF]";
+                const progress = getSkillProgress(skill.xp, skill.level);
+                
+                return (
+                  <div key={skill.skill_id} className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-[#1D3557] capitalize">{skill.name}</span>
+                      <span className="text-xs text-[#6B7280] font-mono">Lv.{skill.level}</span>
+                    </div>
+                    <div className="h-2 bg-[#D4E0EC]/40 rounded-full overflow-hidden border border-[#D4E0EC]/50">
+                      <div
+                        className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-1000", color)}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-xs text-[#6B7280] text-center py-4">
+                No skills unlocked yet. Start learning to grow your skills!
+              </p>
+            )}
           </div>
 
           <p className="text-xs text-[#6B7280] leading-relaxed border-t border-[#D4E0EC]/60 pt-3">
@@ -174,32 +335,62 @@ export function GamificationSection() {
           <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/10 to-[#A7E9FF]/10 border border-[#4DE2E8]/30">
             <Flame className="w-5 h-5 text-[#2FB3C6]" />
             <div>
-              <p className="text-sm font-semibold text-[#1D3557]">
-                Streak: {placeholderData.streak} days
-              </p>
-              <p className="text-xs text-[#6B7280]">Keep it going!</p>
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-4 w-24 mb-1" />
+                  <Skeleton className="h-3 w-16" />
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-[#1D3557]">
+                    Streak: {streak} day{streak !== 1 ? 's' : ''}
+                  </p>
+                  <p className="text-xs text-[#6B7280]">
+                    {streak > 0 ? "Keep it going!" : "Start your streak today!"}
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Unlocked Badge */}
+          {/* Unlocked Badges */}
           <div className="space-y-2">
             <p className="text-xs uppercase tracking-wider text-[#6B7280] font-semibold">
-              Latest Badge
+              Latest Badge{achievements.length > 1 ? 's' : ''}
             </p>
-            {placeholderData.achievements.filter(a => a.unlocked).map((achievement) => (
-              <div
-                key={achievement.name}
-                className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/5 to-[#A7E9FF]/10 border border-[#4DE2E8]/25"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_12px_rgba(77,226,232,0.4)]">
-                  <Trophy className="w-4 h-4 text-white" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-[#1D3557]">{achievement.name}</p>
-                  <p className="text-xs text-[#6B7280] truncate">{achievement.description}</p>
+            {isLoading ? (
+              // Loading skeleton for achievements
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/5 to-[#A7E9FF]/10 border border-[#4DE2E8]/25">
+                <Skeleton className="w-8 h-8 rounded-lg" />
+                <div className="flex-1">
+                  <Skeleton className="h-4 w-20 mb-1" />
+                  <Skeleton className="h-3 w-32" />
                 </div>
               </div>
-            ))}
+            ) : achievements.length > 0 ? (
+              achievements.slice(0, 3).map((achievement) => (
+                <div
+                  key={achievement.achievement_id}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/5 to-[#A7E9FF]/10 border border-[#4DE2E8]/25"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_12px_rgba(77,226,232,0.4)]">
+                    <Trophy className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#1D3557]">{achievement.name}</p>
+                    <p className="text-xs text-[#6B7280] truncate">
+                      Unlocked {new Date(achievement.unlocked_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-3 rounded-xl bg-[#D4E0EC]/20 border border-[#D4E0EC]/50">
+                <p className="text-xs text-[#6B7280] text-center">
+                  No achievements yet. Keep learning!
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Active Mission */}
@@ -209,7 +400,7 @@ export function GamificationSection() {
             </p>
             <div className="p-3 rounded-xl bg-[#D4E0EC]/20 border border-[#D4E0EC]/50">
               <p className="text-xs text-[#4B5563] leading-relaxed">
-                {placeholderData.activeMission}
+                Watch 2 videos and ask the Mentor 1 question this week.
               </p>
             </div>
           </div>
