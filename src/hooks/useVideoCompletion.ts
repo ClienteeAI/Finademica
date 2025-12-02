@@ -13,22 +13,23 @@ export const useVideoCompletion = (videoId: string | undefined) => {
     hasTriggeredRef.current = true;
 
     try {
-      // Get user from localStorage (app uses localStorage auth)
-      const storedUser = localStorage.getItem("user");
-      if (!storedUser) {
-        console.log("No user found in localStorage, skipping video completion event");
+      // Get user from localStorage (app uses separate keys)
+      const email = localStorage.getItem("email");
+      const firstName = localStorage.getItem("firstName");
+      const lastName = localStorage.getItem("lastName");
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+      if (!isLoggedIn || !email) {
+        console.log("No user logged in, skipping video completion event");
         hasTriggeredRef.current = false;
         return;
       }
-
-      const localUser = JSON.parse(storedUser);
-      const userEmail = localUser.email;
 
       // Fetch full user profile from users table by email
       const { data: userData, error: userError } = await supabase
         .from("users")
         .select("*, clients(*)")
-        .eq("email", userEmail)
+        .eq("email", email)
         .maybeSingle();
 
       if (userError) {
@@ -51,9 +52,9 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         timestamp: new Date().toISOString(),
         user: {
           id: userData?.id,
-          email: userData?.email || userEmail,
-          first_name: userData?.first_name || localUser.firstName,
-          last_name: userData?.last_name || localUser.lastName,
+          email: userData?.email || email,
+          first_name: userData?.first_name || firstName,
+          last_name: userData?.last_name || lastName,
           phone: userData?.phone,
           client_id: userData?.client_id,
           quiz_answers: userData?.quiz_answers,
