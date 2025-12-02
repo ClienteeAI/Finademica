@@ -2,84 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system - Ethereal Gold + Ice Theme
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
     /* Client Theme Variables (Dynamically Set by ClientProvider) */
-    --client-primary: #00D084;
-    --client-secondary: #0EA5E9;
+    --client-primary: #E4C776;
+    --client-secondary: #DBE6F0;
 
-    /* Sci-Fi Hologram Color System */
-    --background: 2 61% 5%;
-    --foreground: 240 10% 98%;
+    /* Ethereal Gold + Ice Color System */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
 
-    /* Glass card surfaces */
-    --card: 215 35% 10%;
-    --card-foreground: 240 10% 98%;
+    /* Glass card surfaces - Pearl/Ivory */
+    --card: 210 20% 98%;
+    --card-foreground: 0 0% 10%;
 
-    --popover: 215 35% 10%;
-    --popover-foreground: 240 10% 98%;
+    --popover: 210 20% 98%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Primary: Bright teal/cyan accent */
-    --primary: 177 100% 56%;
-    --primary-foreground: 2 61% 5%;
+    /* Primary: Champagne Gold */
+    --primary: 43 67% 68%;
+    --primary-foreground: 0 0% 12%;
 
-    /* Secondary surfaces */
-    --secondary: 215 35% 12%;
-    --secondary-foreground: 240 10% 98%;
+    /* Secondary surfaces - Soft Pearl */
+    --secondary: 210 29% 97%;
+    --secondary-foreground: 0 0% 29%;
 
     /* Muted elements */
-    --muted: 215 30% 13%;
-    --muted-foreground: 215 16% 60%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent: Emerald green */
-    --accent: 142 76% 36%;
-    --accent-foreground: 240 10% 98%;
+    /* Accent: Warm Gold */
+    --accent: 43 67% 68%;
+    --accent-foreground: 0 0% 12%;
 
     /* Danger */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 240 10% 98%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 98%;
 
-    /* Borders and inputs */
-    --border: 215 25% 20%;
-    --input: 215 30% 13%;
-    --ring: 177 100% 56%;
+    /* Borders and inputs - Icy Silver */
+    --border: 210 30% 88%;
+    --input: 210 20% 96%;
+    --ring: 43 67% 68%;
 
     --radius: 1.375rem;
 
-    /* Success: Emerald */
-    --success: 142 76% 46%;
-    --success-from: 142 76% 46%;
-    --success-to: 177 100% 56%;
+    /* Success: Soft Gold */
+    --success: 43 67% 68%;
+    --success-from: 43 67% 68%;
+    --success-to: 38 70% 75%;
     
-    /* Premium gradient: Teal to violet */
-    --premium-from: 177 100% 56%;
-    --premium-to: 262 83% 58%;
+    /* Premium gradient: Gold to warm gold */
+    --premium-from: 43 67% 68%;
+    --premium-to: 38 70% 75%;
     
     /* Danger gradient */
-    --danger-from: 0 84% 60%;
-    --danger-to: 15 87% 64%;
+    --danger-from: 0 65% 55%;
+    --danger-to: 15 70% 60%;
     
-    /* Info: Sky blue */
-    --info: 199 89% 48%;
-    --warning: 38 92% 50%;
-    --error: 0 84% 60%;
+    /* Info: Icy Silver Blue */
+    --info: 210 40% 70%;
+    --warning: 38 80% 55%;
+    --error: 0 65% 55%;
     
-    /* Text hierarchy */
-    --text-primary: 240 10% 98%;
-    --text-secondary: 215 16% 60%;
-    --text-tertiary: 215 15% 45%;
+    /* Text hierarchy - Dark Charcoal to Soft Gray */
+    --text-primary: 0 0% 10%;
+    --text-secondary: 0 0% 29%;
+    --text-tertiary: 40 5% 45%;
     
     /* Borders with transparency */
-    --border-subtle: 215 25% 20%;
-    --border-hover: 177 100% 56%;
-    --border-glass: 215 20% 28%;
+    --border-subtle: 210 30% 88%;
+    --border-hover: 43 67% 68%;
+    --border-glass: 210 30% 90%;
 
-    /* Purple accent for secondary tags */
-    --purple: 262 83% 58%;
+    /* Purple accent for secondary tags - Rose Gold */
+    --purple: 350 30% 60%;
   }
 }
 
@@ -91,49 +91,43 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: radial-gradient(circle at top, #02081a 0%, #020617 45%, #000000 100%);
+    background: linear-gradient(145deg, #FAFAFA 0%, #F5F7FA 50%, #FAFAFA 100%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     position: relative;
   }
 
-  /* Animated background particles layer */
+  /* Subtle luminous flare effect */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(34, 243, 255, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.08) 0%, transparent 55%);
-    mix-blend-mode: screen;
-    opacity: 0.6;
-    animation: float-particles 40s linear infinite alternate;
+      radial-gradient(circle at 10% 10%, rgba(228, 199, 118, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(219, 230, 240, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(228, 199, 118, 0.05) 0%, transparent 50%);
+    opacity: 1;
     z-index: 0;
-  }
-
-  @keyframes float-particles {
-    from { transform: translate3d(0, 0, 0); }
-    to { transform: translate3d(-60px, -40px, 0); }
   }
 }
 
 @layer utilities {
-  /* Premium Glass Cards */
+  /* Premium Glass Cards - Ethereal Frost */
   .premium-card {
-    background: rgba(15, 23, 42, 0.82);
-    border: 1px solid rgba(148, 163, 184, 0.28);
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(219, 230, 240, 0.7);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
+    box-shadow: 0 8px 40px rgba(219, 230, 240, 0.5);
     border-radius: 22px;
     position: relative;
     overflow: hidden;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Top glow edge effect */
+  /* Top pearl highlight edge effect */
   .premium-card::before {
     content: "";
     position: absolute;
@@ -141,28 +135,28 @@ All colors MUST be HSL.
     border-radius: inherit;
     background: linear-gradient(
       to bottom,
-      rgba(34, 243, 255, 0.18),
+      rgba(255, 255, 255, 0.8),
       transparent 45%
     );
-    opacity: 0.8;
+    opacity: 0.6;
     pointer-events: none;
   }
   
   .premium-card:hover {
-    transform: translateY(-6px) scale(1.01);
-    box-shadow: 0 28px 90px rgba(15, 23, 42, 1),
-                0 0 60px rgba(34, 243, 255, 0.15);
-    border-color: rgba(34, 243, 255, 0.6);
+    transform: translateY(-3px) scale(1.005);
+    box-shadow: 0 12px 50px rgba(219, 230, 240, 0.6),
+                0 0 30px rgba(228, 199, 118, 0.15);
+    border-color: rgba(228, 199, 118, 0.5);
   }
   
-  /* Success gradient */
+  /* Success/Gold gradient */
   .success-gradient {
-    background: linear-gradient(135deg, hsl(var(--success-from)) 0%, hsl(var(--success-to)) 100%);
+    background: linear-gradient(135deg, #E4C776 0%, #F4D98C 100%);
   }
   
-  /* Premium gradient (teal to violet) */
+  /* Premium gradient (gold) */
   .premium-gradient {
-    background: linear-gradient(135deg, hsl(var(--premium-from)) 0%, hsl(var(--premium-to)) 100%);
+    background: linear-gradient(135deg, #E4C776 0%, #F4D98C 100%);
   }
   
   /* Danger gradient */
@@ -170,22 +164,21 @@ All colors MUST be HSL.
     background: linear-gradient(135deg, hsl(var(--danger-from)) 0%, hsl(var(--danger-to)) 100%);
   }
   
-  /* Success glow */
+  /* Gold glow */
   .success-glow {
-    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.4),
-                0 0 20px rgba(34, 243, 255, 0.2);
+    box-shadow: 0 0 18px rgba(228, 199, 118, 0.45);
   }
   
-  /* Glass navigation */
+  /* Glass navigation - Frosted Pearl */
   .glass-nav {
-    background: rgba(10, 14, 26, 0.85);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+    border-bottom: 1px solid rgba(219, 230, 240, 0.6);
     position: relative;
   }
 
-  /* Neon underline for active nav */
+  /* Subtle gold underline for nav */
   .glass-nav::after {
     content: "";
     position: absolute;
@@ -195,7 +188,7 @@ All colors MUST be HSL.
     height: 1px;
     background: linear-gradient(90deg, 
       transparent 0%,
-      rgba(34, 243, 255, 0.5) 50%,
+      rgba(228, 199, 118, 0.4) 50%,
       transparent 100%
     );
   }
@@ -266,25 +259,25 @@ All colors MUST be HSL.
     }
   }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
   }
-  100% {
-    transform: translateX(100%);
+
+  .animate-shimmer {
+    animation: shimmer 2s ease-in-out infinite;
   }
-}
 
-.animate-shimmer {
-  animation: shimmer 2s ease-in-out infinite;
-}
-
-@keyframes neon-glow {
+  @keyframes gold-glow {
     0%, 100% {
-      box-shadow: 0 0 20px rgba(34, 243, 255, 0.4);
+      box-shadow: 0 0 18px rgba(228, 199, 118, 0.4);
     }
     50% {
-      box-shadow: 0 0 30px rgba(34, 243, 255, 0.7);
+      box-shadow: 0 0 28px rgba(228, 199, 118, 0.6);
     }
   }
   
@@ -313,13 +306,14 @@ All colors MUST be HSL.
   }
 
   .animate-neon-glow {
-    animation: neon-glow 2s ease-in-out infinite;
+    animation: gold-glow 2s ease-in-out infinite;
   }
 
   /* Typography enhancements */
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.02em;
     font-weight: 700;
+    color: hsl(var(--text-primary));
   }
 
   .neon-underline {
@@ -335,29 +329,34 @@ All colors MUST be HSL.
     width: 100%;
     height: 2px;
     background: linear-gradient(90deg, 
-      hsl(var(--primary)), 
-      hsl(var(--accent))
+      #E4C776, 
+      #F4D98C
     );
-    box-shadow: 0 0 10px rgba(34, 243, 255, 0.5);
+    box-shadow: 0 0 8px rgba(228, 199, 118, 0.4);
   }
 
-  /* Neon left border accent */
+  /* Gold left border accent */
   .neon-border-left {
     border-left: 2px solid hsl(var(--primary));
-    box-shadow: -2px 0 10px rgba(34, 243, 255, 0.4);
+    box-shadow: -2px 0 8px rgba(228, 199, 118, 0.3);
     padding-left: 1rem;
   }
 
-  /* Glass input fields */
+  /* Glass input fields - Frosted */
   input, textarea, select {
-    background: rgba(15, 23, 42, 0.6) !important;
-    border: 1px solid rgba(148, 163, 184, 0.25) !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    border: 1px solid rgba(219, 230, 240, 0.6) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    color: hsl(var(--text-primary)) !important;
   }
 
   input:focus, textarea:focus, select:focus {
-    border-color: rgba(34, 243, 255, 0.6) !important;
-    box-shadow: 0 0 20px rgba(34, 243, 255, 0.2) !important;
+    border-color: rgba(228, 199, 118, 0.7) !important;
+    box-shadow: 0 0 15px rgba(228, 199, 118, 0.2) !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: hsl(var(--muted-foreground)) !important;
   }
 }

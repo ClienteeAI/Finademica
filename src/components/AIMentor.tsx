@@ -106,9 +106,11 @@ export function AIMentor() {
         className={cn(
           "fixed bottom-6 right-6 z-[9999]",
           "w-[60px] h-[60px] rounded-full",
-          "premium-card flex items-center justify-center",
-          "border-2 border-primary/40",
-          "hover:border-primary hover:shadow-[0_0_30px_rgba(34,243,255,0.4)]",
+          "bg-gradient-to-br from-[#E4C776] to-[#F4D98C]",
+          "flex items-center justify-center",
+          "border-2 border-[#E4C776]/60",
+          "hover:border-[#C9A95C] hover:shadow-[0_0_25px_rgba(228,199,118,0.5)]",
+          "shadow-[0_4px_20px_rgba(228,199,118,0.3)]",
           "transition-all duration-300 ease-out",
           "hover:scale-110 hover:-translate-y-1",
           "animate-pulse-subtle"
@@ -116,9 +118,9 @@ export function AIMentor() {
         aria-label="Open AI Mentor"
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-primary" />
+          <X className="w-6 h-6 text-[#1E1E1F]" />
         ) : (
-          <MessageCircle className="w-6 h-6 text-primary" />
+          <MessageCircle className="w-6 h-6 text-[#1E1E1F]" />
         )}
       </button>
 
@@ -127,7 +129,7 @@ export function AIMentor() {
         <>
           {/* Backdrop for mobile */}
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] md:hidden"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[9998] md:hidden"
             onClick={() => setIsOpen(false)}
           />
 
@@ -136,27 +138,30 @@ export function AIMentor() {
             className={cn(
               "fixed z-[9999]",
               "w-full h-[90vh] bottom-0 left-0 md:w-[380px] md:h-[600px] md:bottom-6 md:right-6 md:left-auto md:top-auto",
-              "premium-card overflow-hidden",
+              "bg-white/80 backdrop-blur-xl",
+              "border border-[#DBE6F0]",
+              "rounded-t-[26px] md:rounded-[26px]",
+              "overflow-hidden",
               "flex flex-col",
               "animate-slide-up md:animate-slide-in-right",
-              "border-2 border-border-glass"
+              "shadow-[0_8px_50px_rgba(219,230,240,0.6)]"
             )}
           >
             {/* Header */}
-            <div className="relative p-6 border-b border-border-glass bg-gradient-to-r from-primary/10 to-accent/10">
+            <div className="relative p-6 border-b border-[#DBE6F0] bg-gradient-to-r from-[#E4C776]/10 to-[#F4D98C]/10">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center animate-neon-glow">
-                  <Sparkles className="w-5 h-5 text-background" />
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#E4C776] to-[#F4D98C] flex items-center justify-center shadow-[0_0_15px_rgba(228,199,118,0.4)]">
+                  <Sparkles className="w-5 h-5 text-[#1E1E1F]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-foreground">AI Trading Mentor</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="text-lg font-bold text-[#1A1A1A]">AI Trading Mentor</h3>
+                  <p className="text-sm text-[#7D7A72]">
                     Ask anything about trading, learning, or mindset.
                   </p>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-[#7D7A72] hover:text-[#1A1A1A] transition-colors"
                   aria-label="Close"
                 >
                   <X className="w-5 h-5" />
@@ -168,10 +173,10 @@ export function AIMentor() {
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <Sparkles className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#E4C776]/20 to-[#F4D98C]/20 flex items-center justify-center border border-[#E4C776]/30">
+                    <Sparkles className="w-8 h-8 text-[#C9A95C]" />
                   </div>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-[#7D7A72] text-sm">
                     Hi! I'm your AI Trading Mentor. Ask me anything!
                   </p>
                 </div>
@@ -189,8 +194,8 @@ export function AIMentor() {
                     className={cn(
                       "max-w-[85%] rounded-[18px] px-4 py-3",
                       message.role === "user"
-                        ? "success-gradient text-background shadow-[0_0_20px_rgba(34,243,255,0.3)]"
-                        : "premium-card text-foreground border border-border-glass"
+                        ? "bg-gradient-to-r from-[#E4C776] to-[#F4D98C] text-[#1E1E1F] shadow-[0_0_15px_rgba(228,199,118,0.3)]"
+                        : "bg-white/70 backdrop-blur-sm text-[#1A1A1A] border border-[#DBE6F0]"
                     )}
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
@@ -200,11 +205,11 @@ export function AIMentor() {
 
               {isLoading && (
                 <div className="flex justify-start animate-fade-in">
-                  <div className="premium-card rounded-[18px] px-4 py-3 border border-border-glass">
+                  <div className="bg-white/70 backdrop-blur-sm rounded-[18px] px-4 py-3 border border-[#DBE6F0]">
                     <div className="flex gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse delay-150" />
-                      <div className="w-2 h-2 rounded-full bg-primary animate-pulse delay-300" />
+                      <div className="w-2 h-2 rounded-full bg-[#E4C776] animate-pulse" />
+                      <div className="w-2 h-2 rounded-full bg-[#E4C776] animate-pulse delay-150" />
+                      <div className="w-2 h-2 rounded-full bg-[#E4C776] animate-pulse delay-300" />
                     </div>
                   </div>
                 </div>
@@ -214,7 +219,7 @@ export function AIMentor() {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-border-glass bg-card/50 backdrop-blur-xl">
+            <div className="p-4 border-t border-[#DBE6F0] bg-white/60 backdrop-blur-xl">
               <div className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -226,9 +231,9 @@ export function AIMentor() {
                   disabled={isLoading}
                   className={cn(
                     "flex-1 px-4 py-3 rounded-full",
-                    "bg-background/60 border border-border-glass",
-                    "text-foreground placeholder:text-muted-foreground",
-                    "focus:outline-none focus:border-primary focus:shadow-[0_0_20px_rgba(34,243,255,0.2)]",
+                    "bg-white/70 border border-[#DBE6F0]",
+                    "text-[#1A1A1A] placeholder:text-[#7D7A72]",
+                    "focus:outline-none focus:border-[#E4C776] focus:shadow-[0_0_15px_rgba(228,199,118,0.2)]",
                     "transition-all duration-300",
                     "backdrop-blur-xl"
                   )}
@@ -238,15 +243,15 @@ export function AIMentor() {
                   disabled={!input.trim() || isLoading}
                   className={cn(
                     "w-12 h-12 rounded-full",
-                    "success-gradient",
+                    "bg-gradient-to-r from-[#E4C776] to-[#F4D98C]",
                     "flex items-center justify-center",
-                    "hover:scale-110 hover:shadow-[0_0_30px_rgba(34,243,255,0.4)]",
+                    "hover:scale-110 hover:shadow-[0_0_20px_rgba(228,199,118,0.5)]",
                     "transition-all duration-300",
                     "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   )}
                   aria-label="Send message"
                 >
-                  <Send className="w-5 h-5 text-background" />
+                  <Send className="w-5 h-5 text-[#1E1E1F]" />
                 </button>
               </div>
             </div>
