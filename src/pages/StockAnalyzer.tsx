@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Search, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import StockAnalysisCard from "@/components/StockAnalysisCard";
+import StockChat from "@/components/StockChat";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
@@ -45,7 +46,6 @@ const StockAnalyzer = () => {
         }),
       });
 
-      // Handle non-JSON or empty responses
       const text = await response.text();
       let data: unknown;
       try {
@@ -56,7 +56,6 @@ const StockAnalyzer = () => {
       
       setAnalysisData(data);
 
-      // Add to recent searches (avoid duplicates, max 5)
       setRecentSearches(prev => {
         const filtered = prev.filter(s => s !== trimmedSymbol);
         return [trimmedSymbol, ...filtered].slice(0, 5);
@@ -124,8 +123,9 @@ const StockAnalyzer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Results Area */}
-          <div className="lg:col-span-3">
-            <Card className="p-8 min-h-[500px]">
+          <div className="lg:col-span-3 space-y-6">
+            {/* Analysis Card */}
+            <Card className="p-8 min-h-[400px]">
               {isLoading ? (
                 <div className="h-full flex flex-col items-center justify-center space-y-6 py-12">
                   <div className="relative">
@@ -160,6 +160,11 @@ const StockAnalyzer = () => {
                   </div>
                 </div>
               )}
+            </Card>
+
+            {/* Chat Card */}
+            <Card className="p-6">
+              <StockChat symbol={analyzedSymbol} />
             </Card>
           </div>
 
