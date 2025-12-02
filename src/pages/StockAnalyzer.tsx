@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import StockAnalysisCard from "@/components/StockAnalysisCard";
 import StockChat from "@/components/StockChat";
 
-const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
+const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
 
