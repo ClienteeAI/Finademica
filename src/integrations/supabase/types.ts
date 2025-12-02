@@ -272,7 +272,7 @@ export type Database = {
       }
       user_events: {
         Row: {
-          created_at: string | null
+          created_at: string
           event_type: string
           event_value: string | null
           id: string
@@ -280,7 +280,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           event_type: string
           event_value?: string | null
           id?: string
@@ -288,22 +288,14 @@ export type Database = {
           user_id: string
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           event_type?: string
           event_value?: string | null
           id?: string
           points?: number
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_gamification: {
         Row: {
@@ -378,6 +370,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_stats: {
+        Row: {
+          level: number
+          total_points: number
+          updated_at: string
+          user_id: string
+          videos_completed: number
+        }
+        Insert: {
+          level?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+          videos_completed?: number
+        }
+        Update: {
+          level?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+          videos_completed?: number
+        }
+        Relationships: []
       }
       user_video_selections: {
         Row: {
@@ -491,54 +507,36 @@ export type Database = {
       }
       video_views: {
         Row: {
-          completed: boolean | null
-          completion_percentage: number | null
+          client_id: string | null
+          completed_at: string
+          created_at: string
           id: string
-          last_position_seconds: number | null
-          started_at: string | null
-          updated_at: string | null
+          raw_quiz_answers: Json | null
+          status: string
           user_id: string
           video_id: string
-          watch_duration_seconds: number | null
         }
         Insert: {
-          completed?: boolean | null
-          completion_percentage?: number | null
+          client_id?: string | null
+          completed_at?: string
+          created_at?: string
           id?: string
-          last_position_seconds?: number | null
-          started_at?: string | null
-          updated_at?: string | null
+          raw_quiz_answers?: Json | null
+          status?: string
           user_id: string
           video_id: string
-          watch_duration_seconds?: number | null
         }
         Update: {
-          completed?: boolean | null
-          completion_percentage?: number | null
+          client_id?: string | null
+          completed_at?: string
+          created_at?: string
           id?: string
-          last_position_seconds?: number | null
-          started_at?: string | null
-          updated_at?: string | null
+          raw_quiz_answers?: Json | null
+          status?: string
           user_id?: string
           video_id?: string
-          watch_duration_seconds?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "video_views_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "video_views_video_id_fkey"
-            columns: ["video_id"]
-            isOneToOne: false
-            referencedRelation: "videos"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       videos: {
         Row: {
@@ -629,6 +627,10 @@ export type Database = {
     }
     Functions: {
       get_gamification: { Args: { uid: string }; Returns: Json }
+      increment_user_stats: {
+        Args: { p_points: number; p_user_id: string; p_videos: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
