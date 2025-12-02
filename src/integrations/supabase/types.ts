@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievements: {
+        Row: {
+          description: string
+          icon: string | null
+          id: string
+          key: string
+          name: string
+        }
+        Insert: {
+          description: string
+          icon?: string | null
+          id?: string
+          key: string
+          name: string
+        }
+        Update: {
+          description?: string
+          icon?: string | null
+          id?: string
+          key?: string
+          name?: string
+        }
+        Relationships: []
+      }
       activity_log: {
         Row: {
           activity_data: Json | null
@@ -156,6 +180,198 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ebooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      skills: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          name: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          name: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      user_achievements: {
+        Row: {
+          achievement_id: string
+          id: string
+          unlocked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          id?: string
+          unlocked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          id?: string
+          unlocked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_achievements_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_avatar: {
+        Row: {
+          last_updated: string | null
+          stage: number
+          user_id: string
+        }
+        Insert: {
+          last_updated?: string | null
+          stage?: number
+          user_id: string
+        }
+        Update: {
+          last_updated?: string | null
+          stage?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_avatar_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_events: {
+        Row: {
+          created_at: string | null
+          event_type: string
+          event_value: string | null
+          id: string
+          points: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: string
+          event_value?: string | null
+          id?: string
+          points?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: string
+          event_value?: string | null
+          id?: string
+          points?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_gamification: {
+        Row: {
+          created_at: string | null
+          last_activity_date: string | null
+          level: number
+          streak_days: number
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string | null
+          last_activity_date?: string | null
+          level?: number
+          streak_days?: number
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string | null
+          last_activity_date?: string | null
+          level?: number
+          streak_days?: number
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_skills: {
+        Row: {
+          id: string
+          level: number
+          skill_id: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          id?: string
+          level?: number
+          skill_id: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          id?: string
+          level?: number
+          skill_id?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_skills_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
