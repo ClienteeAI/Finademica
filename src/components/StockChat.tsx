@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, MessageSquare, Bot, User } from "lucide-react";
 
-const CHAT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/2f5da978-0085-4212-bf66-277f85e2022f";
+const CHAT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/2f5da978-0085-4212-bf66-277f85e2022f";
 
 interface Message {
   id: string;
