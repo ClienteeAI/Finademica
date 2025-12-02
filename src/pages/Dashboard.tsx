@@ -13,6 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useClient } from "@/lib/clientContext";
+import { GamificationSection } from "@/components/GamificationSection";
 
 interface UserData {
   firstName: string;
@@ -175,6 +176,9 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Gamification / Trader Progress Section */}
+        <GamificationSection />
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
