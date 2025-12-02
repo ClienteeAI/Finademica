@@ -13,11 +13,26 @@ export const useVideoCompletion = (videoId: string | undefined) => {
     hasTriggeredRef.current = true;
 
     try {
-      // Get user from localStorage (app uses separate keys)
-      const email = localStorage.getItem("email");
-      const firstName = localStorage.getItem("firstName");
-      const lastName = localStorage.getItem("lastName");
-      const clientId = localStorage.getItem("client_id");
+      // Get user from localStorage - check both patterns (Login vs Signup)
+      let email = localStorage.getItem("email");
+      let firstName = localStorage.getItem("firstName");
+      let lastName = localStorage.getItem("lastName");
+      const clientId = localStorage.getItem("client_id") || localStorage.getItem("userClientId");
+      
+      // Also check for userData JSON object (used by SignupForm)
+      const userDataStr = localStorage.getItem("userData");
+      if (userDataStr && !email) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          email = userData.email || email;
+          firstName = userData.firstName || firstName;
+          lastName = userData.lastName || lastName;
+        } catch (e) {
+          console.error("Failed to parse userData from localStorage:", e);
+        }
+      }
+      
+      console.log("User data from localStorage:", { email, firstName, lastName, clientId });
 
       let userData = null;
       
