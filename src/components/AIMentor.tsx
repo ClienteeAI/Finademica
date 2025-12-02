@@ -104,7 +104,7 @@ export function AIMentor() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-6 z-50",
+          "fixed bottom-6 right-6 z-[9999]",
           "w-[60px] h-[60px] rounded-full",
           "premium-card flex items-center justify-center",
           "border-2 border-primary/40",
@@ -127,14 +127,14 @@ export function AIMentor() {
         <>
           {/* Backdrop for mobile */}
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998] md:hidden"
             onClick={() => setIsOpen(false)}
           />
 
           {/* Panel */}
           <div
             className={cn(
-              "fixed z-50",
+              "fixed z-[9999]",
               "w-full h-[90vh] bottom-0 left-0 md:w-[380px] md:h-[600px] md:bottom-6 md:right-6 md:left-auto md:top-auto",
               "premium-card overflow-hidden",
               "flex flex-col",
