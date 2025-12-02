@@ -72,7 +72,7 @@ export function AIMentor() {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: data.reply || "I'm here to help! Ask me anything about trading.",
+        content: data.output || data.reply || "I'm here to help! Ask me anything about trading.",
         timestamp: new Date(),
       };
 
