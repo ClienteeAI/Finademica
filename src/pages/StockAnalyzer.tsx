@@ -3,12 +3,32 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search, TrendingUp, Loader2, AlertCircle } from "lucide-react";
+import { Search, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
+
+// Helper to convert any response to a displayable string
+const formatAnalysisResponse = (data: unknown): string => {
+  if (typeof data === "string") {
+    return data;
+  }
+  if (data && typeof data === "object") {
+    // Check for common response fields
+    const obj = data as Record<string, unknown>;
+    if (typeof obj.output === "string") return obj.output;
+    if (typeof obj.analysis === "string") return obj.analysis;
+    if (typeof obj.result === "string") return obj.result;
+    if (typeof obj.message === "string") return obj.message;
+    if (typeof obj.text === "string") return obj.text;
+    if (typeof obj.content === "string") return obj.content;
+    // Otherwise stringify the object nicely
+    return JSON.stringify(data, null, 2);
+  }
+  return String(data);
+};
 
 const StockAnalyzer = () => {
   const [symbol, setSymbol] = useState("");
@@ -44,10 +64,16 @@ const StockAnalyzer = () => {
         }),
       });
 
-      const data = await response.json();
+      // Handle non-JSON or empty responses
+      const text = await response.text();
+      let data: unknown;
+      try {
+        data = text ? JSON.parse(text) : { message: "Analysis request sent successfully" };
+      } catch {
+        data = text || "Analysis request sent successfully";
+      }
       
-      // Extract analysis from response (adjust based on webhook response structure)
-      const analysisText = data.output || data.analysis || data.result || data.message || JSON.stringify(data, null, 2);
+      const analysisText = formatAnalysisResponse(data);
       setAnalysis(analysisText);
 
       // Add to recent searches (avoid duplicates, max 5)
