@@ -92,8 +92,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
       
-      // Default to 'naga' for testing / preview environments
-      subdomain = subdomain || 'naga';
+      // Default to 'nasr' for testing / preview environments
+      subdomain = subdomain || 'nasr';
 
       const { data } = await supabase
         .from('clients')
