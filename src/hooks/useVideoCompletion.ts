@@ -14,18 +14,66 @@ export const useVideoCompletion = (videoId: string | undefined) => {
 
     try {
       // Get the current authenticated user
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user: authUser } } = await supabase.auth.getUser();
       
-      if (!user) {
+      if (!authUser) {
         console.log("No authenticated user found, skipping video completion event");
         hasTriggeredRef.current = false;
         return;
       }
 
+      // Fetch full user profile from users table
+      const { data: userData, error: userError } = await supabase
+        .from("users")
+        .select("*, clients(*)")
+        .eq("id", authUser.id)
+        .maybeSingle();
+
+      if (userError) {
+        console.error("Error fetching user data:", userError);
+      }
+
+      // Fetch video details
+      const { data: videoData, error: videoError } = await supabase
+        .from("videos")
+        .select("id, title, category, duration_seconds, video_url")
+        .eq("id", videoId)
+        .maybeSingle();
+
+      if (videoError) {
+        console.error("Error fetching video data:", videoError);
+      }
+
       const payload = {
-        user_id: user.id,
-        video_id: videoId,
-        event_type: "video_completed"
+        event_type: "video_completed",
+        timestamp: new Date().toISOString(),
+        user: {
+          auth_id: authUser.id,
+          id: userData?.id,
+          email: userData?.email || authUser.email,
+          first_name: userData?.first_name,
+          last_name: userData?.last_name,
+          phone: userData?.phone,
+          client_id: userData?.client_id,
+          quiz_answers: userData?.quiz_answers,
+          lead_score: userData?.lead_score,
+          login_count: userData?.login_count,
+          created_at: userData?.created_at,
+        },
+        client: userData?.clients ? {
+          id: (userData.clients as any).id,
+          company_name: (userData.clients as any).company_name,
+          subdomain: (userData.clients as any).subdomain,
+        } : null,
+        video: videoData ? {
+          id: videoData.id,
+          title: videoData.title,
+          category: videoData.category,
+          duration_seconds: videoData.duration_seconds,
+          video_url: videoData.video_url,
+        } : {
+          id: videoId,
+        },
       };
 
       const response = await fetch(WEBHOOK_URL, {
