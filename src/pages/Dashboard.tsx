@@ -24,53 +24,26 @@ interface UserData {
   phone: string;
 }
 
-const placeholderVideos = [
-  {
-    id: "1",
-    title: "Why Trade Forex?",
-    category: "Getting Started",
-    categoryVariant: "info" as const,
-    duration: "7 min",
-    progress: 0,
-    status: "Not Started",
-  },
-  {
-    id: "2",
-    title: "Timing Your Entries",
-    category: "Trading Strategies",
-    categoryVariant: "purple" as const,
-    duration: "8 min",
-    progress: 0,
-    status: "Not Started",
-  },
-  {
-    id: "3",
-    title: "Risk and Position Management",
-    category: "Risk Management",
-    categoryVariant: "destructive" as const,
-    duration: "15 min",
-    progress: 0,
-    status: "Not Started",
-  },
-  {
-    id: "4",
-    title: "Double Top & Double Bottom Patterns",
-    category: "Technical Analysis",
-    categoryVariant: "success" as const,
-    duration: "7 min",
-    progress: 0,
-    status: "Not Started",
-  },
-  {
-    id: "5",
-    title: "Small Cap Trading",
-    category: "Trading Strategies",
-    categoryVariant: "purple" as const,
-    duration: "9 min",
-    progress: 0,
-    status: "Not Started",
-  },
-];
+interface VideoData {
+  id: string;
+  title: string;
+  category: string | null;
+  duration_seconds: number | null;
+  thumbnail_url: string | null;
+}
+
+const categoryVariantMap: Record<string, "info" | "purple" | "destructive" | "success"> = {
+  "Getting Started": "info",
+  "Trading Strategies": "purple",
+  "Risk Management": "destructive",
+  "Technical Analysis": "success",
+};
+
+const formatDuration = (seconds: number | null): string => {
+  if (!seconds) return "Unknown";
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes} min`;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -78,6 +51,8 @@ const Dashboard = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<any>(null);
+  const [videos, setVideos] = useState<VideoData[]>([]);
+  const [videosLoading, setVideosLoading] = useState(true);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -95,6 +70,25 @@ const Dashboard = () => {
     if (quiz) {
       setQuizAnswers(JSON.parse(quiz));
     }
+
+    // Fetch videos from Supabase
+    const fetchVideos = async () => {
+      const { data, error } = await supabase
+        .from("videos")
+        .select("id, title, category, duration_seconds, thumbnail_url")
+        .eq("is_active", true)
+        .order("order_priority", { ascending: true })
+        .limit(5);
+
+      if (error) {
+        console.error("Error fetching videos:", error);
+      } else {
+        setVideos(data || []);
+      }
+      setVideosLoading(false);
+    };
+
+    fetchVideos();
   }, [navigate]);
 
   if (!userData) {
@@ -227,8 +221,8 @@ const Dashboard = () => {
             {
               icon: Video,
               label: "Videos Watched",
-              value: `0 / ${placeholderVideos.length}`,
-              subtext: "5 videos remaining",
+              value: `0 / ${videos.length || 5}`,
+              subtext: `${videos.length || 5} videos remaining`,
               color: "success",
             },
             {
@@ -341,60 +335,84 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {placeholderVideos.map((video, index) => (
-              <Card
-                key={video.id}
-                className="overflow-hidden cursor-pointer group"
-                onClick={() => navigate(`/video/${video.id}`)}
-                style={{
-                  animationDelay: `${0.1 * index}s`,
-                  animationFillMode: "backwards",
-                }}
-              >
-                {/* Thumbnail */}
-                <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
-                  <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
-                      <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
-                    </div>
+          {videosLoading ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className="overflow-hidden">
+                  <div className="aspect-video bg-muted animate-pulse" />
+                  <div className="p-8 space-y-4">
+                    <div className="h-6 bg-muted rounded animate-pulse w-1/3" />
+                    <div className="h-6 bg-muted rounded animate-pulse w-2/3" />
                   </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-8 space-y-4">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <Badge variant={video.categoryVariant}>{video.category}</Badge>
-                    <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" />
-                      {video.duration}
-                    </span>
-                  </div>
-
-                  <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
-                    {video.title}
-                  </h3>
-
-                  <div className="space-y-3">
-                    <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
-                        style={{ width: `${video.progress}%` }}
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {videos.map((video, index) => (
+                <Card
+                  key={video.id}
+                  className="overflow-hidden cursor-pointer group"
+                  onClick={() => navigate(`/video/${video.id}`)}
+                  style={{
+                    animationDelay: `${0.1 * index}s`,
+                    animationFillMode: "backwards",
+                  }}
+                >
+                  {/* Thumbnail */}
+                  <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
+                    {video.thumbnail_url ? (
+                      <img 
+                        src={video.thumbnail_url} 
+                        alt={video.title}
+                        className="w-full h-full object-cover"
                       />
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
+                            <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-8 space-y-4">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <Badge variant={categoryVariantMap[video.category || ""] || "info"}>{video.category || "Uncategorized"}</Badge>
+                      <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        {formatDuration(video.duration_seconds)}
+                      </span>
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#6B7280]">{video.status}</span>
-                      <Button size="sm" variant="primary" className="group-hover:scale-105 transition-transform">
-                        Watch Now →
-                      </Button>
+                    <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
+                      {video.title}
+                    </h3>
+
+                    <div className="space-y-3">
+                      <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
+                          style={{ width: "0%" }}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-[#6B7280]">Not Started</span>
+                        <Button size="sm" variant="primary" className="group-hover:scale-105 transition-transform">
+                          Watch Now →
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Card>
-            ))}
-          </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Learning Roadmap Preview */}
