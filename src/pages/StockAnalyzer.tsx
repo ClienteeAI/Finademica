@@ -123,11 +123,10 @@ const StockAnalyzer = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Results Area */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Analysis Card */}
-            <Card className="p-8 min-h-[400px]">
+          <div className="lg:col-span-3">
+            <Card className="p-8">
               {isLoading ? (
-                <div className="h-full flex flex-col items-center justify-center space-y-6 py-12">
+                <div className="flex flex-col items-center justify-center space-y-6 py-12">
                   <div className="relative">
                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
                       <Loader2 className="w-10 h-10 text-[#4DE2E8] animate-spin" />
@@ -143,9 +142,18 @@ const StockAnalyzer = () => {
                   </div>
                 </div>
               ) : analysisData ? (
-                <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
+                <div className="space-y-8">
+                  {/* Analysis Results */}
+                  <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
+                  
+                  {/* Divider */}
+                  <div className="border-t border-[#D4E0EC]" />
+                  
+                  {/* Integrated Chat */}
+                  <StockChat symbol={analyzedSymbol} />
+                </div>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center space-y-6 py-12">
+                <div className="flex flex-col items-center justify-center space-y-6 py-12">
                   <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/10 to-[#A7E9FF]/10 flex items-center justify-center border border-[#D4E0EC]">
                     <TrendingUp className="w-10 h-10 text-[#6B7280]" />
                   </div>
@@ -160,11 +168,6 @@ const StockAnalyzer = () => {
                   </div>
                 </div>
               )}
-            </Card>
-
-            {/* Chat Card */}
-            <Card className="p-6">
-              <StockChat symbol={analyzedSymbol} />
             </Card>
           </div>
 
