@@ -128,26 +128,27 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
     }
 
     try {
-      // Create auth user in Supabase (trigger will create public.users row)
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone || null,
-            client_id: client.id
-          }
-        }
-      });
+      // INSERT user into Supabase users table
+      const { data: newUser, error } = await supabase
+        .from('users')
+        .insert({
+          client_id: client.id,
+          email: formData.email,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone || null,
+          quiz_answers: quizAnswers,
+          is_admin: false
+        })
+        .select()
+        .single();
 
-      if (authError) {
-        console.error('Supabase Auth error:', authError);
-        throw new Error(authError.message);
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message);
       }
 
-      console.log('Auth user created:', authData.user?.id);
+      console.log('User created in Supabase:', newUser);
 
       // Create webhook payload
       const webhookData = {
