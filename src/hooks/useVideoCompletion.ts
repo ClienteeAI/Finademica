@@ -13,20 +13,22 @@ export const useVideoCompletion = (videoId: string | undefined) => {
     hasTriggeredRef.current = true;
 
     try {
-      // Get the current authenticated user
-      const { data: { user: authUser } } = await supabase.auth.getUser();
-      
-      if (!authUser) {
-        console.log("No authenticated user found, skipping video completion event");
+      // Get user from localStorage (app uses localStorage auth)
+      const storedUser = localStorage.getItem("user");
+      if (!storedUser) {
+        console.log("No user found in localStorage, skipping video completion event");
         hasTriggeredRef.current = false;
         return;
       }
 
-      // Fetch full user profile from users table
+      const localUser = JSON.parse(storedUser);
+      const userEmail = localUser.email;
+
+      // Fetch full user profile from users table by email
       const { data: userData, error: userError } = await supabase
         .from("users")
         .select("*, clients(*)")
-        .eq("id", authUser.id)
+        .eq("email", userEmail)
         .maybeSingle();
 
       if (userError) {
@@ -48,11 +50,10 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         event_type: "video_completed",
         timestamp: new Date().toISOString(),
         user: {
-          auth_id: authUser.id,
           id: userData?.id,
-          email: userData?.email || authUser.email,
-          first_name: userData?.first_name,
-          last_name: userData?.last_name,
+          email: userData?.email || userEmail,
+          first_name: userData?.first_name || localUser.firstName,
+          last_name: userData?.last_name || localUser.lastName,
           phone: userData?.phone,
           client_id: userData?.client_id,
           quiz_answers: userData?.quiz_answers,
@@ -76,6 +77,8 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         },
       };
 
+      console.log("Sending video completion webhook:", payload);
+
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: {
@@ -83,6 +86,8 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         },
         body: JSON.stringify(payload)
       });
+
+      console.log("Webhook response status:", response.status);
 
       if (response.ok) {
         toast({
@@ -92,13 +97,11 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         });
       }
     } catch (error) {
-      // Silently log error, don't block user experience
       console.error("Failed to send video completion event:", error);
     }
   }, [videoId]);
 
   const resetCompletion = useCallback(() => {
-    // Allow re-triggering if video is replayed
     hasTriggeredRef.current = false;
   }, []);
 
