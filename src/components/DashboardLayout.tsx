@@ -54,7 +54,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation - Command Center */}
-      <nav className="sticky top-0 z-50 glass-nav border-b border-border animate-slide-down">
+      <nav className="sticky top-0 z-50 glass-nav animate-slide-down">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-18">
             {/* Logo */}
@@ -64,10 +64,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   <img 
                     src={client.logo_url} 
                     alt={client.company_name} 
-                    className="h-10 transition-all duration-300 group-hover:scale-105"
+                    className="h-10 transition-all duration-300 group-hover:scale-105 drop-shadow-[0_0_8px_rgba(34,243,255,0.4)]"
                   />
                 ) : (
-                  <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-success to-info bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105">
+                  <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent transition-all duration-300 group-hover:scale-105 drop-shadow-[0_0_12px_rgba(34,243,255,0.5)]">
                     {client?.company_name}
                   </span>
                 )}
@@ -75,14 +75,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
               {/* ADMIN MODE: Client Switcher */}
               {isAdminMode && (
-                <div className="flex items-center gap-3 pl-6 border-l border-border">
-                  <span className="px-3 py-1 text-[10px] font-bold bg-purple-600 text-white rounded-full uppercase tracking-wide">
+                <div className="flex items-center gap-3 pl-6 border-l border-border-glass">
+                  <span className="px-3 py-1 text-[10px] font-bold bg-purple text-background rounded-full uppercase tracking-wide shadow-[0_0_12px_rgba(139,92,246,0.4)]">
                     ADMIN MODE
                   </span>
                   <select
                     value={client?.subdomain}
                     onChange={(e) => switchClient(e.target.value)}
-                    className="px-4 py-2 bg-secondary border border-border rounded-lg text-sm font-medium text-foreground hover:border-border-hover transition-colors cursor-pointer"
+                    className="px-4 py-2 bg-card/60 backdrop-blur-sm border border-border-glass rounded-full text-sm font-medium text-foreground hover:border-primary/50 hover:shadow-[0_0_12px_rgba(34,243,255,0.2)] transition-all cursor-pointer"
                   >
                     {allClients.map(c => (
                       <option key={c.id} value={c.subdomain}>
@@ -100,13 +100,15 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative text-[15px] font-medium transition-all duration-300 ${
-                    isActive(item.path) ? "text-success" : "text-text-secondary hover:text-white hover:scale-105"
+                  className={`relative text-[15px] font-semibold tracking-tight transition-all duration-250 ${
+                    isActive(item.path) 
+                      ? "text-primary drop-shadow-[0_0_8px_rgba(34,243,255,0.6)]" 
+                      : "text-text-secondary hover:text-foreground hover:scale-105"
                   }`}
                 >
                   {item.label}
                   {isActive(item.path) && (
-                    <span className="absolute -bottom-6 left-0 right-0 h-[3px] success-gradient rounded-full" />
+                    <span className="absolute -bottom-6 left-0 right-0 h-[2px] bg-gradient-to-r from-primary to-accent rounded-full shadow-[0_2px_12px_rgba(34,243,255,0.6)]" />
                   )}
                 </Link>
               ))}
@@ -116,23 +118,23 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div className="hidden md:flex items-center gap-3">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-3 hover:bg-secondary h-auto py-2 px-3 rounded-xl">
-                    <div className="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center font-bold text-lg ring-2 ring-success/30">
+                  <Button variant="ghost" className="flex items-center gap-3 hover:bg-card/50 hover:backdrop-blur-sm h-auto py-2 px-3 rounded-full border border-transparent hover:border-primary/30 hover:shadow-[0_0_16px_rgba(34,243,255,0.2)]">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-accent text-background flex items-center justify-center font-bold text-lg ring-2 ring-primary/40 shadow-[0_0_16px_rgba(34,243,255,0.4)]">
                       {userData.firstName.charAt(0).toUpperCase()}
                     </div>
-                    <span className="text-[15px] font-medium">{userData.firstName}</span>
+                    <span className="text-[15px] font-semibold">{userData.firstName}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-card border-border rounded-xl p-2 shadow-2xl">
-                  <DropdownMenuItem onClick={() => console.log("Profile clicked")} className="rounded-lg h-12 cursor-pointer">
+                <DropdownMenuContent align="end" className="w-48 bg-card/95 backdrop-blur-xl border-border-glass rounded-2xl p-2 shadow-[0_24px_80px_rgba(15,23,42,0.9)]">
+                  <DropdownMenuItem onClick={() => console.log("Profile clicked")} className="rounded-xl h-12 cursor-pointer hover:bg-primary/10 hover:text-primary transition-all">
                     <User className="mr-2 h-4 w-4" />
                     Profile
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => console.log("Settings clicked")} className="rounded-lg h-12 cursor-pointer">
+                  <DropdownMenuItem onClick={() => console.log("Settings clicked")} className="rounded-xl h-12 cursor-pointer hover:bg-primary/10 hover:text-primary transition-all">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout} className="rounded-lg h-12 cursor-pointer text-error">
+                  <DropdownMenuItem onClick={handleLogout} className="rounded-xl h-12 cursor-pointer text-error hover:bg-error/10 transition-all">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
                   </DropdownMenuItem>
@@ -152,29 +154,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border bg-card/95 backdrop-blur-xl">
+          <div className="md:hidden border-t border-border-glass bg-card/95 backdrop-blur-xl animate-slide-down">
             <div className="container mx-auto px-4 py-4 space-y-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-3 px-4 rounded-xl text-sm font-medium transition-colors ${
+                  className={`block py-3 px-4 rounded-xl text-sm font-semibold transition-all ${
                     isActive(item.path)
-                      ? "bg-success/10 text-success"
-                      : "text-text-secondary hover:bg-secondary"
+                      ? "bg-primary/10 text-primary border border-primary/30 shadow-[0_0_12px_rgba(34,243,255,0.2)]"
+                      : "text-text-secondary hover:bg-card/50 hover:border-primary/20 border border-transparent"
                   }`}
                 >
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-4 border-t border-border mt-4 space-y-2">
+              <div className="pt-4 border-t border-border-glass mt-4 space-y-2">
                 <button
                   onClick={() => {
                     console.log("Profile clicked");
                     setMobileMenuOpen(false);
                   }}
-                  className="block w-full py-3 px-4 rounded-xl text-sm font-medium text-left text-text-secondary hover:bg-secondary"
+                  className="block w-full py-3 px-4 rounded-xl text-sm font-semibold text-left text-text-secondary hover:bg-card/50 hover:text-foreground transition-all"
                 >
                   Profile
                 </button>
@@ -183,7 +185,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     console.log("Settings clicked");
                     setMobileMenuOpen(false);
                   }}
-                  className="block w-full py-3 px-4 rounded-xl text-sm font-medium text-left text-text-secondary hover:bg-secondary"
+                  className="block w-full py-3 px-4 rounded-xl text-sm font-semibold text-left text-text-secondary hover:bg-card/50 hover:text-foreground transition-all"
                 >
                   Settings
                 </button>
@@ -192,7 +194,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="block w-full py-3 px-4 rounded-xl text-sm font-medium text-left text-error hover:bg-secondary"
+                  className="block w-full py-3 px-4 rounded-xl text-sm font-semibold text-left text-error hover:bg-error/10 transition-all"
                 >
                   Logout
                 </button>
