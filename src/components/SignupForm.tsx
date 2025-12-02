@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eye, EyeOff, Check } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SignupFormProps {
   open: boolean;
@@ -121,45 +122,76 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
     
     if (!validate()) return;
 
-    // Create webhook payload
-    const webhookData = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      timestamp: new Date().toISOString(),
-      source: `${client?.company_name} - Quiz`,
-      clientId: client?.id,
-      clientSubdomain: client?.subdomain,
-      quizAnswers: getQuizLabels()
-    };
-
-    // Send to webhook
-    try {
-      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        mode: 'no-cors',
-        body: JSON.stringify(webhookData),
-      });
-      console.log("Signup data sent to webhook successfully");
-    } catch (error) {
-      console.error("Error sending signup data to webhook:", error);
-      // Continue anyway - don't block the user
+    if (!client) {
+      alert('Client not found. Please refresh the page.');
+      return;
     }
 
-    // Store in localStorage
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userData", JSON.stringify({
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone
-    }));
-    localStorage.setItem("quizAnswers", JSON.stringify(quizAnswers));
+    try {
+      // INSERT user into Supabase
+      const { data: newUser, error } = await supabase
+        .from('users')
+        .insert({
+          client_id: client.id,
+          email: formData.email,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone || null,
+          quiz_answers: quizAnswers,
+          is_admin: false
+        })
+        .select()
+        .single();
 
-    // Redirect to dashboard
-    navigate("/dashboard");
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('User created in Supabase:', newUser);
+
+      // Create webhook payload
+      const webhookData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        timestamp: new Date().toISOString(),
+        source: `${client.company_name} - Quiz`,
+        clientId: client.id,
+        clientSubdomain: client.subdomain,
+        quizAnswers: getQuizLabels()
+      };
+
+      // Send to webhook (don't block on this)
+      try {
+        await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          mode: 'no-cors',
+          body: JSON.stringify(webhookData),
+        });
+        console.log("Signup data sent to webhook successfully");
+      } catch (error) {
+        console.error("Error sending signup data to webhook:", error);
+        // Continue anyway - don't block the user
+      }
+
+      // Save to localStorage
+      localStorage.setItem('email', newUser.email);
+      localStorage.setItem('firstName', newUser.first_name);
+      localStorage.setItem('lastName', newUser.last_name);
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('userClientId', newUser.client_id);
+      localStorage.setItem("quizAnswers", JSON.stringify(quizAnswers));
+
+      // Redirect to dashboard
+      navigate('/dashboard');
+
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      alert('Signup failed: ' + (err.message || 'Unknown error'));
+    }
   };
 
   return (
