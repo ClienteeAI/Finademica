@@ -10,7 +10,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useVideoCompletion } from "@/hooks/useVideoCompletion";
 
 const videoData: Record<string, any> = {
   "1": {
@@ -54,6 +55,8 @@ const VideoPlayer = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [transcriptOpen, setTranscriptOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { handleVideoEnd, resetCompletion } = useVideoCompletion(id);
   
   const video = id ? videoData[id] : null;
 
@@ -90,11 +93,25 @@ const VideoPlayer = () => {
           {/* Main Video Area */}
           <div className="lg:col-span-2 space-y-6">
             {/* Video Player */}
-            <div className="relative aspect-video bg-card rounded-xl border border-border flex items-center justify-center">
-              <div className="text-center space-y-4">
-                <Play className="h-16 w-16 text-muted-foreground mx-auto" />
-                <p className="text-muted-foreground">Video player will be embedded here</p>
-              </div>
+            <div className="relative aspect-video bg-card rounded-xl border border-border overflow-hidden">
+              {/* Placeholder video - replace src with actual video URL when available */}
+              <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                controls
+                onEnded={handleVideoEnd}
+                onSeeked={resetCompletion}
+                poster=""
+              >
+                {/* Video source will be dynamically set when real videos are available */}
+                <source src="" type="video/mp4" />
+                <div className="absolute inset-0 flex items-center justify-center bg-card">
+                  <div className="text-center space-y-4">
+                    <Play className="h-16 w-16 text-muted-foreground mx-auto" />
+                    <p className="text-muted-foreground">Video player will be embedded here</p>
+                  </div>
+                </div>
+              </video>
             </div>
 
             {/* Video Info */}
