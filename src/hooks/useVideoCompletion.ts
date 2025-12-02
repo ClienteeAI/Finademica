@@ -17,23 +17,21 @@ export const useVideoCompletion = (videoId: string | undefined) => {
       const email = localStorage.getItem("email");
       const firstName = localStorage.getItem("firstName");
       const lastName = localStorage.getItem("lastName");
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const clientId = localStorage.getItem("client_id");
 
-      if (!isLoggedIn || !email) {
-        console.log("No user logged in, skipping video completion event");
-        hasTriggeredRef.current = false;
-        return;
-      }
+      let userData = null;
+      
+      // Try to fetch full user profile if email exists
+      if (email) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("*, clients(*)")
+          .eq("email", email)
+          .maybeSingle();
 
-      // Fetch full user profile from users table by email
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("*, clients(*)")
-        .eq("email", email)
-        .maybeSingle();
-
-      if (userError) {
-        console.error("Error fetching user data:", userError);
+        if (!error && data) {
+          userData = data;
+        }
       }
 
       // Fetch video details
@@ -50,17 +48,22 @@ export const useVideoCompletion = (videoId: string | undefined) => {
       const payload = {
         event_type: "video_completed",
         timestamp: new Date().toISOString(),
-        user: {
-          id: userData?.id,
-          email: userData?.email || email,
-          first_name: userData?.first_name || firstName,
-          last_name: userData?.last_name || lastName,
-          phone: userData?.phone,
-          client_id: userData?.client_id,
-          quiz_answers: userData?.quiz_answers,
-          lead_score: userData?.lead_score,
-          login_count: userData?.login_count,
-          created_at: userData?.created_at,
+        user: userData ? {
+          id: userData.id,
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          phone: userData.phone,
+          client_id: userData.client_id,
+          quiz_answers: userData.quiz_answers,
+          lead_score: userData.lead_score,
+          login_count: userData.login_count,
+          created_at: userData.created_at,
+        } : {
+          email: email || "anonymous",
+          first_name: firstName || null,
+          last_name: lastName || null,
+          client_id: clientId || null,
         },
         client: userData?.clients ? {
           id: (userData.clients as any).id,
@@ -90,15 +93,19 @@ export const useVideoCompletion = (videoId: string | undefined) => {
 
       console.log("Webhook response status:", response.status);
 
-      if (response.ok) {
-        toast({
-          title: "Lesson completed",
-          description: "XP gained! Keep learning to level up.",
-          duration: 3000
-        });
-      }
+      toast({
+        title: "Lesson completed",
+        description: "XP gained! Keep learning to level up.",
+        duration: 3000
+      });
+      
     } catch (error) {
       console.error("Failed to send video completion event:", error);
+      toast({
+        title: "Error",
+        description: "Failed to mark video as complete",
+        variant: "destructive",
+      });
     }
   }, [videoId]);
 
