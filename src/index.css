@@ -2,84 +2,84 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system - Ethereal Gold + Ice Theme
+/* Definition of the design system - LUMINOUS ICE Theme
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
     /* Client Theme Variables (Dynamically Set by ClientProvider) */
-    --client-primary: #E4C776;
-    --client-secondary: #DBE6F0;
+    --client-primary: #4DE2E8;
+    --client-secondary: #D4E0EC;
 
-    /* Ethereal Gold + Ice Color System */
-    --background: 0 0% 98%;
-    --foreground: 0 0% 10%;
+    /* Luminous Ice Color System */
+    --background: 205 33% 98%;
+    --foreground: 217 91% 10%;
 
-    /* Glass card surfaces - Pearl/Ivory */
-    --card: 210 20% 98%;
-    --card-foreground: 0 0% 10%;
+    /* Glass card surfaces - Arctic */
+    --card: 210 33% 97%;
+    --card-foreground: 217 91% 10%;
 
-    --popover: 210 20% 98%;
-    --popover-foreground: 0 0% 10%;
+    --popover: 210 33% 97%;
+    --popover-foreground: 217 91% 10%;
 
-    /* Primary: Champagne Gold */
-    --primary: 43 67% 68%;
-    --primary-foreground: 0 0% 12%;
+    /* Primary: Luminous Aqua */
+    --primary: 181 75% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    /* Secondary surfaces - Soft Pearl */
-    --secondary: 210 29% 97%;
-    --secondary-foreground: 0 0% 29%;
+    /* Secondary surfaces - Cloud Mist */
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 220 9% 46%;
 
     /* Muted elements */
-    --muted: 210 20% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 210 25% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* Accent: Warm Gold */
-    --accent: 43 67% 68%;
-    --accent-foreground: 0 0% 12%;
+    /* Accent: Neon Cyan */
+    --accent: 195 100% 83%;
+    --accent-foreground: 217 91% 22%;
 
     /* Danger */
-    --destructive: 0 65% 55%;
+    --destructive: 0 72% 71%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders and inputs - Icy Silver */
+    /* Borders and inputs - Icy Slate */
     --border: 210 30% 88%;
-    --input: 210 20% 96%;
-    --ring: 43 67% 68%;
+    --input: 210 25% 96%;
+    --ring: 181 75% 60%;
 
     --radius: 1.375rem;
 
-    /* Success: Soft Gold */
-    --success: 43 67% 68%;
-    --success-from: 43 67% 68%;
-    --success-to: 38 70% 75%;
+    /* Success: Luminous Aqua */
+    --success: 181 75% 60%;
+    --success-from: 181 75% 60%;
+    --success-to: 195 100% 83%;
     
-    /* Premium gradient: Gold to warm gold */
-    --premium-from: 43 67% 68%;
-    --premium-to: 38 70% 75%;
+    /* Premium gradient: Aqua to Cyan */
+    --premium-from: 181 75% 60%;
+    --premium-to: 181 60% 55%;
     
     /* Danger gradient */
-    --danger-from: 0 65% 55%;
-    --danger-to: 15 70% 60%;
+    --danger-from: 0 72% 71%;
+    --danger-to: 15 70% 65%;
     
-    /* Info: Icy Silver Blue */
-    --info: 210 40% 70%;
+    /* Info: Deep Ocean Blue */
+    --info: 212 61% 23%;
     --warning: 38 80% 55%;
-    --error: 0 65% 55%;
+    --error: 0 72% 71%;
     
-    /* Text hierarchy - Dark Charcoal to Soft Gray */
-    --text-primary: 0 0% 10%;
-    --text-secondary: 0 0% 29%;
-    --text-tertiary: 40 5% 45%;
+    /* Text hierarchy - Deep Ocean to Cool Graphite */
+    --text-primary: 220 25% 9%;
+    --text-secondary: 220 9% 46%;
+    --text-tertiary: 220 13% 69%;
     
     /* Borders with transparency */
     --border-subtle: 210 30% 88%;
-    --border-hover: 43 67% 68%;
+    --border-hover: 181 75% 60%;
     --border-glass: 210 30% 90%;
 
-    /* Purple accent for secondary tags - Rose Gold */
-    --purple: 350 30% 60%;
+    /* Lavender Ice for secondary tags */
+    --purple: 255 55% 83%;
   }
 }
 
@@ -91,7 +91,7 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: linear-gradient(145deg, #FAFAFA 0%, #F5F7FA 50%, #FAFAFA 100%);
+    background: linear-gradient(145deg, #F6F9FB 0%, #EDF2F7 50%, #F6F9FB 100%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -105,29 +105,29 @@ All colors MUST be HSL.
     inset: 0;
     pointer-events: none;
     background-image:
-      radial-gradient(circle at 10% 10%, rgba(228, 199, 118, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 90% 20%, rgba(219, 230, 240, 0.12) 0%, transparent 45%),
-      radial-gradient(circle at 50% 90%, rgba(228, 199, 118, 0.05) 0%, transparent 50%);
+      radial-gradient(circle at 10% 10%, rgba(77, 226, 232, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(181, 167, 255, 0.05) 0%, transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(167, 233, 255, 0.04) 0%, transparent 50%);
     opacity: 1;
     z-index: 0;
   }
 }
 
 @layer utilities {
-  /* Premium Glass Cards - Ethereal Frost */
+  /* Premium Glass Cards - Crystal Ice */
   .premium-card {
-    background: rgba(255, 255, 255, 0.65);
-    border: 1px solid rgba(219, 230, 240, 0.7);
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(212, 224, 236, 0.9);
     backdrop-filter: blur(18px);
     -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 8px 40px rgba(219, 230, 240, 0.5);
+    box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08);
     border-radius: 22px;
     position: relative;
     overflow: hidden;
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Top pearl highlight edge effect */
+  /* Top icy highlight edge effect */
   .premium-card::before {
     content: "";
     position: absolute;
@@ -135,28 +135,28 @@ All colors MUST be HSL.
     border-radius: inherit;
     background: linear-gradient(
       to bottom,
-      rgba(255, 255, 255, 0.8),
+      rgba(167, 233, 255, 0.15),
       transparent 45%
     );
-    opacity: 0.6;
+    opacity: 0.8;
     pointer-events: none;
   }
   
   .premium-card:hover {
-    transform: translateY(-3px) scale(1.005);
-    box-shadow: 0 12px 50px rgba(219, 230, 240, 0.6),
-                0 0 30px rgba(228, 199, 118, 0.15);
-    border-color: rgba(228, 199, 118, 0.5);
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 15px 50px rgba(15, 23, 42, 0.1),
+                0 0 30px rgba(77, 226, 232, 0.12);
+    border-color: rgba(77, 226, 232, 0.5);
   }
   
-  /* Success/Gold gradient */
+  /* Success/Aqua gradient */
   .success-gradient {
-    background: linear-gradient(135deg, #E4C776 0%, #F4D98C 100%);
+    background: linear-gradient(135deg, #4DE2E8 0%, #2FB3C6 100%);
   }
   
-  /* Premium gradient (gold) */
+  /* Premium gradient (aqua) */
   .premium-gradient {
-    background: linear-gradient(135deg, #E4C776 0%, #F4D98C 100%);
+    background: linear-gradient(135deg, #4DE2E8 0%, #2FB3C6 100%);
   }
   
   /* Danger gradient */
@@ -164,21 +164,21 @@ All colors MUST be HSL.
     background: linear-gradient(135deg, hsl(var(--danger-from)) 0%, hsl(var(--danger-to)) 100%);
   }
   
-  /* Gold glow */
+  /* Aqua glow */
   .success-glow {
-    box-shadow: 0 0 18px rgba(228, 199, 118, 0.45);
+    box-shadow: 0 0 18px rgba(77, 226, 232, 0.45);
   }
   
-  /* Glass navigation - Frosted Pearl */
+  /* Glass navigation - Crystal */
   .glass-nav {
-    background: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    border-bottom: 1px solid rgba(219, 230, 240, 0.6);
+    border-bottom: 1px solid rgba(212, 224, 236, 0.6);
     position: relative;
   }
 
-  /* Subtle gold underline for nav */
+  /* Subtle aqua underline for nav */
   .glass-nav::after {
     content: "";
     position: absolute;
@@ -188,7 +188,7 @@ All colors MUST be HSL.
     height: 1px;
     background: linear-gradient(90deg, 
       transparent 0%,
-      rgba(228, 199, 118, 0.4) 50%,
+      rgba(77, 226, 232, 0.4) 50%,
       transparent 100%
     );
   }
@@ -272,12 +272,12 @@ All colors MUST be HSL.
     animation: shimmer 2s ease-in-out infinite;
   }
 
-  @keyframes gold-glow {
+  @keyframes cyan-glow {
     0%, 100% {
-      box-shadow: 0 0 18px rgba(228, 199, 118, 0.4);
+      box-shadow: 0 0 18px rgba(77, 226, 232, 0.4);
     }
     50% {
-      box-shadow: 0 0 28px rgba(228, 199, 118, 0.6);
+      box-shadow: 0 0 28px rgba(77, 226, 232, 0.6);
     }
   }
   
@@ -306,7 +306,7 @@ All colors MUST be HSL.
   }
 
   .animate-neon-glow {
-    animation: gold-glow 2s ease-in-out infinite;
+    animation: cyan-glow 2s ease-in-out infinite;
   }
 
   /* Typography enhancements */
@@ -329,31 +329,31 @@ All colors MUST be HSL.
     width: 100%;
     height: 2px;
     background: linear-gradient(90deg, 
-      #E4C776, 
-      #F4D98C
+      #4DE2E8, 
+      #A7E9FF
     );
-    box-shadow: 0 0 8px rgba(228, 199, 118, 0.4);
+    box-shadow: 0 0 8px rgba(77, 226, 232, 0.4);
   }
 
-  /* Gold left border accent */
+  /* Aqua left border accent */
   .neon-border-left {
     border-left: 2px solid hsl(var(--primary));
-    box-shadow: -2px 0 8px rgba(228, 199, 118, 0.3);
+    box-shadow: -2px 0 8px rgba(77, 226, 232, 0.3);
     padding-left: 1rem;
   }
 
-  /* Glass input fields - Frosted */
+  /* Glass input fields - Crystal */
   input, textarea, select {
     background: rgba(255, 255, 255, 0.7) !important;
-    border: 1px solid rgba(219, 230, 240, 0.6) !important;
+    border: 1px solid rgba(212, 224, 236, 0.6) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     color: hsl(var(--text-primary)) !important;
   }
 
   input:focus, textarea:focus, select:focus {
-    border-color: rgba(228, 199, 118, 0.7) !important;
-    box-shadow: 0 0 15px rgba(228, 199, 118, 0.2) !important;
+    border-color: rgba(77, 226, 232, 0.7) !important;
+    box-shadow: 0 0 15px rgba(77, 226, 232, 0.2) !important;
   }
 
   input::placeholder, textarea::placeholder {
