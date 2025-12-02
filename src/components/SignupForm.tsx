@@ -178,9 +178,13 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
       }
 
       // Save to localStorage
-      localStorage.setItem('email', formData.email);
-      localStorage.setItem('firstName', formData.firstName);
-      localStorage.setItem('lastName', formData.lastName);
+      const userData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone
+      };
+      localStorage.setItem('userData', JSON.stringify(userData));
       localStorage.setItem('isLoggedIn', 'true');
       localStorage.setItem('userClientId', client.id);
       localStorage.setItem("quizAnswers", JSON.stringify(quizAnswers));
