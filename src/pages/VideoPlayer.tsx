@@ -194,17 +194,17 @@ const VideoPlayer = () => {
 
               <p className="text-muted-foreground">{video.description || "No description available."}</p>
 
-              {/* Transcript */}
+              {/* Description */}
               <Collapsible open={transcriptOpen} onOpenChange={setTranscriptOpen}>
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" className="w-full">
-                    {transcriptOpen ? "Hide" : "Show"} Transcript
+                    {transcriptOpen ? "Hide" : "Show"} Description
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <Card className="p-4 mt-4 bg-muted/50">
                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {video.transcript || "Transcript not available for this video."}
+                      {video.description || "No description available."}
                     </p>
                   </Card>
                 </CollapsibleContent>
