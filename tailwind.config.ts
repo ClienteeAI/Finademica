@@ -51,11 +51,13 @@ export default {
         warning: "hsl(var(--warning))",
         error: "hsl(var(--error))",
         info: "hsl(var(--info))",
+        purple: "hsl(var(--purple))",
         "text-primary": "hsl(var(--text-primary))",
         "text-secondary": "hsl(var(--text-secondary))",
         "text-tertiary": "hsl(var(--text-tertiary))",
         "border-subtle": "hsl(var(--border-subtle))",
         "border-hover": "hsl(var(--border-hover))",
+        "border-glass": "hsl(var(--border-glass))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -101,10 +103,18 @@ export default {
         },
         "glow-pulse": {
           "0%, 100%": {
-            boxShadow: "0 0 20px rgba(59, 130, 246, 0.4)"
+            boxShadow: "0 0 20px rgba(34, 243, 255, 0.4)"
           },
           "50%": {
-            boxShadow: "0 0 40px rgba(139, 92, 246, 0.6)"
+            boxShadow: "0 0 30px rgba(34, 243, 255, 0.7)"
+          }
+        },
+        "neon-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 20px rgba(34, 243, 255, 0.4)"
+          },
+          "50%": {
+            boxShadow: "0 0 30px rgba(34, 243, 255, 0.7)"
           }
         },
       },
@@ -114,6 +124,7 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-up": "slide-up 0.6s ease-out",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
+        "neon-glow": "neon-glow 2s ease-in-out infinite",
       },
     },
   },
