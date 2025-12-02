@@ -139,9 +139,9 @@ const Dashboard = () => {
       <div className="space-y-12">
         {/* Admin Preview Banner */}
         {isAdminMode && (
-          <div className="bg-[#D4A5A5]/15 border border-[#D4A5A5]/50 px-6 py-3 rounded-xl backdrop-blur-sm animate-slide-down">
-            <p className="text-sm font-medium text-[#1A1A1A]">
-              🔧 <strong>Admin Preview Mode</strong> - You're viewing as: <span className="text-[#8B6B6B]">{client?.company_name}</span>
+          <div className="bg-[#B5A7FF]/15 border border-[#B5A7FF]/50 px-6 py-3 rounded-xl backdrop-blur-sm animate-slide-down">
+            <p className="text-sm font-medium text-[#1D3557]">
+              🔧 <strong>Admin Preview Mode</strong> - You're viewing as: <span className="text-[#6B5B95]">{client?.company_name}</span>
             </p>
           </div>
         )}
@@ -149,10 +149,10 @@ const Dashboard = () => {
         {/* Welcome Section */}
         <div className="space-y-8 animate-slide-up">
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-6xl font-bold text-[#1A1A1A] tracking-tight">
+            <h1 className="text-5xl md:text-6xl font-bold text-[#1D3557] tracking-tight">
               Welcome back, {userData.firstName}!
             </h1>
-            <p className="text-lg text-[#7D7A72]">
+            <p className="text-lg text-[#6B7280]">
               Let's continue your trading journey
             </p>
           </div>
@@ -160,17 +160,17 @@ const Dashboard = () => {
           {/* Progress Bar */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm uppercase tracking-wider text-[#7D7A72] font-semibold">
+              <span className="text-sm uppercase tracking-wider text-[#6B7280] font-semibold">
                 Your Progress
               </span>
-              <span className="text-xl font-semibold text-[#C9A95C] font-mono">
+              <span className="text-xl font-semibold text-[#4DE2E8] font-mono">
                 0%
               </span>
             </div>
             <Progress value={0} className="h-2" />
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/50 border border-[#E4C776]/40 backdrop-blur-sm">
+            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/60 border border-[#4DE2E8]/40 backdrop-blur-sm">
               <span className="text-xl animate-pulse-subtle">🔥</span>
-              <span className="text-sm text-[#7D7A72]">
+              <span className="text-sm text-[#6B7280]">
                 0 day streak - Watch your first video!
               </span>
             </div>
@@ -228,13 +228,13 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                <p className="text-sm uppercase tracking-widest text-[#7D7A72] font-semibold">
+                <p className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
                   {stat.label}
                 </p>
-                <p className="text-4xl font-semibold text-[#1A1A1A] font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
+                <p className="text-4xl font-semibold text-[#1D3557] font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
                   {stat.value}
                 </p>
-                <p className="text-sm text-[#7D7A72]">{stat.subtext}</p>
+                <p className="text-sm text-[#6B7280]">{stat.subtext}</p>
               </div>
             </Card>
           ))}
@@ -246,19 +246,19 @@ const Dashboard = () => {
             <Card className="overflow-hidden">
               <CollapsibleTrigger asChild>
                 <button className="w-full p-6 flex items-center justify-between hover:bg-white/30 transition-colors duration-200 cursor-pointer">
-                  <h2 className="text-xl font-semibold text-[#1A1A1A] flex items-center gap-3">
+                  <h2 className="text-xl font-semibold text-[#1D3557] flex items-center gap-3">
                     <span className="text-2xl">📋</span>
                     Your Trading Profile
                   </h2>
                   {profileOpen ? (
-                    <ChevronUp className="h-5 w-5 text-[#7D7A72] transition-transform duration-200" />
+                    <ChevronUp className="h-5 w-5 text-[#6B7280] transition-transform duration-200" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-[#7D7A72] transition-transform duration-200" />
+                    <ChevronDown className="h-5 w-5 text-[#6B7280] transition-transform duration-200" />
                   )}
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="px-8 pb-8 pt-2 border-t border-[#DBE6F0] space-y-5">
+                <div className="px-8 pb-8 pt-2 border-t border-[#D4E0EC] space-y-5">
                   <div className="grid gap-5 mt-6">
                     {[
                       { label: "Experience", value: getQuizLabel(quizAnswers.experience, "experience") },
@@ -268,10 +268,10 @@ const Dashboard = () => {
                       { label: "Time Available", value: getQuizLabel(quizAnswers.timeCommitment, "timeCommitment") },
                     ].map((item) => (
                       <div key={item.label} className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="text-sm uppercase tracking-wider text-[#7D7A72] font-semibold min-w-[160px]">
+                        <span className="text-sm uppercase tracking-wider text-[#6B7280] font-semibold min-w-[160px]">
                           {item.label}
                         </span>
-                        <span className="text-base text-[#1A1A1A] font-medium">{item.value}</span>
+                        <span className="text-base text-[#1D3557] font-medium">{item.value}</span>
                       </div>
                     ))}
                   </div>
@@ -291,11 +291,11 @@ const Dashboard = () => {
         {/* Personalized Video Playlist */}
         <div className="space-y-8">
           <div className="space-y-3">
-            <h2 className="text-4xl font-bold text-[#1A1A1A] tracking-tight flex items-center gap-3">
+            <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-3">
               <span className="text-3xl">🎥</span>
               Your Personalized Learning Path
             </h2>
-            <p className="text-lg text-[#7D7A72]">
+            <p className="text-lg text-[#6B7280]">
               Based on your answers, these videos are perfect for you
             </p>
           </div>
@@ -312,11 +312,11 @@ const Dashboard = () => {
                 }}
               >
                 {/* Thumbnail */}
-                <div className="relative aspect-video bg-gradient-to-br from-[#F5F7FA] to-[#DBE6F0] overflow-hidden">
-                  <div className="absolute inset-0 bg-[#E4C776]/5 group-hover:bg-[#E4C776]/10 transition-colors duration-500" />
+                <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
+                  <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-[#E4C776]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#E4C776]/30 transition-all duration-300">
-                      <Play className="w-8 h-8 text-[#C9A95C] ml-1" fill="currentColor" />
+                    <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
+                      <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
                     </div>
                   </div>
                 </div>
@@ -325,26 +325,26 @@ const Dashboard = () => {
                 <div className="p-8 space-y-4">
                   <div className="flex items-center gap-3 flex-wrap">
                     <Badge variant={video.categoryVariant}>{video.category}</Badge>
-                    <span className="text-sm text-[#7D7A72] font-mono flex items-center gap-1.5">
+                    <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
                       {video.duration}
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] group-hover:text-[#C9A95C] transition-colors duration-200 line-clamp-2">
+                  <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
                     {video.title}
                   </h3>
 
                   <div className="space-y-3">
-                    <div className="h-1.5 bg-[#DBE6F0]/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#E4C776] to-[#F4D98C] transition-all duration-1000"
+                        className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
                         style={{ width: `${video.progress}%` }}
                       />
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-[#7D7A72]">{video.status}</span>
+                      <span className="text-sm text-[#6B7280]">{video.status}</span>
                       <Button size="sm" variant="primary" className="group-hover:scale-105 transition-transform">
                         Watch Now →
                       </Button>
@@ -359,27 +359,27 @@ const Dashboard = () => {
         {/* Learning Roadmap Preview */}
         <Card className="p-12 space-y-8">
           <div className="space-y-3">
-            <h2 className="text-4xl font-bold text-[#1A1A1A] tracking-tight flex items-center gap-3">
+            <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-3">
               <span className="text-3xl">🗺️</span>
               Your Personalized Roadmap
             </h2>
-            <p className="text-lg text-[#7D7A72]">
+            <p className="text-lg text-[#6B7280]">
               Follow this step-by-step path to success
             </p>
           </div>
 
           <div className="space-y-6">
             {/* Phase 1 - Active */}
-            <div className="relative pl-8 border-l-4 border-[#E4C776]">
-              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-[#E4C776] border-4 border-white animate-pulse-subtle" />
+            <div className="relative pl-8 border-l-4 border-[#4DE2E8]">
+              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-[#4DE2E8] border-4 border-white animate-pulse-subtle" />
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] uppercase tracking-wider">
+                  <h3 className="text-xl font-semibold text-[#1D3557] uppercase tracking-wider">
                     Phase 1: Getting Started
                   </h3>
                   <Badge variant="success">Active</Badge>
                 </div>
-                <p className="text-sm text-[#7D7A72] uppercase tracking-wider">Week 1-2 • 10% Complete</p>
+                <p className="text-sm text-[#6B7280] uppercase tracking-wider">Week 1-2 • 10% Complete</p>
 
                 <div className="space-y-3 mt-6">
                   {[
@@ -392,10 +392,10 @@ const Dashboard = () => {
                       key={i}
                       className={`flex items-center gap-3 text-base ${
                         step.done
-                          ? "text-[#C9A95C]"
+                          ? "text-[#4DE2E8]"
                           : step.current
-                          ? "text-[#7D9AAA]"
-                          : "text-[#7D7A72]"
+                          ? "text-[#1D3557]"
+                          : "text-[#6B7280]"
                       }`}
                     >
                       <span className="text-lg">{step.icon}</span>
@@ -407,17 +407,17 @@ const Dashboard = () => {
             </div>
 
             {/* Phase 2 - Locked */}
-            <div className="relative pl-8 border-l-4 border-[#DBE6F0] opacity-50">
-              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-[#DBE6F0] border-4 border-white" />
+            <div className="relative pl-8 border-l-4 border-[#D4E0EC] opacity-50">
+              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-[#D4E0EC] border-4 border-white" />
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-semibold text-[#1A1A1A] uppercase tracking-wider">
+                  <h3 className="text-xl font-semibold text-[#1D3557] uppercase tracking-wider">
                     Phase 2: Building Skills
                   </h3>
                   <Badge variant="secondary">Locked</Badge>
                 </div>
-                <p className="text-sm text-[#7D7A72] uppercase tracking-wider">Week 3-4</p>
-                <p className="text-base text-[#7D7A72]">🔒 Complete Phase 1 to unlock</p>
+                <p className="text-sm text-[#6B7280] uppercase tracking-wider">Week 3-4</p>
+                <p className="text-base text-[#6B7280]">🔒 Complete Phase 1 to unlock</p>
               </div>
             </div>
           </div>
@@ -433,15 +433,15 @@ const Dashboard = () => {
 
         {/* AI Stock Analyzer Teaser */}
         <Card className="p-12 space-y-8 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1D3557]/5 to-transparent" />
           <div className="relative z-10 space-y-3">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-info/10 flex items-center justify-center mb-6">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-[#1D3557]/10 flex items-center justify-center mb-6">
               <span className="text-4xl">📊</span>
             </div>
-            <h2 className="text-4xl font-bold text-white tracking-tight">
+            <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight">
               AI Stock Analyzer
             </h2>
-            <p className="text-lg text-text-secondary max-w-md mx-auto">
+            <p className="text-lg text-[#6B7280] max-w-md mx-auto">
               Analyze any stock in real-time with advanced AI technology
             </p>
           </div>
@@ -450,7 +450,7 @@ const Dashboard = () => {
             <Input
               placeholder="Enter symbol (e.g., AAPL, TSLA)"
               disabled
-              className="h-14 text-base bg-secondary border-border-hover rounded-xl"
+              className="h-14 text-base bg-white/60 border-[#D4E0EC] rounded-xl"
             />
             <div className="flex gap-3">
               <Button disabled className="flex-1" size="lg">
@@ -472,19 +472,19 @@ const Dashboard = () => {
         <Card className="p-16 text-center space-y-8 relative overflow-hidden success-glow">
           <div className="absolute inset-0 success-gradient opacity-10" />
           <div className="relative z-10 space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-success/10 flex items-center justify-center">
-              <Phone className="w-10 h-10 text-success" />
+            <div className="w-20 h-20 mx-auto rounded-2xl bg-[#4DE2E8]/10 flex items-center justify-center">
+              <Phone className="w-10 h-10 text-[#4DE2E8]" />
             </div>
             <div className="space-y-3">
-              <h2 className="text-5xl font-bold text-white tracking-tight">
+              <h2 className="text-5xl font-bold text-[#1D3557] tracking-tight">
                 Ready for 1-on-1 Guidance?
               </h2>
-              <p className="text-xl text-text-secondary max-w-xl mx-auto">
+              <p className="text-xl text-[#6B7280] max-w-xl mx-auto">
                 Book a free call with a trading specialist
               </p>
             </div>
 
-            <div className="flex items-center justify-center gap-6 text-sm text-text-tertiary">
+            <div className="flex items-center justify-center gap-6 text-sm text-[#9CA3AF]">
               <span className="flex items-center gap-2">✓ No sales pitch</span>
               <span className="flex items-center gap-2">✓ 30-minute session</span>
               <span className="flex items-center gap-2">✓ 100% free</span>
