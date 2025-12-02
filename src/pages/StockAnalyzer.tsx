@@ -5,35 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Search, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import StockAnalysisCard from "@/components/StockAnalysisCard";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
 
-// Helper to convert any response to a displayable string
-const formatAnalysisResponse = (data: unknown): string => {
-  if (typeof data === "string") {
-    return data;
-  }
-  if (data && typeof data === "object") {
-    // Check for common response fields
-    const obj = data as Record<string, unknown>;
-    if (typeof obj.output === "string") return obj.output;
-    if (typeof obj.analysis === "string") return obj.analysis;
-    if (typeof obj.result === "string") return obj.result;
-    if (typeof obj.message === "string") return obj.message;
-    if (typeof obj.text === "string") return obj.text;
-    if (typeof obj.content === "string") return obj.content;
-    // Otherwise stringify the object nicely
-    return JSON.stringify(data, null, 2);
-  }
-  return String(data);
-};
-
 const StockAnalyzer = () => {
   const [symbol, setSymbol] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<string | null>(null);
+  const [analysisData, setAnalysisData] = useState<unknown>(null);
   const [analyzedSymbol, setAnalyzedSymbol] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
@@ -49,7 +30,7 @@ const StockAnalyzer = () => {
     }
 
     setIsLoading(true);
-    setAnalysis(null);
+    setAnalysisData(null);
     setAnalyzedSymbol(trimmedSymbol);
 
     try {
@@ -70,11 +51,10 @@ const StockAnalyzer = () => {
       try {
         data = text ? JSON.parse(text) : { message: "Analysis request sent successfully" };
       } catch {
-        data = text || "Analysis request sent successfully";
+        data = { message: text || "Analysis request sent successfully" };
       }
       
-      const analysisText = formatAnalysisResponse(data);
-      setAnalysis(analysisText);
+      setAnalysisData(data);
 
       // Add to recent searches (avoid duplicates, max 5)
       setRecentSearches(prev => {
@@ -88,7 +68,7 @@ const StockAnalyzer = () => {
       });
     } catch (error) {
       console.error("Error analyzing:", error);
-      setAnalysis(null);
+      setAnalysisData(null);
       toast({
         title: "Analysis Failed",
         description: "Unable to fetch analysis. Please try again.",
@@ -162,23 +142,8 @@ const StockAnalyzer = () => {
                     </p>
                   </div>
                 </div>
-              ) : analysis ? (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 pb-4 border-b border-[#D4E0EC]">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_15px_rgba(77,226,232,0.3)]">
-                      <TrendingUp className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-[#1D3557]">{analyzedSymbol}</h2>
-                      <p className="text-sm text-[#6B7280]">AI Analysis Report</p>
-                    </div>
-                  </div>
-                  <div className="prose prose-sm max-w-none">
-                    <div className="whitespace-pre-wrap text-[#4B5563] leading-relaxed">
-                      {analysis}
-                    </div>
-                  </div>
-                </div>
+              ) : analysisData ? (
+                <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
               ) : (
                 <div className="h-full flex flex-col items-center justify-center space-y-6 py-12">
                   <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/10 to-[#A7E9FF]/10 flex items-center justify-center border border-[#D4E0EC]">
