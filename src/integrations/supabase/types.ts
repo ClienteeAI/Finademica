@@ -626,10 +626,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      complete_video: {
+        Args: { p_points: number; p_user_id: string; p_video_id: string }
+        Returns: Json
+      }
       get_gamification: { Args: { uid: string }; Returns: Json }
       increment_user_stats: {
         Args: { p_points: number; p_user_id: string; p_videos: number }
-        Returns: undefined
+        Returns: Json
       }
     }
     Enums: {
