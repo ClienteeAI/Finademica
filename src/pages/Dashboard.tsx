@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, Phone } from "lucide-react";
+import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, Phone, CheckCircle } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/collapsible";
 import { useClient } from "@/lib/clientContext";
 import { GamificationSection } from "@/components/GamificationSection";
+import { UserProgressCard } from "@/components/UserProgressCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -53,6 +54,7 @@ const Dashboard = () => {
   const [quizAnswers, setQuizAnswers] = useState<any>(null);
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
+  const [completedVideoIds, setCompletedVideoIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -88,7 +90,26 @@ const Dashboard = () => {
       setVideosLoading(false);
     };
 
+    // Fetch completed video views for current user
+    const fetchCompletedVideos = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("video_views")
+        .select("video_id")
+        .eq("user_id", user.id)
+        .eq("status", "completed");
+
+      if (error) {
+        console.error("Error fetching video views:", error);
+      } else if (data) {
+        setCompletedVideoIds(new Set(data.map(v => v.video_id)));
+      }
+    };
+
     fetchVideos();
+    fetchCompletedVideos();
   }, [navigate]);
 
   if (!userData) {
@@ -214,6 +235,9 @@ const Dashboard = () => {
 
         {/* Gamification / Trader Progress Section */}
         <GamificationSection />
+
+        {/* Your Progress Card */}
+        <UserProgressCard />
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -349,68 +373,80 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {videos.map((video, index) => (
-                <Card
-                  key={video.id}
-                  className="overflow-hidden cursor-pointer group"
-                  onClick={() => navigate(`/video/${video.id}`)}
-                  style={{
-                    animationDelay: `${0.1 * index}s`,
-                    animationFillMode: "backwards",
-                  }}
-                >
-                  {/* Thumbnail */}
-                  <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
-                    {video.thumbnail_url ? (
-                      <img 
-                        src={video.thumbnail_url} 
-                        alt={video.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <>
-                        <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
-                            <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Content */}
-                  <div className="p-8 space-y-4">
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <Badge variant={categoryVariantMap[video.category || ""] || "info"}>{video.category || "Uncategorized"}</Badge>
-                      <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
-                        <Clock className="w-3.5 h-3.5" />
-                        {formatDuration(video.duration_seconds)}
-                      </span>
-                    </div>
-
-                    <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
-                      {video.title}
-                    </h3>
-
-                    <div className="space-y-3">
-                      <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
-                          style={{ width: "0%" }}
+              {videos.map((video, index) => {
+                const isCompleted = completedVideoIds.has(video.id);
+                return (
+                  <Card
+                    key={video.id}
+                    className="overflow-hidden cursor-pointer group"
+                    onClick={() => navigate(`/video/${video.id}`)}
+                    style={{
+                      animationDelay: `${0.1 * index}s`,
+                      animationFillMode: "backwards",
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
+                      {video.thumbnail_url ? (
+                        <img 
+                          src={video.thumbnail_url} 
+                          alt={video.title}
+                          className="w-full h-full object-cover"
                         />
+                      ) : (
+                        <>
+                          <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
+                              <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {/* Completed overlay badge */}
+                      {isCompleted && (
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold shadow-lg">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          Completed
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8 space-y-4">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <Badge variant={categoryVariantMap[video.category || ""] || "info"}>{video.category || "Uncategorized"}</Badge>
+                        <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5" />
+                          {formatDuration(video.duration_seconds)}
+                        </span>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-[#6B7280]">Not Started</span>
-                        <Button size="sm" variant="primary" className="group-hover:scale-105 transition-transform">
-                          Watch Now →
-                        </Button>
+                      <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
+                        {video.title}
+                      </h3>
+
+                      <div className="space-y-3">
+                        <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
+                            style={{ width: isCompleted ? "100%" : "0%" }}
+                          />
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-[#6B7280]">
+                            {isCompleted ? "Completed" : "Not Started"}
+                          </span>
+                          <Button size="sm" variant={isCompleted ? "outline" : "primary"} className="group-hover:scale-105 transition-transform">
+                            {isCompleted ? "Watch Again" : "Watch Now →"}
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>
