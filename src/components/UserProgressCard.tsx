@@ -16,9 +16,20 @@ export const UserProgressCard = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      // Get user ID from localStorage (consistent with app's auth approach)
+      const userDataStr = localStorage.getItem("userData");
+      let userId: string | null = null;
       
-      if (!user) {
+      if (userDataStr) {
+        try {
+          const userData = JSON.parse(userDataStr);
+          userId = userData.id;
+        } catch (e) {
+          console.error("Error parsing userData:", e);
+        }
+      }
+      
+      if (!userId) {
         setLoading(false);
         return;
       }
@@ -26,7 +37,7 @@ export const UserProgressCard = () => {
       const { data, error } = await supabase
         .from("user_stats")
         .select("total_points, videos_completed")
-        .eq("user_id", user.id)
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (error) {
