@@ -10,7 +10,6 @@ export const useVideoCompletion = (videoId: string | undefined) => {
   const handleVideoEnd = useCallback(async () => {
     // Prevent duplicate triggers for the same end event
     if (hasTriggeredRef.current || !videoId) return;
-    hasTriggeredRef.current = true;
 
     try {
       // Get user from localStorage - check both patterns (Login vs Signup)
@@ -107,6 +106,9 @@ export const useVideoCompletion = (videoId: string | undefined) => {
       });
 
       console.log("Webhook response status:", response.status);
+
+      // Only mark as triggered after successful webhook
+      hasTriggeredRef.current = true;
 
       toast({
         title: "Lesson completed",
