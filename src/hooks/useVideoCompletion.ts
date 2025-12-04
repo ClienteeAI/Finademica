@@ -95,6 +95,22 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         },
       };
 
+      // Call Supabase complete_video function to update stats
+      if (userData?.id) {
+        const { data: statsResult, error: statsError } = await supabase
+          .rpc("complete_video", {
+            p_user_id: userData.id,
+            p_video_id: videoId,
+            p_points: 25 // Award 25 XP per video
+          });
+
+        if (statsError) {
+          console.error("Error updating user stats:", statsError);
+        } else {
+          console.log("User stats updated:", statsResult);
+        }
+      }
+
       console.log("Sending video completion webhook:", payload);
 
       const response = await fetch(WEBHOOK_URL, {
@@ -112,7 +128,7 @@ export const useVideoCompletion = (videoId: string | undefined) => {
 
       toast({
         title: "Lesson completed",
-        description: "XP gained! Keep learning to level up.",
+        description: "+25 XP earned! Keep learning to level up.",
         duration: 3000
       });
       
