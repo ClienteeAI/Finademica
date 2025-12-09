@@ -169,7 +169,23 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-12">
+      {/* Nasr Trade Academy Video Background */}
+      {isNasrTheme && (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute w-full h-full object-cover opacity-30"
+          >
+            <source src="/nasr-background.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+        </div>
+      )}
+      
+      <div className="space-y-12 relative z-10">
         {/* Admin Preview Banner */}
         {isAdminMode && (
           <div className="bg-[#B5A7FF]/15 border border-[#B5A7FF]/50 px-6 py-3 rounded-xl backdrop-blur-sm animate-slide-down">
