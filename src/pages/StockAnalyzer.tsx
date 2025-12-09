@@ -7,12 +7,16 @@ import { Search, TrendingUp, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import StockAnalysisCard from "@/components/StockAnalysisCard";
 import StockChat from "@/components/StockChat";
+import { useClient } from "@/lib/clientContext";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
 
 const StockAnalyzer = () => {
+  const { client } = useClient();
+  const isNasrTheme = client?.subdomain === 'nasr';
+  
   const [symbol, setSymbol] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [analysisData, setAnalysisData] = useState<unknown>(null);
@@ -80,7 +84,23 @@ const StockAnalyzer = () => {
 
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+      {/* Nasr Trade Academy Video Background */}
+      {isNasrTheme && (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute w-full h-full object-cover opacity-30"
+          >
+            <source src="/nasr-analyzer-background.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+        </div>
+      )}
+      
+      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in relative z-10">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-[#1D3557]">AI Stock Analyzer</h1>
