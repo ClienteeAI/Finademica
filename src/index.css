@@ -2,11 +2,17 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system - LUMINOUS ICE Theme
-All colors MUST be HSL.
-*/
+/* ============================================
+   DESIGN SYSTEM - Multi-Theme Support
+   - Default: LUMINOUS ICE (light theme)
+   - Nasr Trade: PREMIUM GOLD (dark luxury theme)
+   All colors MUST be HSL.
+============================================ */
 
 @layer base {
+  /* ============================================
+     DEFAULT THEME: LUMINOUS ICE (Light)
+  ============================================ */
   :root {
     /* Client Theme Variables (Dynamically Set by ClientProvider) */
     --client-primary: #4DE2E8;
@@ -80,6 +86,87 @@ All colors MUST be HSL.
 
     /* Lavender Ice for secondary tags */
     --purple: 255 55% 83%;
+
+    /* Gold accent (used in Nasr theme) */
+    --gold: 43 69% 53%;
+    --gold-light: 45 85% 62%;
+    --gold-glow: 43 69% 53%;
+  }
+
+  /* ============================================
+     NASR TRADE THEME: PREMIUM GOLD (Dark Luxury)
+     Applied via .theme-nasr class on html/body
+  ============================================ */
+  .theme-nasr {
+    /* Deep black to navy gradient base */
+    --background: 220 30% 2%;
+    --foreground: 0 0% 96%;
+
+    /* Dark charcoal panels */
+    --card: 220 25% 6%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 220 25% 6%;
+    --popover-foreground: 0 0% 96%;
+
+    /* Primary: Premium Gold */
+    --primary: 43 69% 53%;
+    --primary-foreground: 0 0% 0%;
+
+    /* Secondary: Dark charcoal */
+    --secondary: 220 20% 10%;
+    --secondary-foreground: 0 0% 79%;
+
+    /* Muted elements - darker */
+    --muted: 220 20% 12%;
+    --muted-foreground: 0 0% 79%;
+
+    /* Accent: Soft gold */
+    --accent: 45 70% 55%;
+    --accent-foreground: 0 0% 0%;
+
+    /* Danger - keeping similar */
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    /* Borders - subtle white with low opacity effect */
+    --border: 220 15% 15%;
+    --input: 220 20% 10%;
+    --ring: 43 69% 53%;
+
+    --radius: 0.75rem;
+
+    /* Success: Gold */
+    --success: 43 69% 53%;
+    --success-from: 45 85% 62%;
+    --success-to: 43 69% 53%;
+    
+    /* Premium gradient: Gold */
+    --premium-from: 45 85% 62%;
+    --premium-to: 43 69% 53%;
+    
+    /* Info, warning stay similar */
+    --info: 43 69% 53%;
+    --warning: 38 80% 55%;
+    --error: 0 72% 50%;
+    
+    /* Text hierarchy - off-white to muted */
+    --text-primary: 0 0% 96%;
+    --text-secondary: 0 0% 79%;
+    --text-tertiary: 0 0% 55%;
+    
+    /* Borders */
+    --border-subtle: 220 15% 15%;
+    --border-hover: 43 69% 53%;
+    --border-glass: 43 69% 20%;
+
+    /* Purple becomes gold-ish */
+    --purple: 43 50% 45%;
+
+    /* Gold accent colors */
+    --gold: 43 69% 53%;
+    --gold-light: 45 85% 62%;
+    --gold-glow: 43 69% 53%;
   }
 }
 
@@ -98,7 +185,13 @@ All colors MUST be HSL.
     position: relative;
   }
 
-  /* Subtle luminous flare effect */
+  /* Nasr theme body background */
+  .theme-nasr body,
+  body.theme-nasr {
+    background: linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%);
+  }
+
+  /* Subtle luminous flare effect - Light theme */
   body::before {
     content: "";
     position: fixed;
@@ -111,9 +204,24 @@ All colors MUST be HSL.
     opacity: 1;
     z-index: 0;
   }
+
+  /* Nasr theme: Gold particles background effect */
+  .theme-nasr body::before,
+  body.theme-nasr::before {
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(212, 175, 55, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 30% 60%, rgba(212, 175, 55, 0.03) 0%, transparent 30%),
+      radial-gradient(circle at 70% 80%, rgba(212, 175, 55, 0.04) 0%, transparent 35%);
+  }
 }
 
 @layer utilities {
+  /* ============================================
+     LIGHT THEME UTILITIES (Default)
+  ============================================ */
+  
   /* Premium Glass Cards - Crystal Ice */
   .premium-card {
     background: rgba(255, 255, 255, 0.78);
@@ -148,15 +256,54 @@ All colors MUST be HSL.
                 0 0 30px rgba(77, 226, 232, 0.12);
     border-color: rgba(77, 226, 232, 0.5);
   }
+
+  /* ============================================
+     NASR THEME UTILITIES (Dark Luxury)
+  ============================================ */
+  
+  /* Nasr Premium Cards - Dark with gold glow */
+  .theme-nasr .premium-card {
+    background: rgba(11, 15, 22, 0.95);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                0 0 1px rgba(212, 175, 55, 0.3);
+  }
+
+  .theme-nasr .premium-card::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(212, 175, 55, 0.08),
+      transparent 45%
+    );
+  }
+
+  .theme-nasr .premium-card:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(212, 175, 55, 0.15);
+    border-color: rgba(212, 175, 55, 0.4);
+  }
   
   /* Success/Aqua gradient */
   .success-gradient {
     background: linear-gradient(135deg, #4DE2E8 0%, #2FB3C6 100%);
   }
+
+  .theme-nasr .success-gradient {
+    background: linear-gradient(135deg, #F2C94C 0%, #D4AF37 100%);
+  }
   
-  /* Premium gradient (aqua) */
+  /* Premium gradient */
   .premium-gradient {
     background: linear-gradient(135deg, #4DE2E8 0%, #2FB3C6 100%);
+  }
+
+  .theme-nasr .premium-gradient {
+    background: linear-gradient(135deg, #F2C94C 0%, #D4AF37 100%);
+  }
+
+  /* Gold gradient for Nasr */
+  .gold-gradient {
+    background: linear-gradient(135deg, #F2C94C 0%, #D4AF37 100%);
   }
   
   /* Danger gradient */
@@ -164,12 +311,20 @@ All colors MUST be HSL.
     background: linear-gradient(135deg, hsl(var(--danger-from)) 0%, hsl(var(--danger-to)) 100%);
   }
   
-  /* Aqua glow */
+  /* Glow effects */
   .success-glow {
     box-shadow: 0 0 18px rgba(77, 226, 232, 0.45);
   }
+
+  .theme-nasr .success-glow {
+    box-shadow: 0 0 18px rgba(212, 175, 55, 0.45);
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 18px rgba(212, 175, 55, 0.45);
+  }
   
-  /* Glass navigation - Crystal */
+  /* Glass navigation */
   .glass-nav {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(24px);
@@ -178,7 +333,12 @@ All colors MUST be HSL.
     position: relative;
   }
 
-  /* Subtle aqua underline for nav */
+  .theme-nasr .glass-nav {
+    background: rgba(11, 15, 22, 0.95);
+    border-bottom: 1px solid rgba(212, 175, 55, 0.15);
+  }
+
+  /* Subtle underline for nav */
   .glass-nav::after {
     content: "";
     position: absolute;
@@ -192,8 +352,18 @@ All colors MUST be HSL.
       transparent 100%
     );
   }
+
+  .theme-nasr .glass-nav::after {
+    background: linear-gradient(90deg, 
+      transparent 0%,
+      rgba(212, 175, 55, 0.4) 50%,
+      transparent 100%
+    );
+  }
   
-  /* Animations */
+  /* ============================================
+     ANIMATIONS
+  ============================================ */
   @keyframes slideDown {
     from {
       opacity: 0;
@@ -280,6 +450,26 @@ All colors MUST be HSL.
       box-shadow: 0 0 28px rgba(77, 226, 232, 0.6);
     }
   }
+
+  @keyframes gold-glow {
+    0%, 100% {
+      box-shadow: 0 0 18px rgba(212, 175, 55, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 28px rgba(212, 175, 55, 0.6);
+    }
+  }
+
+  @keyframes float-particle {
+    0%, 100% {
+      transform: translateY(0) translateX(0);
+      opacity: 0.3;
+    }
+    50% {
+      transform: translateY(-20px) translateX(10px);
+      opacity: 0.6;
+    }
+  }
   
   .animate-slide-down {
     animation: slideDown 0.4s ease-out;
@@ -309,11 +499,37 @@ All colors MUST be HSL.
     animation: cyan-glow 2s ease-in-out infinite;
   }
 
-  /* Typography enhancements */
+  .theme-nasr .animate-neon-glow {
+    animation: gold-glow 2s ease-in-out infinite;
+  }
+
+  .animate-gold-glow {
+    animation: gold-glow 2s ease-in-out infinite;
+  }
+
+  /* ============================================
+     TYPOGRAPHY
+  ============================================ */
   h1, h2, h3, h4, h5, h6 {
     letter-spacing: -0.02em;
     font-weight: 700;
     color: hsl(var(--text-primary));
+  }
+
+  /* Nasr theme: Serif headings */
+  .theme-nasr h1,
+  .theme-nasr h2,
+  .theme-nasr h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  /* Font utilities */
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .font-sans {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   }
 
   .neon-underline {
@@ -335,14 +551,45 @@ All colors MUST be HSL.
     box-shadow: 0 0 8px rgba(77, 226, 232, 0.4);
   }
 
-  /* Aqua left border accent */
+  .theme-nasr .neon-underline::after {
+    background: linear-gradient(90deg, 
+      #D4AF37, 
+      #F2C94C
+    );
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  }
+
+  /* Gold underline for Nasr */
+  .gold-underline {
+    position: relative;
+    display: inline-block;
+  }
+
+  .gold-underline::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, #D4AF37, #F2C94C);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
+  }
+
+  /* Left border accent */
   .neon-border-left {
     border-left: 2px solid hsl(var(--primary));
     box-shadow: -2px 0 8px rgba(77, 226, 232, 0.3);
     padding-left: 1rem;
   }
 
-  /* Glass input fields - Crystal */
+  .theme-nasr .neon-border-left {
+    box-shadow: -2px 0 8px rgba(212, 175, 55, 0.3);
+  }
+
+  /* ============================================
+     FORM ELEMENTS
+  ============================================ */
   input, textarea, select {
     background: rgba(255, 255, 255, 0.7) !important;
     border: 1px solid rgba(212, 224, 236, 0.6) !important;
@@ -351,12 +598,107 @@ All colors MUST be HSL.
     color: hsl(var(--text-primary)) !important;
   }
 
+  .theme-nasr input,
+  .theme-nasr textarea,
+  .theme-nasr select {
+    background: rgba(11, 15, 22, 0.8) !important;
+    border: 1px solid rgba(212, 175, 55, 0.2) !important;
+    color: hsl(0 0% 96%) !important;
+  }
+
   input:focus, textarea:focus, select:focus {
     border-color: rgba(77, 226, 232, 0.7) !important;
     box-shadow: 0 0 15px rgba(77, 226, 232, 0.2) !important;
   }
 
+  .theme-nasr input:focus,
+  .theme-nasr textarea:focus,
+  .theme-nasr select:focus {
+    border-color: rgba(212, 175, 55, 0.5) !important;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.15) !important;
+  }
+
   input::placeholder, textarea::placeholder {
     color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* ============================================
+     NASR THEME SPECIFIC UTILITIES
+  ============================================ */
+  
+  /* Gold text color */
+  .text-gold {
+    color: #D4AF37;
+  }
+
+  .text-gold-light {
+    color: #F2C94C;
+  }
+
+  /* Gold background */
+  .bg-gold {
+    background-color: #D4AF37;
+  }
+
+  .bg-gold-light {
+    background-color: #F2C94C;
+  }
+
+  /* Gold border */
+  .border-gold {
+    border-color: #D4AF37;
+  }
+
+  .border-gold-glow {
+    border-color: rgba(212, 175, 55, 0.3);
+  }
+
+  /* Dark panel backgrounds for Nasr */
+  .bg-nasr-panel {
+    background: #0B0F16;
+  }
+
+  .bg-nasr-dark {
+    background: #02040A;
+  }
+
+  /* Nasr card styling override */
+  .nasr-card {
+    background: rgba(11, 15, 22, 0.95);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(212, 175, 55, 0.1);
+    border-radius: 12px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .nasr-card:hover {
+    border-color: rgba(212, 175, 55, 0.3);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(212, 175, 55, 0.1),
+                inset 0 1px 0 rgba(212, 175, 55, 0.15);
+  }
+
+  /* Grid lines background effect for Nasr */
+  .nasr-grid-bg {
+    background-image: 
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Floating gold particles */
+  .gold-particles::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.06) 0%, transparent 2%),
+      radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.04) 0%, transparent 2%),
+      radial-gradient(circle at 40% 70%, rgba(212, 175, 55, 0.05) 0%, transparent 2%),
+      radial-gradient(circle at 60% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 2%),
+      radial-gradient(circle at 10% 80%, rgba(212, 175, 55, 0.04) 0%, transparent 2%);
+    animation: float-particle 8s ease-in-out infinite;
   }
 }
