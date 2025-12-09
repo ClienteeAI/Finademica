@@ -2,6 +2,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Trophy, Video, Clock, TrendingUp, Lock } from "lucide-react";
+import { useClient } from "@/lib/clientContext";
 
 const achievements = [
   {
@@ -56,9 +57,28 @@ const stats = [
 ];
 
 const Progress = () => {
+  const { client } = useClient();
+  const isNasrTheme = client?.subdomain === 'nasr';
+
   return (
     <DashboardLayout>
-      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in">
+      {/* Nasr Trade Academy Video Background */}
+      {isNasrTheme && (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute w-full h-full object-cover opacity-30"
+          >
+            <source src="/nasr-progress-background.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+        </div>
+      )}
+      
+      <div className="max-w-6xl mx-auto space-y-8 animate-fade-in relative z-10">
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground">Your Progress</h1>
