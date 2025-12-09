@@ -13,6 +13,12 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        'serif': ['Playfair Display', 'Georgia', 'serif'],
+        'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+        'playfair': ['Playfair Display', 'Georgia', 'serif'],
+        'inter': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -78,6 +84,21 @@ export default {
           DEFAULT: "#B5A7FF",
           light: "#D4CBFF",
         },
+        // Nasr Trade Gold theme colors
+        gold: {
+          DEFAULT: "#D4AF37",
+          light: "#F2C94C",
+          dark: "#B8962E",
+          glow: "rgba(212, 175, 55, 0.12)",
+        },
+        nasr: {
+          bg: "#000000",
+          navy: "#02040A",
+          panel: "#0B0F16",
+          border: "rgba(255, 255, 255, 0.06)",
+          text: "#F5F5F5",
+          "text-muted": "#C9C9C9",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -90,6 +111,12 @@ export default {
         'ice': '0 10px 40px rgba(15, 23, 42, 0.08)',
         'ice-lg': '0 15px 50px rgba(15, 23, 42, 0.1)',
         'frost': '0 4px 24px rgba(212, 224, 236, 0.4)',
+        // Nasr gold shadows
+        'gold': '0 0 18px rgba(212, 175, 55, 0.45)',
+        'gold-lg': '0 0 30px rgba(212, 175, 55, 0.6)',
+        'gold-glow': '0 0 40px rgba(212, 175, 55, 0.4)',
+        'nasr-card': '0 10px 40px rgba(0, 0, 0, 0.4), 0 0 1px rgba(212, 175, 55, 0.3)',
+        'nasr-card-hover': '0 15px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(212, 175, 55, 0.15)',
       },
       keyframes: {
         "accordion-down": {
@@ -136,6 +163,14 @@ export default {
             boxShadow: "0 0 28px rgba(77, 226, 232, 0.6)"
           }
         },
+        "gold-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 18px rgba(212, 175, 55, 0.4)"
+          },
+          "50%": {
+            boxShadow: "0 0 28px rgba(212, 175, 55, 0.6)"
+          }
+        },
         "glow-pulse": {
           "0%, 100%": {
             boxShadow: "0 0 18px rgba(77, 226, 232, 0.4)"
@@ -159,6 +194,7 @@ export default {
         "fade-in": "fade-in 0.5s ease-out",
         "slide-up": "slide-up 0.6s ease-out",
         "cyan-glow": "cyan-glow 2s ease-in-out infinite",
+        "gold-glow": "gold-glow 2s ease-in-out infinite",
         "glow-pulse": "glow-pulse 3s ease-in-out infinite",
         "neon-glow": "neon-glow 2s ease-in-out infinite",
       },

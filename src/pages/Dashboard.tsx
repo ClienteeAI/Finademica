@@ -17,6 +17,7 @@ import { GamificationSection } from "@/components/GamificationSection";
 import { UserProgressCard } from "@/components/UserProgressCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface UserData {
   firstName: string;
@@ -55,6 +56,21 @@ const Dashboard = () => {
   const [videos, setVideos] = useState<VideoData[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [completedVideoIds, setCompletedVideoIds] = useState<Set<string>>(new Set());
+
+  // Theme detection
+  const isNasrTheme = client?.subdomain === 'nasr';
+  
+  // Theme-aware color classes
+  const themeColors = {
+    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
+    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
+    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
+    primaryBg: isNasrTheme ? 'bg-gold' : 'bg-aqua',
+    cardBorder: isNasrTheme ? 'border-gold/20' : 'border-ice',
+    accentGlow: isNasrTheme ? 'shadow-gold' : 'shadow-aqua',
+    progressBar: isNasrTheme ? 'from-gold-light to-gold' : 'from-aqua to-aqua-light',
+    badge: isNasrTheme ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-aqua/10 border-aqua/30 text-aqua',
+  };
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -205,10 +221,13 @@ const Dashboard = () => {
         {/* Welcome Section */}
         <div className="space-y-8 animate-slide-up">
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-6xl font-bold text-[#1D3557] tracking-tight">
+            <h1 className={cn(
+              "text-5xl md:text-6xl font-bold tracking-tight",
+              themeColors.heading
+            )}>
               Welcome back, {userData.firstName}!
             </h1>
-            <p className="text-lg text-[#6B7280]">
+            <p className={cn("text-lg", themeColors.subtext)}>
               Let's continue your trading journey
             </p>
           </div>
@@ -216,17 +235,20 @@ const Dashboard = () => {
           {/* Progress Bar */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm uppercase tracking-wider text-[#6B7280] font-semibold">
+              <span className={cn("text-sm uppercase tracking-wider font-semibold", themeColors.subtext)}>
                 Your Progress
               </span>
-              <span className="text-xl font-semibold text-[#4DE2E8] font-mono">
+              <span className={cn("text-xl font-semibold font-mono", themeColors.primary)}>
                 0%
               </span>
             </div>
             <Progress value={0} className="h-2" />
-            <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-white/60 border border-[#4DE2E8]/40 backdrop-blur-sm">
+            <div className={cn(
+              "inline-flex items-center gap-3 px-5 py-3 rounded-full backdrop-blur-sm border",
+              isNasrTheme ? 'bg-nasr-panel/60 border-gold/20' : 'bg-white/60 border-aqua/40'
+            )}>
               <span className="text-xl animate-pulse-subtle">🔥</span>
-              <span className="text-sm text-[#6B7280]">
+              <span className={cn("text-sm", themeColors.subtext)}>
                 0 day streak - Watch your first video!
               </span>
             </div>

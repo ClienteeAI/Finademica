@@ -130,6 +130,15 @@ export function ClientProvider({ children }: ClientProviderProps) {
     // Apply CSS variables for dynamic theming
     document.documentElement.style.setProperty('--client-primary', client.primary_color);
     document.documentElement.style.setProperty('--client-secondary', client.secondary_color);
+    
+    // Apply theme class for Nasr Trade (dark gold theme)
+    if (client.subdomain === 'nasr') {
+      document.documentElement.classList.add('theme-nasr');
+      document.body.classList.add('theme-nasr');
+    } else {
+      document.documentElement.classList.remove('theme-nasr');
+      document.body.classList.remove('theme-nasr');
+    }
   }
 
   if (loading) {
