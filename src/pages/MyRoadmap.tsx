@@ -1,22 +1,40 @@
+import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle, Clock, Lock, Download } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
+import { supabase } from "@/integrations/supabase/client";
 
-const phases = [
+interface RoadmapStep {
+  id: number;
+  title: string;
+  videoTitle?: string; // matches videos.title in Supabase
+  completed: boolean;
+  inProgress?: boolean;
+}
+
+interface RoadmapPhase {
+  id: number;
+  title: string;
+  weeks: string;
+  status: "active" | "locked" | "completed";
+  progress: number;
+  steps: RoadmapStep[];
+}
+
+// Base roadmap structure with video titles that match Supabase videos.title
+const basePhases: Omit<RoadmapPhase, "status" | "progress">[] = [
   {
     id: 1,
     title: "Getting Started",
     weeks: "Week 1-2",
-    status: "active",
-    progress: 10,
     steps: [
       { id: 1, title: "Create your account", completed: true },
-      { id: 2, title: "Complete your profile", inProgress: true },
-      { id: 3, title: 'Watch "Why Trade Forex?"', completed: false },
-      { id: 4, title: 'Watch "Risk Management"', completed: false },
+      { id: 2, title: "Complete your profile", completed: true },
+      { id: 3, title: 'Watch "Why Trade Forex?"', videoTitle: "Why Trade Forex?", completed: false },
+      { id: 4, title: 'Watch "Risk Management"', videoTitle: "Risk Management", completed: false },
       { id: 5, title: "Take beginner quiz", completed: false },
     ],
   },
@@ -24,11 +42,9 @@ const phases = [
     id: 2,
     title: "Building Foundation",
     weeks: "Week 3-4",
-    status: "locked",
-    progress: 0,
     steps: [
-      { id: 1, title: 'Watch "Entry Timing"', completed: false },
-      { id: 2, title: 'Watch "Chart Patterns"', completed: false },
+      { id: 1, title: 'Watch "Entry Timing"', videoTitle: "Entry Timing", completed: false },
+      { id: 2, title: 'Watch "Chart Patterns"', videoTitle: "Chart Patterns", completed: false },
       { id: 3, title: "Practice with demo account", completed: false },
       { id: 4, title: "Complete strategy assessment", completed: false },
     ],
@@ -37,8 +53,6 @@ const phases = [
     id: 3,
     title: "Developing Skills",
     weeks: "Week 5-6",
-    status: "locked",
-    progress: 0,
     steps: [
       { id: 1, title: "Advanced technical analysis", completed: false },
       { id: 2, title: "Position sizing strategies", completed: false },
@@ -50,8 +64,6 @@ const phases = [
     id: 4,
     title: "Advanced Trading",
     weeks: "Week 7-8",
-    status: "locked",
-    progress: 0,
     steps: [
       { id: 1, title: "Develop your trading plan", completed: false },
       { id: 2, title: "Advanced risk management", completed: false },
@@ -60,10 +72,119 @@ const phases = [
     ],
   },
 ];
-
 const MyRoadmap = () => {
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
+  const [phases, setPhases] = useState<RoadmapPhase[]>([]);
+  const [overallProgress, setOverallProgress] = useState(0);
+
+  useEffect(() => {
+    const fetchCompletedVideos = async () => {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        // No user, just show base phases with default status
+        const defaultPhases = basePhases.map((phase, index) => ({
+          ...phase,
+          status: index === 0 ? "active" as const : "locked" as const,
+          progress: index === 0 ? 20 : 0, // Account and profile completed
+        }));
+        setPhases(defaultPhases);
+        setOverallProgress(5);
+        return;
+      }
+
+      try {
+        // Fetch completed video views for this user
+        const { data: videoViews, error: viewsError } = await supabase
+          .from("video_views")
+          .select("video_id")
+          .eq("user_id", userId)
+          .eq("status", "completed");
+
+        if (viewsError) {
+          console.error("Error fetching video views:", viewsError);
+        }
+
+        // Fetch all videos to match by title
+        const { data: videos, error: videosError } = await supabase
+          .from("videos")
+          .select("id, title");
+
+        if (videosError) {
+          console.error("Error fetching videos:", videosError);
+        }
+
+        // Create a set of completed video titles
+        const completedVideoIds = new Set(videoViews?.map(v => v.video_id) || []);
+        const videoTitleMap = new Map(videos?.map(v => [v.title, v.id]) || []);
+
+        // Update phases with completion status
+        let totalSteps = 0;
+        let completedSteps = 0;
+
+        const updatedPhases: RoadmapPhase[] = basePhases.map((phase, phaseIndex) => {
+          const updatedSteps = phase.steps.map(step => {
+            totalSteps++;
+            let isCompleted = step.completed; // Keep pre-completed items (account, profile)
+
+            // Check if this step has an associated video and if it's been watched
+            if (step.videoTitle) {
+              const videoId = videoTitleMap.get(step.videoTitle);
+              if (videoId && completedVideoIds.has(videoId)) {
+                isCompleted = true;
+              }
+            }
+
+            if (isCompleted) completedSteps++;
+            return { ...step, completed: isCompleted };
+          });
+
+          const completedInPhase = updatedSteps.filter(s => s.completed).length;
+          const phaseProgress = Math.round((completedInPhase / updatedSteps.length) * 100);
+
+          // Determine phase status
+          let status: "active" | "locked" | "completed" = "locked";
+          if (phaseProgress === 100) {
+            status = "completed";
+          } else if (phaseIndex === 0) {
+            status = "active";
+          } else {
+            // Check if previous phase is complete
+            const prevPhaseSteps = basePhases[phaseIndex - 1].steps;
+            const prevPhaseComplete = prevPhaseSteps.every(s => {
+              if (s.completed) return true;
+              if (s.videoTitle) {
+                const videoId = videoTitleMap.get(s.videoTitle);
+                return videoId && completedVideoIds.has(videoId);
+              }
+              return false;
+            });
+            if (prevPhaseComplete) status = "active";
+          }
+
+          // Find first incomplete step and mark as inProgress
+          const firstIncomplete = updatedSteps.findIndex(s => !s.completed);
+          if (status === "active" && firstIncomplete !== -1) {
+            updatedSteps[firstIncomplete].inProgress = true;
+          }
+
+          return {
+            ...phase,
+            steps: updatedSteps,
+            progress: phaseProgress,
+            status,
+          };
+        });
+
+        setPhases(updatedPhases);
+        setOverallProgress(Math.round((completedSteps / totalSteps) * 100));
+      } catch (error) {
+        console.error("Error loading roadmap data:", error);
+      }
+    };
+
+    fetchCompletedVideos();
+  }, []);
 
   return (
     <DashboardLayout>
@@ -112,13 +233,13 @@ const MyRoadmap = () => {
                   strokeWidth="8"
                   fill="none"
                   strokeDasharray={`${2 * Math.PI * 56}`}
-                  strokeDashoffset={`${2 * Math.PI * 56 * (1 - 10 / 100)}`}
+                  strokeDashoffset={`${2 * Math.PI * 56 * (1 - overallProgress / 100)}`}
                   className="text-primary transition-all duration-500"
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-3xl font-bold text-foreground">10%</span>
+                <span className="text-3xl font-bold text-foreground">{overallProgress}%</span>
               </div>
             </div>
             <p className="text-sm font-medium text-muted-foreground">Overall Progress</p>
