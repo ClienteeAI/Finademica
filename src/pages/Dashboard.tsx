@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, Phone, CheckCircle } from "lucide-react";
+import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, Phone, CheckCircle, Lock } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -34,6 +34,15 @@ interface VideoData {
   thumbnail_url: string | null;
 }
 
+interface RecommendedVideo {
+  id: string;
+  priority: number | null;
+  tier: string | null;
+  reason: string | null;
+  video_id: string | null;
+  video: VideoData | null;
+}
+
 const categoryVariantMap: Record<string, "info" | "purple" | "destructive" | "success"> = {
   "Getting Started": "info",
   "Trading Strategies": "purple",
@@ -53,7 +62,8 @@ const Dashboard = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<any>(null);
-  const [videos, setVideos] = useState<VideoData[]>([]);
+  const [freeVideos, setFreeVideos] = useState<RecommendedVideo[]>([]);
+  const [lockedVideos, setLockedVideos] = useState<RecommendedVideo[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [completedVideoIds, setCompletedVideoIds] = useState<Set<string>>(new Set());
 
@@ -92,20 +102,61 @@ const Dashboard = () => {
       setQuizAnswers(JSON.parse(quiz));
     }
 
-    // Fetch videos from Supabase
-    const fetchVideos = async () => {
-      const { data, error } = await supabase
+    // Fetch AI-recommended videos from Supabase
+    const fetchRecommendedVideos = async () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        setVideosLoading(false);
+        return;
+      }
+
+      // First, fetch recommendations
+      const { data: recommendations, error: recError } = await supabase
+        .from("user_video_recommendations")
+        .select("id, priority, tier, reason, video_id")
+        .eq("user_id", userId)
+        .order("priority", { ascending: true });
+
+      if (recError) {
+        console.error("Error fetching recommendations:", recError);
+        setVideosLoading(false);
+        return;
+      }
+
+      if (!recommendations || recommendations.length === 0) {
+        setVideosLoading(false);
+        return;
+      }
+
+      // Get unique video IDs (filter out nulls)
+      const videoIds = recommendations
+        .map(r => r.video_id)
+        .filter((id): id is string => id !== null);
+
+      // Fetch video details
+      const { data: videos, error: vidError } = await supabase
         .from("videos")
         .select("id, title, category, duration_seconds, thumbnail_url")
-        .eq("is_active", true)
-        .order("order_priority", { ascending: true })
-        .limit(5);
+        .in("id", videoIds);
 
-      if (error) {
-        console.error("Error fetching videos:", error);
-      } else {
-        setVideos(data || []);
+      if (vidError) {
+        console.error("Error fetching videos:", vidError);
+        setVideosLoading(false);
+        return;
       }
+
+      // Map videos to recommendations
+      const videosMap = new Map(videos?.map(v => [v.id, v]) || []);
+      const enrichedRecommendations: RecommendedVideo[] = recommendations.map(rec => ({
+        ...rec,
+        video: rec.video_id ? videosMap.get(rec.video_id) || null : null
+      }));
+
+      // Separate by tier
+      const free = enrichedRecommendations.filter(v => v.tier === 'free_to_watch');
+      const locked = enrichedRecommendations.filter(v => v.tier === 'preview_only');
+      setFreeVideos(free);
+      setLockedVideos(locked);
       setVideosLoading(false);
     };
 
@@ -127,7 +178,7 @@ const Dashboard = () => {
       }
     };
 
-    fetchVideos();
+    fetchRecommendedVideos();
     fetchCompletedVideos();
   }, [navigate]);
 
@@ -286,8 +337,8 @@ const Dashboard = () => {
             {
               icon: Video,
               label: "Videos Watched",
-              value: `0 / ${videos.length || 5}`,
-              subtext: `${videos.length || 5} videos remaining`,
+              value: `${completedVideoIds.size} / ${freeVideos.length + lockedVideos.length || 5}`,
+              subtext: `${Math.max(0, freeVideos.length - completedVideoIds.size)} free videos remaining`,
               color: "success",
             },
             {
@@ -413,81 +464,182 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {videos.map((video, index) => {
-                const isCompleted = completedVideoIds.has(video.id);
-                return (
-                  <Card
-                    key={video.id}
-                    className="overflow-hidden cursor-pointer group"
-                    onClick={() => navigate(`/video/${video.id}`)}
-                    style={{
-                      animationDelay: `${0.1 * index}s`,
-                      animationFillMode: "backwards",
-                    }}
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
-                      {video.thumbnail_url ? (
-                        <img 
-                          src={video.thumbnail_url} 
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <>
-                          <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
-                              <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
+            <div className="space-y-8">
+              {/* Free Videos */}
+              {freeVideos.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {freeVideos.map((rec, index) => {
+                    if (!rec.video) return null;
+                    const video = rec.video;
+                    const isCompleted = completedVideoIds.has(video.id);
+                    return (
+                      <Card
+                        key={rec.id}
+                        className="overflow-hidden cursor-pointer group"
+                        onClick={() => navigate(`/video/${video.id}`)}
+                        style={{
+                          animationDelay: `${0.1 * index}s`,
+                          animationFillMode: "backwards",
+                        }}
+                      >
+                        {/* Thumbnail */}
+                        <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
+                          {video.thumbnail_url ? (
+                            <img 
+                              src={video.thumbnail_url} 
+                              alt={video.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <>
+                              <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
+                                  <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
+                                </div>
+                              </div>
+                            </>
+                          )}
+                          {/* Completed overlay badge */}
+                          {isCompleted && (
+                            <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold shadow-lg">
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              Completed
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-8 space-y-4">
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <Badge variant={categoryVariantMap[video.category || ""] || "info"}>{video.category || "Uncategorized"}</Badge>
+                            <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5" />
+                              {formatDuration(video.duration_seconds)}
+                            </span>
+                          </div>
+
+                          <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
+                            {video.title}
+                          </h3>
+
+                          {rec.reason && (
+                            <p className="text-sm text-[#6B7280] italic">
+                              {rec.reason}
+                            </p>
+                          )}
+
+                          <div className="space-y-3">
+                            <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
+                                style={{ width: isCompleted ? "100%" : "0%" }}
+                              />
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-[#6B7280]">
+                                {isCompleted ? "Completed" : "Not Started"}
+                              </span>
+                              <Button size="sm" variant={isCompleted ? "outline" : "primary"} className="group-hover:scale-105 transition-transform">
+                                {isCompleted ? "Watch Again" : "Watch Now →"}
+                              </Button>
                             </div>
                           </div>
-                        </>
-                      )}
-                      {/* Completed overlay badge */}
-                      {isCompleted && (
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold shadow-lg">
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          Completed
                         </div>
-                      )}
-                    </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
 
-                    {/* Content */}
-                    <div className="p-8 space-y-4">
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <Badge variant={categoryVariantMap[video.category || ""] || "info"}>{video.category || "Uncategorized"}</Badge>
-                        <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5" />
-                          {formatDuration(video.duration_seconds)}
-                        </span>
-                      </div>
+              {/* Locked Videos Section */}
+              {lockedVideos.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-semibold text-[#1D3557] flex items-center gap-2">
+                    <Lock className="w-5 h-5" />
+                    Unlock More Content
+                  </h3>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {lockedVideos.map((rec, index) => {
+                      if (!rec.video) return null;
+                      const video = rec.video;
+                      return (
+                        <Card
+                          key={rec.id}
+                          className="overflow-hidden relative group opacity-75"
+                          style={{
+                            animationDelay: `${0.1 * index}s`,
+                            animationFillMode: "backwards",
+                          }}
+                        >
+                          {/* Thumbnail with lock overlay */}
+                          <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
+                            {video.thumbnail_url ? (
+                              <img 
+                                src={video.thumbnail_url} 
+                                alt={video.title}
+                                className="w-full h-full object-cover grayscale"
+                              />
+                            ) : (
+                              <div className="absolute inset-0 bg-[#D4E0EC]/50" />
+                            )}
+                            {/* Lock Overlay */}
+                            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+                              <div className="text-center space-y-2">
+                                <div className="w-14 h-14 mx-auto rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                                  <Lock className="w-7 h-7 text-white" />
+                                </div>
+                                <p className="text-white text-sm font-medium px-4">
+                                  Unlock with Live Account
+                                </p>
+                              </div>
+                            </div>
+                          </div>
 
-                      <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
-                        {video.title}
-                      </h3>
+                          {/* Content */}
+                          <div className="p-8 space-y-4">
+                            <div className="flex items-center gap-3 flex-wrap">
+                              <Badge variant="secondary">{video.category || "Premium"}</Badge>
+                              <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
+                                <Clock className="w-3.5 h-3.5" />
+                                {formatDuration(video.duration_seconds)}
+                              </span>
+                            </div>
 
-                      <div className="space-y-3">
-                        <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
-                            style={{ width: isCompleted ? "100%" : "0%" }}
-                          />
-                        </div>
+                            <h3 className="text-xl font-semibold text-[#1D3557] line-clamp-2">
+                              {video.title}
+                            </h3>
 
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-[#6B7280]">
-                            {isCompleted ? "Completed" : "Not Started"}
-                          </span>
-                          <Button size="sm" variant={isCompleted ? "outline" : "primary"} className="group-hover:scale-105 transition-transform">
-                            {isCompleted ? "Watch Again" : "Watch Now →"}
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
+                            {rec.reason && (
+                              <p className="text-sm text-[#6B7280] italic">
+                                {rec.reason}
+                              </p>
+                            )}
+
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm text-[#6B7280] flex items-center gap-1">
+                                <Lock className="w-3.5 h-3.5" />
+                                Locked
+                              </span>
+                              <Button size="sm" variant="outline" disabled>
+                                Open Live Account
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {freeVideos.length === 0 && lockedVideos.length === 0 && (
+                <Card className="p-12 text-center">
+                  <p className="text-[#6B7280]">No personalized videos available yet. Complete the quiz to get recommendations.</p>
+                </Card>
+              )}
             </div>
           )}
         </div>
