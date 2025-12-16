@@ -154,32 +154,10 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
     setWebhookError(null);
 
     try {
-      // MANDATORY: Send quiz webhook
-      const webhookPayload = {
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        email: userData.email,
-        phone: userData.phone,
-        quiz: {
-          experience: answers.experience,
-          markets: answers.markets.join(", "),
-          goal: answers.goal,
-          expectation: answers.expectation,
-          problem: answers.problem
-        },
-        source: "lovable_quiz"
-      };
-
-      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(webhookPayload),
-      });
-
-      console.log("Quiz webhook sent successfully");
-
-      // Now create user in Supabase (only after successful webhook)
+      // Quiz data saved to Supabase only (no webhook - CORS issues)
+      // Signup webhook already sent user info in SignupFormInitial
+      
+      // Create user in Supabase with quiz answers
       if (client) {
         const { data: newUser, error } = await supabase
           .from('users')
