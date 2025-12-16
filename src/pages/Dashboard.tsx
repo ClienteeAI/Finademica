@@ -444,16 +444,16 @@ const Dashboard = () => {
           <div className="space-y-3">
             <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-3">
               <span className="text-3xl">🎥</span>
-              Your Personalized Learning Path
+              Start Learning
             </h2>
             <p className="text-lg text-[#6B7280]">
-              Based on your answers, these videos are perfect for you
+              Your personalized videos - watch these first
             </p>
           </div>
 
           {videosLoading ? (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {[1, 2, 3, 4].map((i) => (
+              {[1, 2].map((i) => (
                 <Card key={i} className="overflow-hidden">
                   <div className="aspect-video bg-muted animate-pulse" />
                   <div className="p-8 space-y-4">
@@ -464,11 +464,11 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <div className="space-y-8">
-              {/* Free Videos */}
+            <div className="space-y-6">
+              {/* Show only first 2 free videos */}
               {freeVideos.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {freeVideos.map((rec, index) => {
+                  {freeVideos.slice(0, 2).map((rec, index) => {
                     if (!rec.video) return null;
                     const video = rec.video;
                     const isCompleted = completedVideoIds.has(video.id);
@@ -553,89 +553,19 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {/* Locked Videos Section */}
-              {lockedVideos.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-semibold text-[#1D3557] flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Unlock More Content
-                  </h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {lockedVideos.map((rec, index) => {
-                      if (!rec.video) return null;
-                      const video = rec.video;
-                      return (
-                        <Card
-                          key={rec.id}
-                          className="overflow-hidden relative group opacity-75"
-                          style={{
-                            animationDelay: `${0.1 * index}s`,
-                            animationFillMode: "backwards",
-                          }}
-                        >
-                          {/* Thumbnail with lock overlay */}
-                          <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
-                            {video.thumbnail_url ? (
-                              <img 
-                                src={video.thumbnail_url} 
-                                alt={video.title}
-                                className="w-full h-full object-cover grayscale"
-                              />
-                            ) : (
-                              <div className="absolute inset-0 bg-[#D4E0EC]/50" />
-                            )}
-                            {/* Lock Overlay */}
-                            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                              <div className="text-center space-y-2">
-                                <div className="w-14 h-14 mx-auto rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                  <Lock className="w-7 h-7 text-white" />
-                                </div>
-                                <p className="text-white text-sm font-medium px-4">
-                                  Unlock with Live Account
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Content */}
-                          <div className="p-8 space-y-4">
-                            <div className="flex items-center gap-3 flex-wrap">
-                              <Badge variant="secondary">{video.category || "Premium"}</Badge>
-                              <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
-                                <Clock className="w-3.5 h-3.5" />
-                                {formatDuration(video.duration_seconds)}
-                              </span>
-                            </div>
-
-                            <h3 className="text-xl font-semibold text-[#1D3557] line-clamp-2">
-                              {video.title}
-                            </h3>
-
-                            {rec.reason && (
-                              <p className="text-sm text-[#6B7280] italic">
-                                {rec.reason}
-                              </p>
-                            )}
-
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm text-[#6B7280] flex items-center gap-1">
-                                <Lock className="w-3.5 h-3.5" />
-                                Locked
-                              </span>
-                              <Button size="sm" variant="outline" disabled>
-                                Open Live Account
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                </div>
+              {/* See More Free Videos Button */}
+              {freeVideos.length > 2 && (
+                <Button 
+                  onClick={() => navigate("/videos")}
+                  size="lg"
+                  className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-6 text-lg"
+                >
+                  See {Math.max(0, freeVideos.length - 2)} More Free Videos →
+                </Button>
               )}
 
               {/* Empty state */}
-              {freeVideos.length === 0 && lockedVideos.length === 0 && (
+              {freeVideos.length === 0 && (
                 <Card className="p-12 text-center">
                   <p className="text-[#6B7280]">No personalized videos available yet. Complete the quiz to get recommendations.</p>
                 </Card>
