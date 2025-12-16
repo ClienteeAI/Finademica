@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -73,12 +74,21 @@ const basePhases: Omit<RoadmapPhase, "status" | "progress">[] = [
   },
 ];
 const MyRoadmap = () => {
+  const navigate = useNavigate();
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
   const [phases, setPhases] = useState<RoadmapPhase[]>([]);
   const [overallProgress, setOverallProgress] = useState(0);
 
   useEffect(() => {
+    // ACCESS CONTROL: Must be logged in AND have completed quiz
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const quizCompleted = localStorage.getItem("quizCompleted");
+    if (!isLoggedIn || !quizCompleted) {
+      navigate("/");
+      return;
+    }
+
     const fetchCompletedVideos = async () => {
       const userId = localStorage.getItem("userId");
       if (!userId) {

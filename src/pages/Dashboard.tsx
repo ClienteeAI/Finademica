@@ -74,7 +74,10 @@ const Dashboard = () => {
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn) {
+    const quizCompleted = localStorage.getItem("quizCompleted");
+    
+    // ACCESS CONTROL: Must be logged in AND have completed quiz
+    if (!isLoggedIn || !quizCompleted) {
       navigate("/");
       return;
     }

@@ -3,12 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LogIn } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
-import QuizModal from "./QuizModal";
+import SignupFormInitial, { SignupUserData } from "./SignupFormInitial";
+import MandatoryQuizModal from "./MandatoryQuizModal";
 
 const HeroSection = () => {
   const { client } = useClient();
+  const [signupOpen, setSignupOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [userData, setUserData] = useState<SignupUserData | null>(null);
   const navigate = useNavigate();
+
+  const handleSignupComplete = (data: SignupUserData) => {
+    setUserData(data);
+    setQuizOpen(true); // Open mandatory quiz after signup
+  };
 
   return (
     <>
@@ -59,7 +67,7 @@ const HeroSection = () => {
             <div className="pt-4">
               <Button 
                 size="lg" 
-                onClick={() => setQuizOpen(true)}
+                onClick={() => setSignupOpen(true)}
                 data-quiz-trigger
                 className="bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold px-12 py-7 text-lg rounded-xl shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
               >
@@ -86,7 +94,18 @@ const HeroSection = () => {
         </div>
       </section>
       
-      <QuizModal open={quizOpen} onOpenChange={setQuizOpen} />
+      {/* Step 1: Signup Form */}
+      <SignupFormInitial 
+        open={signupOpen} 
+        onOpenChange={setSignupOpen} 
+        onSignupComplete={handleSignupComplete}
+      />
+      
+      {/* Step 2: Mandatory Quiz (only opens after signup) */}
+      <MandatoryQuizModal 
+        open={quizOpen} 
+        userData={userData}
+      />
     </>
   );
 };

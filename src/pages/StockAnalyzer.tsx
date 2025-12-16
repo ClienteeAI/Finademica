@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,18 @@ const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
 
 const StockAnalyzer = () => {
+  const navigate = useNavigate();
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
+
+  // ACCESS CONTROL: Must be logged in AND have completed quiz
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const quizCompleted = localStorage.getItem("quizCompleted");
+    if (!isLoggedIn || !quizCompleted) {
+      navigate("/");
+    }
+  }, [navigate]);
   
   const [symbol, setSymbol] = useState("");
   const [isLoading, setIsLoading] = useState(false);
