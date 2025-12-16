@@ -143,6 +143,48 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          id: string
+          message: string
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          message: string
+          role: string
+          user_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          message?: string
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ebooks: {
         Row: {
           call_notes: string | null
@@ -187,6 +229,47 @@ export type Database = {
           },
         ]
       }
+      quiz_answers: {
+        Row: {
+          created_at: string | null
+          experience_level: string | null
+          id: string
+          main_concern: string | null
+          markets_interested: string[] | null
+          primary_goal: string | null
+          time_available: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          experience_level?: string | null
+          id?: string
+          main_concern?: string | null
+          markets_interested?: string[] | null
+          primary_goal?: string | null
+          time_available?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          experience_level?: string | null
+          id?: string
+          main_concern?: string | null
+          markets_interested?: string[] | null
+          primary_goal?: string | null
+          time_available?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_answers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       skills: {
         Row: {
           description: string | null
@@ -207,6 +290,77 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      trading_diary: {
+        Row: {
+          created_at: string | null
+          direction: string
+          emotion_after: string | null
+          emotion_before: string | null
+          entry_price: number | null
+          exit_price: number | null
+          id: string
+          lessons_learned: string | null
+          pair: string
+          position_size: number | null
+          profit_loss: number | null
+          profit_loss_pct: number | null
+          screenshot_url: string | null
+          strategy_used: string | null
+          trade_date: string
+          user_id: string | null
+          what_to_improve: string | null
+          what_went_well: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          direction: string
+          emotion_after?: string | null
+          emotion_before?: string | null
+          entry_price?: number | null
+          exit_price?: number | null
+          id?: string
+          lessons_learned?: string | null
+          pair: string
+          position_size?: number | null
+          profit_loss?: number | null
+          profit_loss_pct?: number | null
+          screenshot_url?: string | null
+          strategy_used?: string | null
+          trade_date: string
+          user_id?: string | null
+          what_to_improve?: string | null
+          what_went_well?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          direction?: string
+          emotion_after?: string | null
+          emotion_before?: string | null
+          entry_price?: number | null
+          exit_price?: number | null
+          id?: string
+          lessons_learned?: string | null
+          pair?: string
+          position_size?: number | null
+          profit_loss?: number | null
+          profit_loss_pct?: number | null
+          screenshot_url?: string | null
+          strategy_used?: string | null
+          trade_date?: string
+          user_id?: string | null
+          what_to_improve?: string | null
+          what_went_well?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trading_diary_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_achievements: {
         Row: {
@@ -395,6 +549,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_video_recommendations: {
+        Row: {
+          created_at: string | null
+          id: string
+          priority: number | null
+          reason: string | null
+          tier: string | null
+          user_id: string | null
+          video_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          priority?: number | null
+          reason?: string | null
+          tier?: string | null
+          user_id?: string | null
+          video_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          priority?: number | null
+          reason?: string | null
+          tier?: string | null
+          user_id?: string | null
+          video_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_video_recommendations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_video_selections: {
         Row: {
           ai_reason: string | null
@@ -439,6 +631,9 @@ export type Database = {
       }
       users: {
         Row: {
+          account_opened_at: string | null
+          account_status: string | null
+          broker_account_id: string | null
           client_id: string
           created_at: string | null
           ebook_status: string | null
@@ -454,10 +649,14 @@ export type Database = {
           login_count: number | null
           password_hash: string | null
           phone: string | null
+          phone_prefix: string | null
           quiz_answers: Json | null
           updated_at: string | null
         }
         Insert: {
+          account_opened_at?: string | null
+          account_status?: string | null
+          broker_account_id?: string | null
           client_id: string
           created_at?: string | null
           ebook_status?: string | null
@@ -473,10 +672,14 @@ export type Database = {
           login_count?: number | null
           password_hash?: string | null
           phone?: string | null
+          phone_prefix?: string | null
           quiz_answers?: Json | null
           updated_at?: string | null
         }
         Update: {
+          account_opened_at?: string | null
+          account_status?: string | null
+          broker_account_id?: string | null
           client_id?: string
           created_at?: string | null
           ebook_status?: string | null
@@ -492,6 +695,7 @@ export type Database = {
           login_count?: number | null
           password_hash?: string | null
           phone?: string | null
+          phone_prefix?: string | null
           quiz_answers?: Json | null
           updated_at?: string | null
         }

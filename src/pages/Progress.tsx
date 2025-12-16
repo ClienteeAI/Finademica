@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -57,9 +59,18 @@ const stats = [
 ];
 
 const Progress = () => {
+  const navigate = useNavigate();
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
 
+  // ACCESS CONTROL: Must be logged in AND have completed quiz
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const quizCompleted = localStorage.getItem("quizCompleted");
+    if (!isLoggedIn || !quizCompleted) {
+      navigate("/");
+    }
+  }, [navigate]);
   return (
     <DashboardLayout>
       {/* Nasr Trade Academy Video Background */}

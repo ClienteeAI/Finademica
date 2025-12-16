@@ -63,6 +63,14 @@ const VideoPlayer = () => {
   const { handleVideoEnd } = useVideoCompletion(id);
 
   useEffect(() => {
+    // ACCESS CONTROL: Must be logged in AND have completed quiz
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    const quizCompleted = localStorage.getItem("quizCompleted");
+    if (!isLoggedIn || !quizCompleted) {
+      navigate("/");
+      return;
+    }
+
     const fetchVideo = async () => {
       if (!id) return;
       
