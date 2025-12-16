@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SignupUserData {
   firstName: string;
@@ -67,7 +68,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
     setIsSubmitting(true);
 
     try {
-      // MANDATORY: Send signup webhook
+      // 1. Send signup webhook
       const webhookPayload = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -76,17 +77,39 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
         source: "lovable_signup"
       };
 
-      const response = await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(webhookPayload),
       });
 
-      // Check if webhook succeeded (for non-cors requests, we may not get response)
-      // If using no-cors, response.ok will be false but request still goes through
-      // For proper error handling, the endpoint should support CORS
-      
       console.log("Signup webhook sent successfully");
+
+      // 2. Create user in Supabase (without quiz answers - will be updated later)
+      if (client) {
+        const { data: newUser, error } = await supabase
+          .from('users')
+          .insert([{
+            client_id: client.id,
+            email: formData.email,
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone || null,
+            is_admin: false
+          }])
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Supabase error:', error);
+          if (!error.message.includes('duplicate')) {
+            throw new Error(error.message);
+          }
+        } else {
+          console.log('User created in Supabase:', newUser);
+          localStorage.setItem('userId', newUser.id);
+        }
+      }
       
       // Store user data temporarily for quiz
       localStorage.setItem('pendingSignupData', JSON.stringify(formData));
@@ -96,7 +119,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
       onOpenChange(false);
 
     } catch (error) {
-      console.error("Signup webhook failed:", error);
+      console.error("Signup failed:", error);
       setWebhookError("Failed to complete signup. Please try again.");
     } finally {
       setIsSubmitting(false);
