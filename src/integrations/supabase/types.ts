@@ -457,6 +457,7 @@ export type Database = {
       user_gamification: {
         Row: {
           created_at: string | null
+          experience_points: number
           last_activity_date: string | null
           level: number
           streak_days: number
@@ -465,6 +466,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          experience_points: number
           last_activity_date?: string | null
           level?: number
           streak_days?: number
@@ -473,6 +475,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          experience_points?: number
           last_activity_date?: string | null
           level?: number
           streak_days?: number

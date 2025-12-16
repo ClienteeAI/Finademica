@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/collapsible";
 import { useVideoCompletion } from "@/hooks/useVideoCompletion";
 import { supabase } from "@/integrations/supabase/client";
+import AchievementToast from "@/components/AchievementToast";
+import LevelUpModal from "@/components/LevelUpModal";
 
 interface Video {
   id: string;
@@ -39,7 +41,6 @@ const formatDuration = (seconds: number | null): string => {
   return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
 };
 
-// Extract YouTube video ID from various URL formats
 const getYouTubeEmbedUrl = (url: string): string | null => {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
@@ -60,10 +61,15 @@ const VideoPlayer = () => {
   const [video, setVideo] = useState<Video | null>(null);
   const [nextVideo, setNextVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
-  const { handleVideoEnd } = useVideoCompletion(id);
+  const { 
+    handleVideoEnd, 
+    unlockedAchievements, 
+    levelUpData,
+    dismissAchievement,
+    dismissLevelUp
+  } = useVideoCompletion(id);
 
   useEffect(() => {
-    // ACCESS CONTROL: Must be logged in AND have completed quiz
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     const quizCompleted = localStorage.getItem("quizCompleted");
     if (!isLoggedIn || !quizCompleted) {
@@ -76,7 +82,6 @@ const VideoPlayer = () => {
       
       setLoading(true);
       
-      // Fetch current video
       const { data, error } = await supabase
         .from("videos")
         .select("id, title, category, duration_seconds, description, video_url, thumbnail_url, transcript")
@@ -92,7 +97,6 @@ const VideoPlayer = () => {
 
       setVideo(data);
 
-      // Fetch next video (by order_priority)
       if (data) {
         const { data: nextData } = await supabase
           .from("videos")
@@ -110,7 +114,7 @@ const VideoPlayer = () => {
     };
 
     fetchVideo();
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return (
@@ -149,6 +153,23 @@ const VideoPlayer = () => {
 
   return (
     <DashboardLayout>
+      {/* Achievement Toasts */}
+      {unlockedAchievements?.map((achievement, index) => (
+        <AchievementToast
+          key={`${achievement.name}-${index}`}
+          achievement={achievement}
+          onClose={() => dismissAchievement(index)}
+        />
+      ))}
+
+      {/* Level Up Modal */}
+      {levelUpData.show && (
+        <LevelUpModal
+          level={levelUpData.level}
+          onClose={dismissLevelUp}
+        />
+      )}
+
       <div className="space-y-6 animate-fade-in">
         {/* Back Button */}
         <Button
@@ -202,7 +223,6 @@ const VideoPlayer = () => {
 
               <p className="text-muted-foreground">{video.description || "No description available."}</p>
 
-              {/* Description */}
               <Collapsible open={transcriptOpen} onOpenChange={setTranscriptOpen}>
                 <CollapsibleTrigger asChild>
                   <Button variant="outline" className="w-full">
@@ -230,10 +250,17 @@ const VideoPlayer = () => {
                 <p className="text-sm text-muted-foreground mt-2">0% watched</p>
               </div>
               
-              <Button className="w-full gap-2" onClick={handleVideoEnd}>
+              <Button 
+                className="w-full gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400" 
+                onClick={handleVideoEnd}
+              >
                 <CheckCircle className="h-4 w-4" />
                 Mark as Complete
               </Button>
+              
+              <p className="text-xs text-center text-muted-foreground">
+                Earn +25 XP when you complete this video
+              </p>
             </Card>
 
             {/* Next Video */}
