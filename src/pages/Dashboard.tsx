@@ -133,11 +133,11 @@ const Dashboard = () => {
         .map(r => r.video_id)
         .filter((id): id is string => id !== null);
 
-      // Fetch video details
+      // Fetch video details using video_id (text field, not UUID)
       const { data: videos, error: vidError } = await supabase
         .from("videos")
-        .select("id, title, category, duration_seconds, thumbnail_url")
-        .in("id", videoIds);
+        .select("id, video_id, title, category, duration_seconds, thumbnail_url")
+        .in("video_id", videoIds);
 
       if (vidError) {
         console.error("Error fetching videos:", vidError);
@@ -145,8 +145,8 @@ const Dashboard = () => {
         return;
       }
 
-      // Map videos to recommendations
-      const videosMap = new Map(videos?.map(v => [v.id, v]) || []);
+      // Map videos by video_id (text) to match recommendations
+      const videosMap = new Map(videos?.map(v => [v.video_id, v]) || []);
       const enrichedRecommendations: RecommendedVideo[] = recommendations.map(rec => ({
         ...rec,
         video: rec.video_id ? videosMap.get(rec.video_id) || null : null
