@@ -379,7 +379,7 @@ const MyVideos = () => {
                     <Lock className="w-5 h-5" />
                     Premium Content - Advanced Strategies
                   </h2>
-                  <Badge variant="secondary">{filteredLockedVideos.length} locked</Badge>
+                  <Badge variant="secondary">100+ locked</Badge>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredLockedVideos.map((rec) => rec.video && (
