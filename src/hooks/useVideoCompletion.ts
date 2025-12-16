@@ -12,104 +12,74 @@ export const useVideoCompletion = (videoId: string | undefined) => {
     if (hasTriggeredRef.current || !videoId) return;
 
     try {
-      // Get user from localStorage - check both patterns (Login vs Signup)
-      let email = localStorage.getItem("email");
-      let firstName = localStorage.getItem("firstName");
-      let lastName = localStorage.getItem("lastName");
-      const clientId = localStorage.getItem("client_id") || localStorage.getItem("userClientId");
+      // Get user_id from localStorage - check multiple patterns
+      let userId = localStorage.getItem("userId");
       
-      // Also check for userData JSON object (used by SignupForm)
-      const userDataStr = localStorage.getItem("userData");
-      if (userDataStr && !email) {
-        try {
-          const userData = JSON.parse(userDataStr);
-          email = userData.email || email;
-          firstName = userData.firstName || firstName;
-          lastName = userData.lastName || lastName;
-        } catch (e) {
-          console.error("Failed to parse userData from localStorage:", e);
-        }
-      }
-      
-      console.log("User data from localStorage:", { email, firstName, lastName, clientId });
-
-      let userData = null;
-      
-      // Try to fetch full user profile if email exists
-      if (email) {
-        const { data, error } = await supabase
-          .from("users")
-          .select("*, clients(*)")
-          .eq("email", email)
-          .maybeSingle();
-
-        if (!error && data) {
-          userData = data;
+      // Fallback: check userData JSON object
+      if (!userId) {
+        const userDataStr = localStorage.getItem("userData");
+        if (userDataStr) {
+          try {
+            const userData = JSON.parse(userDataStr);
+            userId = userData.id || userData.userId;
+          } catch (e) {
+            console.error("Failed to parse userData from localStorage:", e);
+          }
         }
       }
 
-      // Fetch video details
-      const { data: videoData, error: videoError } = await supabase
-        .from("videos")
-        .select("id, title, category, duration_seconds, video_url")
-        .eq("id", videoId)
-        .maybeSingle();
-
-      if (videoError) {
-        console.error("Error fetching video data:", videoError);
+      // Fallback: try to get from Supabase using email
+      if (!userId) {
+        const email = localStorage.getItem("email");
+        if (email) {
+          const { data: userData } = await supabase
+            .from("users")
+            .select("id")
+            .eq("email", email)
+            .maybeSingle();
+          
+          if (userData?.id) {
+            userId = userData.id;
+            // Store for future use
+            localStorage.setItem("userId", userId);
+          }
+        }
       }
 
-      const payload = {
-        event_type: "video_completed",
-        timestamp: new Date().toISOString(),
-        user: userData ? {
-          id: userData.id,
-          email: userData.email,
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          phone: userData.phone,
-          client_id: userData.client_id,
-          quiz_answers: userData.quiz_answers,
-          lead_score: userData.lead_score,
-          login_count: userData.login_count,
-          created_at: userData.created_at,
-        } : {
-          email: email || "anonymous",
-          first_name: firstName || null,
-          last_name: lastName || null,
-          client_id: clientId || null,
-        },
-        client: userData?.clients ? {
-          id: (userData.clients as any).id,
-          company_name: (userData.clients as any).company_name,
-          subdomain: (userData.clients as any).subdomain,
-        } : null,
-        video: videoData ? {
-          id: videoData.id,
-          title: videoData.title,
-          category: videoData.category,
-          duration_seconds: videoData.duration_seconds,
-          video_url: videoData.video_url,
-        } : {
-          id: videoId,
-        },
-      };
+      // Error if no user_id found
+      if (!userId) {
+        console.error("No user_id found - user may not be logged in");
+        toast({
+          title: "Error",
+          description: "Please log in to track your progress",
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Call Supabase complete_video function to update stats
-      if (userData?.id) {
-        const { data: statsResult, error: statsError } = await supabase
-          .rpc("complete_video", {
-            p_user_id: userData.id,
-            p_video_id: videoId,
-            p_points: 25 // Award 25 XP per video
-          });
+      const { data: statsResult, error: statsError } = await supabase
+        .rpc("complete_video", {
+          p_user_id: userId,
+          p_video_id: videoId,
+          p_points: 25
+        });
 
-        if (statsError) {
-          console.error("Error updating user stats:", statsError);
-        } else {
-          console.log("User stats updated:", statsResult);
-        }
+      if (statsError) {
+        console.error("Error updating user stats:", statsError);
+      } else {
+        console.log("User stats updated:", statsResult);
       }
+
+      // Send simplified webhook payload
+      const payload = {
+        user: {
+          id: userId
+        },
+        video: {
+          id: videoId
+        }
+      };
 
       console.log("Sending video completion webhook:", payload);
 
