@@ -157,7 +157,31 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
       // Get userId from localStorage (created during signup form)
       const userId = localStorage.getItem('userId');
       
-      // Update existing user with quiz answers
+      // 1. Send quiz webhook
+      const quizPayload = {
+        user_id: userId,
+        email: userData.email,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        experience_level: answers.experience,
+        markets_interested: answers.markets,
+        primary_goal: answers.goal,
+        main_concern: answers.problem,
+        time_available: answers.expectation,
+        client_id: client?.id,
+        client_name: client?.company_name,
+        source: "lovable_quiz"
+      };
+
+      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quizPayload),
+      });
+
+      console.log("Quiz webhook sent successfully");
+
+      // 2. Update existing user with quiz answers in Supabase
       if (userId) {
         const { error } = await supabase
           .from('users')
