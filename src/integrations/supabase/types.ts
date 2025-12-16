@@ -21,6 +21,7 @@ export type Database = {
           id: string
           key: string
           name: string
+          points: number
         }
         Insert: {
           description: string
@@ -28,6 +29,7 @@ export type Database = {
           id?: string
           key: string
           name: string
+          points?: number
         }
         Update: {
           description?: string
@@ -35,6 +37,7 @@ export type Database = {
           id?: string
           key?: string
           name?: string
+          points?: number
         }
         Relationships: []
       }
