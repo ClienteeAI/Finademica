@@ -154,35 +154,26 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
     setWebhookError(null);
 
     try {
-      // Quiz data saved to Supabase only (no webhook - CORS issues)
-      // Signup webhook already sent user info in SignupFormInitial
+      // Get userId from localStorage (created during signup form)
+      const userId = localStorage.getItem('userId');
       
-      // Create user in Supabase with quiz answers
-      if (client) {
-        const { data: newUser, error } = await supabase
+      // Update existing user with quiz answers
+      if (userId) {
+        const { error } = await supabase
           .from('users')
-          .insert([{
-            client_id: client.id,
-            email: userData.email,
-            first_name: userData.firstName,
-            last_name: userData.lastName,
-            phone: userData.phone || null,
+          .update({
             quiz_answers: answers as any,
-            is_admin: false
-          }])
-          .select()
-          .single();
+            account_status: 'active'
+          })
+          .eq('id', userId);
 
         if (error) {
-          console.error('Supabase error:', error);
-          // Don't block if user already exists
-          if (!error.message.includes('duplicate')) {
-            throw new Error(error.message);
-          }
-        } else {
-          console.log('User created in Supabase:', newUser);
-          localStorage.setItem('userId', newUser.id);
+          console.error('Supabase update error:', error);
+          throw new Error(error.message);
         }
+        console.log('User updated with quiz answers');
+      } else {
+        console.warn('No userId found, quiz answers not saved to database');
       }
 
       // Save to localStorage - UNLOCK ACCESS
@@ -207,7 +198,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
       navigate('/dashboard');
 
     } catch (error) {
-      console.error("Quiz webhook failed:", error);
+      console.error("Quiz submission failed:", error);
       setWebhookError("Failed to submit quiz. Please try again.");
     } finally {
       setIsSubmitting(false);
