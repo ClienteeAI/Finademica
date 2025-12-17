@@ -13,6 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useClient } from "@/lib/clientContext";
+import { useAuth } from "@/lib/AuthContext";
 import { GamificationSection } from "@/components/GamificationSection";
 import { UserProgressCard } from "@/components/UserProgressCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,7 +60,7 @@ const formatDuration = (seconds: number | null): string => {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { client, isAdminMode } = useClient();
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const { user, profile, loading } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState<any>(null);
   const [freeVideos, setFreeVideos] = useState<RecommendedVideo[]>([]);
@@ -82,20 +83,17 @@ const Dashboard = () => {
     badge: isNasrTheme ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-aqua/10 border-aqua/30 text-aqua',
   };
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    
-    // ACCESS CONTROL: Must be logged in AND have completed quiz
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
-      return;
-    }
+  // Derive userData from profile
+  const userData: UserData | null = profile ? {
+    firstName: profile.first_name || user?.user_metadata?.first_name || '',
+    lastName: profile.last_name || user?.user_metadata?.last_name || '',
+    email: profile.email || user?.email || '',
+    phone: profile.phone || ''
+  } : null;
 
-    const data = localStorage.getItem("userData");
-    if (data) {
-      setUserData(JSON.parse(data));
-    }
+  useEffect(() => {
+    // Skip if still loading auth
+    if (loading) return;
 
     const quiz = localStorage.getItem("quizAnswers");
     if (quiz) {
@@ -103,12 +101,12 @@ const Dashboard = () => {
     }
 
     // Fetch AI-recommended videos from Supabase
-    const fetchRecommendedVideos = async () => {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
+    const fetchRecommendedVideos = async (profileId: string) => {
+      if (!profileId) {
         setVideosLoading(false);
         return;
       }
+      const userId = profileId;
 
       // First, fetch recommendations
       const { data: recommendations, error: recError } = await supabase
@@ -178,9 +176,13 @@ const Dashboard = () => {
       }
     };
 
-    fetchRecommendedVideos();
+    if (profile?.id) {
+      fetchRecommendedVideos(profile.id);
+    } else {
+      setVideosLoading(false);
+    }
     fetchCompletedVideos();
-  }, [navigate]);
+  }, [loading, profile]);
 
   if (!userData) {
     return (
