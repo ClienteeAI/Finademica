@@ -799,6 +799,7 @@ export type Database = {
       }
       user_events: {
         Row: {
+          auth_user_id: string | null
           created_at: string
           event_type: string
           event_value: string | null
@@ -807,6 +808,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
           event_type: string
           event_value?: string | null
@@ -815,6 +817,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
           event_type?: string
           event_value?: string | null

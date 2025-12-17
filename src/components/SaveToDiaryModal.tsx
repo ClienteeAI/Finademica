@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
 import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { useLogEvent } from "@/hooks/useLogEvent";
 
 interface CalculationResult {
   lots_final?: number;
@@ -55,6 +56,7 @@ export const SaveToDiaryModal = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { logEvent } = useLogEvent();
   const [status, setStatus] = useState<"planned" | "open">("planned");
   const [openTime, setOpenTime] = useState("");
   const [notes, setNotes] = useState(formData.notes || "");
@@ -129,6 +131,12 @@ export const SaveToDiaryModal = ({
       toast({
         title: "Saved to diary",
         description: "Your trade has been saved successfully.",
+      });
+      // Log diary_trade_created event
+      await logEvent("diary_trade_created", {
+        symbol: formData.symbol.toUpperCase(),
+        side: formData.side,
+        rr_ratio: calcResult?.rr_ratio,
       });
       setShowSuccess(true);
     } else {

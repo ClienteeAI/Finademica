@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLogEvent } from "@/hooks/useLogEvent";
 
 interface Message {
   id: string;
@@ -16,6 +17,7 @@ export function AIMentor() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { logEvent } = useLogEvent();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -34,12 +36,17 @@ export function AIMentor() {
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
+    const messageContent = input.trim();
+
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input.trim(),
+      content: messageContent,
       timestamp: new Date(),
     };
+
+    // Log mentor_message_sent event
+    logEvent("mentor_message_sent", { message_length: messageContent.length });
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
