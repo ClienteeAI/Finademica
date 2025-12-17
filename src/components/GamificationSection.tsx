@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Trophy, Target, Flame, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { useGamification } from "@/hooks/useGamification";
 
 interface SkillData {
   skill_id: string;
@@ -22,14 +22,6 @@ interface AchievementData {
   unlocked_at: string;
 }
 
-interface GamificationData {
-  xp: number;
-  level: number;
-  streak_days: number;
-  skills: SkillData[];
-  achievements: AchievementData[];
-}
-
 // Skill colors mapped by skill name/key
 const skillColors: Record<string, string> = {
   risk: "from-[#4DE2E8] to-[#2FB3C6]",
@@ -39,101 +31,106 @@ const skillColors: Record<string, string> = {
   money_management: "from-[#4DE2E8] to-[#A7E9FF]",
 };
 
-// Level titles based on level
-const getLevelTitle = (level: number): string => {
-  if (level <= 2) return "Novice Trader";
-  if (level <= 4) return "Apprentice Trader";
-  if (level <= 6) return "Rising Analyst";
-  if (level <= 8) return "Strategic Learner";
-  if (level <= 10) return "Market Tactician";
-  return "Master Trader";
+// XP thresholds - read from xp_levels table (display only)
+const getXPForNextLevel = (level: number): number => {
+  const thresholds: Record<number, number> = {
+    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
+    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
+  };
+  return thresholds[level + 1] ?? (level + 1) * 150;
 };
 
-// Calculate XP needed for next level (150 XP per level)
-const getXPForLevel = (level: number): number => {
-  return level * 150;
+const getCurrentLevelXP = (level: number): number => {
+  const thresholds: Record<number, number> = {
+    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
+    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
+  };
+  return thresholds[level] ?? (level - 1) * 150;
+};
+
+// Calculate skill progress (XP within current skill level) - display only
+const getSkillProgress = (skillXP: number, skillLevel: number): number => {
+  const xpForCurrentLevel = skillLevel * 50;
+  const xpForNextLevel = (skillLevel + 1) * 50;
+  const progress = ((skillXP - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
+  return Math.max(0, Math.min(progress, 100));
 };
 
 export function GamificationSection() {
-  const [gamificationData, setGamificationData] = useState<GamificationData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { xpTotal, level, levelName, streakDays, isLoading, error } = useGamification();
+  const [skills, setSkills] = useState<SkillData[]>([]);
+  const [achievements, setAchievements] = useState<AchievementData[]>([]);
+  const [detailsLoading, setDetailsLoading] = useState(true);
 
+  // Fetch skills and achievements separately
   useEffect(() => {
-    const fetchGamificationData = async () => {
+    const fetchDetails = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
-
-        // Get the current authenticated user
         const { data: { user } } = await supabase.auth.getUser();
-        
-        if (!user) {
-          setError("Not authenticated");
-          setIsLoading(false);
-          return;
-        }
+        if (!user) return;
 
-        // Map auth user to public.users.id
+        // Get public user id
         const { data: publicUser } = await supabase
           .from("users")
           .select("id")
           .eq("auth_user_id", user.id)
           .maybeSingle();
 
-        const userId = publicUser?.id;
-        if (!userId) {
-          setError("User profile not found");
-          setIsLoading(false);
-          return;
+        if (!publicUser?.id) return;
+
+        // Fetch skills
+        const { data: skillsData } = await supabase
+          .from("user_skills")
+          .select(`
+            skill_id,
+            level,
+            xp,
+            skills (key, name)
+          `)
+          .eq("user_id", publicUser.id);
+
+        if (skillsData) {
+          setSkills(skillsData.map((s: any) => ({
+            skill_id: s.skill_id,
+            name: s.skills?.key || s.skills?.name || "Unknown",
+            level: s.level,
+            xp: s.xp,
+          })));
         }
 
-        // Call the get_gamification function with public user id
-        const { data, error: rpcError } = await supabase.rpc('get_gamification', {
-          uid: userId
-        });
+        // Fetch achievements
+        const { data: achievementsData } = await supabase
+          .from("user_achievements")
+          .select(`
+            achievement_id,
+            unlocked_at,
+            achievements (key, name)
+          `)
+          .eq("user_id", publicUser.id)
+          .order("unlocked_at", { ascending: false });
 
-        if (rpcError) {
-          console.error("Error fetching gamification data:", rpcError);
-          setError("Could not load gamification data");
-          setIsLoading(false);
-          return;
-        }
-
-        if (data) {
-          setGamificationData(data as unknown as GamificationData);
+        if (achievementsData) {
+          setAchievements(achievementsData.map((a: any) => ({
+            achievement_id: a.achievement_id,
+            key: a.achievements?.key || "",
+            name: a.achievements?.name || "Achievement",
+            unlocked_at: a.unlocked_at,
+          })));
         }
       } catch (err) {
-        console.error("Failed to fetch gamification data:", err);
-        setError("Could not load gamification data");
+        console.error("Error fetching gamification details:", err);
       } finally {
-        setIsLoading(false);
+        setDetailsLoading(false);
       }
     };
 
-    fetchGamificationData();
+    fetchDetails();
   }, []);
 
-  // Calculate derived values
-  const level = gamificationData?.level ?? 1;
-  const currentXP = gamificationData?.xp ?? 0;
-  const nextLevelXP = getXPForLevel(level + 1);
-  const currentLevelXP = getXPForLevel(level);
-  const xpProgress = currentXP - currentLevelXP;
-  const xpNeeded = nextLevelXP - currentLevelXP;
-  const xpPercentage = xpNeeded > 0 ? Math.min((xpProgress / xpNeeded) * 100, 100) : 0;
-  const levelTitle = getLevelTitle(level);
-  const streak = gamificationData?.streak_days ?? 0;
-  const skills = gamificationData?.skills ?? [];
-  const achievements = gamificationData?.achievements ?? [];
-
-  // Calculate skill progress (XP within current skill level)
-  const getSkillProgress = (skillXP: number, skillLevel: number): number => {
-    const xpForCurrentLevel = skillLevel * 50;
-    const xpForNextLevel = (skillLevel + 1) * 50;
-    const progress = ((skillXP - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
-    return Math.max(0, Math.min(progress, 100));
-  };
+  // Calculate XP progress for display (read-only)
+  const currentLevelXP = getCurrentLevelXP(level);
+  const nextLevelXP = getXPForNextLevel(level);
+  const xpPercentage = Math.min(((xpTotal - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100, 100);
 
   // Error state
   if (error && !isLoading) {
@@ -195,9 +192,9 @@ export function GamificationSection() {
                     Level {level}
                   </span>
                 </div>
-                <p className="text-lg text-[#4DE2E8] font-medium">{levelTitle}</p>
+                <p className="text-lg text-[#4DE2E8] font-medium">{levelName}</p>
                 <p className="text-sm text-[#6B7280] font-mono">
-                  {currentXP} / {nextLevelXP} XP to next level
+                  {xpTotal} / {nextLevelXP} XP to next level
                 </p>
               </>
             )}
@@ -226,7 +223,6 @@ export function GamificationSection() {
 
         {/* Avatar Card */}
         <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden">
-          {/* Holographic glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-[#4DE2E8]/5 via-transparent to-[#B5A7FF]/10 pointer-events-none" />
           
           <div className="flex items-center justify-between relative">
@@ -240,14 +236,11 @@ export function GamificationSection() {
             )}
           </div>
 
-          {/* Avatar Placeholder - Glowing Orb */}
           <div className="flex justify-center py-4">
             <div className="relative">
-              {/* Outer glow rings */}
               <div className="absolute inset-0 w-24 h-24 rounded-full bg-gradient-to-br from-[#4DE2E8]/30 to-[#A7E9FF]/20 blur-xl animate-pulse" />
               <div className="absolute inset-2 w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#B5A7FF]/20 blur-lg animate-pulse" style={{ animationDelay: '0.5s' }} />
               
-              {/* Main orb */}
               <div className={cn(
                 "relative w-24 h-24 rounded-full",
                 "bg-gradient-to-br from-[#4DE2E8]/30 via-white/60 to-[#A7E9FF]/30",
@@ -270,7 +263,7 @@ export function GamificationSection() {
               </>
             ) : (
               <>
-                <p className="text-lg font-semibold text-[#1D3557]">{levelTitle}</p>
+                <p className="text-lg font-semibold text-[#1D3557]">{levelName}</p>
                 <p className="text-xs text-[#6B7280]">
                   Keep learning to evolve your avatar.
                 </p>
@@ -292,8 +285,7 @@ export function GamificationSection() {
           </div>
 
           <div className="space-y-3">
-            {isLoading ? (
-              // Loading skeletons for skills
+            {detailsLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="space-y-1.5">
                   <div className="flex items-center justify-between">
@@ -357,10 +349,10 @@ export function GamificationSection() {
               ) : (
                 <>
                   <p className="text-sm font-semibold text-[#1D3557]">
-                    Streak: {streak} day{streak !== 1 ? 's' : ''}
+                    Streak: {streakDays} day{streakDays !== 1 ? 's' : ''}
                   </p>
                   <p className="text-xs text-[#6B7280]">
-                    {streak > 0 ? "Keep it going!" : "Start your streak today!"}
+                    {streakDays > 0 ? "Keep it going!" : "Start your streak today!"}
                   </p>
                 </>
               )}
@@ -372,8 +364,7 @@ export function GamificationSection() {
             <p className="text-xs uppercase tracking-wider text-[#6B7280] font-semibold">
               Latest Badge{achievements.length > 1 ? 's' : ''}
             </p>
-            {isLoading ? (
-              // Loading skeleton for achievements
+            {detailsLoading ? (
               <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/5 to-[#A7E9FF]/10 border border-[#4DE2E8]/25">
                 <Skeleton className="w-8 h-8 rounded-lg" />
                 <div className="flex-1">
