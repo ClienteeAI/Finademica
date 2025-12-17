@@ -74,9 +74,23 @@ export function GamificationSection() {
           return;
         }
 
-        // Call the get_gamification function
+        // Map auth user to public.users.id
+        const { data: publicUser } = await supabase
+          .from("users")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .maybeSingle();
+
+        const userId = publicUser?.id;
+        if (!userId) {
+          setError("User profile not found");
+          setIsLoading(false);
+          return;
+        }
+
+        // Call the get_gamification function with public user id
         const { data, error: rpcError } = await supabase.rpc('get_gamification', {
-          uid: user.id
+          uid: userId
         });
 
         if (rpcError) {
