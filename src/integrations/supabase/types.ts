@@ -828,32 +828,47 @@ export type Database = {
         Row: {
           created_at: string | null
           experience_points: number
+          last_activity_at: string | null
           last_activity_date: string | null
           level: number
           streak_days: number
           total_achievements_unlocked: number
+          trades_logged: number
+          updated_at: string
           user_id: string
+          videos_completed: number
           xp: number
+          xp_total: number
         }
         Insert: {
           created_at?: string | null
           experience_points: number
+          last_activity_at?: string | null
           last_activity_date?: string | null
           level?: number
           streak_days?: number
           total_achievements_unlocked?: number
+          trades_logged?: number
+          updated_at?: string
           user_id: string
+          videos_completed?: number
           xp?: number
+          xp_total?: number
         }
         Update: {
           created_at?: string | null
           experience_points?: number
+          last_activity_at?: string | null
           last_activity_date?: string | null
           level?: number
           streak_days?: number
           total_achievements_unlocked?: number
+          trades_logged?: number
+          updated_at?: string
           user_id?: string
+          videos_completed?: number
           xp?: number
+          xp_total?: number
         }
         Relationships: [
           {
