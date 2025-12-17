@@ -669,6 +669,66 @@ export type Database = {
           },
         ]
       }
+      trading_diary_trades: {
+        Row: {
+          broker_key: string
+          created_at: string
+          entry_price: number | null
+          id: string
+          lots_final: number | null
+          notes: string | null
+          pip_value_position_usd: number | null
+          profit_total_usd: number | null
+          risk_total_usd: number | null
+          rr_ratio: number | null
+          side: string
+          stop_loss_price: number | null
+          symbol: string
+          take_profit_price: number | null
+          tick_value_position_usd: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          broker_key?: string
+          created_at?: string
+          entry_price?: number | null
+          id?: string
+          lots_final?: number | null
+          notes?: string | null
+          pip_value_position_usd?: number | null
+          profit_total_usd?: number | null
+          risk_total_usd?: number | null
+          rr_ratio?: number | null
+          side: string
+          stop_loss_price?: number | null
+          symbol: string
+          take_profit_price?: number | null
+          tick_value_position_usd?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          broker_key?: string
+          created_at?: string
+          entry_price?: number | null
+          id?: string
+          lots_final?: number | null
+          notes?: string | null
+          pip_value_position_usd?: number | null
+          profit_total_usd?: number | null
+          risk_total_usd?: number | null
+          rr_ratio?: number | null
+          side?: string
+          stop_loss_price?: number | null
+          symbol?: string
+          take_profit_price?: number | null
+          tick_value_position_usd?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_achievements: {
         Row: {
           achievement_id: string
