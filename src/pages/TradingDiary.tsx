@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { EditTradeModal } from "@/components/EditTradeModal";
 import { DeleteTradeDialog } from "@/components/DeleteTradeDialog";
+import { AddTradeModal } from "@/components/AddTradeModal";
 import { useAuth } from "@/lib/AuthContext";
 
 interface DiaryEntry {
@@ -55,9 +56,10 @@ const TradingDiary = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // Edit/Delete modals
+  // Edit/Delete/Add modals
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [tradeToEdit, setTradeToEdit] = useState<DiaryEntry | null>(null);
   const [tradeToDelete, setTradeToDelete] = useState<{ id: string; symbol: string } | null>(null);
 
@@ -214,7 +216,7 @@ const TradingDiary = () => {
             </div>
           </div>
           <Button
-            onClick={() => navigate('/calculator')}
+            onClick={() => setAddModalOpen(true)}
             className={cn(
               "h-11 px-5 text-base font-semibold rounded-xl transition-all",
               isNasrTheme 
@@ -748,6 +750,14 @@ const TradingDiary = () => {
         tradeSymbol={tradeToDelete?.symbol || ""}
         isNasrTheme={isNasrTheme}
         onSuccess={handleDeleteSuccess}
+      />
+
+      {/* Add Trade Modal */}
+      <AddTradeModal
+        open={addModalOpen}
+        onOpenChange={setAddModalOpen}
+        onSuccess={refreshEntries}
+        isNasrTheme={isNasrTheme}
       />
     </DashboardLayout>
   );
