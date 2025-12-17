@@ -57,15 +57,14 @@ const MyRoadmap = () => {
   const { achievements, loading: achievementsLoading } = useAchievements();
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
-      return;
-    }
-
     const fetchRoadmapData = async () => {
-      const userId = localStorage.getItem("userId");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/login");
+        return;
+      }
+
+      const userId = user.id;
       
       if (userId) {
         // Fetch user gamification data

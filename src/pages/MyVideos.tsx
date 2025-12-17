@@ -144,7 +144,7 @@ const MyVideos = () => {
         }
       }
 
-      // Fetch completed videos using localStorage userId
+      // Fetch completed videos using profile userId
       const { data: views } = await supabase
         .from("video_views")
         .select("video_id")

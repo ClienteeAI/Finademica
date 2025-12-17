@@ -14,6 +14,7 @@ import { useClient } from "@/lib/clientContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { SaveToDiaryModal } from "@/components/SaveToDiaryModal";
+import { supabase } from "@/integrations/supabase/client";
 
 interface CalculationResult {
   lots_final: number;
@@ -221,13 +222,14 @@ const Calculator = () => {
   };
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
-      return;
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+        return;
+      }
+    };
+    checkAuth();
   }, [navigate]);
 
   const validateForm = (): boolean => {
@@ -280,19 +282,9 @@ const Calculator = () => {
     setResult(null);
     setErrors({});
 
-    // Get user_id from localStorage
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const parsed = JSON.parse(userData);
-          userId = parsed.userId || parsed.id;
-        } catch (e) {
-          console.error('Failed to parse userData');
-        }
-      }
-    }
+    // Get user_id from Supabase auth
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || "unknown";
 
     const payload = {
       calculator_type: "position_size",

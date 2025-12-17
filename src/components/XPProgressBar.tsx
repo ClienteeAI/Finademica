@@ -28,8 +28,9 @@ const XPProgressBar = ({ compact = false, className = "" }: XPProgressBarProps) 
 
   useEffect(() => {
     const fetchStats = async () => {
-      const userId = localStorage.getItem("userId");
-      if (!userId) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const userId = user.id;
 
       const { data } = await supabase
         .from("user_gamification")

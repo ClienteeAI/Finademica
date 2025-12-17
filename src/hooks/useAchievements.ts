@@ -23,11 +23,12 @@ export const useAchievements = () => {
   const [userLevel, setUserLevel] = useState(1);
 
   const fetchAchievements = useCallback(async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       setLoading(false);
       return;
     }
+    const userId = user.id;
 
     try {
       // Fetch all achievements
