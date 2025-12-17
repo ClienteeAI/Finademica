@@ -16,6 +16,9 @@ interface CalculationResult {
   ticks_to_sl: number;
   risk_per_1lot_usd: number;
   lots_calculated: number;
+  tick_value_position_usd?: number;
+  pip_value_position_usd?: number;
+  symbol?: string;
   warnings?: string[];
   error?: string;
 }
@@ -581,6 +584,88 @@ const Calculator = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Position Sensitivity Section */}
+                {(result.tick_value_position_usd !== undefined || result.pip_value_position_usd !== undefined) && (
+                  <div className={cn(
+                    "p-5 rounded-xl space-y-4 animate-fade-in",
+                    isNasrTheme 
+                      ? 'bg-nasr-bg/40 border border-gold/10 backdrop-blur-sm' 
+                      : 'bg-muted/40 border border-border backdrop-blur-sm'
+                  )}>
+                    <div>
+                      <h3 className={cn("text-sm font-semibold uppercase tracking-wider", themeColors.subtext)}>
+                        Position Sensitivity
+                      </h3>
+                      <p className={cn("text-xs mt-0.5", themeColors.subtext, "opacity-70")}>
+                        Understand how price movement affects your P/L
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* 1 Tick Move */}
+                      {result.tick_value_position_usd !== undefined && (
+                        <div className={cn(
+                          "p-4 rounded-lg",
+                          isNasrTheme 
+                            ? 'bg-gradient-to-r from-amber-500/15 to-amber-500/5 border border-amber-500/20' 
+                            : 'bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20'
+                        )}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">📉</span>
+                              <span className={cn("text-sm font-medium", themeColors.subtext)}>
+                                1 Tick Movement
+                              </span>
+                            </div>
+                            <span className={cn(
+                              "text-xl font-bold font-mono",
+                              isNasrTheme ? 'text-amber-400' : 'text-amber-600'
+                            )}>
+                              ${result.tick_value_position_usd.toFixed(2)}
+                            </span>
+                          </div>
+                          <p className={cn("text-xs mt-2", themeColors.subtext, "opacity-70")}>
+                            Your profit or loss changes by this amount for every 1 tick move.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* 1 Pip Move */}
+                      {result.pip_value_position_usd !== undefined && (
+                        <div className={cn(
+                          "p-4 rounded-lg",
+                          isNasrTheme 
+                            ? 'bg-gradient-to-r from-gold/20 to-gold/5 border border-gold/30' 
+                            : 'bg-gradient-to-r from-aqua/15 to-aqua/5 border border-aqua/30'
+                        )}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-lg">📈</span>
+                              <span className={cn("text-sm font-medium", themeColors.subtext)}>
+                                1 Pip Movement
+                              </span>
+                            </div>
+                            <span className={cn(
+                              "text-2xl font-bold font-mono",
+                              themeColors.primary
+                            )}>
+                              ${result.pip_value_position_usd.toFixed(2)}
+                            </span>
+                          </div>
+                          <p className={cn("text-xs mt-2", themeColors.subtext, "opacity-70")}>
+                            Your profit or loss changes by this amount for every 1 pip move.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Micro-detail footer */}
+                    <p className={cn("text-xs text-center pt-2 border-t", themeColors.subtext, "opacity-60", isNasrTheme ? 'border-gold/10' : 'border-border')}>
+                      Calculated for <span className="font-mono font-semibold">{result.lots_final?.toFixed(2)}</span> lots on <span className="font-mono font-semibold">{result.symbol || symbol.toUpperCase()}</span>
+                    </p>
+                  </div>
+                )}
 
                 {/* Warnings */}
                 {result.warnings && result.warnings.length > 0 && (
