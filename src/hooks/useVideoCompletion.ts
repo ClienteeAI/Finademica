@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
-const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/14bc5880-e57c-44ce-9980-5caf53bf2e53";
+const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/14bc5880-e57c-44ce-9980-5caf53bf2e53";
 
 interface WebhookResponse {
   achievements_unlocked?: Array<{
