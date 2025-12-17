@@ -683,12 +683,13 @@ export type Database = {
           risk_total_usd: number | null
           rr_ratio: number | null
           side: string
+          status: string | null
           stop_loss_price: number | null
           symbol: string
           take_profit_price: number | null
           tick_value_position_usd: number | null
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           auth_user_id: string
@@ -703,12 +704,13 @@ export type Database = {
           risk_total_usd?: number | null
           rr_ratio?: number | null
           side: string
+          status?: string | null
           stop_loss_price?: number | null
           symbol: string
           take_profit_price?: number | null
           tick_value_position_usd?: number | null
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           auth_user_id?: string
@@ -723,12 +725,13 @@ export type Database = {
           risk_total_usd?: number | null
           rr_ratio?: number | null
           side?: string
+          status?: string | null
           stop_loss_price?: number | null
           symbol?: string
           take_profit_price?: number | null
           tick_value_position_usd?: number | null
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
