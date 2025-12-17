@@ -103,7 +103,10 @@ export const EditTradeModal = ({
         "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "x-diary-secret": "DIARY_9fA3kP2xQ7mVZ81sLwT0R"
+          },
           body: JSON.stringify(payload),
         }
       );
