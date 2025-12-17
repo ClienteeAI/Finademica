@@ -799,29 +799,35 @@ export type Database = {
       }
       user_events: {
         Row: {
+          action: string | null
           auth_user_id: string | null
           created_at: string
           event_type: string
           event_value: string | null
           id: string
+          meta: Json | null
           points: number
           user_id: string
         }
         Insert: {
+          action?: string | null
           auth_user_id?: string | null
           created_at?: string
           event_type: string
           event_value?: string | null
           id?: string
+          meta?: Json | null
           points?: number
           user_id: string
         }
         Update: {
+          action?: string | null
           auth_user_id?: string | null
           created_at?: string
           event_type?: string
           event_value?: string | null
           id?: string
+          meta?: Json | null
           points?: number
           user_id?: string
         }
