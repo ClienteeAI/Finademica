@@ -6,8 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
 interface CalculationResult {
@@ -33,9 +37,163 @@ interface FormErrors {
   general?: string;
 }
 
+// Tick vs Pip Info Content Component
+const TickPipInfoContent = ({ isNasrTheme }: { isNasrTheme: boolean }) => {
+  const themeColors = {
+    heading: isNasrTheme ? 'text-nasr-text' : 'text-ocean',
+    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
+    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="space-y-3">
+        <div>
+          <h4 className={cn("font-semibold text-sm", themeColors.heading)}>Tick</h4>
+          <p className={cn("text-sm mt-1", themeColors.subtext)}>
+            A tick is the smallest price step for the instrument (from broker specs).
+            "1 Tick Movement" shows how much your P/L changes when price moves by 1 tick, for your current lot size.
+          </p>
+        </div>
+        <div>
+          <h4 className={cn("font-semibold text-sm", themeColors.heading)}>Pip</h4>
+          <p className={cn("text-sm mt-1", themeColors.subtext)}>
+            A pip is a standard Forex unit. For most pairs: 1 pip = 0.0001.
+            On 5-digit pricing, 1 pip = 10 ticks.
+            "1 Pip Movement" shows how much your P/L changes when price moves by 1 pip, for your current lot size.
+          </p>
+        </div>
+      </div>
+      
+      <div className={cn(
+        "text-xs p-3 rounded-lg",
+        isNasrTheme ? 'bg-gold/10 border border-gold/20' : 'bg-aqua/10 border border-aqua/20'
+      )}>
+        <span className={themeColors.primary}>Note:</span>{' '}
+        <span className={themeColors.subtext}>
+          All values come from the n8n webhook (Lovable only displays results).
+        </span>
+      </div>
+
+      <Accordion type="single" collapsible className="w-full">
+        <AccordionItem value="learn-more" className="border-none">
+          <AccordionTrigger className={cn(
+            "text-sm py-2 hover:no-underline",
+            themeColors.primary
+          )}>
+            Learn more
+          </AccordionTrigger>
+          <AccordionContent className={cn("text-sm", themeColors.subtext)}>
+            On instruments with 5-digit pricing (like EURUSD at 1.08525), the last digit represents a "point" or "pipette". 
+            In this case, 1 pip = 10 ticks. For indices and commodities, the relationship between pips and ticks varies by instrument. 
+            The calculator uses broker-specific tick values to ensure accurate calculations.
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
+  );
+};
+
+// Info Tooltip Component (Popover on desktop, Drawer on mobile)
+const InfoTooltip = ({ isNasrTheme }: { isNasrTheme: boolean }) => {
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+
+  const triggerButton = (
+    <button
+      className={cn(
+        "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200",
+        isNasrTheme 
+          ? 'bg-nasr-panel/60 border border-gold/20 hover:border-gold/50 hover:shadow-[0_0_8px_rgba(212,175,55,0.3)]' 
+          : 'bg-white/60 border border-ice hover:border-aqua/50 hover:shadow-[0_0_8px_rgba(77,226,232,0.3)]'
+      )}
+    >
+      <Info className={cn("w-3.5 h-3.5", isNasrTheme ? 'text-gold/70' : 'text-aqua/70')} />
+    </button>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={setOpen}>
+        <button onClick={() => setOpen(true)}>
+          {triggerButton}
+        </button>
+        <DrawerContent className={cn(
+          isNasrTheme 
+            ? 'bg-nasr-panel border-gold/20' 
+            : 'bg-white border-ice'
+        )}>
+          <DrawerHeader className="relative">
+            <DrawerTitle className={cn(
+              "text-lg font-semibold",
+              isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
+            )}>
+              Tick vs Pip
+            </DrawerTitle>
+            <DrawerClose asChild>
+              <button className={cn(
+                "absolute right-4 top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                isNasrTheme 
+                  ? 'hover:bg-gold/10 text-nasr-text-muted' 
+                  : 'hover:bg-muted text-ocean-muted'
+              )}>
+                <X className="w-4 h-4" />
+              </button>
+            </DrawerClose>
+          </DrawerHeader>
+          <div className="px-4 pb-6">
+            <TickPipInfoContent isNasrTheme={isNasrTheme} />
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        {triggerButton}
+      </PopoverTrigger>
+      <PopoverContent 
+        className={cn(
+          "w-80 p-0 backdrop-blur-xl",
+          isNasrTheme 
+            ? 'bg-nasr-panel/95 border-gold/20' 
+            : 'bg-white/95 border-ice'
+        )}
+        align="end"
+      >
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className={cn(
+              "font-semibold",
+              isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
+            )}>
+              Tick vs Pip
+            </h3>
+            <button 
+              onClick={() => setOpen(false)}
+              className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
+                isNasrTheme 
+                  ? 'hover:bg-gold/10 text-nasr-text-muted' 
+                  : 'hover:bg-muted text-ocean-muted'
+              )}
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <TickPipInfoContent isNasrTheme={isNasrTheme} />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+};
+
 const Calculator = () => {
   const navigate = useNavigate();
   const { client } = useClient();
+  const isMobile = useIsMobile();
 
   // Theme detection
   const isNasrTheme = client?.subdomain === 'nasr';
@@ -616,14 +774,17 @@ const Calculator = () => {
                             1 Tick Movement
                           </span>
                         </div>
-                        <span className={cn(
-                          "text-xl font-bold font-mono",
-                          isNasrTheme ? 'text-amber-400' : 'text-amber-600'
-                        )}>
-                          {result.tick_value_position_usd !== undefined 
-                            ? `$${result.tick_value_position_usd.toFixed(2)}` 
-                            : '—'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <InfoTooltip isNasrTheme={isNasrTheme} />
+                          <span className={cn(
+                            "text-xl font-bold font-mono",
+                            isNasrTheme ? 'text-amber-400' : 'text-amber-600'
+                          )}>
+                            {result.tick_value_position_usd !== undefined 
+                              ? `$${result.tick_value_position_usd.toFixed(2)}` 
+                              : '—'}
+                          </span>
+                        </div>
                       </div>
                       <p className={cn("text-xs mt-2", themeColors.subtext, "opacity-70")}>
                         Your profit or loss changes by this amount for every 1 tick move.
@@ -644,14 +805,17 @@ const Calculator = () => {
                             1 Pip Movement
                           </span>
                         </div>
-                        <span className={cn(
-                          "text-2xl font-bold font-mono",
-                          themeColors.primary
-                        )}>
-                          {result.pip_value_position_usd !== undefined 
-                            ? `$${result.pip_value_position_usd.toFixed(2)}` 
-                            : '—'}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <InfoTooltip isNasrTheme={isNasrTheme} />
+                          <span className={cn(
+                            "text-2xl font-bold font-mono",
+                            themeColors.primary
+                          )}>
+                            {result.pip_value_position_usd !== undefined 
+                              ? `$${result.pip_value_position_usd.toFixed(2)}` 
+                              : '—'}
+                          </span>
+                        </div>
                       </div>
                       <p className={cn("text-xs mt-2", themeColors.subtext, "opacity-70")}>
                         Your profit or loss changes by this amount for every 1 pip move.
