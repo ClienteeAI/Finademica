@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ConversionBanner } from "@/components/ConversionBanner";
 import { LockedVideoModal } from "@/components/LockedVideoModal";
 import { Card } from "@/components/ui/card";
+import { useAuth } from "@/lib/AuthContext";
 
 interface Video {
   id: string;
@@ -46,6 +47,7 @@ const formatDuration = (seconds: number | null): string => {
 
 const MyVideos = () => {
   const navigate = useNavigate();
+  const { profile, loading: authLoading } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [freeVideos, setFreeVideos] = useState<RecommendedVideo[]>([]);
@@ -59,36 +61,18 @@ const MyVideos = () => {
   const [selectedLockedVideo, setSelectedLockedVideo] = useState<string>("");
 
   useEffect(() => {
-    // ACCESS CONTROL: Must be logged in AND have completed quiz
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
+    // Skip if auth is still loading
+    if (authLoading) return;
+    
+    // Use profile.id (public.users.id) for all queries
+    const userId = profile?.id;
+    if (!userId) {
+      setLoading(false);
       return;
     }
 
     const fetchVideos = async () => {
       setLoading(true);
-      
-      // Get userId from localStorage (check both formats)
-      let userId = localStorage.getItem('userId');
-      if (!userId) {
-        const userData = localStorage.getItem('userData');
-        if (userData) {
-          try {
-            const parsed = JSON.parse(userData);
-            userId = parsed.userId || parsed.id;
-          } catch (e) {
-            console.error('Failed to parse userData');
-          }
-        }
-      }
-      
-      if (!userId) {
-        console.error('No userId found in localStorage');
-        setLoading(false);
-        return;
-      }
 
       // Fetch user account status
       const { data: userData, error: userError } = await supabase
@@ -175,7 +159,7 @@ const MyVideos = () => {
     };
 
     fetchVideos();
-  }, [navigate]);
+  }, [authLoading, profile]);
 
   const isPremium = accountStatus === "live_account";
 
