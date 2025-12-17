@@ -200,7 +200,7 @@ const Calculator = () => {
   const [riskValue, setRiskValue] = useState("");
   const [lotsOverrideEnabled, setLotsOverrideEnabled] = useState(false);
   const [lotsRequested, setLotsRequested] = useState("");
-
+  const [notes, setNotes] = useState("");
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -611,6 +611,24 @@ const Calculator = () => {
               )}
             </div>
 
+            {/* Notes (Optional) */}
+            <div className="space-y-2">
+              <Label className={themeColors.subtext}>Notes (optional)</Label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Why this trade? Setup? Emotions?"
+                rows={3}
+                className={cn(
+                  "w-full px-4 py-3 rounded-xl text-base resize-none",
+                  themeColors.inputBg,
+                  themeColors.inputBorder,
+                  "border focus:outline-none focus:ring-2 focus:ring-offset-0",
+                  isNasrTheme ? 'focus:ring-gold/30' : 'focus:ring-aqua/30'
+                )}
+              />
+            </div>
+
             {/* Calculate Button */}
             <Button
               onClick={handleCalculate}
@@ -906,6 +924,8 @@ const Calculator = () => {
           accountBalance,
           riskType,
           riskValue,
+          lotsRequested: lotsOverrideEnabled ? lotsRequested : undefined,
+          notes,
         }}
         isNasrTheme={isNasrTheme}
       />
