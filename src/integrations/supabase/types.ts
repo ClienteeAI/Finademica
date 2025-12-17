@@ -831,6 +831,7 @@ export type Database = {
           last_activity_date: string | null
           level: number
           streak_days: number
+          total_achievements_unlocked: number
           user_id: string
           xp: number
         }
@@ -840,6 +841,7 @@ export type Database = {
           last_activity_date?: string | null
           level?: number
           streak_days?: number
+          total_achievements_unlocked?: number
           user_id: string
           xp?: number
         }
@@ -849,6 +851,7 @@ export type Database = {
           last_activity_date?: string | null
           level?: number
           streak_days?: number
+          total_achievements_unlocked?: number
           user_id?: string
           xp?: number
         }

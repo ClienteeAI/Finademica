@@ -48,7 +48,19 @@ const Progress = () => {
         return;
       }
 
-      const userId = user.id;
+      // Map auth user to public.users.id
+      const { data: publicUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      const userId = publicUser?.id;
+      if (!userId) {
+        console.error("No public user found for auth user");
+        setLoading(false);
+        return;
+      }
 
       try {
         // Fetch user stats

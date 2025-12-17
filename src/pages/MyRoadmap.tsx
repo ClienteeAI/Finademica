@@ -64,130 +64,140 @@ const MyRoadmap = () => {
         return;
       }
 
-      const userId = user.id;
-      
-      if (userId) {
-        // Fetch user gamification data
-        const { data: gamification } = await supabase
-          .from("user_gamification")
-          .select("level, experience_points, streak_days")
-          .eq("user_id", userId)
-          .maybeSingle();
-        
-        if (gamification) {
-          setUserStats({
-            level: gamification.level || 1,
-            xp: gamification.experience_points || 0,
-            streak: gamification.streak_days || 0
-          });
-        }
+      // Map auth user to public.users.id
+      const { data: publicUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
 
-        // Fetch video recommendations and completion status
-        const { data: recommendations } = await supabase
-          .from("user_video_recommendations")
-          .select("video_id, tier, priority")
-          .eq("user_id", userId)
-          .order("priority", { ascending: true });
-
-        const { data: videoViews } = await supabase
-          .from("video_views")
-          .select("video_id")
-          .eq("user_id", userId)
-          .eq("status", "completed");
-
-        const { data: videos } = await supabase
-          .from("videos")
-          .select("id, title, duration_seconds");
-
-        const completedIds = new Set(videoViews?.map(v => v.video_id) || []);
-        const videoMap = new Map(videos?.map(v => [v.id, v]) || []);
-
-        const freeVideos = recommendations?.filter(r => r.tier === 'free_to_watch') || [];
-        const lockedVideos = recommendations?.filter(r => r.tier === 'preview_only') || [];
-
-        const mapVideos = (recs: typeof freeVideos): VideoStep[] => {
-          return recs.map(rec => {
-            const video = videoMap.get(rec.video_id);
-            return {
-              id: rec.video_id,
-              title: video?.title || 'Unknown Video',
-              duration: video?.duration_seconds,
-              completed: completedIds.has(rec.video_id),
-              inProgress: false
-            };
-          }).filter(v => v.title !== 'Unknown Video');
-        };
-
-        const freeVideoSteps = mapVideos(freeVideos);
-        const lockedVideoSteps = mapVideos(lockedVideos);
-
-        const firstIncomplete = freeVideoSteps.findIndex(v => !v.completed);
-        if (firstIncomplete !== -1) {
-          freeVideoSteps[firstIncomplete].inProgress = true;
-        }
-
-        const phase1Videos = freeVideoSteps.slice(0, 8);
-        const phase2Videos = freeVideoSteps.slice(8, 15);
-
-        const phase1Completed = phase1Videos.filter(v => v.completed).length;
-        const phase2Completed = phase2Videos.filter(v => v.completed).length;
-        const phase1Complete = phase1Completed === phase1Videos.length && phase1Videos.length > 0;
-
-        const mountainLocations: MountainLocation[] = [
-          {
-            id: 4,
-            name: "MASTER SUMMIT",
-            emoji: "⛰️",
-            subtitle: "Elite Mastery",
-            description: "Professional institutional tactics & advanced portfolio management",
-            status: "locked",
-            requiresLiveAccount: true,
-            progress: 0,
-            totalVideos: 50,
-            completedVideos: 0,
-            videos: []
-          },
-          {
-            id: 3,
-            name: "STRATEGY PEAK",
-            emoji: "🏔️",
-            subtitle: "Advanced Strategies",
-            description: "Richard Dennis's $150M System, Game Theory, VWAP Analysis",
-            status: "locked",
-            requiresLiveAccount: true,
-            progress: 0,
-            totalVideos: lockedVideoSteps.length + 30,
-            completedVideos: 0,
-            videos: lockedVideoSteps.slice(0, 5)
-          },
-          {
-            id: 2,
-            name: "SKILLS VALLEY",
-            emoji: "⛺",
-            subtitle: "Building Foundation",
-            description: "Chart patterns, technical indicators & entry timing",
-            status: phase1Complete ? "active" : "locked",
-            progress: phase2Videos.length > 0 ? Math.round((phase2Completed / phase2Videos.length) * 100) : 0,
-            totalVideos: phase2Videos.length,
-            completedVideos: phase2Completed,
-            videos: phase2Videos
-          },
-          {
-            id: 1,
-            name: "BASE CAMP",
-            emoji: "🏕️",
-            subtitle: "Phase 1: Foundations",
-            description: "Your trading journey begins here",
-            status: phase1Complete ? "completed" : "active",
-            progress: phase1Videos.length > 0 ? Math.round((phase1Completed / phase1Videos.length) * 100) : 0,
-            totalVideos: phase1Videos.length,
-            completedVideos: phase1Completed,
-            videos: phase1Videos
-          }
-        ];
-
-        setLocations(mountainLocations);
+      const userId = publicUser?.id;
+      if (!userId) {
+        console.error("No public user found for auth user");
+        setIsLoading(false);
+        return;
       }
+      
+      // Fetch user gamification data
+      const { data: gamification } = await supabase
+        .from("user_gamification")
+        .select("level, experience_points, streak_days")
+        .eq("user_id", userId)
+        .maybeSingle();
+        
+      if (gamification) {
+        setUserStats({
+          level: gamification.level || 1,
+          xp: gamification.experience_points || 0,
+          streak: gamification.streak_days || 0
+        });
+      }
+
+      // Fetch video recommendations and completion status
+      const { data: recommendations } = await supabase
+        .from("user_video_recommendations")
+        .select("video_id, tier, priority")
+        .eq("user_id", userId)
+        .order("priority", { ascending: true });
+
+      const { data: videoViews } = await supabase
+        .from("video_views")
+        .select("video_id")
+        .eq("user_id", userId)
+        .eq("status", "completed");
+
+      const { data: videos } = await supabase
+        .from("videos")
+        .select("id, title, duration_seconds");
+
+      const completedIds = new Set(videoViews?.map(v => v.video_id) || []);
+      const videoMap = new Map(videos?.map(v => [v.id, v]) || []);
+
+      const freeVideos = recommendations?.filter(r => r.tier === 'free_to_watch') || [];
+      const lockedVideos = recommendations?.filter(r => r.tier === 'preview_only') || [];
+
+      const mapVideos = (recs: typeof freeVideos): VideoStep[] => {
+        return recs.map(rec => {
+          const video = videoMap.get(rec.video_id);
+          return {
+            id: rec.video_id,
+            title: video?.title || 'Unknown Video',
+            duration: video?.duration_seconds,
+            completed: completedIds.has(rec.video_id),
+            inProgress: false
+          };
+        }).filter(v => v.title !== 'Unknown Video');
+      };
+
+      const freeVideoSteps = mapVideos(freeVideos);
+      const lockedVideoSteps = mapVideos(lockedVideos);
+
+      const firstIncomplete = freeVideoSteps.findIndex(v => !v.completed);
+      if (firstIncomplete !== -1) {
+        freeVideoSteps[firstIncomplete].inProgress = true;
+      }
+
+      const phase1Videos = freeVideoSteps.slice(0, 8);
+      const phase2Videos = freeVideoSteps.slice(8, 15);
+
+      const phase1Completed = phase1Videos.filter(v => v.completed).length;
+      const phase2Completed = phase2Videos.filter(v => v.completed).length;
+      const phase1Complete = phase1Completed === phase1Videos.length && phase1Videos.length > 0;
+
+      const mountainLocations: MountainLocation[] = [
+        {
+          id: 4,
+          name: "MASTER SUMMIT",
+          emoji: "⛰️",
+          subtitle: "Elite Mastery",
+          description: "Professional institutional tactics & advanced portfolio management",
+          status: "locked",
+          requiresLiveAccount: true,
+          progress: 0,
+          totalVideos: 50,
+          completedVideos: 0,
+          videos: []
+        },
+        {
+          id: 3,
+          name: "STRATEGY PEAK",
+          emoji: "🏔️",
+          subtitle: "Advanced Strategies",
+          description: "Richard Dennis's $150M System, Game Theory, VWAP Analysis",
+          status: "locked",
+          requiresLiveAccount: true,
+          progress: 0,
+          totalVideos: lockedVideoSteps.length + 30,
+          completedVideos: 0,
+          videos: lockedVideoSteps.slice(0, 5)
+        },
+        {
+          id: 2,
+          name: "SKILLS VALLEY",
+          emoji: "⛺",
+          subtitle: "Building Foundation",
+          description: "Chart patterns, technical indicators & entry timing",
+          status: phase1Complete ? "active" : "locked",
+          progress: phase2Videos.length > 0 ? Math.round((phase2Completed / phase2Videos.length) * 100) : 0,
+          totalVideos: phase2Videos.length,
+          completedVideos: phase2Completed,
+          videos: phase2Videos
+        },
+        {
+          id: 1,
+          name: "BASE CAMP",
+          emoji: "🏕️",
+          subtitle: "Phase 1: Foundations",
+          description: "Your trading journey begins here",
+          status: phase1Complete ? "completed" : "active",
+          progress: phase1Videos.length > 0 ? Math.round((phase1Completed / phase1Videos.length) * 100) : 0,
+          totalVideos: phase1Videos.length,
+          completedVideos: phase1Completed,
+          videos: phase1Videos
+        }
+      ];
+
+      setLocations(mountainLocations);
 
       setIsLoading(false);
     };
