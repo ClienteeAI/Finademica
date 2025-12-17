@@ -2,27 +2,14 @@ import { useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
-import { useLogEvent } from "@/hooks/useLogEvent";
 
-const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/14bc5880-e57c-44ce-9980-5caf53bf2e53";
-
-interface WebhookResponse {
-  achievements_unlocked?: Array<{
-    name: string;
-    icon: string;
-    description?: string;
-  }>;
-  level_up?: boolean;
-  level?: number;
-  points_earned?: number;
-  already_completed?: boolean;
-}
-
-export const useVideoCompletion = (videoId: string | undefined, videoTitle?: string) => {
+export const useVideoCompletion = (
+  videoId: string | undefined, 
+  videoTitle?: string,
+  onEventLogged?: () => void
+) => {
   const hasTriggeredRef = useRef(false);
-  const [unlockedAchievements, setUnlockedAchievements] = useState<WebhookResponse["achievements_unlocked"]>([]);
-  const [levelUpData, setLevelUpData] = useState<{ show: boolean; level: number }>({ show: false, level: 0 });
-  const { logEvent } = useLogEvent();
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const triggerConfetti = useCallback(() => {
     const colors = ["#22d3ee", "#3b82f6", "#a855f7", "#f59e0b"];
@@ -35,137 +22,122 @@ export const useVideoCompletion = (videoId: string | undefined, videoTitle?: str
   }, []);
 
   const handleVideoEnd = useCallback(async () => {
-    if (hasTriggeredRef.current || !videoId) return;
+    if (hasTriggeredRef.current || !videoId || isCompleting) return;
+
+    setIsCompleting(true);
 
     try {
-      // Get user from Supabase Auth
-      const { data: { user } } = await supabase.auth.getUser();
+      // 1. Get auth user ID
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
       
-      if (!user) {
-        console.error("No authenticated user found");
+      if (authError || !user) {
         toast({
-          title: "Error",
-          description: "Please log in to track your progress",
+          title: "Authentication required",
+          description: authError?.message || "Please log in to track your progress",
           variant: "destructive",
         });
+        setIsCompleting(false);
         return;
       }
 
-      // Map auth user to public.users.id
-      const { data: publicUser } = await supabase
+      const authUid = user.id;
+
+      // 2. Get profile_id from public.users
+      const { data: publicUser, error: userError } = await supabase
         .from("users")
         .select("id")
-        .eq("auth_user_id", user.id)
+        .eq("auth_user_id", authUid)
         .maybeSingle();
 
-      const userId = publicUser?.id;
-      if (!userId) {
-        console.error("No public user found for auth user");
+      if (userError || !publicUser?.id) {
+        toast({
+          title: "User profile not found",
+          description: userError?.message || "Could not find your user profile",
+          variant: "destructive",
+        });
+        setIsCompleting(false);
         return;
       }
 
-      // Call Supabase complete_video function
-      const { data: statsResult, error: statsError } = await supabase
-        .rpc("complete_video", {
-          p_user_id: userId,
-          p_video_id: videoId,
-          p_points: 25
-        });
+      const profileId = publicUser.id;
 
-      if (statsError) {
-        console.error("Error updating user stats:", statsError);
+      // 3. Upsert into video_views (repeated clicks won't error)
+      const { error: viewError } = await supabase
+        .from("video_views")
+        .upsert(
+          {
+            user_id: profileId,
+            video_id: videoId,
+            status: "completed",
+            completed_at: new Date().toISOString(),
+          },
+          { onConflict: "user_id,video_id" }
+        );
+
+      if (viewError) {
+        console.error("Error upserting video_views:", viewError);
+        toast({
+          title: "Failed to save progress",
+          description: viewError.message,
+          variant: "destructive",
+        });
+        setIsCompleting(false);
+        return;
       }
 
-      // Send webhook and get response
-      const payload = {
-        user: { id: userId },
-        video: { id: videoId }
-      };
+      // 4. Insert into user_events for XP tracking (ignore if already exists)
+      const { error: eventError } = await supabase
+        .from("user_events")
+        .insert({
+          auth_user_id: authUid,
+          user_id: profileId,
+          event_type: "video_completed",
+          event_value: JSON.stringify({ 
+            video_id: videoId, 
+            video_title: videoTitle || "Unknown" 
+          }),
+          points: 0, // Points handled by DB triggers
+        });
 
-      console.log("Sending video completion webhook:", payload);
-
-      const response = await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      // Don't fail if event already exists (duplicate completion)
+      if (eventError && !eventError.message.includes("duplicate")) {
+        console.warn("Event logging error:", eventError.message);
+      }
 
       hasTriggeredRef.current = true;
 
-      // Log event to user_events
-      await logEvent("video_completed", { video_id: videoId, video_title: videoTitle || "Unknown" });
+      // 5. Success - show toast and confetti
+      triggerConfetti();
+      toast({
+        title: "Lesson completed!",
+        description: "Your progress has been saved.",
+        duration: 3000,
+      });
 
-      // Try to parse response for achievements
-      let webhookResult: WebhookResponse = {};
-      try {
-        webhookResult = await response.json();
-        console.log("Webhook response:", webhookResult);
-      } catch (e) {
-        console.log("Could not parse webhook response as JSON");
+      // 6. Refresh XP widget
+      if (onEventLogged) {
+        onEventLogged();
       }
 
-      // Handle achievements
-      if (webhookResult.achievements_unlocked && webhookResult.achievements_unlocked.length > 0) {
-        setUnlockedAchievements(webhookResult.achievements_unlocked);
-        webhookResult.achievements_unlocked.forEach((_, index) => {
-          setTimeout(() => {
-            triggerConfetti();
-          }, index * 500);
-        });
-      }
-
-      // Handle level up
-      if (webhookResult.level_up && webhookResult.level) {
-        setTimeout(() => {
-          setLevelUpData({ show: true, level: webhookResult.level! });
-          triggerConfetti();
-        }, webhookResult.achievements_unlocked?.length ? webhookResult.achievements_unlocked.length * 500 + 500 : 500);
-      }
-
-      // Show XP toast if not already completed
-      if (!webhookResult.already_completed) {
-        const points = webhookResult.points_earned || 25;
-        toast({
-          title: "Lesson completed",
-          description: `+${points} XP earned! Keep learning to level up.`,
-          duration: 3000
-        });
-      } else {
-        toast({
-          title: "Already completed",
-          description: "You've already completed this video.",
-          duration: 3000
-        });
-      }
-      
-    } catch (error) {
-      console.error("Failed to send video completion event:", error);
+    } catch (error: any) {
+      console.error("Failed to mark video as complete:", error);
       toast({
         title: "Error",
-        description: "Failed to mark video as complete",
+        description: error?.message || "Failed to mark video as complete",
         variant: "destructive",
       });
+    } finally {
+      setIsCompleting(false);
     }
-  }, [videoId, triggerConfetti]);
+  }, [videoId, videoTitle, triggerConfetti, onEventLogged, isCompleting]);
 
   const resetCompletion = useCallback(() => {
     hasTriggeredRef.current = false;
   }, []);
 
-  const dismissAchievement = useCallback((index: number) => {
-    setUnlockedAchievements((prev) => prev?.filter((_, i) => i !== index));
-  }, []);
-
-  const dismissLevelUp = useCallback(() => {
-    setLevelUpData({ show: false, level: 0 });
-  }, []);
-
   return { 
     handleVideoEnd, 
-    resetCompletion, 
-    unlockedAchievements, 
-    levelUpData,
-    dismissAchievement,
-    dismissLevelUp
+    resetCompletion,
+    isCompleting,
   };
 };
