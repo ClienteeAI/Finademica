@@ -173,7 +173,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
         source: "lovable_quiz"
       };
 
-      await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+      await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(quizPayload),
