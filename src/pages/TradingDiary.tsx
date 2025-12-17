@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, Search, Calendar, TrendingUp, TrendingDown, Filter, X, Loader2 } from "lucide-react";
+import { BookOpen, Search, Calendar, TrendingUp, TrendingDown, Filter, X, Loader2, Plus } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -102,11 +102,24 @@ const TradingDiary = () => {
         }
       );
 
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setEntries(data);
-      } else if (data.entries && Array.isArray(data.entries)) {
-        setEntries(data.entries);
+      if (response.ok) {
+        const text = await response.text();
+        console.log('Diary response text:', text);
+        if (text) {
+          try {
+            const data = JSON.parse(text);
+            console.log('Diary parsed data:', data);
+            if (Array.isArray(data)) {
+              setEntries(data);
+            } else if (data.entries && Array.isArray(data.entries)) {
+              setEntries(data.entries);
+            } else if (data.trades && Array.isArray(data.trades)) {
+              setEntries(data.trades);
+            }
+          } catch (e) {
+            console.error('Failed to parse diary response:', e);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to fetch diary entries:', error);
@@ -164,7 +177,7 @@ const TradingDiary = () => {
 
       <div className="space-y-8 relative z-10">
         {/* Header */}
-        <div className="space-y-3 animate-slide-up">
+        <div className="flex items-center justify-between animate-slide-up">
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-12 h-12 rounded-xl flex items-center justify-center",
@@ -181,6 +194,18 @@ const TradingDiary = () => {
               </p>
             </div>
           </div>
+          <Button
+            onClick={() => navigate('/calculator')}
+            className={cn(
+              "h-11 px-5 text-base font-semibold rounded-xl transition-all",
+              isNasrTheme 
+                ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
+                : 'success-gradient text-white hover:opacity-90 success-glow'
+            )}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Add Trade
+          </Button>
         </div>
 
         {/* Filters */}
