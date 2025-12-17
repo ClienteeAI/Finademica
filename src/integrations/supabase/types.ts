@@ -671,6 +671,7 @@ export type Database = {
       }
       trading_diary_trades: {
         Row: {
+          auth_user_id: string
           broker_key: string
           created_at: string
           entry_price: number | null
@@ -690,6 +691,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auth_user_id: string
           broker_key?: string
           created_at?: string
           entry_price?: number | null
@@ -709,6 +711,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auth_user_id?: string
           broker_key?: string
           created_at?: string
           entry_price?: number | null
