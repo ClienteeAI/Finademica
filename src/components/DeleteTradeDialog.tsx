@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -9,7 +8,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -32,9 +33,19 @@ export const DeleteTradeDialog = ({
 }: DeleteTradeDialogProps) => {
   const { toast } = useToast();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [confirmText, setConfirmText] = useState("");
+
+  const isConfirmed = confirmText === "DELETE";
+
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      setConfirmText("");
+    }
+    onOpenChange(open);
+  };
 
   const handleDelete = async () => {
-    if (!tradeId) return;
+    if (!tradeId || !isConfirmed) return;
 
     setIsDeleting(true);
 
@@ -55,6 +66,7 @@ export const DeleteTradeDialog = ({
       action: "delete",
       user_id: userId || "unknown",
       trade_id: tradeId,
+      symbol: tradeSymbol,
     };
 
     try {
@@ -75,6 +87,7 @@ export const DeleteTradeDialog = ({
           title: "Trade deleted",
           description: "Your trade has been removed from the diary.",
         });
+        setConfirmText("");
         onOpenChange(false);
         onSuccess();
       } else {
@@ -97,7 +110,7 @@ export const DeleteTradeDialog = ({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={handleClose}>
       <AlertDialogContent className={cn(
         "backdrop-blur-xl border",
         isNasrTheme 
@@ -105,17 +118,47 @@ export const DeleteTradeDialog = ({
           : 'bg-white/95 border-ice'
       )}>
         <AlertDialogHeader>
-          <AlertDialogTitle className={cn(
-            isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
-          )}>
-            Delete Trade
-          </AlertDialogTitle>
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "p-2 rounded-full",
+              isNasrTheme ? 'bg-red-500/20' : 'bg-destructive/10'
+            )}>
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+            </div>
+            <AlertDialogTitle className={cn(
+              isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
+            )}>
+              Delete Trade
+            </AlertDialogTitle>
+          </div>
           <AlertDialogDescription className={cn(
+            "pt-2",
             isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'
           )}>
             Are you sure you want to delete the trade for <span className="font-semibold">{tradeSymbol}</span>? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
+
+        <div className="py-4 space-y-2">
+          <p className={cn(
+            "text-sm",
+            isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'
+          )}>
+            Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm:
+          </p>
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="Type DELETE here"
+            className={cn(
+              "font-mono",
+              isNasrTheme 
+                ? 'bg-nasr-bg/60 border-gold/20 text-nasr-text' 
+                : 'bg-white/60 border-ice'
+            )}
+          />
+        </div>
+
         <AlertDialogFooter>
           <AlertDialogCancel 
             disabled={isDeleting}
@@ -128,10 +171,11 @@ export const DeleteTradeDialog = ({
           >
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
+          <Button
             onClick={handleDelete}
-            disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            disabled={isDeleting || !isConfirmed}
+            variant="destructive"
+            className="rounded-xl"
           >
             {isDeleting ? (
               <>
@@ -139,9 +183,9 @@ export const DeleteTradeDialog = ({
                 Deleting...
               </>
             ) : (
-              "Delete"
+              "Delete Trade"
             )}
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
