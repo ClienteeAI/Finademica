@@ -10,6 +10,7 @@ interface UserProfile {
   client_id: string;
   is_admin: boolean | null;
   phone: string | null;
+  quiz_answers: Record<string, unknown> | null;
 }
 
 interface AuthContextType {

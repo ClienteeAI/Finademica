@@ -49,9 +49,9 @@ const getLevelTitle = (level: number): string => {
   return "Master Trader";
 };
 
-// Calculate XP needed for next level (simple formula)
+// Calculate XP needed for next level (150 XP per level)
 const getXPForLevel = (level: number): number => {
-  return level * 100;
+  return level * 150;
 };
 
 export function GamificationSection() {
