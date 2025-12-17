@@ -1023,6 +1023,71 @@ export type Database = {
           },
         ]
       }
+      user_xp: {
+        Row: {
+          auth_user_id: string
+          level: number
+          updated_at: string
+          xp_total: number
+        }
+        Insert: {
+          auth_user_id: string
+          level?: number
+          updated_at?: string
+          xp_total?: number
+        }
+        Update: {
+          auth_user_id?: string
+          level?: number
+          updated_at?: string
+          xp_total?: number
+        }
+        Relationships: []
+      }
+      user_xp_events: {
+        Row: {
+          action_key: string | null
+          auth_user_id: string
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json
+          ref_id: string | null
+          xp_amount: number | null
+          xp_awarded: number
+        }
+        Insert: {
+          action_key?: string | null
+          auth_user_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json
+          ref_id?: string | null
+          xp_amount?: number | null
+          xp_awarded?: number
+        }
+        Update: {
+          action_key?: string | null
+          auth_user_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json
+          ref_id?: string | null
+          xp_amount?: number | null
+          xp_awarded?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_xp_events_user_id_fkey"
+            columns: ["auth_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           account_opened_at: string | null
@@ -1225,11 +1290,84 @@ export type Database = {
           },
         ]
       }
+      xp_actions: {
+        Row: {
+          action_key: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          xp_points: number
+        }
+        Insert: {
+          action_key: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          xp_points: number
+        }
+        Update: {
+          action_key?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          xp_points?: number
+        }
+        Relationships: []
+      }
+      xp_levels: {
+        Row: {
+          level: number
+          min_xp: number
+        }
+        Insert: {
+          level: number
+          min_xp: number
+        }
+        Update: {
+          level?: number
+          min_xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      xp_rules: {
+        Row: {
+          action_key: string | null
+          is_active: boolean | null
+          xp_points: number | null
+        }
+        Insert: {
+          action_key?: string | null
+          is_active?: boolean | null
+          xp_points?: number | null
+        }
+        Update: {
+          action_key?: string | null
+          is_active?: boolean | null
+          xp_points?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      award_xp:
+        | {
+            Args: {
+              p_action_key: string
+              p_auth_user_id: string
+              p_meta?: Json
+            }
+            Returns: Json
+          }
+        | {
+            Args: { p_event_type: string; p_meta?: Json; p_ref_id?: string }
+            Returns: Json
+          }
+      calc_level_from_xp: { Args: { p_xp: number }; Returns: number }
       complete_video: {
         Args: { p_points: number; p_user_id: string; p_video_id: string }
         Returns: Json
