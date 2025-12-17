@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X, Save, BookOpen } from "lucide-react";
+import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X, Save, BookOpen, BarChart3, Activity, FileText } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
@@ -40,101 +39,69 @@ interface FormErrors {
 }
 
 // Tick vs Pip Info Content Component
-const TickPipInfoContent = ({ isNasrTheme }: { isNasrTheme: boolean }) => {
-  const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text' : 'text-ocean',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
-    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="space-y-3">
-        <div>
-          <h4 className={cn("font-semibold text-sm", themeColors.heading)}>Tick</h4>
-          <p className={cn("text-sm mt-1", themeColors.subtext)}>
-            A tick is the smallest price step for the instrument (from broker specs).
-            "1 Tick Movement" shows how much your P/L changes when price moves by 1 tick, for your current lot size.
-          </p>
-        </div>
-        <div>
-          <h4 className={cn("font-semibold text-sm", themeColors.heading)}>Pip</h4>
-          <p className={cn("text-sm mt-1", themeColors.subtext)}>
-            A pip is a standard Forex unit. For most pairs: 1 pip = 0.0001.
-            On 5-digit pricing, 1 pip = 10 ticks.
-            "1 Pip Movement" shows how much your P/L changes when price moves by 1 pip, for your current lot size.
-          </p>
-        </div>
+const TickPipInfoContent = () => (
+  <div className="space-y-4">
+    <div className="space-y-3">
+      <div>
+        <h4 className="font-semibold text-sm text-white">Tick</h4>
+        <p className="text-sm mt-1 text-slate-400">
+          A tick is the smallest price step for the instrument (from broker specs).
+          "1 Tick Movement" shows how much your P/L changes when price moves by 1 tick, for your current lot size.
+        </p>
       </div>
-
-      <Accordion type="single" collapsible className="w-full">
-        <AccordionItem value="learn-more" className="border-none">
-          <AccordionTrigger className={cn(
-            "text-sm py-2 hover:no-underline",
-            themeColors.primary
-          )}>
-            Learn more
-          </AccordionTrigger>
-          <AccordionContent className={cn("text-sm", themeColors.subtext)}>
-            On instruments with 5-digit pricing (like EURUSD at 1.08525), the last digit represents a "point" or "pipette". 
-            In this case, 1 pip = 10 ticks. For indices and commodities, the relationship between pips and ticks varies by instrument. 
-            The calculator uses broker-specific tick values to ensure accurate calculations.
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+      <div>
+        <h4 className="font-semibold text-sm text-white">Pip</h4>
+        <p className="text-sm mt-1 text-slate-400">
+          A pip is a standard Forex unit. For most pairs: 1 pip = 0.0001.
+          On 5-digit pricing, 1 pip = 10 ticks.
+          "1 Pip Movement" shows how much your P/L changes when price moves by 1 pip, for your current lot size.
+        </p>
+      </div>
     </div>
-  );
-};
+
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value="learn-more" className="border-none">
+        <AccordionTrigger className="text-sm py-2 hover:no-underline text-yellow-400">
+          Learn more
+        </AccordionTrigger>
+        <AccordionContent className="text-sm text-slate-400">
+          On instruments with 5-digit pricing (like EURUSD at 1.08525), the last digit represents a "point" or "pipette". 
+          In this case, 1 pip = 10 ticks. For indices and commodities, the relationship between pips and ticks varies by instrument. 
+          The calculator uses broker-specific tick values to ensure accurate calculations.
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </div>
+);
 
 // Info Tooltip Component (Popover on desktop, Drawer on mobile)
-const InfoTooltip = ({ isNasrTheme }: { isNasrTheme: boolean }) => {
+const InfoTooltip = () => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
   const triggerButton = (
-    <button
-      className={cn(
-        "w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200",
-        isNasrTheme 
-          ? 'bg-nasr-panel/60 border border-gold/20 hover:border-gold/50 hover:shadow-[0_0_8px_rgba(212,175,55,0.3)]' 
-          : 'bg-white/60 border border-ice hover:border-aqua/50 hover:shadow-[0_0_8px_rgba(77,226,232,0.3)]'
-      )}
-    >
-      <Info className={cn("w-3.5 h-3.5", isNasrTheme ? 'text-gold/70' : 'text-aqua/70')} />
+    <button className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 bg-slate-800/60 border border-slate-700 hover:border-yellow-500/50 hover:shadow-[0_0_8px_rgba(234,179,8,0.3)]">
+      <Info className="w-3.5 h-3.5 text-yellow-500/70" />
     </button>
   );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
-        <button onClick={() => setOpen(true)}>
-          {triggerButton}
-        </button>
-        <DrawerContent className={cn(
-          isNasrTheme 
-            ? 'bg-nasr-panel border-gold/20' 
-            : 'bg-white border-ice'
-        )}>
+        <button onClick={() => setOpen(true)}>{triggerButton}</button>
+        <DrawerContent className="bg-slate-900 border-slate-700">
           <DrawerHeader className="relative">
-            <DrawerTitle className={cn(
-              "text-lg font-semibold",
-              isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
-            )}>
+            <DrawerTitle className="text-lg font-semibold text-white">
               Tick vs Pip
             </DrawerTitle>
             <DrawerClose asChild>
-              <button className={cn(
-                "absolute right-4 top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-                isNasrTheme 
-                  ? 'hover:bg-gold/10 text-nasr-text-muted' 
-                  : 'hover:bg-muted text-ocean-muted'
-              )}>
+              <button className="absolute right-4 top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-slate-800 text-slate-400">
                 <X className="w-4 h-4" />
               </button>
             </DrawerClose>
           </DrawerHeader>
           <div className="px-4 pb-6">
-            <TickPipInfoContent isNasrTheme={isNasrTheme} />
+            <TickPipInfoContent />
           </div>
         </DrawerContent>
       </Drawer>
@@ -143,39 +110,19 @@ const InfoTooltip = ({ isNasrTheme }: { isNasrTheme: boolean }) => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        {triggerButton}
-      </PopoverTrigger>
-      <PopoverContent 
-        className={cn(
-          "w-80 p-0 backdrop-blur-xl",
-          isNasrTheme 
-            ? 'bg-nasr-panel/95 border-gold/20' 
-            : 'bg-white/95 border-ice'
-        )}
-        align="end"
-      >
+      <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
+      <PopoverContent className="w-80 p-0 backdrop-blur-xl bg-slate-900/95 border-slate-700" align="end">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className={cn(
-              "font-semibold",
-              isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
-            )}>
-              Tick vs Pip
-            </h3>
+            <h3 className="font-semibold text-white">Tick vs Pip</h3>
             <button 
               onClick={() => setOpen(false)}
-              className={cn(
-                "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
-                isNasrTheme 
-                  ? 'hover:bg-gold/10 text-nasr-text-muted' 
-                  : 'hover:bg-muted text-ocean-muted'
-              )}
+              className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:bg-slate-800 text-slate-400"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
-          <TickPipInfoContent isNasrTheme={isNasrTheme} />
+          <TickPipInfoContent />
         </div>
       </PopoverContent>
     </Popover>
@@ -202,24 +149,12 @@ const Calculator = () => {
   const [lotsOverrideEnabled, setLotsOverrideEnabled] = useState(false);
   const [lotsRequested, setLotsRequested] = useState("");
   const [notes, setNotes] = useState("");
+  
   // UI state
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saveDiaryOpen, setSaveDiaryOpen] = useState(false);
-
-  // Theme-aware colors
-  const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
-    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
-    primaryBg: isNasrTheme ? 'bg-gold' : 'bg-aqua',
-    cardBorder: isNasrTheme ? 'border-gold/20' : 'border-ice',
-    inputBg: isNasrTheme ? 'bg-nasr-panel/60' : 'bg-white/60',
-    inputBorder: isNasrTheme ? 'border-gold/20 focus:border-gold/50' : 'border-ice focus:border-aqua/50',
-    toggleActive: isNasrTheme ? 'bg-gold text-nasr-bg' : 'bg-aqua text-white',
-    toggleInactive: isNasrTheme ? 'bg-nasr-panel/60 text-nasr-text-muted' : 'bg-muted text-ocean-muted',
-  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -282,7 +217,6 @@ const Calculator = () => {
     setResult(null);
     setErrors({});
 
-    // Get user_id from Supabase auth
     const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id || "unknown";
 
@@ -339,76 +273,89 @@ const Calculator = () => {
       type="button"
       onClick={onClick}
       className={cn(
-        "flex-1 py-2.5 px-4 rounded-lg text-sm font-semibold transition-all duration-200",
+        "flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300",
         active 
-          ? themeColors.toggleActive
-          : themeColors.toggleInactive + " hover:opacity-80"
+          ? "bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-slate-900 shadow-lg shadow-yellow-500/30"
+          : "bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50"
       )}
     >
       {children}
     </button>
   );
 
+  // Risk color helper
+  const getRiskColor = (riskUsd: number, balance: number | null) => {
+    if (!balance) return "text-white";
+    const riskPercent = (riskUsd / balance) * 100;
+    if (riskPercent <= 1) return "text-green-400";
+    if (riskPercent <= 2) return "text-yellow-400";
+    return "text-red-400";
+  };
+
   return (
     <DashboardLayout>
-      {/* Nasr Trade Academy Video Background */}
-      {isNasrTheme && (
-        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute w-full h-full object-cover opacity-30"
-          >
-            <source src="/nasr-background.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
-        </div>
-      )}
+      {/* Premium Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        {isNasrTheme ? (
+          <>
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute w-full h-full object-cover opacity-30"
+            >
+              <source src="/nasr-background.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900" />
+        )}
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+        }} />
+      </div>
 
-      <div className="space-y-8 relative z-10">
+      <div className="relative z-10 max-w-[1400px] mx-auto space-y-8 px-4 md:px-6">
         {/* Header */}
-        <div className="space-y-3 animate-slide-up">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-12 h-12 rounded-xl flex items-center justify-center",
-              isNasrTheme ? 'bg-gold/10' : 'bg-aqua/10'
-            )}>
-              <CalcIcon className={cn("w-6 h-6", themeColors.primary)} />
-            </div>
-            <div>
-              <h1 className={cn("text-4xl md:text-5xl font-bold tracking-tight", themeColors.heading)}>
-                Position Size Calculator
-              </h1>
-              <p className={cn("text-base mt-1", themeColors.subtext)}>
-                Calculate optimal lot size based on your risk parameters
-              </p>
-            </div>
+        <div className="text-center space-y-4 pt-4 animate-fade-in">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-500/20 mb-4 animate-pulse">
+            <CalcIcon className="w-8 h-8 text-yellow-400" />
           </div>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 bg-clip-text text-transparent">
+            Position Size Calculator
+          </h1>
+          <p className="text-slate-400 text-lg max-w-xl mx-auto">
+            Calculate optimal lot size based on your risk parameters
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Form Card */}
-          <Card className={cn("p-8 space-y-6", isNasrTheme && "bg-nasr-panel/80 border-gold/20")}>
-            <h2 className={cn("text-xl font-semibold", themeColors.heading)}>Trade Parameters</h2>
+        {/* Trade Parameters Card */}
+        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl shadow-blue-500/10 p-6 md:p-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-yellow-400" />
+            </div>
+            Trade Parameters
+          </h2>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Symbol */}
             <div className="space-y-2">
-              <Label className={themeColors.subtext}>Symbol *</Label>
+              <Label className="text-slate-400 text-sm font-medium">Symbol *</Label>
               <Input
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
                 placeholder="e.g., EURUSD, XAUUSD, US30"
                 className={cn(
-                  "h-12 text-base",
-                  themeColors.inputBg,
-                  themeColors.inputBorder,
-                  errors.symbol && "border-destructive"
+                  "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all",
+                  errors.symbol && "border-red-500"
                 )}
               />
               {errors.symbol && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-sm text-red-400 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.symbol}
                 </p>
               )}
@@ -416,11 +363,8 @@ const Calculator = () => {
 
             {/* Side Toggle */}
             <div className="space-y-2">
-              <Label className={themeColors.subtext}>Side *</Label>
-              <div className={cn(
-                "flex gap-1 p-1 rounded-xl",
-                isNasrTheme ? 'bg-nasr-bg/60' : 'bg-muted/60'
-              )}>
+              <Label className="text-slate-400 text-sm font-medium">Side *</Label>
+              <div className="flex gap-2 p-1.5 rounded-xl bg-slate-800/30 border border-slate-700/50">
                 <ToggleButton active={side === "long"} onClick={() => setSide("long")}>
                   <span className="flex items-center justify-center gap-2">
                     <TrendingUp className="w-4 h-4" /> Long
@@ -434,10 +378,10 @@ const Calculator = () => {
               </div>
             </div>
 
-            {/* Entry & Stop Loss */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className={themeColors.subtext}>Entry Price *</Label>
+            {/* Entry Price */}
+            <div className="space-y-2">
+              <Label className="text-slate-400 text-sm font-medium">Entry Price *</Label>
+              <div className="relative">
                 <Input
                   type="number"
                   step="any"
@@ -445,20 +389,23 @@ const Calculator = () => {
                   onChange={(e) => setEntryPrice(e.target.value)}
                   placeholder="0.00"
                   className={cn(
-                    "h-12 text-base font-mono",
-                    themeColors.inputBg,
-                    themeColors.inputBorder,
-                    errors.entry_price && "border-destructive"
+                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
+                    errors.entry_price && "border-red-500"
                   )}
                 />
-                {errors.entry_price && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" /> {errors.entry_price}
-                  </p>
-                )}
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
               </div>
-              <div className="space-y-2">
-                <Label className={themeColors.subtext}>Stop Loss Price *</Label>
+              {errors.entry_price && (
+                <p className="text-sm text-red-400 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> {errors.entry_price}
+                </p>
+              )}
+            </div>
+
+            {/* Stop Loss Price */}
+            <div className="space-y-2">
+              <Label className="text-slate-400 text-sm font-medium">Stop Loss Price *</Label>
+              <div className="relative">
                 <Input
                   type="number"
                   step="any"
@@ -466,51 +413,54 @@ const Calculator = () => {
                   onChange={(e) => setStopLossPrice(e.target.value)}
                   placeholder="0.00"
                   className={cn(
-                    "h-12 text-base font-mono",
-                    themeColors.inputBg,
-                    themeColors.inputBorder,
-                    errors.stop_loss_price && "border-destructive"
+                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
+                    errors.stop_loss_price && "border-red-500"
                   )}
                 />
-                {errors.stop_loss_price && (
-                  <p className="text-sm text-destructive flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" /> {errors.stop_loss_price}
-                  </p>
-                )}
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
               </div>
+              {errors.stop_loss_price && (
+                <p className="text-sm text-red-400 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> {errors.stop_loss_price}
+                </p>
+              )}
             </div>
 
             {/* Take Profit (Optional) */}
             <div className="space-y-2">
-              <Label className={themeColors.subtext}>Take Profit Price (Optional)</Label>
-              <Input
-                type="number"
-                step="any"
-                value={takeProfitPrice}
-                onChange={(e) => setTakeProfitPrice(e.target.value)}
-                placeholder="0.00"
-                className={cn("h-12 text-base font-mono", themeColors.inputBg, themeColors.inputBorder)}
-              />
+              <Label className="text-slate-400 text-sm font-medium">Take Profit Price (Optional)</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  step="any"
+                  value={takeProfitPrice}
+                  onChange={(e) => setTakeProfitPrice(e.target.value)}
+                  placeholder="0.00"
+                  className="h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10"
+                />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+              </div>
             </div>
 
             {/* Account Balance */}
             <div className="space-y-2">
-              <Label className={themeColors.subtext}>Account Balance (USD) *</Label>
-              <Input
-                type="number"
-                step="any"
-                value={accountBalance}
-                onChange={(e) => setAccountBalance(e.target.value)}
-                placeholder="10000"
-                className={cn(
-                  "h-12 text-base font-mono",
-                  themeColors.inputBg,
-                  themeColors.inputBorder,
-                  errors.account_balance && "border-destructive"
-                )}
-              />
+              <Label className="text-slate-400 text-sm font-medium">Account Balance (USD) *</Label>
+              <div className="relative">
+                <Input
+                  type="number"
+                  step="any"
+                  value={accountBalance}
+                  onChange={(e) => setAccountBalance(e.target.value)}
+                  placeholder="10000"
+                  className={cn(
+                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
+                    errors.account_balance && "border-red-500"
+                  )}
+                />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+              </div>
               {errors.account_balance && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-sm text-red-400 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.account_balance}
                 </p>
               )}
@@ -518,11 +468,8 @@ const Calculator = () => {
 
             {/* Risk Type Toggle */}
             <div className="space-y-2">
-              <Label className={themeColors.subtext}>Risk Type *</Label>
-              <div className={cn(
-                "flex gap-1 p-1 rounded-xl",
-                isNasrTheme ? 'bg-nasr-bg/60' : 'bg-muted/60'
-              )}>
+              <Label className="text-slate-400 text-sm font-medium">Risk Type *</Label>
+              <div className="flex gap-2 p-1.5 rounded-xl bg-slate-800/30 border border-slate-700/50">
                 <ToggleButton active={riskType === "percent"} onClick={() => setRiskType("percent")}>
                   Percent %
                 </ToggleButton>
@@ -534,373 +481,295 @@ const Calculator = () => {
 
             {/* Risk Value */}
             <div className="space-y-2">
-              <Label className={themeColors.subtext}>
+              <Label className="text-slate-400 text-sm font-medium">
                 Risk Value ({riskType === "percent" ? "%" : "USD"}) *
               </Label>
-              <Input
-                type="number"
-                step="any"
-                value={riskValue}
-                onChange={(e) => setRiskValue(e.target.value)}
-                placeholder={riskType === "percent" ? "1" : "100"}
-                className={cn(
-                  "h-12 text-base font-mono",
-                  themeColors.inputBg,
-                  themeColors.inputBorder,
-                  errors.risk_value && "border-destructive"
-                )}
-              />
+              <div className="relative">
+                <Input
+                  type="number"
+                  step="any"
+                  value={riskValue}
+                  onChange={(e) => setRiskValue(e.target.value)}
+                  placeholder={riskType === "percent" ? "1" : "100"}
+                  className={cn(
+                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
+                    errors.risk_value && "border-red-500"
+                  )}
+                />
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                  {riskType === "percent" ? "%" : "$"}
+                </span>
+              </div>
               {errors.risk_value && (
-                <p className="text-sm text-destructive flex items-center gap-1">
+                <p className="text-sm text-red-400 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.risk_value}
                 </p>
               )}
-              <p className={cn("text-xs", themeColors.subtext)}>
+              <p className="text-xs text-slate-500">
                 {riskType === "percent" 
                   ? "Percentage of account balance to risk" 
                   : "Fixed USD amount to risk"}
               </p>
             </div>
+          </div>
 
-            {/* Lots Override */}
-            <div className={cn(
-              "p-4 rounded-xl space-y-4",
-              isNasrTheme ? 'bg-nasr-bg/40 border border-gold/10' : 'bg-muted/40 border border-border'
-            )}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label className={themeColors.subtext}>Override Lot Size</Label>
-                  <p className={cn("text-xs", themeColors.subtext)}>
-                    Manually specify lot size instead of calculated
-                  </p>
-                </div>
-                <Switch
-                  checked={lotsOverrideEnabled}
-                  onCheckedChange={setLotsOverrideEnabled}
-                />
-              </div>
-              {lotsOverrideEnabled && (
-                <div className="space-y-2">
-                  <Input
-                    type="number"
-                    step="0.01"
-                    value={lotsRequested}
-                    onChange={(e) => setLotsRequested(e.target.value)}
-                    placeholder="0.10"
-                    className={cn(
-                      "h-12 text-base font-mono",
-                      themeColors.inputBg,
-                      themeColors.inputBorder,
-                      errors.lots_requested && "border-destructive"
-                    )}
-                  />
-                  {errors.lots_requested && (
-                    <p className="text-sm text-destructive flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> {errors.lots_requested}
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Notes (Optional) */}
-            <div className="space-y-2">
-              <Label className={themeColors.subtext}>Notes (optional)</Label>
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Why this trade? Setup? Emotions?"
-                rows={3}
-                className={cn(
-                  "w-full px-4 py-3 rounded-xl text-base resize-none",
-                  themeColors.inputBg,
-                  themeColors.inputBorder,
-                  "border focus:outline-none focus:ring-2 focus:ring-offset-0",
-                  isNasrTheme ? 'focus:ring-gold/30' : 'focus:ring-aqua/30'
-                )}
-              />
-            </div>
-
-            {/* Calculate Button */}
-            <Button
-              onClick={handleCalculate}
-              disabled={isLoading}
-              className={cn(
-                "w-full h-14 text-lg font-semibold rounded-xl transition-all",
-                isNasrTheme 
-                  ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
-                  : 'success-gradient text-white hover:opacity-90 success-glow'
-              )}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Calculating...
-                </>
-              ) : (
-                <>
-                  <CalcIcon className="w-5 h-5 mr-2" />
-                  Calculate Position Size
-                </>
-              )}
-            </Button>
-
-            {/* General Error */}
-            {errors.general && (
-              <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30">
-                <p className="text-sm text-destructive flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4" /> {errors.general}
+          {/* Lots Override Section */}
+          <div className="mt-6 p-5 rounded-xl bg-slate-800/30 border border-slate-700/50 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <Label className="text-slate-300 font-medium">Override Lot Size</Label>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Manually specify lot size instead of calculated
                 </p>
               </div>
+              <Switch
+                checked={lotsOverrideEnabled}
+                onCheckedChange={setLotsOverrideEnabled}
+              />
+            </div>
+            {lotsOverrideEnabled && (
+              <div className="space-y-2 animate-fade-in">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={lotsRequested}
+                  onChange={(e) => setLotsRequested(e.target.value)}
+                  placeholder="0.10"
+                  className={cn(
+                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all",
+                    errors.lots_requested && "border-red-500"
+                  )}
+                />
+                {errors.lots_requested && (
+                  <p className="text-sm text-red-400 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" /> {errors.lots_requested}
+                  </p>
+                )}
+              </div>
             )}
-          </Card>
+          </div>
 
-          {/* Results Card */}
-          <Card className={cn(
-            "p-8 space-y-6",
-            isNasrTheme && "bg-nasr-panel/80 border-gold/20",
-            !result && "flex items-center justify-center"
-          )}>
-            {result ? (
-              <div className="space-y-6 animate-fade-in">
-                <h2 className={cn("text-xl font-semibold", themeColors.heading)}>
-                  Calculation Results
-                </h2>
+          {/* Notes Section */}
+          <div className="mt-6 space-y-2">
+            <Label className="text-slate-400 text-sm font-medium flex items-center gap-2">
+              <FileText className="w-4 h-4" /> Notes (optional)
+            </Label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Why this trade? Setup? Emotions?"
+              rows={3}
+              maxLength={500}
+              className="w-full px-4 py-3 rounded-xl text-base resize-none bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 focus:outline-none transition-all"
+            />
+            <p className="text-xs text-slate-500 text-right">{notes.length}/500</p>
+          </div>
 
-                {/* Primary Results */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className={cn(
-                    "p-6 rounded-xl text-center",
-                    isNasrTheme 
-                      ? 'bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30' 
-                      : 'bg-gradient-to-br from-aqua/20 to-aqua/5 border border-aqua/30'
-                  )}>
-                    <div className={cn(
-                      "w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center",
-                      isNasrTheme ? 'bg-gold/20' : 'bg-aqua/20'
-                    )}>
-                      <Target className={cn("w-6 h-6", themeColors.primary)} />
-                    </div>
-                    <p className={cn("text-sm uppercase tracking-wider mb-1", themeColors.subtext)}>
-                      Recommended Lots
-                    </p>
-                    <p className={cn(
-                      "text-4xl font-bold font-mono",
-                      themeColors.primary
-                    )}>
-                      {result.lots_final?.toFixed(2) ?? "—"}
-                    </p>
+          {/* Calculate Button */}
+          <Button
+            onClick={handleCalculate}
+            disabled={isLoading}
+            className="w-full h-14 mt-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-slate-900 hover:brightness-110 shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-yellow-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Calculating...
+              </>
+            ) : (
+              <>
+                <CalcIcon className="w-5 h-5 mr-2" />
+                Calculate Position Size
+              </>
+            )}
+          </Button>
+
+          {/* General Error */}
+          {errors.general && (
+            <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 animate-fade-in">
+              <p className="text-sm text-red-400 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" /> {errors.general}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Results Section */}
+        {result && (
+          <div className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            {/* Primary Results - 2 Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Recommended Lots Card */}
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-500 hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-500/20">
+                    <Target className="w-8 h-8 text-yellow-400" />
                   </div>
-                  <div className={cn(
-                    "p-6 rounded-xl text-center",
-                    isNasrTheme 
-                      ? 'bg-gradient-to-br from-gold/20 to-gold/5 border border-gold/30' 
-                      : 'bg-gradient-to-br from-aqua/20 to-aqua/5 border border-aqua/30'
-                  )}>
-                    <div className={cn(
-                      "w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center",
-                      isNasrTheme ? 'bg-gold/20' : 'bg-aqua/20'
-                    )}>
-                      <DollarSign className={cn("w-6 h-6", themeColors.primary)} />
-                    </div>
-                    <p className={cn("text-sm uppercase tracking-wider mb-1", themeColors.subtext)}>
-                      Actual Risk
-                    </p>
-                    <p className={cn(
-                      "text-4xl font-bold font-mono",
-                      themeColors.primary
-                    )}>
-                      ${result.risk_total_usd?.toFixed(2) ?? "—"}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Secondary Results */}
-                <div className={cn(
-                  "p-5 rounded-xl space-y-4",
-                  isNasrTheme ? 'bg-nasr-bg/40 border border-gold/10' : 'bg-muted/40 border border-border'
-                )}>
-                  <h3 className={cn("text-sm font-semibold uppercase tracking-wider", themeColors.subtext)}>
-                    Additional Details
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className={themeColors.subtext}>Ticks to Stop Loss</span>
-                      <span className={cn("font-mono font-semibold", themeColors.heading)}>
-                        {result.ticks_to_sl?.toFixed(2) ?? "—"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={themeColors.subtext}>Risk per 1 Lot (USD)</span>
-                      <span className={cn("font-mono font-semibold", themeColors.heading)}>
-                        ${result.risk_per_1lot_usd?.toFixed(2) ?? "—"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={themeColors.subtext}>Calculated Lots (before rounding)</span>
-                      <span className={cn("font-mono font-semibold", themeColors.heading)}>
-                        {result.lots_calculated?.toFixed(4) ?? "—"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Position Sensitivity Section */}
-                <div className={cn(
-                  "p-5 rounded-xl space-y-4 animate-fade-in",
-                  isNasrTheme 
-                    ? 'bg-nasr-bg/40 border border-gold/10 backdrop-blur-sm' 
-                    : 'bg-muted/40 border border-border backdrop-blur-sm'
-                )}>
-                  <div>
-                    <h3 className={cn("text-sm font-semibold uppercase tracking-wider", themeColors.subtext)}>
-                      Position Sensitivity
-                    </h3>
-                    <p className={cn("text-xs mt-0.5", themeColors.subtext, "opacity-70")}>
-                      Understand how price movement affects your P/L
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    {/* 1 Tick Move */}
-                    <div className={cn(
-                      "p-4 rounded-lg",
-                      isNasrTheme 
-                        ? 'bg-gradient-to-r from-amber-500/15 to-amber-500/5 border border-amber-500/20' 
-                        : 'bg-gradient-to-r from-amber-500/10 to-amber-500/5 border border-amber-500/20'
-                    )}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">📉</span>
-                          <span className={cn("text-sm font-medium", themeColors.subtext)}>
-                            1 Tick Movement
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <InfoTooltip isNasrTheme={isNasrTheme} />
-                          <span className={cn(
-                            "text-xl font-bold font-mono",
-                            isNasrTheme ? 'text-amber-400' : 'text-amber-600'
-                          )}>
-                            {result.tick_value_position_usd !== undefined 
-                              ? `$${result.tick_value_position_usd.toFixed(2)}` 
-                              : '—'}
-                          </span>
-                        </div>
-                      </div>
-                      <p className={cn("text-xs mt-2", themeColors.subtext, "opacity-70")}>
-                        Your profit or loss changes by this amount for every 1 tick move.
-                      </p>
-                    </div>
-
-                    {/* 1 Pip Move */}
-                    <div className={cn(
-                      "p-4 rounded-lg",
-                      isNasrTheme 
-                        ? 'bg-gradient-to-r from-gold/20 to-gold/5 border border-gold/30' 
-                        : 'bg-gradient-to-r from-aqua/15 to-aqua/5 border border-aqua/30'
-                    )}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">📈</span>
-                          <span className={cn("text-sm font-medium", themeColors.subtext)}>
-                            1 Pip Movement
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <InfoTooltip isNasrTheme={isNasrTheme} />
-                          <span className={cn(
-                            "text-2xl font-bold font-mono",
-                            themeColors.primary
-                          )}>
-                            {result.pip_value_position_usd !== undefined 
-                              ? `$${result.pip_value_position_usd.toFixed(2)}` 
-                              : '—'}
-                          </span>
-                        </div>
-                      </div>
-                      <p className={cn("text-xs mt-2", themeColors.subtext, "opacity-70")}>
-                        Your profit or loss changes by this amount for every 1 pip move.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Micro-detail footer */}
-                  <p className={cn("text-xs text-center pt-2 border-t", themeColors.subtext, "opacity-60", isNasrTheme ? 'border-gold/10' : 'border-border')}>
-                    Calculated for <span className="font-mono font-semibold">{result.lots_final?.toFixed(2)}</span> lots on <span className="font-mono font-semibold">{result.symbol || symbol.toUpperCase()}</span>
+                  <p className="text-xs uppercase tracking-widest text-slate-400 mb-2">
+                    Recommended Lots
+                  </p>
+                  <p className="text-5xl md:text-6xl font-bold font-mono bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
+                    {result.lots_final?.toFixed(2) ?? "—"}
                   </p>
                 </div>
+              </div>
 
-                {/* Warnings */}
-                {result.warnings && result.warnings.length > 0 && (
-                  <div className={cn(
-                    "p-4 rounded-xl",
-                    isNasrTheme 
-                      ? 'bg-amber-500/10 border border-amber-500/30' 
-                      : 'bg-warning/10 border border-warning/30'
-                  )}>
-                    <h3 className="text-sm font-semibold text-amber-600 mb-2 flex items-center gap-2">
-                      <Info className="w-4 h-4" /> Warnings
-                    </h3>
-                    <ul className="space-y-1">
-                      {result.warnings.map((warning, index) => (
-                        <li key={index} className="text-sm text-amber-600">
-                          • {warning}
-                        </li>
-                      ))}
-                    </ul>
+              {/* Actual Risk Card */}
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-500 hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="relative z-10">
+                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-500/20">
+                    <DollarSign className="w-8 h-8 text-yellow-400" />
                   </div>
-                )}
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    onClick={() => setSaveDiaryOpen(true)}
-                    className={cn(
-                      "flex-1 h-12 font-semibold rounded-xl transition-all",
-                      isNasrTheme 
-                        ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
-                        : 'success-gradient text-white hover:opacity-90 success-glow'
-                    )}
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    Save to Diary
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate('/diary')}
-                    className={cn(
-                      "h-12 px-6 font-semibold rounded-xl transition-all",
-                      isNasrTheme 
-                        ? 'border-gold/30 text-gold hover:bg-gold/10' 
-                        : 'border-aqua/30 text-aqua hover:bg-aqua/10'
-                    )}
-                  >
-                    <BookOpen className="w-4 h-4 mr-2" />
-                    View Diary
-                  </Button>
+                  <p className="text-xs uppercase tracking-widest text-slate-400 mb-2">
+                    Actual Risk
+                  </p>
+                  <p className={cn(
+                    "text-5xl md:text-6xl font-bold font-mono",
+                    getRiskColor(result.risk_total_usd, accountBalance ? parseFloat(accountBalance) : null)
+                  )}>
+                    ${result.risk_total_usd?.toFixed(2) ?? "—"}
+                  </p>
                 </div>
               </div>
-            ) : (
-              <div className="text-center space-y-4 py-12">
-                <div className={cn(
-                  "w-20 h-20 rounded-full mx-auto flex items-center justify-center",
-                  isNasrTheme ? 'bg-gold/10' : 'bg-aqua/10'
-                )}>
-                  <CalcIcon className={cn("w-10 h-10", themeColors.primary, "opacity-50")} />
+            </div>
+
+            {/* Additional Details - 3 Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-5 group hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Ticks to Stop Loss</p>
+                <p className="text-2xl font-semibold text-white font-mono">
+                  {result.ticks_to_sl?.toFixed(2) ?? "—"}
+                </p>
+              </div>
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-5 group hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Risk per 1 Lot (USD)</p>
+                <p className="text-2xl font-semibold text-white font-mono">
+                  ${result.risk_per_1lot_usd?.toFixed(2) ?? "—"}
+                </p>
+              </div>
+              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-5 group hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
+                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Calculated Lots (raw)</p>
+                <p className="text-2xl font-semibold text-white font-mono">
+                  {result.lots_calculated?.toFixed(4) ?? "—"}
+                </p>
+              </div>
+            </div>
+
+            {/* Position Sensitivity Section */}
+            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-yellow-400" />
                 </div>
                 <div>
-                  <p className={cn("text-lg font-medium", themeColors.heading)}>
-                    Enter your trade parameters
-                  </p>
-                  <p className={cn("text-sm", themeColors.subtext)}>
-                    Results will appear here after calculation
-                  </p>
+                  <h3 className="text-lg font-semibold text-white">Position Sensitivity</h3>
+                  <p className="text-sm text-slate-500">Understand how price movement affects your P/L</p>
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* 1 Tick Movement */}
+                <div className="p-5 rounded-xl bg-gradient-to-r from-amber-500/10 to-transparent border-l-4 border-amber-500 group hover:from-amber-500/15 transition-all">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">📊</span>
+                      <div>
+                        <p className="text-sm font-medium text-slate-300">1 Tick Movement</p>
+                        <p className="text-xs text-slate-500">↑↓ Per tick change</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <InfoTooltip />
+                      <span className="text-2xl font-bold font-mono text-amber-400">
+                        {result.tick_value_position_usd !== undefined 
+                          ? `$${result.tick_value_position_usd.toFixed(2)}` 
+                          : '—'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 1 Pip Movement */}
+                <div className="p-5 rounded-xl bg-gradient-to-r from-yellow-500/10 to-transparent border-l-4 border-yellow-400 group hover:from-yellow-500/15 transition-all">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">📈</span>
+                      <div>
+                        <p className="text-sm font-medium text-slate-300">1 Pip Movement</p>
+                        <p className="text-xs text-slate-500">↑↓ Per pip change</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <InfoTooltip />
+                      <span className="text-2xl font-bold font-mono bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">
+                        {result.pip_value_position_usd !== undefined 
+                          ? `$${result.pip_value_position_usd.toFixed(2)}` 
+                          : '—'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Micro-detail footer */}
+              <p className="text-xs text-center text-slate-500 pt-4 border-t border-slate-700/50">
+                Calculated for <span className="font-mono font-semibold text-slate-400">{result.lots_final?.toFixed(2)}</span> lots on <span className="font-mono font-semibold text-slate-400">{result.symbol || symbol.toUpperCase()}</span>
+              </p>
+            </div>
+
+            {/* Warnings */}
+            {result.warnings && result.warnings.length > 0 && (
+              <div className="p-5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 animate-fade-in">
+                <h3 className="text-sm font-semibold text-yellow-400 mb-3 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" /> Warnings
+                </h3>
+                <ul className="space-y-1.5">
+                  {result.warnings.map((warning, index) => (
+                    <li key={index} className="text-sm text-yellow-300/80">
+                      • {warning}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
-          </Card>
-        </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-2">
+              <Button
+                onClick={() => setSaveDiaryOpen(true)}
+                className="flex-1 h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-slate-900 hover:brightness-110 shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-[1.02]"
+              >
+                <Save className="w-5 h-5 mr-2" />
+                Save to Diary
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => navigate('/diary')}
+                className="flex-1 h-14 text-lg font-semibold rounded-xl border-2 border-yellow-500/50 text-yellow-400 bg-transparent hover:bg-yellow-500/10 hover:border-yellow-500 transition-all duration-300"
+              >
+                <BookOpen className="w-5 h-5 mr-2" />
+                View Diary
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!result && !isLoading && (
+          <div className="text-center py-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <div className="w-24 h-24 rounded-3xl mx-auto mb-6 flex items-center justify-center bg-slate-800/50 border border-slate-700/50">
+              <CalcIcon className="w-12 h-12 text-slate-600" />
+            </div>
+            <p className="text-xl font-medium text-slate-400">
+              Enter your trade parameters
+            </p>
+            <p className="text-slate-500 mt-2">
+              Results will appear here after calculation
+            </p>
+          </div>
+        )}
       </div>
 
       <SaveToDiaryModal
