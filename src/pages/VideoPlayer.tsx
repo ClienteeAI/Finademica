@@ -6,11 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CheckCircle, Play } from "lucide-react";
+import { ArrowLeft, CheckCircle, Play, Loader2 } from "lucide-react";
 import { useVideoCompletion } from "@/hooks/useVideoCompletion";
+import { useGamification } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
-import AchievementToast from "@/components/AchievementToast";
-import LevelUpModal from "@/components/LevelUpModal";
 
 interface Video {
   id: string;
@@ -56,14 +55,14 @@ const VideoPlayer = () => {
   const [nextVideo, setNextVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Pass video title to useVideoCompletion for event logging
+  // Get gamification refresh function
+  const { refetch: refetchGamification } = useGamification();
+  
+  // Pass video title and refresh callback to useVideoCompletion
   const { 
     handleVideoEnd, 
-    unlockedAchievements, 
-    levelUpData,
-    dismissAchievement,
-    dismissLevelUp
-  } = useVideoCompletion(id, video?.title);
+    isCompleting,
+  } = useVideoCompletion(id, video?.title, refetchGamification);
 
   useEffect(() => {
     const checkAuthAndFetch = async () => {
@@ -148,23 +147,6 @@ const VideoPlayer = () => {
 
   return (
     <DashboardLayout>
-      {/* Achievement Toasts */}
-      {unlockedAchievements?.map((achievement, index) => (
-        <AchievementToast
-          key={`${achievement.name}-${index}`}
-          achievement={achievement}
-          onClose={() => dismissAchievement(index)}
-        />
-      ))}
-
-      {/* Level Up Modal */}
-      {levelUpData.show && (
-        <LevelUpModal
-          level={levelUpData.level}
-          onClose={dismissLevelUp}
-        />
-      )}
-
       <div className="space-y-6 animate-fade-in">
         {/* Back Button */}
         <Button
@@ -233,9 +215,14 @@ const VideoPlayer = () => {
               <Button 
                 className="w-full gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400" 
                 onClick={handleVideoEnd}
+                disabled={isCompleting}
               >
-                <CheckCircle className="h-4 w-4" />
-                Mark as Complete
+                {isCompleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-4 w-4" />
+                )}
+                {isCompleting ? "Saving..." : "Mark as Complete"}
               </Button>
               
               <p className="text-xs text-center text-muted-foreground">
