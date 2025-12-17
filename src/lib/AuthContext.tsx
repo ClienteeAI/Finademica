@@ -40,13 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .from('users')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('Error fetching profile:', error);
       return null;
     }
-    return data as UserProfile;
+    return data as UserProfile | null;
   };
 
   useEffect(() => {

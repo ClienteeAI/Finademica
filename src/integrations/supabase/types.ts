@@ -1003,6 +1003,7 @@ export type Database = {
         Row: {
           account_opened_at: string | null
           account_status: string | null
+          auth_user_id: string | null
           broker_account_id: string | null
           client_id: string
           created_at: string | null
@@ -1021,11 +1022,13 @@ export type Database = {
           phone: string | null
           phone_prefix: string | null
           quiz_answers: Json | null
+          role: string
           updated_at: string | null
         }
         Insert: {
           account_opened_at?: string | null
           account_status?: string | null
+          auth_user_id?: string | null
           broker_account_id?: string | null
           client_id: string
           created_at?: string | null
@@ -1044,11 +1047,13 @@ export type Database = {
           phone?: string | null
           phone_prefix?: string | null
           quiz_answers?: Json | null
+          role?: string
           updated_at?: string | null
         }
         Update: {
           account_opened_at?: string | null
           account_status?: string | null
+          auth_user_id?: string | null
           broker_account_id?: string | null
           client_id?: string
           created_at?: string | null
@@ -1067,6 +1072,7 @@ export type Database = {
           phone?: string | null
           phone_prefix?: string | null
           quiz_answers?: Json | null
+          role?: string
           updated_at?: string | null
         }
         Relationships: [
