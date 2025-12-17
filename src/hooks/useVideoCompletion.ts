@@ -36,39 +36,11 @@ export const useVideoCompletion = (videoId: string | undefined) => {
     if (hasTriggeredRef.current || !videoId) return;
 
     try {
-      // Get user_id from localStorage
-      let userId = localStorage.getItem("userId");
+      // Get user from Supabase Auth
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!userId) {
-        const userDataStr = localStorage.getItem("userData");
-        if (userDataStr) {
-          try {
-            const userData = JSON.parse(userDataStr);
-            userId = userData.id || userData.userId;
-          } catch (e) {
-            console.error("Failed to parse userData from localStorage:", e);
-          }
-        }
-      }
-
-      if (!userId) {
-        const email = localStorage.getItem("email");
-        if (email) {
-          const { data: userData } = await supabase
-            .from("users")
-            .select("id")
-            .eq("email", email)
-            .maybeSingle();
-          
-          if (userData?.id) {
-            userId = userData.id;
-            localStorage.setItem("userId", userId);
-          }
-        }
-      }
-
-      if (!userId) {
-        console.error("No user_id found - user may not be logged in");
+      if (!user) {
+        console.error("No authenticated user found");
         toast({
           title: "Error",
           description: "Please log in to track your progress",
@@ -76,6 +48,8 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         });
         return;
       }
+
+      const userId = user.id;
 
       // Call Supabase complete_video function
       const { data: statsResult, error: statsError } = await supabase
