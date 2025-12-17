@@ -7,8 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Save, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
 interface CalculationResult {
   lots_final?: number;
   risk_total_usd?: number;
@@ -53,6 +53,8 @@ export const SaveToDiaryModal = ({
   isNasrTheme,
 }: SaveToDiaryModalProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<"planned" | "open">("planned");
   const [openTime, setOpenTime] = useState("");
   const [notes, setNotes] = useState(formData.notes || "");
@@ -73,31 +75,30 @@ export const SaveToDiaryModal = ({
   const handleSubmit = async () => {
     if (!calcResult) return;
 
-    setIsSubmitting(true);
-
-    // Get user_id from localStorage
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const parsed = JSON.parse(userData);
-          userId = parsed.userId || parsed.id;
-        } catch (e) {
-          console.error('Failed to parse userData');
-        }
-      }
+    // Check if user is logged in
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to save trades to your diary.",
+        variant: "destructive",
+      });
+      onOpenChange(false);
+      navigate("/login");
+      return;
     }
+
+    setIsSubmitting(true);
 
     const tags = tagsInput
       .split(',')
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
-    // Payload structure as specified
+    // Payload structure with Supabase auth user
     const payload = {
       action: "create",
-      user_id: userId || "unknown",
+      auth_user_id: user.id,
+      email: user.email,
       broker_key: "nasr_trade_mt5",
       symbol: formData.symbol.toUpperCase(),
       side: formData.side,
