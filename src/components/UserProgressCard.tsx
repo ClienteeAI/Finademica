@@ -1,58 +1,31 @@
-import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
 import { Trophy, Sparkles } from "lucide-react";
+import { useGamification } from "@/hooks/useGamification";
 
-interface UserStats {
-  total_points: number;
-  videos_completed: number;
-}
+// XP thresholds from xp_levels table (read from DB, but we need them for progress bar display)
+const getXPForNextLevel = (level: number): number => {
+  // These should match xp_levels.min_xp in the database
+  const thresholds: Record<number, number> = {
+    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
+    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
+  };
+  return thresholds[level + 1] ?? (level + 1) * 150;
+};
+
+const getCurrentLevelXP = (level: number): number => {
+  const thresholds: Record<number, number> = {
+    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
+    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
+  };
+  return thresholds[level] ?? (level - 1) * 150;
+};
 
 export const UserProgressCard = () => {
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { xpTotal, level, videosCompleted, isLoading } = useGamification();
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      // Get auth user and map to public.users.id
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      const { data: publicUser } = await supabase
-        .from("users")
-        .select("id")
-        .eq("auth_user_id", user.id)
-        .maybeSingle();
-
-      const userId = publicUser?.id;
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("user_stats")
-        .select("total_points, videos_completed")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching user stats:", error);
-      }
-
-      setStats(data || { total_points: 0, videos_completed: 0 });
-      setLoading(false);
-    };
-
-    fetchStats();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <Card className="p-8 space-y-6">
         <div className="flex items-center gap-3">
@@ -68,17 +41,13 @@ export const UserProgressCard = () => {
     );
   }
 
-  const totalPoints = stats?.total_points || 0;
-  const videosCompleted = stats?.videos_completed || 0;
-  
-  const level = Math.floor(totalPoints / 150) + 1;
-  const pointsForCurrentLevel = (level - 1) * 150;
-  const pointsForNextLevel = level * 150;
-  const progressPercent = totalPoints === 0 
+  const currentLevelXP = getCurrentLevelXP(level);
+  const nextLevelXP = getXPForNextLevel(level);
+  const progressPercent = xpTotal === 0 
     ? 0 
-    : ((totalPoints - pointsForCurrentLevel) / (pointsForNextLevel - pointsForCurrentLevel)) * 100;
+    : Math.min(((xpTotal - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100, 100);
 
-  const isEmpty = totalPoints === 0 && videosCompleted === 0;
+  const isEmpty = xpTotal === 0 && videosCompleted === 0;
 
   return (
     <Card className="p-8 space-y-6 group hover:shadow-lg transition-shadow duration-300">
@@ -104,13 +73,13 @@ export const UserProgressCard = () => {
       </div>
 
       <p className="text-base text-[#6B7280]">
-        XP: <span className="font-mono font-semibold text-[#1D3557]">{totalPoints}</span> · Videos completed: <span className="font-mono font-semibold text-[#1D3557]">{videosCompleted}</span>
+        XP: <span className="font-mono font-semibold text-[#1D3557]">{xpTotal}</span> · Videos completed: <span className="font-mono font-semibold text-[#1D3557]">{videosCompleted}</span>
       </p>
 
       <div className="space-y-2">
         <Progress value={progressPercent} className="h-3" />
         <p className="text-sm text-[#6B7280]">
-          Next level at <span className="font-mono font-semibold">{pointsForNextLevel}</span> XP
+          Next level at <span className="font-mono font-semibold">{nextLevelXP}</span> XP
         </p>
       </div>
 
