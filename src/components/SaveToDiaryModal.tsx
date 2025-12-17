@@ -9,6 +9,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
+import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+
 interface CalculationResult {
   lots_final?: number;
   risk_total_usd?: number;
@@ -43,8 +45,6 @@ interface SaveToDiaryModalProps {
   isNasrTheme: boolean;
 }
 
-const DIARY_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d";
-
 export const SaveToDiaryModal = ({
   open,
   onOpenChange,
@@ -75,30 +75,31 @@ export const SaveToDiaryModal = ({
   const handleSubmit = async () => {
     if (!calcResult) return;
 
-    // Check if user is logged in
-    if (!user) {
+    setIsSubmitting(true);
+
+    // Get authenticated user from Supabase
+    const authUser = await getAuthUser();
+    
+    if (!authUser) {
       toast({
         title: "Login Required",
-        description: "Please log in to save trades to your diary.",
+        description: "Please log in to manage your trading diary.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
       onOpenChange(false);
       navigate("/login");
       return;
     }
-
-    setIsSubmitting(true);
 
     const tags = tagsInput
       .split(',')
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
-    // Payload structure with Supabase auth user
     const payload = {
-      action: "create",
-      auth_user_id: user.id,
-      email: user.email,
+      auth_user_id: authUser.auth_user_id,
+      user_email: authUser.user_email,
       broker_key: "nasr_trade_mt5",
       symbol: formData.symbol.toUpperCase(),
       side: formData.side,
@@ -122,39 +123,24 @@ export const SaveToDiaryModal = ({
       tags,
     };
 
-    try {
-      const response = await fetch(DIARY_WEBHOOK_URL, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "x-diary-secret": "DIARY_9fA3kP2xQ7mVZ81sLwT0R"
-        },
-        body: JSON.stringify(payload),
-      });
+    const result = await sendDiaryWebhook("create", payload);
 
-      if (response.ok) {
-        toast({
-          title: "Saved to Trading Diary ✅",
-          description: "Your trade has been saved successfully.",
-        });
-        setShowSuccess(true);
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to save trade. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Save trade error:', error);
+    if (result.success) {
+      toast({
+        title: "Saved to diary",
+        description: "Your trade has been saved successfully.",
+      });
+      setShowSuccess(true);
+    } else {
+      console.error("Diary action failed:", result.error);
       toast({
         title: "Error",
-        description: "Failed to save trade. Please try again.",
+        description: "Diary action failed. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
+
+    setIsSubmitting(false);
   };
 
   const handleClose = () => {

@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
+import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
 interface DeleteTradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -49,64 +49,46 @@ export const DeleteTradeDialog = ({
 
     setIsDeleting(true);
 
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const parsed = JSON.parse(userData);
-          userId = parsed.userId || parsed.id;
-        } catch (e) {
-          console.error('Failed to parse userData');
-        }
-      }
+    // Get authenticated user from Supabase
+    const authUser = await getAuthUser();
+    
+    if (!authUser) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to manage your trading diary.",
+        variant: "destructive",
+      });
+      setIsDeleting(false);
+      onOpenChange(false);
+      return;
     }
 
     const payload = {
-      action: "delete",
-      user_id: userId || "unknown",
+      auth_user_id: authUser.auth_user_id,
+      user_email: authUser.user_email,
       trade_id: tradeId,
-      symbol: tradeSymbol,
     };
 
-    try {
-      const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d",
-        {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "x-diary-secret": "DIARY_9fA3kP2xQ7mVZ81sLwT0R"
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+    const result = await sendDiaryWebhook("delete", payload);
 
-      if (response.ok) {
-        toast({
-          title: "Trade deleted",
-          description: "Your trade has been removed from the diary.",
-        });
-        setConfirmText("");
-        onOpenChange(false);
-        onSuccess();
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete trade. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Delete trade error:', error);
+    if (result.success) {
+      toast({
+        title: "Trade deleted",
+        description: "Your trade has been removed from the diary.",
+      });
+      setConfirmText("");
+      onOpenChange(false);
+      onSuccess();
+    } else {
+      console.error("Diary action failed:", result.error);
       toast({
         title: "Error",
-        description: "Failed to delete trade. Please try again.",
+        description: "Diary action failed. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
     }
+
+    setIsDeleting(false);
   };
 
   return (

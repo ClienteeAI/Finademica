@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Save, TrendingUp, TrendingDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-
+import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { useNavigate } from "react-router-dom";
 interface DiaryEntry {
   id: string;
   symbol: string;
@@ -36,6 +37,7 @@ export const EditTradeModal = ({
   onSuccess,
 }: EditTradeModalProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [symbol, setSymbol] = useState("");
@@ -75,22 +77,24 @@ export const EditTradeModal = ({
 
     setIsSubmitting(true);
 
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const parsed = JSON.parse(userData);
-          userId = parsed.userId || parsed.id;
-        } catch (e) {
-          console.error('Failed to parse userData');
-        }
-      }
+    // Get authenticated user from Supabase
+    const authUser = await getAuthUser();
+    
+    if (!authUser) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to manage your trading diary.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      onOpenChange(false);
+      navigate("/login");
+      return;
     }
 
     const payload = {
-      action: "update",
-      user_id: userId || "unknown",
+      auth_user_id: authUser.auth_user_id,
+      user_email: authUser.user_email,
       trade_id: trade.id,
       symbol: symbol.toUpperCase(),
       side,
@@ -102,43 +106,25 @@ export const EditTradeModal = ({
       notes: notes || null,
     };
 
-    try {
-      const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d",
-        {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "x-diary-secret": "DIARY_9fA3kP2xQ7mVZ81sLwT0R"
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+    const result = await sendDiaryWebhook("update", payload);
 
-      if (response.ok) {
-        toast({
-          title: "Trade updated ✅",
-          description: "Your trade has been updated successfully.",
-        });
-        onOpenChange(false);
-        onSuccess();
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to update trade. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Update trade error:', error);
+    if (result.success) {
+      toast({
+        title: "Trade updated",
+        description: "Your trade has been updated successfully.",
+      });
+      onOpenChange(false);
+      onSuccess();
+    } else {
+      console.error("Diary action failed:", result.error);
       toast({
         title: "Error",
-        description: "Failed to update trade. Please try again.",
+        description: "Diary action failed. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
+
+    setIsSubmitting(false);
   };
 
   return (
