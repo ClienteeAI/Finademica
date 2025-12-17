@@ -50,7 +50,7 @@ export function AIMentor() {
       const user = userData ? JSON.parse(userData) : null;
 
       const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook-test/81b2df02-b127-41cf-9e40-f846b4a2bd47",
+        "https://clientee.app.n8n.cloud/webhook/81b2df02-b127-41cf-9e40-f846b4a2bd47",
         {
           method: "POST",
           headers: {
