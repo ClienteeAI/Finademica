@@ -432,6 +432,172 @@ export type Database = {
         }
         Relationships: []
       }
+      trade_journal_entries: {
+        Row: {
+          account_balance: number | null
+          account_currency: string
+          broker_key: string
+          calculation_id: string | null
+          close_time: string | null
+          created_at: string
+          entry_price: number
+          id: string
+          lots_calculated_raw: number | null
+          lots_final: number | null
+          lots_requested: number | null
+          notes: string | null
+          open_time: string | null
+          pip_value_position_usd: number | null
+          pnl_pct: number | null
+          pnl_usd: number | null
+          profit_per_1lot_usd: number | null
+          profit_total_usd: number | null
+          risk_amount_usd: number | null
+          risk_per_1lot_usd: number | null
+          risk_total_usd: number | null
+          risk_type: string | null
+          risk_value: number | null
+          rr_ratio: number | null
+          side: Database["public"]["Enums"]["trade_side"]
+          status: Database["public"]["Enums"]["trade_status"]
+          stop_loss_price: number
+          symbol: string
+          tags: string[] | null
+          take_profit_price: number | null
+          tick_size: number | null
+          tick_value_position_usd: number | null
+          tick_value_usd_per_1lot: number | null
+          ticks_per_pip: number | null
+          ticks_to_sl: number | null
+          ticks_to_tp: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_balance?: number | null
+          account_currency?: string
+          broker_key: string
+          calculation_id?: string | null
+          close_time?: string | null
+          created_at?: string
+          entry_price: number
+          id?: string
+          lots_calculated_raw?: number | null
+          lots_final?: number | null
+          lots_requested?: number | null
+          notes?: string | null
+          open_time?: string | null
+          pip_value_position_usd?: number | null
+          pnl_pct?: number | null
+          pnl_usd?: number | null
+          profit_per_1lot_usd?: number | null
+          profit_total_usd?: number | null
+          risk_amount_usd?: number | null
+          risk_per_1lot_usd?: number | null
+          risk_total_usd?: number | null
+          risk_type?: string | null
+          risk_value?: number | null
+          rr_ratio?: number | null
+          side: Database["public"]["Enums"]["trade_side"]
+          status?: Database["public"]["Enums"]["trade_status"]
+          stop_loss_price: number
+          symbol: string
+          tags?: string[] | null
+          take_profit_price?: number | null
+          tick_size?: number | null
+          tick_value_position_usd?: number | null
+          tick_value_usd_per_1lot?: number | null
+          ticks_per_pip?: number | null
+          ticks_to_sl?: number | null
+          ticks_to_tp?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_balance?: number | null
+          account_currency?: string
+          broker_key?: string
+          calculation_id?: string | null
+          close_time?: string | null
+          created_at?: string
+          entry_price?: number
+          id?: string
+          lots_calculated_raw?: number | null
+          lots_final?: number | null
+          lots_requested?: number | null
+          notes?: string | null
+          open_time?: string | null
+          pip_value_position_usd?: number | null
+          pnl_pct?: number | null
+          pnl_usd?: number | null
+          profit_per_1lot_usd?: number | null
+          profit_total_usd?: number | null
+          risk_amount_usd?: number | null
+          risk_per_1lot_usd?: number | null
+          risk_total_usd?: number | null
+          risk_type?: string | null
+          risk_value?: number | null
+          rr_ratio?: number | null
+          side?: Database["public"]["Enums"]["trade_side"]
+          status?: Database["public"]["Enums"]["trade_status"]
+          stop_loss_price?: number
+          symbol?: string
+          tags?: string[] | null
+          take_profit_price?: number | null
+          tick_size?: number | null
+          tick_value_position_usd?: number | null
+          tick_value_usd_per_1lot?: number | null
+          ticks_per_pip?: number | null
+          ticks_to_sl?: number | null
+          ticks_to_tp?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_journal_entries_calculation_id_fkey"
+            columns: ["calculation_id"]
+            isOneToOne: false
+            referencedRelation: "trade_calculations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_journal_events: {
+        Row: {
+          created_at: string
+          entry_id: string
+          event_type: string
+          id: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          event_type: string
+          id?: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_journal_events_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "trade_journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trading_diary: {
         Row: {
           created_at: string | null
@@ -985,7 +1151,8 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      trade_side: "long" | "short"
+      trade_status: "planned" | "open" | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1112,6 +1279,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      trade_side: ["long", "short"],
+      trade_status: ["planned", "open", "closed"],
+    },
   },
 } as const
