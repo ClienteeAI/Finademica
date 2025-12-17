@@ -17,6 +17,7 @@ interface DiaryEntry {
   take_profit_price?: number;
   lots_final?: number;
   notes?: string;
+  status?: string;
 }
 
 interface EditTradeModalProps {
@@ -39,6 +40,7 @@ export const EditTradeModal = ({
   
   const [symbol, setSymbol] = useState("");
   const [side, setSide] = useState<"long" | "short">("long");
+  const [status, setStatus] = useState<"planned" | "open" | "closed">("planned");
   const [entryPrice, setEntryPrice] = useState("");
   const [stopLossPrice, setStopLossPrice] = useState("");
   const [takeProfitPrice, setTakeProfitPrice] = useState("");
@@ -49,6 +51,7 @@ export const EditTradeModal = ({
     if (trade) {
       setSymbol(trade.symbol || "");
       setSide(trade.side || "long");
+      setStatus((trade.status as "planned" | "open" | "closed") || "planned");
       setEntryPrice(trade.entry_price?.toString() || "");
       setStopLossPrice(trade.stop_loss_price?.toString() || "");
       setTakeProfitPrice(trade.take_profit_price?.toString() || "");
@@ -91,6 +94,7 @@ export const EditTradeModal = ({
       trade_id: trade.id,
       symbol: symbol.toUpperCase(),
       side,
+      status,
       entry_price: parseFloat(entryPrice) || null,
       stop_loss_price: parseFloat(stopLossPrice) || null,
       take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
@@ -188,6 +192,46 @@ export const EditTradeModal = ({
                 )}
               >
                 <TrendingDown className="w-4 h-4" /> Short
+              </button>
+            </div>
+          </div>
+
+          {/* Status Toggle */}
+          <div className="space-y-2">
+            <Label className={themeColors.subtext}>Status</Label>
+            <div className={cn(
+              "flex gap-1 p-1 rounded-xl",
+              isNasrTheme ? 'bg-nasr-bg/60' : 'bg-muted/60'
+            )}>
+              <button
+                type="button"
+                onClick={() => setStatus("planned")}
+                className={cn(
+                  "flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200",
+                  status === "planned" ? themeColors.toggleActive : themeColors.toggleInactive
+                )}
+              >
+                Planned
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatus("open")}
+                className={cn(
+                  "flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200",
+                  status === "open" ? themeColors.toggleActive : themeColors.toggleInactive
+                )}
+              >
+                Open
+              </button>
+              <button
+                type="button"
+                onClick={() => setStatus("closed")}
+                className={cn(
+                  "flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all duration-200",
+                  status === "closed" ? themeColors.toggleActive : themeColors.toggleInactive
+                )}
+              >
+                Closed
               </button>
             </div>
           </div>
