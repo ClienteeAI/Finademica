@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Save } from "lucide-react";
+import { Loader2, Save, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { Link } from "react-router-dom";
 
 interface CalculationResult {
   lots_final?: number;
@@ -36,9 +37,13 @@ interface SaveToDiaryModalProps {
     accountBalance: string;
     riskType: "percent" | "amount";
     riskValue: string;
+    lotsRequested?: string;
+    notes?: string;
   };
   isNasrTheme: boolean;
 }
+
+const DIARY_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d";
 
 export const SaveToDiaryModal = ({
   open,
@@ -50,9 +55,10 @@ export const SaveToDiaryModal = ({
   const { toast } = useToast();
   const [status, setStatus] = useState<"planned" | "open">("planned");
   const [openTime, setOpenTime] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(formData.notes || "");
   const [tagsInput, setTagsInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const themeColors = {
     heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
@@ -88,89 +94,50 @@ export const SaveToDiaryModal = ({
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
+    // Payload structure as specified
     const payload = {
-      action: "save_trade",
+      action: "create",
       user_id: userId || "unknown",
+      broker_key: "nasr_trade_mt5",
+      symbol: formData.symbol.toUpperCase(),
+      side: formData.side,
+      account_currency: "USD",
+      account_balance: formData.accountBalance ? parseFloat(formData.accountBalance) : null,
+      risk_type: formData.riskType,
+      risk_value: parseFloat(formData.riskValue) || null,
+      entry_price: parseFloat(formData.entryPrice) || null,
+      stop_loss_price: parseFloat(formData.stopLossPrice) || null,
+      take_profit_price: formData.takeProfitPrice ? parseFloat(formData.takeProfitPrice) : null,
+      lots_requested: formData.lotsRequested ? parseFloat(formData.lotsRequested) : null,
+      lots_final: calcResult.lots_final,
+      risk_total_usd: calcResult.risk_total_usd,
+      profit_total_usd: calcResult.profit_total_usd,
+      rr_ratio: calcResult.rr_ratio,
+      tick_value_position_usd: calcResult.tick_value_position_usd,
+      pip_value_position_usd: calcResult.pip_value_position_usd,
+      notes: notes || formData.notes || null,
       status,
       open_time: openTime || null,
-      notes: notes || null,
       tags,
-      calc: {
-        ...calcResult,
-        symbol: formData.symbol.toUpperCase(),
-        side: formData.side,
-        entry_price: parseFloat(formData.entryPrice) || null,
-        stop_loss_price: parseFloat(formData.stopLossPrice) || null,
-        take_profit_price: formData.takeProfitPrice ? parseFloat(formData.takeProfitPrice) : null,
-        account_balance: formData.accountBalance ? parseFloat(formData.accountBalance) : null,
-        risk_type: formData.riskType,
-        risk_value: parseFloat(formData.riskValue) || null,
-      },
     };
 
     try {
-      const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook/95c61f3e-fb17-4049-9801-62c89402d43b",
-        {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "x-diary-secret": "DIARY_9fA3kP2xQ7mVZ81sLwT0R"
-          },
-          body: JSON.stringify(payload),
-        }
-      );
+      const response = await fetch(DIARY_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      // Check if request was successful (2xx status)
       if (response.ok) {
-        // Try to parse JSON response, but don't fail if empty
-        let data = null;
-        const text = await response.text();
-        if (text) {
-          try {
-            data = JSON.parse(text);
-          } catch (e) {
-            // Response is not JSON, but that's okay if status is 200
-          }
-        }
-
-        // Check if the parsed data contains an error
-        if (data?.error) {
-          toast({
-            title: "Error",
-            description: data.error,
-            variant: "destructive",
-          });
-        } else {
-          // Send trade data to secondary webhook
-          try {
-            await fetch(
-              "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-              }
-            );
-          } catch (e) {
-            console.error('Failed to send trade data to secondary webhook:', e);
-          }
-
-          toast({
-            title: "Saved to Diary",
-            description: "Your trade has been saved successfully.",
-          });
-          // Clear form and close modal
-          setStatus("planned");
-          setOpenTime("");
-          setNotes("");
-          setTagsInput("");
-          onOpenChange(false);
-        }
+        toast({
+          title: "Saved to Trading Diary ✅",
+          description: "Your trade has been saved successfully.",
+        });
+        setShowSuccess(true);
       } else {
         toast({
           title: "Error",
-          description: "Failed to save trade. Server returned an error.",
+          description: "Failed to save trade. Please try again.",
           variant: "destructive",
         });
       }
@@ -186,8 +153,73 @@ export const SaveToDiaryModal = ({
     }
   };
 
+  const handleClose = () => {
+    setShowSuccess(false);
+    setStatus("planned");
+    setOpenTime("");
+    setNotes(formData.notes || "");
+    setTagsInput("");
+    onOpenChange(false);
+  };
+
+  if (showSuccess) {
+    return (
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className={cn(
+          "max-w-md backdrop-blur-xl border",
+          isNasrTheme 
+            ? 'bg-nasr-panel/95 border-gold/20' 
+            : 'bg-white/95 border-ice'
+        )}>
+          <div className="text-center py-6 space-y-4">
+            <div className={cn(
+              "w-16 h-16 rounded-full mx-auto flex items-center justify-center",
+              isNasrTheme ? 'bg-gold/20' : 'bg-emerald-500/20'
+            )}>
+              <span className="text-3xl">✅</span>
+            </div>
+            <h3 className={cn("text-xl font-semibold", themeColors.heading)}>
+              Trade Saved!
+            </h3>
+            <p className={cn("text-sm", themeColors.subtext)}>
+              Your trade has been added to your Trading Diary.
+            </p>
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={handleClose}
+                className={cn(
+                  "flex-1 h-11 rounded-xl",
+                  isNasrTheme 
+                    ? 'border-gold/30 text-gold hover:bg-gold/10' 
+                    : 'border-aqua/30 text-aqua hover:bg-aqua/10'
+                )}
+              >
+                Close
+              </Button>
+              <Link to="/diary" className="flex-1">
+                <Button 
+                  onClick={handleClose}
+                  className={cn(
+                    "w-full h-11 font-semibold rounded-xl",
+                    isNasrTheme 
+                      ? 'gold-gradient text-nasr-bg hover:opacity-90' 
+                      : 'success-gradient text-white hover:opacity-90'
+                  )}
+                >
+                  <BookOpen className="w-4 h-4 mr-2" />
+                  Open Diary
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className={cn(
         "max-w-md backdrop-blur-xl border",
         isNasrTheme 
@@ -256,7 +288,7 @@ export const SaveToDiaryModal = ({
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add any notes about this trade..."
+              placeholder="Why this trade? Setup? Emotions?"
               className={cn(
                 "min-h-[100px] resize-none",
                 themeColors.inputBg,
