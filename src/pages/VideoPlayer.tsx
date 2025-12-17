@@ -70,14 +70,13 @@ const VideoPlayer = () => {
   } = useVideoCompletion(id);
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
-      return;
-    }
+    const checkAuthAndFetch = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+        return;
+      }
 
-    const fetchVideo = async () => {
       if (!id) return;
       
       setLoading(true);
@@ -113,7 +112,7 @@ const VideoPlayer = () => {
       setLoading(false);
     };
 
-    fetchVideo();
+    checkAuthAndFetch();
   }, [id, navigate]);
 
   if (loading) {
