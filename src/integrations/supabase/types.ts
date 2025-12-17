@@ -232,6 +232,75 @@ export type Database = {
           },
         ]
       }
+      instrument_specs_mt5: {
+        Row: {
+          broker_key: string
+          calc_mode: number | null
+          contract_size: number
+          currency_base: string | null
+          currency_margin: string | null
+          currency_profit: string | null
+          digits: number
+          id: string
+          inactive_reason: string | null
+          is_active: boolean
+          symbol: string
+          tick_size: number
+          tick_value: number | null
+          tick_value_profit: number | null
+          tick_value_usd: number
+          trade_mode: number | null
+          updated_at: string
+          vol_max: number
+          vol_min: number
+          vol_step: number
+        }
+        Insert: {
+          broker_key?: string
+          calc_mode?: number | null
+          contract_size: number
+          currency_base?: string | null
+          currency_margin?: string | null
+          currency_profit?: string | null
+          digits: number
+          id?: string
+          inactive_reason?: string | null
+          is_active?: boolean
+          symbol: string
+          tick_size: number
+          tick_value?: number | null
+          tick_value_profit?: number | null
+          tick_value_usd: number
+          trade_mode?: number | null
+          updated_at?: string
+          vol_max: number
+          vol_min: number
+          vol_step: number
+        }
+        Update: {
+          broker_key?: string
+          calc_mode?: number | null
+          contract_size?: number
+          currency_base?: string | null
+          currency_margin?: string | null
+          currency_profit?: string | null
+          digits?: number
+          id?: string
+          inactive_reason?: string | null
+          is_active?: boolean
+          symbol?: string
+          tick_size?: number
+          tick_value?: number | null
+          tick_value_profit?: number | null
+          tick_value_usd?: number
+          trade_mode?: number | null
+          updated_at?: string
+          vol_max?: number
+          vol_min?: number
+          vol_step?: number
+        }
+        Relationships: []
+      }
       quiz_answers: {
         Row: {
           created_at: string | null
@@ -291,6 +360,75 @@ export type Database = {
           id?: string
           key?: string
           name?: string
+        }
+        Relationships: []
+      }
+      trade_calculations: {
+        Row: {
+          account_balance: number | null
+          account_currency: string
+          broker_key: string
+          created_at: string
+          entry_price: number
+          id: string
+          lots_calculated: number
+          lots_final: number
+          lots_requested: number | null
+          notes: string | null
+          risk_per_1lot_usd: number
+          risk_total_usd: number
+          risk_type: string
+          risk_value: number
+          side: string
+          stop_loss_price: number
+          symbol: string
+          take_profit_price: number | null
+          ticks_to_sl: number
+          user_id: string
+        }
+        Insert: {
+          account_balance?: number | null
+          account_currency?: string
+          broker_key?: string
+          created_at?: string
+          entry_price: number
+          id?: string
+          lots_calculated: number
+          lots_final: number
+          lots_requested?: number | null
+          notes?: string | null
+          risk_per_1lot_usd: number
+          risk_total_usd: number
+          risk_type: string
+          risk_value: number
+          side: string
+          stop_loss_price: number
+          symbol: string
+          take_profit_price?: number | null
+          ticks_to_sl: number
+          user_id: string
+        }
+        Update: {
+          account_balance?: number | null
+          account_currency?: string
+          broker_key?: string
+          created_at?: string
+          entry_price?: number
+          id?: string
+          lots_calculated?: number
+          lots_final?: number
+          lots_requested?: number | null
+          notes?: string | null
+          risk_per_1lot_usd?: number
+          risk_total_usd?: number
+          risk_type?: string
+          risk_value?: number
+          side?: string
+          stop_loss_price?: number
+          symbol?: string
+          take_profit_price?: number | null
+          ticks_to_sl?: number
+          user_id?: string
         }
         Relationships: []
       }
