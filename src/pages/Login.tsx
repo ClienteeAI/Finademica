@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useClient } from '@/lib/clientContext';
+import { useAuth } from '@/lib/AuthContext';
 import { Eye, EyeOff, Mail, Lock, AlertTriangle, Check } from 'lucide-react';
 
 function Login() {
@@ -14,6 +14,14 @@ function Login() {
   const [shake, setShake] = useState(false);
   const navigate = useNavigate();
   const { client } = useClient();
+  const { signIn, user } = useAuth();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard');
+    }
+  }, [user, navigate]);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -22,36 +30,22 @@ function Login() {
     setShake(false);
 
     try {
-      // Query user from database
-      const { data: user, error: queryError } = await supabase
-        .from('users')
-        .select('*, clients(*)')
-        .eq('email', email)
-        .single();
+      const { error: signInError } = await signIn(email, password);
 
-      if (queryError || !user) {
-        setError('Invalid email or password');
+      if (signInError) {
+        let errorMessage = 'Invalid email or password';
+        if (signInError.message.includes('Invalid login credentials')) {
+          errorMessage = 'Invalid email or password';
+        } else if (signInError.message.includes('Email not confirmed')) {
+          errorMessage = 'Please confirm your email before signing in';
+        } else {
+          errorMessage = signInError.message;
+        }
+        setError(errorMessage);
         setLoading(false);
         setShake(true);
         setTimeout(() => setShake(false), 500);
         return;
-      }
-
-      // Save to localStorage
-      localStorage.setItem('email', user.email);
-      localStorage.setItem('firstName', user.first_name || '');
-      localStorage.setItem('lastName', user.last_name || '');
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('client_id', user.client_id);
-
-      // Check if admin
-      if (user.is_admin) {
-        localStorage.setItem('isAdmin', 'true');
-      }
-
-      // If not admin, save their client
-      if (!user.is_admin) {
-        localStorage.setItem('userClientId', user.client_id);
       }
 
       // Show success state
