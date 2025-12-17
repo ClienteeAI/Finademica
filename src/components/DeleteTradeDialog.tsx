@@ -14,6 +14,7 @@ import { Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { useLogEvent } from "@/hooks/useLogEvent";
 interface DeleteTradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -32,6 +33,7 @@ export const DeleteTradeDialog = ({
   onSuccess,
 }: DeleteTradeDialogProps) => {
   const { toast } = useToast();
+  const { logEvent } = useLogEvent();
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState("");
 
@@ -76,6 +78,8 @@ export const DeleteTradeDialog = ({
         title: "Trade deleted",
         description: "Your trade has been removed from the diary.",
       });
+      // Log diary_trade_deleted event
+      await logEvent("diary_trade_deleted", { trade_id: tradeId });
       setConfirmText("");
       onOpenChange(false);
       onSuccess();

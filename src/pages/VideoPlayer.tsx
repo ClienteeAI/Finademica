@@ -55,13 +55,15 @@ const VideoPlayer = () => {
   const [video, setVideo] = useState<Video | null>(null);
   const [nextVideo, setNextVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Pass video title to useVideoCompletion for event logging
   const { 
     handleVideoEnd, 
     unlockedAchievements, 
     levelUpData,
     dismissAchievement,
     dismissLevelUp
-  } = useVideoCompletion(id);
+  } = useVideoCompletion(id, video?.title);
 
   useEffect(() => {
     const checkAuthAndFetch = async () => {

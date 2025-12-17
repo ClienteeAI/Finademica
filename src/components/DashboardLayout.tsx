@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, Settings, LogOut, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
+import XPWidget from "@/components/XPWidget";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -170,8 +171,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               ))}
             </div>
 
-            {/* User Profile */}
-            <div className="hidden md:flex items-center gap-3">
+            {/* XP Widget + User Profile */}
+            <div className="hidden md:flex items-center gap-4">
+              {/* Compact XP Widget */}
+              <XPWidget className="!p-3 !rounded-xl" />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 

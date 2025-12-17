@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
 import { useNavigate } from "react-router-dom";
+import { useLogEvent } from "@/hooks/useLogEvent";
 interface DiaryEntry {
   id: string;
   symbol: string;
@@ -38,6 +39,7 @@ export const EditTradeModal = ({
 }: EditTradeModalProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { logEvent } = useLogEvent();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [symbol, setSymbol] = useState("");
@@ -112,6 +114,11 @@ export const EditTradeModal = ({
       toast({
         title: "Trade updated",
         description: "Your trade has been updated successfully.",
+      });
+      // Log diary_trade_updated event
+      await logEvent("diary_trade_updated", {
+        trade_id: trade.id,
+        fields_changed: ["symbol", "side", "status", "entry_price", "stop_loss_price", "take_profit_price", "lots_final", "notes"],
       });
       onOpenChange(false);
       onSuccess();

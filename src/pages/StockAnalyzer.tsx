@@ -10,6 +10,7 @@ import StockAnalysisCard from "@/components/StockAnalysisCard";
 import StockChat from "@/components/StockChat";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useLogEvent } from "@/hooks/useLogEvent";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
@@ -18,6 +19,7 @@ const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "
 const StockAnalyzer = () => {
   const navigate = useNavigate();
   const { client } = useClient();
+  const { logEvent } = useLogEvent();
   const isNasrTheme = client?.subdomain === 'nasr';
 
   // ACCESS CONTROL: Must be logged in
@@ -73,6 +75,9 @@ const StockAnalyzer = () => {
       }
       
       setAnalysisData(data);
+
+      // Log stock_analyzer_used event
+      await logEvent("stock_analyzer_used", { symbol: trimmedSymbol, timeframe: "default" });
 
       setRecentSearches(prev => {
         const filtered = prev.filter(s => s !== trimmedSymbol);

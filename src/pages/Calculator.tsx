@@ -14,6 +14,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { SaveToDiaryModal } from "@/components/SaveToDiaryModal";
 import { supabase } from "@/integrations/supabase/client";
+import { useLogEvent } from "@/hooks/useLogEvent";
 
 interface CalculationResult {
   lots_final: number;
@@ -133,6 +134,7 @@ const Calculator = () => {
   const navigate = useNavigate();
   const { client } = useClient();
   const isMobile = useIsMobile();
+  const { logEvent } = useLogEvent();
 
   // Theme detection
   const isNasrTheme = client?.subdomain === 'nasr';
@@ -252,6 +254,13 @@ const Calculator = () => {
         setErrors({ general: data.error });
       } else {
         setResult(data);
+        // Log calculator_used event
+        await logEvent("calculator_used", {
+          symbol: symbol.toUpperCase().trim(),
+          side,
+          lots_final: data.lots_final,
+          risk_total_usd: data.risk_total_usd,
+        });
       }
     } catch (error) {
       setErrors({ general: "Calculation failed. Please try again." });

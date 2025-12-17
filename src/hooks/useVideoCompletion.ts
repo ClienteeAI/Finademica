@@ -2,6 +2,7 @@ import { useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
+import { useLogEvent } from "@/hooks/useLogEvent";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/14bc5880-e57c-44ce-9980-5caf53bf2e53";
 
@@ -17,10 +18,11 @@ interface WebhookResponse {
   already_completed?: boolean;
 }
 
-export const useVideoCompletion = (videoId: string | undefined) => {
+export const useVideoCompletion = (videoId: string | undefined, videoTitle?: string) => {
   const hasTriggeredRef = useRef(false);
   const [unlockedAchievements, setUnlockedAchievements] = useState<WebhookResponse["achievements_unlocked"]>([]);
   const [levelUpData, setLevelUpData] = useState<{ show: boolean; level: number }>({ show: false, level: 0 });
+  const { logEvent } = useLogEvent();
 
   const triggerConfetti = useCallback(() => {
     const colors = ["#22d3ee", "#3b82f6", "#a855f7", "#f59e0b"];
@@ -89,6 +91,9 @@ export const useVideoCompletion = (videoId: string | undefined) => {
       });
 
       hasTriggeredRef.current = true;
+
+      // Log event to user_events
+      await logEvent("video_completed", { video_id: videoId, video_title: videoTitle || "Unknown" });
 
       // Try to parse response for achievements
       let webhookResult: WebhookResponse = {};
