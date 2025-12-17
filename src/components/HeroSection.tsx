@@ -25,7 +25,10 @@ const HeroSection = () => {
         <div className="absolute top-8 right-8 z-20">
           <Button 
             variant="outline"
-            onClick={() => navigate('/login')}
+            onClick={() => {
+              console.log('LOGIN_CLICK');
+              navigate('/login');
+            }}
             className="gap-2"
           >
             <LogIn size={18} />

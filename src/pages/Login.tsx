@@ -30,9 +30,11 @@ function Login() {
     setShake(false);
 
     try {
+      console.log('Attempting sign in for:', email);
       const { error: signInError } = await signIn(email, password);
 
       if (signInError) {
+        console.error('Sign in error:', signInError);
         let errorMessage = 'Invalid email or password';
         if (signInError.message.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password';
@@ -47,6 +49,8 @@ function Login() {
         setTimeout(() => setShake(false), 500);
         return;
       }
+
+      console.log('Sign in successful');
 
       // Show success state
       setSuccess(true);
