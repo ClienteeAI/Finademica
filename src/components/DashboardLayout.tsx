@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, Settings, LogOut } from "lucide-react";
+import { Menu, X, User, Settings, LogOut, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
+import { useAuth } from "@/lib/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,27 +19,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { client, allClients, isAdminMode, switchClient } = useClient();
+  const { user, profile, loading, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<{ firstName: string } | null>(null);
 
   // Detect if Nasr theme
   const isNasrTheme = client?.subdomain === 'nasr';
 
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (!isLoggedIn) {
-      navigate("/");
-      return;
-    }
+  // Show loading state while auth is being checked
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-    const data = localStorage.getItem("userData");
-    if (data) {
-      setUserData(JSON.parse(data));
-    }
-  }, [navigate]);
+  // Redirect to login if not authenticated
+  if (!user) {
+    navigate("/login");
+    return null;
+  }
 
-  const handleLogout = () => {
-    localStorage.clear();
+  const handleLogout = async () => {
+    await signOut();
     navigate("/");
   };
 
@@ -54,7 +57,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  if (!userData) return null;
+  // Get user's first name from profile or user metadata
+  const firstName = profile?.first_name || user?.user_metadata?.first_name || user?.email?.split('@')[0] || 'User';
 
   // Theme-aware colors
   const colors = isNasrTheme ? {
@@ -183,10 +187,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         ? 'from-gold-light to-gold text-nasr-bg ring-2 ring-gold/30 shadow-gold'
                         : 'from-aqua to-aqua-deep text-white ring-2 ring-aqua/30 shadow-aqua'
                     } flex items-center justify-center font-bold text-lg`}>
-                      {userData.firstName.charAt(0).toUpperCase()}
+                      {firstName.charAt(0).toUpperCase()}
                     </div>
                     <span className={`text-[15px] font-semibold ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-                      {userData.firstName}
+                      {firstName}
                     </span>
                   </Button>
                 </DropdownMenuTrigger>
