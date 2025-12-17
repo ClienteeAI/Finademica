@@ -203,7 +203,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   }`}
                 >
                   <DropdownMenuItem 
-                    onClick={() => console.log("Profile clicked")} 
+                    onClick={() => navigate("/profile")} 
                     className={`rounded-xl h-12 cursor-pointer transition-all ${
                       isNasrTheme 
                         ? 'text-nasr-text-muted hover:bg-gold/10 hover:text-nasr-text'
@@ -214,7 +214,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     Profile
                   </DropdownMenuItem>
                   <DropdownMenuItem 
-                    onClick={() => console.log("Settings clicked")} 
+                    onClick={() => navigate("/settings")} 
                     className={`rounded-xl h-12 cursor-pointer transition-all ${
                       isNasrTheme 
                         ? 'text-nasr-text-muted hover:bg-gold/10 hover:text-nasr-text'
@@ -274,7 +274,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <div className={`pt-4 border-t mt-4 space-y-2 ${isNasrTheme ? 'border-gold/15' : 'border-ice'}`}>
                 <button
                   onClick={() => {
-                    console.log("Profile clicked");
+                    navigate("/profile");
                     setMobileMenuOpen(false);
                   }}
                   className={`block w-full py-3 px-4 rounded-xl text-sm font-semibold text-left transition-all ${
@@ -287,7 +287,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </button>
                 <button
                   onClick={() => {
-                    console.log("Settings clicked");
+                    navigate("/settings");
                     setMobileMenuOpen(false);
                   }}
                   className={`block w-full py-3 px-4 rounded-xl text-sm font-semibold text-left transition-all ${
