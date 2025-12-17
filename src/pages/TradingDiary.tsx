@@ -7,37 +7,40 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpen, Search, TrendingUp, TrendingDown, X, Loader2, Plus, MoreVertical, Edit2, Trash2, FileText } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { BookOpen, Search, TrendingUp, TrendingDown, X, Loader2, Plus, MoreVertical, Edit2, Trash2, FileText, Info } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { EditTradeModal } from "@/components/EditTradeModal";
 import { DeleteTradeDialog } from "@/components/DeleteTradeDialog";
+import { useAuth } from "@/lib/AuthContext";
 
 interface DiaryEntry {
   id: string;
   created_at: string;
   symbol: string;
   side: "long" | "short";
-  status: "planned" | "open" | "closed";
+  status: string | null;
   lots_final: number | null;
   risk_total_usd: number | null;
   profit_total_usd: number | null;
   rr_ratio: number | null;
-  entry_price: number;
-  stop_loss_price: number;
+  entry_price: number | null;
+  stop_loss_price: number | null;
   take_profit_price: number | null;
   notes: string | null;
-  tags: string[] | null;
-  open_time: string | null;
   tick_value_position_usd: number | null;
   pip_value_position_usd: number | null;
+  tags?: string[] | null;
+  open_time?: string | null;
 }
 
 const TradingDiary = () => {
   const navigate = useNavigate();
   const { client } = useClient();
+  const { user, loading: authLoading } = useAuth();
   const isNasrTheme = client?.subdomain === 'nasr';
 
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
@@ -69,43 +72,24 @@ const TradingDiary = () => {
   };
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
+    if (authLoading) return;
     
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
+    if (!user) {
+      navigate("/login");
       return;
     }
 
-    fetchEntries();
-  }, [navigate]);
+    fetchEntries(user.id);
+  }, [authLoading, user, navigate]);
 
-  const fetchEntries = async () => {
+  const fetchEntries = async (authUserId: string) => {
     setIsLoading(true);
-    
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      const userData = localStorage.getItem('userData');
-      if (userData) {
-        try {
-          const parsed = JSON.parse(userData);
-          userId = parsed.userId || parsed.id;
-        } catch (e) {
-          console.error('Failed to parse userData');
-        }
-      }
-    }
-
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
 
     try {
       const { data, error } = await supabase
-        .from('trade_journal_entries')
+        .from('trading_diary_trades')
         .select('*')
-        .eq('user_id', userId)
+        .eq('auth_user_id', authUserId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -117,6 +101,13 @@ const TradingDiary = () => {
       console.error('Failed to fetch diary entries:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Function to refresh entries (used after saving new trade)
+  const refreshEntries = () => {
+    if (user) {
+      fetchEntries(user.id);
     }
   };
 
@@ -164,12 +155,12 @@ const TradingDiary = () => {
   };
 
   const handleEditSuccess = () => {
-    fetchEntries();
+    refreshEntries();
     setDrawerOpen(false);
   };
 
   const handleDeleteSuccess = () => {
-    fetchEntries();
+    refreshEntries();
     setDrawerOpen(false);
   };
 
@@ -202,9 +193,21 @@ const TradingDiary = () => {
               <BookOpen className={cn("w-6 h-6", themeColors.primary)} />
             </div>
             <div>
-              <h1 className={cn("text-4xl md:text-5xl font-bold tracking-tight", themeColors.heading)}>
-                Trading Diary
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className={cn("text-4xl md:text-5xl font-bold tracking-tight", themeColors.heading)}>
+                  Trading Diary
+                </h1>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Info className={cn("w-5 h-5 cursor-help opacity-60 hover:opacity-100 transition-opacity", themeColors.subtext)} />
+                    </TooltipTrigger>
+                    <TooltipContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                      <p className="text-sm">Trades are filtered by your account (auth_user_id)</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
               <p className={cn("text-base mt-1", themeColors.subtext)}>
                 Track and analyze your trades
               </p>
@@ -723,7 +726,16 @@ const TradingDiary = () => {
       <EditTradeModal
         open={editModalOpen}
         onOpenChange={setEditModalOpen}
-        trade={tradeToEdit}
+        trade={tradeToEdit ? {
+          id: tradeToEdit.id,
+          symbol: tradeToEdit.symbol,
+          side: tradeToEdit.side,
+          entry_price: tradeToEdit.entry_price ?? 0,
+          stop_loss_price: tradeToEdit.stop_loss_price ?? 0,
+          take_profit_price: tradeToEdit.take_profit_price ?? undefined,
+          lots_final: tradeToEdit.lots_final ?? undefined,
+          notes: tradeToEdit.notes ?? undefined,
+        } : null}
         isNasrTheme={isNasrTheme}
         onSuccess={handleEditSuccess}
       />
