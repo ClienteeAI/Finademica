@@ -69,9 +69,23 @@ const MyVideos = () => {
 
     const fetchVideos = async () => {
       setLoading(true);
-      const userId = localStorage.getItem('userId');
+      
+      // Get userId from localStorage (check both formats)
+      let userId = localStorage.getItem('userId');
+      if (!userId) {
+        const userData = localStorage.getItem('userData');
+        if (userData) {
+          try {
+            const parsed = JSON.parse(userData);
+            userId = parsed.userId || parsed.id;
+          } catch (e) {
+            console.error('Failed to parse userData');
+          }
+        }
+      }
       
       if (!userId) {
+        console.error('No userId found in localStorage');
         setLoading(false);
         return;
       }
@@ -146,18 +160,15 @@ const MyVideos = () => {
         }
       }
 
-      // Fetch completed videos
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: views } = await supabase
-          .from("video_views")
-          .select("video_id")
-          .eq("user_id", user.id)
-          .eq("status", "completed");
-        
-        if (views) {
-          setCompletedVideoIds(new Set(views.map(v => v.video_id)));
-        }
+      // Fetch completed videos using localStorage userId
+      const { data: views } = await supabase
+        .from("video_views")
+        .select("video_id")
+        .eq("user_id", userId)
+        .eq("status", "completed");
+      
+      if (views) {
+        setCompletedVideoIds(new Set(views.map(v => v.video_id)));
       }
 
       setLoading(false);
