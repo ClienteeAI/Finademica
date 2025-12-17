@@ -1332,26 +1332,42 @@ export type Database = {
         }
         Relationships: []
       }
-    }
-    Views: {
       xp_rules: {
         Row: {
-          action_key: string | null
-          is_active: boolean | null
-          xp_points: number | null
+          action_key: string
+          cooldown_seconds: number | null
+          created_at: string
+          id: string
+          is_active: boolean
+          max_per_day: number | null
+          points: number
+          updated_at: string
         }
         Insert: {
-          action_key?: string | null
-          is_active?: boolean | null
-          xp_points?: number | null
+          action_key: string
+          cooldown_seconds?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_per_day?: number | null
+          points: number
+          updated_at?: string
         }
         Update: {
-          action_key?: string | null
-          is_active?: boolean | null
-          xp_points?: number | null
+          action_key?: string
+          cooldown_seconds?: number | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_per_day?: number | null
+          points?: number
+          updated_at?: string
         }
         Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
     }
     Functions: {
       award_xp:
