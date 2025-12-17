@@ -142,6 +142,20 @@ export const SaveToDiaryModal = ({
             variant: "destructive",
           });
         } else {
+          // Send trade data to secondary webhook
+          try {
+            await fetch(
+              "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+              }
+            );
+          } catch (e) {
+            console.error('Failed to send trade data to secondary webhook:', e);
+          }
+
           toast({
             title: "Saved to Diary",
             description: "Your trade has been saved successfully.",
