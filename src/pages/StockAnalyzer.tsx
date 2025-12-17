@@ -185,7 +185,7 @@ const StockAnalyzer = () => {
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:scale-105 transition-all duration-300"
                     >
-                      Buy {analyzedSymbol}
+                      Trade {analyzedSymbol}
                     </a>
                   </div>
                   

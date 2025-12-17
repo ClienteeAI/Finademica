@@ -71,9 +71,9 @@ export const UserProgressCard = () => {
   const totalPoints = stats?.total_points || 0;
   const videosCompleted = stats?.videos_completed || 0;
   
-  const level = Math.floor(totalPoints / 100) + 1;
-  const pointsForCurrentLevel = (level - 1) * 100;
-  const pointsForNextLevel = level * 100;
+  const level = Math.floor(totalPoints / 150) + 1;
+  const pointsForCurrentLevel = (level - 1) * 150;
+  const pointsForNextLevel = level * 150;
   const progressPercent = totalPoints === 0 
     ? 0 
     : ((totalPoints - pointsForCurrentLevel) / (pointsForNextLevel - pointsForCurrentLevel)) * 100;

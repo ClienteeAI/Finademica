@@ -82,8 +82,12 @@ export const useAchievements = () => {
         }
 
         // Video-based achievements
-        if (key === "first_steps" || key === "video_viewer") {
-          if (completedVideos >= 1) return { status: "in_progress", progress: Math.min(completedVideos * 100, 100) };
+        if (key === "first_steps") {
+          if (completedVideos >= 1) return { status: "in_progress", progress: 100 };
+          return { status: "locked" };
+        }
+        if (key === "video_viewer") {
+          if (completedVideos >= 1) return { status: "in_progress", progress: Math.min((completedVideos / 5) * 100, 100) };
           return { status: "locked" };
         }
         if (key === "knowledge_seeker") {

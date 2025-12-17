@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, Phone, CheckCircle, Lock } from "lucide-react";
+import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, CheckCircle, Lock } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -94,9 +94,15 @@ const Dashboard = () => {
     // Skip if still loading auth
     if (loading) return;
 
-    const quiz = localStorage.getItem("quizAnswers");
-    if (quiz) {
-      setQuizAnswers(JSON.parse(quiz));
+    // Get quiz answers from profile (database) or fallback to localStorage
+    const profileQuiz = profile?.quiz_answers;
+    if (profileQuiz) {
+      setQuizAnswers(profileQuiz);
+    } else {
+      const localQuiz = localStorage.getItem("quizAnswers");
+      if (localQuiz) {
+        setQuizAnswers(JSON.parse(localQuiz));
+      }
     }
 
     // Fetch AI-recommended videos from Supabase
@@ -576,7 +582,6 @@ const Dashboard = () => {
                     { done: true, text: "Create your account", icon: "✅" },
                     { done: false, current: true, text: "Watch your first video", icon: "⏳" },
                     { done: false, text: "Complete beginner module", icon: "⬜" },
-                    { done: false, text: "Take your first quiz", icon: "⬜" },
                   ].map((step, i) => (
                     <div
                       key={i}
@@ -658,37 +663,6 @@ const Dashboard = () => {
           </div>
         </Card>
 
-        {/* Call to Action */}
-        <Card className="p-16 text-center space-y-8 relative overflow-hidden success-glow">
-          <div className="absolute inset-0 success-gradient opacity-10" />
-          <div className="relative z-10 space-y-6">
-            <div className="w-20 h-20 mx-auto rounded-2xl bg-[#4DE2E8]/10 flex items-center justify-center">
-              <Phone className="w-10 h-10 text-[#4DE2E8]" />
-            </div>
-            <div className="space-y-3">
-              <h2 className="text-5xl font-bold text-[#1D3557] tracking-tight">
-                Ready for 1-on-1 Guidance?
-              </h2>
-              <p className="text-xl text-[#6B7280] max-w-xl mx-auto">
-                Book a free call with a trading specialist
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-[#9CA3AF]">
-              <span className="flex items-center gap-2">✓ No sales pitch</span>
-              <span className="flex items-center gap-2">✓ 30-minute session</span>
-              <span className="flex items-center gap-2">✓ 100% free</span>
-            </div>
-
-            <Button
-              onClick={() => console.log("Book call clicked")}
-              className="px-16 animate-pulse-subtle"
-              size="lg"
-            >
-              Book Your Call
-            </Button>
-          </div>
-        </Card>
       </div>
     </DashboardLayout>
   );
