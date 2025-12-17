@@ -121,27 +121,47 @@ export const SaveToDiaryModal = ({
         }
       );
 
-      const data = await response.json();
+      // Check if request was successful (2xx status)
+      if (response.ok) {
+        // Try to parse JSON response, but don't fail if empty
+        let data = null;
+        const text = await response.text();
+        if (text) {
+          try {
+            data = JSON.parse(text);
+          } catch (e) {
+            // Response is not JSON, but that's okay if status is 200
+          }
+        }
 
-      if (data.error) {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to save trade",
-          variant: "destructive",
-        });
+        // Check if the parsed data contains an error
+        if (data?.error) {
+          toast({
+            title: "Error",
+            description: data.error,
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Saved to Diary",
+            description: "Your trade has been saved successfully.",
+          });
+          // Clear form and close modal
+          setStatus("planned");
+          setOpenTime("");
+          setNotes("");
+          setTagsInput("");
+          onOpenChange(false);
+        }
       } else {
         toast({
-          title: "Saved to Diary",
-          description: "Your trade has been saved successfully.",
+          title: "Error",
+          description: "Failed to save trade. Server returned an error.",
+          variant: "destructive",
         });
-        // Clear form and close modal
-        setStatus("planned");
-        setOpenTime("");
-        setNotes("");
-        setTagsInput("");
-        onOpenChange(false);
       }
     } catch (error) {
+      console.error('Save trade error:', error);
       toast({
         title: "Error",
         description: "Failed to save trade. Please try again.",
