@@ -47,6 +47,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { path: "/videos", label: "My Videos" },
     { path: "/analyzer", label: "Stock Analyzer" },
     { path: "/calculator", label: "Calculator" },
+    { path: "/diary", label: "Trading Diary" },
     { path: "/roadmap", label: "My Roadmap" },
     { path: "/progress", label: "Progress" },
   ];
