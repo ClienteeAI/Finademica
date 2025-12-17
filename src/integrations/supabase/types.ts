@@ -1321,14 +1321,20 @@ export type Database = {
         Row: {
           level: number
           min_xp: number
+          perks: string | null
+          title: string | null
         }
         Insert: {
           level: number
           min_xp: number
+          perks?: string | null
+          title?: string | null
         }
         Update: {
           level?: number
           min_xp?: number
+          perks?: string | null
+          title?: string | null
         }
         Relationships: []
       }
@@ -1367,7 +1373,89 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_gamification_with_level: {
+        Row: {
+          created_at: string | null
+          experience_points: number | null
+          last_activity_at: string | null
+          last_activity_date: string | null
+          level: number | null
+          level_perks: string | null
+          level_title: string | null
+          streak_days: number | null
+          total_achievements_unlocked: number | null
+          trades_logged: number | null
+          updated_at: string | null
+          user_id: string | null
+          videos_completed: number | null
+          xp: number | null
+          xp_total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_user_gamification: {
+        Row: {
+          last_activity_at: string | null
+          level: number | null
+          streak_days: number | null
+          updated_at: string | null
+          user_id: string | null
+          xp_total: number | null
+        }
+        Insert: {
+          last_activity_at?: string | null
+          level?: number | null
+          streak_days?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          xp_total?: never
+        }
+        Update: {
+          last_activity_at?: string | null
+          level?: number | null
+          streak_days?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+          xp_total?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_user_gamification_auth: {
+        Row: {
+          auth_user_id: string | null
+          last_activity_at: string | null
+          level: number | null
+          streak_days: number | null
+          updated_at: string | null
+          user_id: string | null
+          xp_total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       award_xp:

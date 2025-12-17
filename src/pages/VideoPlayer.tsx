@@ -7,11 +7,6 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowLeft, CheckCircle, Play } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { useVideoCompletion } from "@/hooks/useVideoCompletion";
 import { supabase } from "@/integrations/supabase/client";
 import AchievementToast from "@/components/AchievementToast";
@@ -57,7 +52,6 @@ const getYouTubeEmbedUrl = (url: string): string | null => {
 const VideoPlayer = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [transcriptOpen, setTranscriptOpen] = useState(false);
   const [video, setVideo] = useState<Video | null>(null);
   const [nextVideo, setNextVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
@@ -221,21 +215,6 @@ const VideoPlayer = () => {
               </div>
 
               <p className="text-muted-foreground">{video.description || "No description available."}</p>
-
-              <Collapsible open={transcriptOpen} onOpenChange={setTranscriptOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full">
-                    {transcriptOpen ? "Hide" : "Show"} Description
-                  </Button>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <Card className="p-4 mt-4 bg-muted/50">
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                      {video.description || "No description available."}
-                    </p>
-                  </Card>
-                </CollapsibleContent>
-              </Collapsible>
             </div>
           </div>
 
