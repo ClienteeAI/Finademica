@@ -61,18 +61,37 @@ export const useVideoCompletion = (
 
       const profileId = publicUser.id;
 
-      // 3. Upsert into video_views (repeated clicks won't error)
-      const { error: viewError } = await supabase
+      // 3. Check if video_view exists, then insert or update
+      const { data: existingView } = await supabase
         .from("video_views")
-        .upsert(
-          {
+        .select("id")
+        .eq("user_id", profileId)
+        .eq("video_id", videoId)
+        .maybeSingle();
+
+      let viewError;
+      if (existingView) {
+        // Update existing record
+        const { error } = await supabase
+          .from("video_views")
+          .update({
+            status: "completed",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", existingView.id);
+        viewError = error;
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from("video_views")
+          .insert({
             user_id: profileId,
             video_id: videoId,
             status: "completed",
             completed_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id,video_id" }
-        );
+          });
+        viewError = error;
+      }
 
       if (viewError) {
         console.error("Error upserting video_views:", viewError);
