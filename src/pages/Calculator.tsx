@@ -9,10 +9,11 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X } from "lucide-react";
+import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X, Save, BookOpen } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { SaveToDiaryModal } from "@/components/SaveToDiaryModal";
 
 interface CalculationResult {
   lots_final: number;
@@ -204,6 +205,7 @@ const Calculator = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [saveDiaryOpen, setSaveDiaryOpen] = useState(false);
 
   // Theme-aware colors
   const themeColors = {
@@ -839,6 +841,35 @@ const Calculator = () => {
                     </ul>
                   </div>
                 )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    onClick={() => setSaveDiaryOpen(true)}
+                    className={cn(
+                      "flex-1 h-12 font-semibold rounded-xl transition-all",
+                      isNasrTheme 
+                        ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
+                        : 'success-gradient text-white hover:opacity-90 success-glow'
+                    )}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save to Diary
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/diary')}
+                    className={cn(
+                      "h-12 px-6 font-semibold rounded-xl transition-all",
+                      isNasrTheme 
+                        ? 'border-gold/30 text-gold hover:bg-gold/10' 
+                        : 'border-aqua/30 text-aqua hover:bg-aqua/10'
+                    )}
+                  >
+                    <BookOpen className="w-4 h-4 mr-2" />
+                    View Diary
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="text-center space-y-4 py-12">
@@ -861,6 +892,23 @@ const Calculator = () => {
           </Card>
         </div>
       </div>
+
+      <SaveToDiaryModal
+        open={saveDiaryOpen}
+        onOpenChange={setSaveDiaryOpen}
+        calcResult={result}
+        formData={{
+          symbol,
+          side,
+          entryPrice,
+          stopLossPrice,
+          takeProfitPrice,
+          accountBalance,
+          riskType,
+          riskValue,
+        }}
+        isNasrTheme={isNasrTheme}
+      />
     </DashboardLayout>
   );
 };

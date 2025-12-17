@@ -14,6 +14,7 @@ import StockAnalyzer from "./pages/StockAnalyzer";
 import MyRoadmap from "./pages/MyRoadmap";
 import Progress from "./pages/Progress";
 import Calculator from "./pages/Calculator";
+import TradingDiary from "./pages/TradingDiary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/roadmap" element={<MyRoadmap />} />
             <Route path="/progress" element={<Progress />} />
             <Route path="/calculator" element={<Calculator />} />
+            <Route path="/diary" element={<TradingDiary />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
