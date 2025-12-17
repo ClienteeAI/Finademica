@@ -91,7 +91,10 @@ const TradingDiary = () => {
         "https://clientee.app.n8n.cloud/webhook-test/95c61f3e-fb17-4049-9801-62c89402d43b",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "x-diary-secret": "DIARY_9fA3kP2xQ7mVZ81sLwT0R"
+          },
           body: JSON.stringify({
             action: "get_trades",
             user_id: userId,
