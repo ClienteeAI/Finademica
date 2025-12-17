@@ -41,19 +41,14 @@ const Progress = () => {
   const { achievements, loading: achievementsLoading } = useAchievements();
 
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
-      return;
-    }
-
     const fetchStats = async () => {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        setLoading(false);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate("/login");
         return;
       }
+
+      const userId = user.id;
 
       try {
         // Fetch user stats

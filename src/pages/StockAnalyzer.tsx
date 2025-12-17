@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import StockAnalysisCard from "@/components/StockAnalysisCard";
 import StockChat from "@/components/StockChat";
 import { useClient } from "@/lib/clientContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
@@ -19,13 +20,15 @@ const StockAnalyzer = () => {
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
 
-  // ACCESS CONTROL: Must be logged in AND have completed quiz
+  // ACCESS CONTROL: Must be logged in
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    const quizCompleted = localStorage.getItem("quizCompleted");
-    if (!isLoggedIn || !quizCompleted) {
-      navigate("/");
-    }
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/login");
+      }
+    };
+    checkAuth();
   }, [navigate]);
   
   const [symbol, setSymbol] = useState("");
