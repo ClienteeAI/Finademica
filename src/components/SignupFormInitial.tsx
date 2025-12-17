@@ -82,7 +82,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
         source: "lovable_signup"
       };
 
-      await fetch('https://clientee.app.n8n.cloud/webhook-test/f9b5acc5-f4a9-4a0b-8956-37e174289f51', {
+      await fetch('https://clientee.app.n8n.cloud/webhook/f9b5acc5-f4a9-4a0b-8956-37e174289f51', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(webhookPayload),
