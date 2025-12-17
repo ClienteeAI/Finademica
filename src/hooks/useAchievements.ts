@@ -28,7 +28,19 @@ export const useAchievements = () => {
       setLoading(false);
       return;
     }
-    const userId = user.id;
+
+    // Map auth user to public.users.id
+    const { data: publicUser } = await supabase
+      .from("users")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    const userId = publicUser?.id;
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       // Fetch all achievements

@@ -49,7 +49,18 @@ export const useVideoCompletion = (videoId: string | undefined) => {
         return;
       }
 
-      const userId = user.id;
+      // Map auth user to public.users.id
+      const { data: publicUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      const userId = publicUser?.id;
+      if (!userId) {
+        console.error("No public user found for auth user");
+        return;
+      }
 
       // Call Supabase complete_video function
       const { data: statsResult, error: statsError } = await supabase

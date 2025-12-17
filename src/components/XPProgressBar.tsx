@@ -30,7 +30,16 @@ const XPProgressBar = ({ compact = false, className = "" }: XPProgressBarProps) 
     const fetchStats = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const userId = user.id;
+
+      // Map auth user to public.users.id
+      const { data: publicUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      const userId = publicUser?.id;
+      if (!userId) return;
 
       const { data } = await supabase
         .from("user_gamification")
