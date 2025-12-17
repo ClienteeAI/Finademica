@@ -64,16 +64,6 @@ const TickPipInfoContent = ({ isNasrTheme }: { isNasrTheme: boolean }) => {
           </p>
         </div>
       </div>
-      
-      <div className={cn(
-        "text-xs p-3 rounded-lg",
-        isNasrTheme ? 'bg-gold/10 border border-gold/20' : 'bg-aqua/10 border border-aqua/20'
-      )}>
-        <span className={themeColors.primary}>Note:</span>{' '}
-        <span className={themeColors.subtext}>
-          All values come from the n8n webhook (Lovable only displays results).
-        </span>
-      </div>
 
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="learn-more" className="border-none">
