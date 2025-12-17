@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ClientProvider } from "@/lib/clientContext";
+import { AuthProvider } from "@/lib/AuthContext";
 import { AIMentor } from "@/components/AIMentor";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
@@ -30,9 +31,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ClientProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+        <AuthProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
@@ -48,8 +50,9 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ConditionalAIMentor />
-        </BrowserRouter>
+            <ConditionalAIMentor />
+          </BrowserRouter>
+        </AuthProvider>
       </ClientProvider>
     </TooltipProvider>
   </QueryClientProvider>

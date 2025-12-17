@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/AuthContext";
 
 export interface SignupUserData {
   firstName: string;
@@ -23,6 +23,7 @@ interface SignupFormInitialProps {
 
 const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormInitialProps) => {
   const { client } = useClient();
+  const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
@@ -64,6 +65,10 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
     setWebhookError(null);
     
     if (!validate()) return;
+    if (!client) {
+      setWebhookError("Client not found. Please refresh the page.");
+      return;
+    }
 
     setIsSubmitting(true);
 
@@ -85,31 +90,30 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
       console.log("Signup webhook sent successfully");
 
-      // 2. Create user in Supabase (without quiz answers - will be updated later)
-      if (client) {
-        const { data: newUser, error } = await supabase
-          .from('users')
-          .insert([{
-            client_id: client.id,
-            email: formData.email,
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: formData.phone || null,
-            is_admin: false
-          }])
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Supabase error:', error);
-          if (!error.message.includes('duplicate')) {
-            throw new Error(error.message);
-          }
-        } else {
-          console.log('User created in Supabase:', newUser);
-          localStorage.setItem('userId', newUser.id);
+      // 2. Create user with Supabase Auth
+      const { error: signUpError } = await signUp(
+        formData.email,
+        formData.password,
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+          client_id: client.id,
         }
+      );
+
+      if (signUpError) {
+        console.error('Supabase auth error:', signUpError);
+        if (signUpError.message.includes('already registered')) {
+          setWebhookError("This email is already registered. Please sign in instead.");
+        } else {
+          setWebhookError(signUpError.message);
+        }
+        setIsSubmitting(false);
+        return;
       }
+
+      console.log('User created with Supabase Auth');
       
       // Store user data temporarily for quiz
       localStorage.setItem('pendingSignupData', JSON.stringify(formData));
