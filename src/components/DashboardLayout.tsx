@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, User, Settings, LogOut, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
-import XPWidget from "@/components/XPWidget";
+import XPNavIndicator from "@/components/XPNavIndicator";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -173,8 +173,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* XP Widget + User Profile */}
             <div className="hidden md:flex items-center gap-4">
-              {/* Compact XP Widget */}
-              <XPWidget className="!p-3 !rounded-xl" />
+              {/* Compact XP Indicator */}
+              <XPNavIndicator isNasrTheme={isNasrTheme} />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button 
