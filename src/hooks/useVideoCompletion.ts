@@ -3,6 +3,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
+const XP_PER_VIDEO = 25; // XP awarded per video completion
+
+// Dispatch custom event for XP gain (listened by XPGainToastProvider)
+const dispatchXPGainEvent = (xpAmount: number, title?: string) => {
+  window.dispatchEvent(new CustomEvent('xp-gain', { 
+    detail: { xpAmount, title } 
+  }));
+};
+
 export const useVideoCompletion = (
   videoId: string | undefined, 
   videoTitle?: string,
@@ -125,13 +134,9 @@ export const useVideoCompletion = (
 
       hasTriggeredRef.current = true;
 
-      // 5. Success - show toast and confetti
+      // 5. Success - show XP toast with animation and confetti
       triggerConfetti();
-      toast({
-        title: "Lesson completed!",
-        description: "Your progress has been saved.",
-        duration: 3000,
-      });
+      dispatchXPGainEvent(XP_PER_VIDEO, "Lesson Complete!");
 
       // 6. Refresh XP widget
       if (onEventLogged) {

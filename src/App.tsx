@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ClientProvider } from "@/lib/clientContext";
 import { AuthProvider } from "@/lib/AuthContext";
 import { AIMentor } from "@/components/AIMentor";
+import { XPGainToastProvider } from "@/components/XPGainToast";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -36,6 +37,7 @@ const App = () => (
         <AuthProvider>
           <Toaster />
           <Sonner />
+          <XPGainToastProvider />
           <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
