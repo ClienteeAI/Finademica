@@ -284,7 +284,7 @@ const Calculator = () => {
         return;
       }
 
-      let data;
+      let data: unknown;
       try {
         data = JSON.parse(text);
       } catch (parseError) {
@@ -294,16 +294,26 @@ const Calculator = () => {
         return;
       }
 
-      if (data.error) {
-        setErrors({ general: data.error });
+      const normalized = Array.isArray(data) ? (data[0] as unknown) : data;
+
+      if (!normalized || typeof normalized !== "object") {
+        console.error("Unexpected webhook response shape:", data);
+        setErrors({ general: "Unexpected response from server. Please try again." });
+        return;
+      }
+
+      const resultData = normalized as CalculationResult;
+
+      if (resultData.error) {
+        setErrors({ general: resultData.error });
       } else {
-        setResult(data);
+        setResult(resultData);
         // Log calculator_used event
         await logEvent("calculator_used", {
           symbol: symbol.toUpperCase().trim(),
           side,
-          lots_final: data.lots_final,
-          risk_total_usd: data.risk_total_usd,
+          lots_final: resultData.lots_final,
+          risk_total_usd: resultData.risk_total_usd,
         });
       }
     } catch (error) {
