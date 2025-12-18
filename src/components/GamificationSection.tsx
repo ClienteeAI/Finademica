@@ -57,11 +57,10 @@ const getSkillProgress = (skillXP: number, skillLevel: number): number => {
 };
 
 export function GamificationSection() {
-  const { xpTotal, level, levelName, streakDays, isLoading, error } = useGamification();
+  const { xp, level, levelName, streakDays, currentLevelXp, nextLevelXp, isLoading, error } = useGamification();
   const [skills, setSkills] = useState<SkillData[]>([]);
   const [achievements, setAchievements] = useState<AchievementData[]>([]);
   const [detailsLoading, setDetailsLoading] = useState(true);
-
   // Fetch skills and achievements separately
   useEffect(() => {
     const fetchDetails = async () => {
@@ -127,10 +126,10 @@ export function GamificationSection() {
     fetchDetails();
   }, []);
 
-  // Calculate XP progress for display (read-only)
-  const currentLevelXP = getCurrentLevelXP(level);
-  const nextLevelXP = getXPForNextLevel(level);
-  const xpPercentage = Math.min(((xpTotal - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100, 100);
+  // Calculate XP progress for display (read-only) - using values from hook
+  const xpPercentage = nextLevelXp > currentLevelXp 
+    ? Math.min(((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100, 100)
+    : 0;
 
   // Error state
   if (error && !isLoading) {
@@ -194,7 +193,7 @@ export function GamificationSection() {
                 </div>
                 <p className="text-lg text-[#4DE2E8] font-medium">{levelName}</p>
                 <p className="text-sm text-[#6B7280] font-mono">
-                  {xpTotal} / {nextLevelXP} XP to next level
+                  {xp} / {nextLevelXp} XP to next level
                 </p>
               </>
             )}

@@ -8,19 +8,12 @@ interface XPWidgetProps {
 }
 
 const XPWidget = ({ className }: XPWidgetProps) => {
-  const { xpTotal, level, levelName, streakDays, isLoading, error } = useGamification();
+  const { xp, level, levelName, streakDays, currentLevelXp, nextLevelXp, isLoading, error } = useGamification();
 
-  // XP thresholds from xp_levels table
-  const levelThresholds: Record<number, number> = {
-    1: 0, 2: 100, 3: 250, 4: 450, 5: 700,
-    6: 1000, 7: 1350, 8: 1750, 9: 2200, 10: 2700,
-  };
-
-  const currentLevelXP = levelThresholds[level] ?? 0;
-  const nextLevelXP = levelThresholds[level + 1] ?? currentLevelXP + 500;
-  const xpInLevel = xpTotal - currentLevelXP;
-  const xpNeeded = nextLevelXP - currentLevelXP;
-  const progressPercent = Math.min((xpInLevel / xpNeeded) * 100, 100);
+  // Calculate progress using thresholds from hook (sourced from xp_levels table)
+  const xpInLevel = xp - currentLevelXp;
+  const xpNeeded = nextLevelXp - currentLevelXp;
+  const progressPercent = xpNeeded > 0 ? Math.min((xpInLevel / xpNeeded) * 100, 100) : 0;
 
   if (isLoading) {
     return (
@@ -77,8 +70,8 @@ const XPWidget = ({ className }: XPWidgetProps) => {
       {/* XP Progress Bar */}
       <div className="space-y-1.5 mb-3">
         <div className="flex items-center justify-between text-xs">
-          <span className="font-semibold text-ocean">{xpTotal.toLocaleString()} XP</span>
-          <span className="text-ocean-muted">{nextLevelXP.toLocaleString()} XP</span>
+          <span className="font-semibold text-ocean">{xp.toLocaleString()} XP</span>
+          <span className="text-ocean-muted">{nextLevelXp.toLocaleString()} XP</span>
         </div>
         <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
           <div
@@ -87,7 +80,7 @@ const XPWidget = ({ className }: XPWidgetProps) => {
           />
         </div>
         <p className="text-[10px] text-ocean-muted text-right">
-          {Math.max(0, nextLevelXP - xpTotal).toLocaleString()} XP to next level
+          {Math.max(0, nextLevelXp - xp).toLocaleString()} XP to next level
         </p>
       </div>
 

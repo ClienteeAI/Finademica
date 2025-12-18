@@ -16,23 +16,27 @@ const FALLBACK_LEVEL_NAMES: Record<number, string> = {
 };
 
 interface GamificationState {
-  xpTotal: number;
+  xp: number; // Renamed from xpTotal for clarity - this is experience_points
   level: number;
   levelName: string;
   streakDays: number;
   totalAchievementsUnlocked: number;
   videosCompleted: number;
+  currentLevelXp: number;
+  nextLevelXp: number;
   isLoading: boolean;
   error: string | null;
 }
 
 const DEFAULT_STATE: GamificationState = {
-  xpTotal: 0,
+  xp: 0,
   level: 1,
   levelName: "Rookie",
   streakDays: 0,
   totalAchievementsUnlocked: 0,
   videosCompleted: 0,
+  currentLevelXp: 0,
+  nextLevelXp: 100,
   isLoading: true,
   error: null,
 };
@@ -77,9 +81,10 @@ export function useGamification() {
       const profileId = publicUser.id;
 
       // Step 3: Fetch user_gamification by user_id = profile_id
+      // Read experience_points (the active XP column), NOT xp_total
       const { data: gamification, error: gamError } = await supabase
         .from("user_gamification")
-        .select("xp_total, streak_days, level")
+        .select("experience_points, streak_days, level")
         .eq("user_id", profileId)
         .maybeSingle();
 
@@ -89,7 +94,8 @@ export function useGamification() {
         return;
       }
 
-      const xpTotal = Number(gamification?.xp_total ?? 0);
+      // Use experience_points as the single source of truth for XP
+      const xp = Number(gamification?.experience_points ?? 0);
       const streakDays = gamification?.streak_days ?? 0;
 
       // Step 4: Get all xp_levels to determine current and next level
@@ -98,16 +104,27 @@ export function useGamification() {
         .select("level, min_xp, title")
         .order("level", { ascending: true });
 
-      // Determine current level: highest level where min_xp <= xp_total
+      // Determine current level: highest level where min_xp <= xp
       let currentLevel = 1;
       let levelName = FALLBACK_LEVEL_NAMES[1];
+      let currentLevelXp = 0;
+      let nextLevelXp = 100; // Default for level 1 -> 2
 
       if (allLevels && allLevels.length > 0) {
         for (const lvl of allLevels) {
-          if (lvl.min_xp <= xpTotal) {
+          if (lvl.min_xp <= xp) {
             currentLevel = lvl.level;
             levelName = lvl.title || FALLBACK_LEVEL_NAMES[lvl.level] || `Level ${lvl.level}`;
+            currentLevelXp = lvl.min_xp;
           }
+        }
+        // Find next level threshold
+        const nextLevel = allLevels.find(lvl => lvl.level === currentLevel + 1);
+        if (nextLevel) {
+          nextLevelXp = nextLevel.min_xp;
+        } else {
+          // If at max level, set next threshold high
+          nextLevelXp = currentLevelXp + 500;
         }
       }
 
@@ -125,12 +142,14 @@ export function useGamification() {
         .eq("status", "completed");
 
       setState({
-        xpTotal,
+        xp,
         level: currentLevel,
         levelName,
         streakDays,
         totalAchievementsUnlocked: achievementCount ?? 0,
         videosCompleted: videoCount ?? 0,
+        currentLevelXp,
+        nextLevelXp,
         isLoading: false,
         error: null,
       });

@@ -4,26 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Sparkles } from "lucide-react";
 import { useGamification } from "@/hooks/useGamification";
 
-// XP thresholds from xp_levels table (read from DB, but we need them for progress bar display)
-const getXPForNextLevel = (level: number): number => {
-  // These should match xp_levels.min_xp in the database
-  const thresholds: Record<number, number> = {
-    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
-    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
-  };
-  return thresholds[level + 1] ?? (level + 1) * 150;
-};
-
-const getCurrentLevelXP = (level: number): number => {
-  const thresholds: Record<number, number> = {
-    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
-    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
-  };
-  return thresholds[level] ?? (level - 1) * 150;
-};
-
 export const UserProgressCard = () => {
-  const { xpTotal, level, videosCompleted, isLoading } = useGamification();
+  const { xp, level, videosCompleted, currentLevelXp, nextLevelXp, isLoading } = useGamification();
 
   if (isLoading) {
     return (
@@ -41,13 +23,11 @@ export const UserProgressCard = () => {
     );
   }
 
-  const currentLevelXP = getCurrentLevelXP(level);
-  const nextLevelXP = getXPForNextLevel(level);
-  const progressPercent = xpTotal === 0 
-    ? 0 
-    : Math.min(((xpTotal - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100, 100);
+  const progressPercent = nextLevelXp > currentLevelXp 
+    ? Math.min(((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100, 100)
+    : 0;
 
-  const isEmpty = xpTotal === 0 && videosCompleted === 0;
+  const isEmpty = xp === 0 && videosCompleted === 0;
 
   return (
     <Card className="p-8 space-y-6 group hover:shadow-lg transition-shadow duration-300">
@@ -73,13 +53,13 @@ export const UserProgressCard = () => {
       </div>
 
       <p className="text-base text-[#6B7280]">
-        XP: <span className="font-mono font-semibold text-[#1D3557]">{xpTotal}</span> · Videos completed: <span className="font-mono font-semibold text-[#1D3557]">{videosCompleted}</span>
+        XP: <span className="font-mono font-semibold text-[#1D3557]">{xp}</span> · Videos completed: <span className="font-mono font-semibold text-[#1D3557]">{videosCompleted}</span>
       </p>
 
       <div className="space-y-2">
         <Progress value={progressPercent} className="h-3" />
         <p className="text-sm text-[#6B7280]">
-          Next level at <span className="font-mono font-semibold">{nextLevelXP}</span> XP
+          Next level at <span className="font-mono font-semibold">{nextLevelXp}</span> XP
         </p>
       </div>
 

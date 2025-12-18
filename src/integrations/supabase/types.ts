@@ -301,6 +301,30 @@ export type Database = {
         }
         Relationships: []
       }
+      mentor_messages: {
+        Row: {
+          auth_user_id: string
+          content: string
+          created_at: string
+          id: string
+          role: string
+        }
+        Insert: {
+          auth_user_id: string
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+        }
+        Update: {
+          auth_user_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       quiz_answers: {
         Row: {
           created_at: string | null
@@ -1189,6 +1213,7 @@ export type Database = {
           completed_at: string
           created_at: string
           id: string
+          is_completed: boolean
           raw_quiz_answers: Json | null
           status: string
           user_id: string
@@ -1199,6 +1224,7 @@ export type Database = {
           completed_at?: string
           created_at?: string
           id?: string
+          is_completed?: boolean
           raw_quiz_answers?: Json | null
           status?: string
           user_id: string
@@ -1209,6 +1235,7 @@ export type Database = {
           completed_at?: string
           created_at?: string
           id?: string
+          is_completed?: boolean
           raw_quiz_answers?: Json | null
           status?: string
           user_id?: string
