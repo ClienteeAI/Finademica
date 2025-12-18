@@ -10,6 +10,7 @@ import { useGamification } from "@/hooks/useGamification";
 
 interface SkillData {
   skill_id: string;
+  key: string;
   name: string;
   level: number;
   xp: number;
@@ -22,7 +23,7 @@ interface AchievementData {
   unlocked_at: string;
 }
 
-// Skill colors mapped by skill name/key
+// Skill colors mapped by skill key
 const skillColors: Record<string, string> = {
   risk: "from-[#4DE2E8] to-[#2FB3C6]",
   mindset: "from-[#B5A7FF] to-[#D4CBFF]",
@@ -31,100 +32,103 @@ const skillColors: Record<string, string> = {
   money_management: "from-[#4DE2E8] to-[#A7E9FF]",
 };
 
-// XP thresholds - read from xp_levels table (display only)
-const getXPForNextLevel = (level: number): number => {
-  const thresholds: Record<number, number> = {
-    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
-    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
-  };
-  return thresholds[level + 1] ?? (level + 1) * 150;
-};
-
-const getCurrentLevelXP = (level: number): number => {
-  const thresholds: Record<number, number> = {
-    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
-    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
-  };
-  return thresholds[level] ?? (level - 1) * 150;
-};
-
-// Calculate skill progress (XP within current skill level) - display only
-const getSkillProgress = (skillXP: number, skillLevel: number): number => {
-  const xpForCurrentLevel = skillLevel * 50;
-  const xpForNextLevel = (skillLevel + 1) * 50;
-  const progress = ((skillXP - xpForCurrentLevel) / (xpForNextLevel - xpForCurrentLevel)) * 100;
-  return Math.max(0, Math.min(progress, 100));
+// Calculate skill progress: 100 XP per level (display only)
+const getSkillProgress = (xp: number): number => {
+  const progressInLevel = xp % 100;
+  return Math.min((progressInLevel / 100) * 100, 100);
 };
 
 export function GamificationSection() {
-  const { xp, level, levelName, streakDays, currentLevelXp, nextLevelXp, isLoading, error } = useGamification();
+  const { xp, level, levelName, streakDays, currentLevelXp, nextLevelXp, isLoading, error, refetch } = useGamification();
   const [skills, setSkills] = useState<SkillData[]>([]);
   const [achievements, setAchievements] = useState<AchievementData[]>([]);
   const [detailsLoading, setDetailsLoading] = useState(true);
-  // Fetch skills and achievements separately
-  useEffect(() => {
-    const fetchDetails = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
 
-        // Get public user id
-        const { data: publicUser } = await supabase
-          .from("users")
-          .select("id")
-          .eq("auth_user_id", user.id)
-          .maybeSingle();
+  // Fetch skills and achievements
+  const fetchDetails = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-        if (!publicUser?.id) return;
+      // Get public user id
+      const { data: publicUser } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
 
-        // Fetch skills
-        const { data: skillsData } = await supabase
-          .from("user_skills")
-          .select(`
-            skill_id,
-            level,
-            xp,
-            skills (key, name)
-          `)
-          .eq("user_id", publicUser.id);
+      if (!publicUser?.id) return;
 
-        if (skillsData) {
-          setSkills(skillsData.map((s: any) => ({
-            skill_id: s.skill_id,
-            name: s.skills?.key || s.skills?.name || "Unknown",
-            level: s.level,
-            xp: s.xp,
-          })));
-        }
+      // Fetch all skills (static definitions)
+      const { data: allSkills } = await supabase
+        .from("skills")
+        .select("id, key, name");
 
-        // Fetch achievements
-        const { data: achievementsData } = await supabase
-          .from("user_achievements")
-          .select(`
-            achievement_id,
-            unlocked_at,
-            achievements (key, name)
-          `)
-          .eq("user_id", publicUser.id)
-          .order("unlocked_at", { ascending: false });
+      // Fetch user's skill progress
+      const { data: userSkillsData } = await supabase
+        .from("user_skills")
+        .select("skill_id, level, xp")
+        .eq("user_id", publicUser.id);
 
-        if (achievementsData) {
-          setAchievements(achievementsData.map((a: any) => ({
-            achievement_id: a.achievement_id,
-            key: a.achievements?.key || "",
-            name: a.achievements?.name || "Achievement",
-            unlocked_at: a.unlocked_at,
-          })));
-        }
-      } catch (err) {
-        console.error("Error fetching gamification details:", err);
-      } finally {
-        setDetailsLoading(false);
+      // Merge: always show all skills, attach user progress if exists
+      if (allSkills) {
+        const userSkillsMap = new Map(
+          (userSkillsData || []).map((us: any) => [us.skill_id, us])
+        );
+
+        const mergedSkills: SkillData[] = allSkills.map((skill: any) => {
+          const userProgress = userSkillsMap.get(skill.id);
+          return {
+            skill_id: skill.id,
+            key: skill.key,
+            name: skill.name,
+            level: userProgress?.level ?? 1,
+            xp: userProgress?.xp ?? 0,
+          };
+        });
+
+        setSkills(mergedSkills);
       }
-    };
 
+      // Fetch achievements
+      const { data: achievementsData } = await supabase
+        .from("user_achievements")
+        .select(`
+          achievement_id,
+          unlocked_at,
+          achievements (key, name)
+        `)
+        .eq("user_id", publicUser.id)
+        .order("unlocked_at", { ascending: false });
+
+      if (achievementsData) {
+        setAchievements(achievementsData.map((a: any) => ({
+          achievement_id: a.achievement_id,
+          key: a.achievements?.key || "",
+          name: a.achievements?.name || "Achievement",
+          unlocked_at: a.unlocked_at,
+        })));
+      }
+    } catch (err) {
+      console.error("Error fetching gamification details:", err);
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchDetails();
   }, []);
+
+  // Listen for gamification updates (e.g., after video completion)
+  useEffect(() => {
+    const handleUpdate = () => {
+      fetchDetails();
+      refetch?.();
+    };
+    window.addEventListener('gamification-update', handleUpdate);
+    return () => window.removeEventListener('gamification-update', handleUpdate);
+  }, [refetch]);
 
   // Calculate XP progress for display (read-only) - using values from hook
   const xpPercentage = nextLevelXp > currentLevelXp 
@@ -296,15 +300,18 @@ export function GamificationSection() {
               ))
             ) : skills.length > 0 ? (
               skills.map((skill) => {
-                const colorKey = skill.name.toLowerCase().replace(/\s+/g, '_');
-                const color = skillColors[colorKey] || "from-[#4DE2E8] to-[#A7E9FF]";
-                const progress = getSkillProgress(skill.xp, skill.level);
+                const color = skillColors[skill.key] || "from-[#4DE2E8] to-[#A7E9FF]";
+                const progress = getSkillProgress(skill.xp);
                 
                 return (
                   <div key={skill.skill_id} className="space-y-1.5">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-[#1D3557] capitalize">{skill.name}</span>
-                      <span className="text-xs text-[#6B7280] font-mono">Lv.{skill.level}</span>
+                      <span className="text-xs font-medium text-[#1D3557] capitalize">
+                        {skill.name.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-xs text-[#6B7280] font-mono">
+                        Lv.{skill.level} · {skill.xp} XP
+                      </span>
                     </div>
                     <div className="h-2 bg-[#D4E0EC]/40 rounded-full overflow-hidden border border-[#D4E0EC]/50">
                       <div
