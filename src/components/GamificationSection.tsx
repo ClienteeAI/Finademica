@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkles, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useGamification } from "@/hooks/useGamification";
+import { useClient } from "@/lib/clientContext";
 
 interface SkillData {
   skill_id: string;
@@ -39,10 +39,14 @@ const getSkillProgress = (xp: number): number => {
 };
 
 export function GamificationSection() {
+  const { client } = useClient();
   const { xp, level, levelName, streakDays, currentLevelXp, nextLevelXp, isLoading, error, refetch } = useGamification();
   const [skills, setSkills] = useState<SkillData[]>([]);
   const [achievements, setAchievements] = useState<AchievementData[]>([]);
   const [detailsLoading, setDetailsLoading] = useState(true);
+  
+  // Theme detection
+  const isNasrTheme = client?.subdomain === 'nasr';
 
   // Fetch skills and achievements
   const fetchDetails = async () => {
@@ -159,12 +163,17 @@ export function GamificationSection() {
     <div className="space-y-6">
       {/* Section Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
-          <Sparkles className="w-5 h-5 text-[#2FB3C6]" />
+        <div className={cn(
+          "w-10 h-10 rounded-xl flex items-center justify-center border",
+          isNasrTheme 
+            ? "bg-gradient-to-br from-gold/20 to-gold-light/20 border-gold/30" 
+            : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 border-[#4DE2E8]/30"
+        )}>
+          <Sparkles className={cn("w-5 h-5", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-[#1D3557] tracking-tight">Trader Progress</h2>
-          <p className="text-sm text-[#6B7280]">Your trading RPG journey</p>
+          <h2 className="text-2xl font-bold text-foreground tracking-tight">Trader Progress</h2>
+          <p className="text-sm text-muted-foreground">Your trading RPG journey</p>
         </div>
       </div>
 
@@ -173,11 +182,16 @@ export function GamificationSection() {
         {/* Level & XP Card */}
         <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
+            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               Your Trader Level
             </h3>
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
-              <Target className="w-4 h-4 text-[#2FB3C6]" />
+            <div className={cn(
+              "w-8 h-8 rounded-lg flex items-center justify-center border",
+              isNasrTheme 
+                ? "bg-gradient-to-br from-gold/20 to-gold-light/20 border-gold/30" 
+                : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 border-[#4DE2E8]/30"
+            )}>
+              <Target className={cn("w-4 h-4", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
             </div>
           </div>
 
@@ -191,12 +205,12 @@ export function GamificationSection() {
             ) : (
               <>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-[#1D3557] font-mono">
+                  <span className="text-4xl font-bold text-foreground font-mono">
                     Level {level}
                   </span>
                 </div>
-                <p className="text-lg text-[#4DE2E8] font-medium">{levelName}</p>
-                <p className="text-sm text-[#6B7280] font-mono">
+                <p className={cn("text-lg font-medium", isNasrTheme ? "text-gold" : "text-[#4DE2E8]")}>{levelName}</p>
+                <p className="text-sm text-muted-foreground font-mono">
                   {xp} / {nextLevelXp} XP to next level
                 </p>
               </>
@@ -205,12 +219,20 @@ export function GamificationSection() {
 
           {/* XP Progress Bar */}
           <div className="space-y-2">
-            <div className="h-3 bg-[#D4E0EC]/40 rounded-full overflow-hidden backdrop-blur-sm border border-[#D4E0EC]/60">
+            <div className={cn(
+              "h-3 rounded-full overflow-hidden backdrop-blur-sm border",
+              isNasrTheme ? "bg-white/5 border-white/10" : "bg-[#D4E0EC]/40 border-[#D4E0EC]/60"
+            )}>
               {isLoading ? (
                 <div className="h-full w-0" />
               ) : (
                 <div
-                  className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] relative overflow-hidden shadow-[0_0_12px_rgba(77,226,232,0.4)] transition-all duration-1000"
+                  className={cn(
+                    "h-full bg-gradient-to-r relative overflow-hidden transition-all duration-1000",
+                    isNasrTheme 
+                      ? "from-gold-light to-gold shadow-[0_0_12px_rgba(212,175,55,0.4)]" 
+                      : "from-[#4DE2E8] to-[#A7E9FF] shadow-[0_0_12px_rgba(77,226,232,0.4)]"
+                  )}
                   style={{ width: `${xpPercentage}%` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shimmer" />
@@ -219,17 +241,22 @@ export function GamificationSection() {
             </div>
           </div>
 
-          <p className="text-xs text-[#6B7280] leading-relaxed">
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Complete lessons, use the Mentor, and follow your roadmap to gain XP.
           </p>
         </Card>
 
         {/* Avatar Card */}
         <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#4DE2E8]/5 via-transparent to-[#B5A7FF]/10 pointer-events-none" />
+          <div className={cn(
+            "absolute inset-0 pointer-events-none",
+            isNasrTheme 
+              ? "bg-gradient-to-br from-gold/5 via-transparent to-gold-light/10" 
+              : "bg-gradient-to-br from-[#4DE2E8]/5 via-transparent to-[#B5A7FF]/10"
+          )} />
           
           <div className="flex items-center justify-between relative">
-            <h3 className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
+            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               AI Trading Avatar
             </h3>
             {isLoading ? (
@@ -241,19 +268,25 @@ export function GamificationSection() {
 
           <div className="flex justify-center py-4">
             <div className="relative">
-              <div className="absolute inset-0 w-24 h-24 rounded-full bg-gradient-to-br from-[#4DE2E8]/30 to-[#A7E9FF]/20 blur-xl animate-pulse" />
-              <div className="absolute inset-2 w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#B5A7FF]/20 blur-lg animate-pulse" style={{ animationDelay: '0.5s' }} />
+              <div className={cn(
+                "absolute inset-0 w-24 h-24 rounded-full blur-xl animate-pulse",
+                isNasrTheme ? "bg-gradient-to-br from-gold/30 to-gold-light/20" : "bg-gradient-to-br from-[#4DE2E8]/30 to-[#A7E9FF]/20"
+              )} />
+              <div className={cn(
+                "absolute inset-2 w-20 h-20 rounded-full blur-lg animate-pulse",
+                isNasrTheme ? "bg-gradient-to-br from-gold/20 to-gold-light/20" : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#B5A7FF]/20"
+              )} style={{ animationDelay: '0.5s' }} />
               
               <div className={cn(
-                "relative w-24 h-24 rounded-full",
-                "bg-gradient-to-br from-[#4DE2E8]/30 via-white/60 to-[#A7E9FF]/30",
-                "border-2 border-[#4DE2E8]/50",
-                "flex items-center justify-center",
-                "shadow-[0_0_30px_rgba(77,226,232,0.25),inset_0_0_20px_rgba(255,255,255,0.5)]",
-                "group-hover:shadow-[0_0_40px_rgba(77,226,232,0.4),inset_0_0_25px_rgba(255,255,255,0.6)]",
-                "transition-all duration-500"
+                "relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500",
+                isNasrTheme 
+                  ? "bg-gradient-to-br from-gold/30 via-white/10 to-gold-light/30 border-2 border-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.25),inset_0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_40px_rgba(212,175,55,0.4),inset_0_0_25px_rgba(255,255,255,0.3)]"
+                  : "bg-gradient-to-br from-[#4DE2E8]/30 via-white/60 to-[#A7E9FF]/30 border-2 border-[#4DE2E8]/50 shadow-[0_0_30px_rgba(77,226,232,0.25),inset_0_0_20px_rgba(255,255,255,0.5)] group-hover:shadow-[0_0_40px_rgba(77,226,232,0.4),inset_0_0_25px_rgba(255,255,255,0.6)]"
               )}>
-                <Sparkles className="w-10 h-10 text-[#2FB3C6] drop-shadow-[0_0_8px_rgba(77,226,232,0.6)]" />
+                <Sparkles className={cn(
+                  "w-10 h-10",
+                  isNasrTheme ? "text-gold drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" : "text-[#2FB3C6] drop-shadow-[0_0_8px_rgba(77,226,232,0.6)]"
+                )} />
               </div>
             </div>
           </div>
@@ -266,15 +299,18 @@ export function GamificationSection() {
               </>
             ) : (
               <>
-                <p className="text-lg font-semibold text-[#1D3557]">{levelName}</p>
-                <p className="text-xs text-[#6B7280]">
+                <p className="text-lg font-semibold text-foreground">{levelName}</p>
+                <p className="text-xs text-muted-foreground">
                   Keep learning to evolve your avatar.
                 </p>
               </>
             )}
           </div>
 
-          <p className="text-xs text-[#6B7280] text-center border-t border-[#D4E0EC]/60 pt-3">
+          <p className={cn(
+            "text-xs text-muted-foreground text-center border-t pt-3",
+            isNasrTheme ? "border-white/10" : "border-[#D4E0EC]/60"
+          )}>
             Next stage unlocks at Level {(Math.floor(level / 3) + 1) * 3 + 1}
           </p>
         </Card>
@@ -282,7 +318,7 @@ export function GamificationSection() {
         {/* Skill Tree Card */}
         <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
+            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               Your Skill Tree
             </h3>
           </div>
@@ -300,22 +336,32 @@ export function GamificationSection() {
               ))
             ) : skills.length > 0 ? (
               skills.map((skill) => {
-                const color = skillColors[skill.key] || "from-[#4DE2E8] to-[#A7E9FF]";
+                const color = isNasrTheme 
+                  ? "from-gold-light to-gold" 
+                  : skillColors[skill.key] || "from-[#4DE2E8] to-[#A7E9FF]";
                 const progress = getSkillProgress(skill.xp);
+                const hasProgress = skill.xp > 0;
                 
                 return (
-                  <div key={skill.skill_id} className="space-y-1.5">
+                  <div key={skill.skill_id} className={cn("space-y-1.5", !hasProgress && "opacity-60")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-[#1D3557] capitalize">
+                      <span className="text-xs font-semibold text-foreground capitalize">
                         {skill.name.replace(/_/g, ' ')}
                       </span>
-                      <span className="text-xs text-[#6B7280] font-mono">
-                        Lv.{skill.level} · {skill.xp} XP
+                      <span className="text-xs text-muted-foreground font-mono">
+                        {hasProgress ? `Lv.${skill.level} · ${skill.xp} XP` : "Start learning"}
                       </span>
                     </div>
-                    <div className="h-2 bg-[#D4E0EC]/40 rounded-full overflow-hidden border border-[#D4E0EC]/50">
+                    <div className={cn(
+                      "h-2 rounded-full overflow-hidden border",
+                      isNasrTheme ? "bg-white/5 border-white/10" : "bg-[#D4E0EC]/40 border-[#D4E0EC]/50"
+                    )}>
                       <div
-                        className={cn("h-full rounded-full bg-gradient-to-r transition-all duration-1000", color)}
+                        className={cn(
+                          "h-full rounded-full bg-gradient-to-r transition-all duration-1000",
+                          color,
+                          hasProgress && (isNasrTheme ? "shadow-[0_0_8px_rgba(212,175,55,0.3)]" : "shadow-[0_0_8px_rgba(77,226,232,0.3)]")
+                        )}
                         style={{ width: `${progress}%` }}
                       />
                     </div>
@@ -323,13 +369,16 @@ export function GamificationSection() {
                 );
               })
             ) : (
-              <p className="text-xs text-[#6B7280] text-center py-4">
+              <p className="text-xs text-muted-foreground text-center py-4">
                 No skills unlocked yet. Start learning to grow your skills!
               </p>
             )}
           </div>
 
-          <p className="text-xs text-[#6B7280] leading-relaxed border-t border-[#D4E0EC]/60 pt-3">
+          <p className={cn(
+            "text-xs text-muted-foreground leading-relaxed border-t pt-3",
+            isNasrTheme ? "border-white/10" : "border-[#D4E0EC]/60"
+          )}>
             Skill XP grows as you complete new lessons.
           </p>
         </Card>

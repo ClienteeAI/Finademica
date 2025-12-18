@@ -323,14 +323,16 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <p className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
+              <p className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
                 Videos Watched
               </p>
-              <p className="text-4xl font-semibold text-[#1D3557] font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
-                {completedVideoIds.size} / {freeVideos.length + lockedVideos.length || 5}
+              <p className="text-4xl font-semibold text-foreground font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
+                {completedVideoIds.size} / {freeVideos.length || 0}
               </p>
-              <p className="text-sm text-[#6B7280]">
-                {Math.max(0, freeVideos.length - completedVideoIds.size)} free videos remaining
+              <p className="text-sm text-muted-foreground">
+                {freeVideos.length - completedVideoIds.size > 0 
+                  ? `${freeVideos.length - completedVideoIds.size} free videos remaining`
+                  : "All free videos completed!"}
               </p>
             </div>
           </Card>
