@@ -33,6 +33,7 @@ interface FormErrors {
   symbol?: string;
   entry_price?: string;
   stop_loss_price?: string;
+  take_profit_price?: string;
   account_balance?: string;
   risk_value?: string;
   lots_requested?: string;
@@ -189,6 +190,25 @@ const Calculator = () => {
 
     if (entry && sl && entry === sl) {
       newErrors.stop_loss_price = "Stop loss must differ from entry price";
+    }
+
+    // Side-aware validation for SL and TP
+    const tp = parseFloat(takeProfitPrice);
+    
+    if (side === "long") {
+      if (entry && sl && !isNaN(entry) && !isNaN(sl) && sl >= entry) {
+        newErrors.stop_loss_price = "Stop loss must be below entry for long positions";
+      }
+      if (entry && tp && !isNaN(entry) && !isNaN(tp) && tp <= entry) {
+        newErrors.take_profit_price = "Take profit must be above entry for long positions";
+      }
+    } else if (side === "short") {
+      if (entry && sl && !isNaN(entry) && !isNaN(sl) && sl <= entry) {
+        newErrors.stop_loss_price = "Stop loss must be above entry for short positions";
+      }
+      if (entry && tp && !isNaN(entry) && !isNaN(tp) && tp >= entry) {
+        newErrors.take_profit_price = "Take profit must be below entry for short positions";
+      }
     }
 
     const balance = parseFloat(accountBalance);
@@ -445,10 +465,18 @@ const Calculator = () => {
                   value={takeProfitPrice}
                   onChange={(e) => setTakeProfitPrice(e.target.value)}
                   placeholder="0.00"
-                  className="h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10"
+                  className={cn(
+                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
+                    errors.take_profit_price && "border-red-500"
+                  )}
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
               </div>
+              {errors.take_profit_price && (
+                <p className="text-sm text-red-400 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> {errors.take_profit_price}
+                </p>
+              )}
             </div>
 
             {/* Account Balance */}

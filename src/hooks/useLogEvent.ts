@@ -46,8 +46,8 @@ export function useLogEvent(onEventLogged?: () => void) {
 
         // Call award_xp RPC to log event and award XP
         const { data, error } = await supabase.rpc("award_xp", {
-          p_event_type: xpEventType,
-          p_ref_id: meta.video_id || meta.trade_id || null,
+          p_auth_user_id: user.id,
+          p_action_key: xpEventType,
           p_meta: JSON.parse(JSON.stringify(meta)) as Json,
         });
 
