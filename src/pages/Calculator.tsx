@@ -256,6 +256,7 @@ const Calculator = () => {
       risk_type: riskType,
       risk_value: parseFloat(riskValue),
       lots_requested: lotsOverrideEnabled && lotsRequested ? parseFloat(lotsRequested) : null,
+      notes: notes.trim() || null,
     };
 
     try {
