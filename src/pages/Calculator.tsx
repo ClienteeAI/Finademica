@@ -745,7 +745,7 @@ const Calculator = () => {
                     <div className="flex items-center gap-2">
                       <InfoTooltip />
                       <span className="text-2xl font-bold font-mono text-amber-400">
-                        {result.tick_value_position_usd !== undefined 
+                        {result.tick_value_position_usd != null 
                           ? `$${result.tick_value_position_usd.toFixed(2)}` 
                           : '—'}
                       </span>
@@ -766,7 +766,7 @@ const Calculator = () => {
                     <div className="flex items-center gap-2">
                       <InfoTooltip />
                       <span className="text-2xl font-bold font-mono bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">
-                        {result.pip_value_position_usd !== undefined 
+                        {result.pip_value_position_usd != null 
                           ? `$${result.pip_value_position_usd.toFixed(2)}` 
                           : '—'}
                       </span>
