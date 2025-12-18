@@ -260,7 +260,7 @@ const Calculator = () => {
 
     try {
       const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook-test/95c61f3e-fb17-4049-9801-62c89402d43b",
+        "https://clientee.app.n8n.cloud/webhook/95c61f3e-fb17-4049-9801-62c89402d43b",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
