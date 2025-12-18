@@ -431,21 +431,21 @@ export type Database = {
           account_currency: string
           broker_key: string
           created_at: string
-          entry_price: number
+          entry_price: number | null
           id: string
-          lots_calculated: number
-          lots_final: number
+          lots_calculated: number | null
+          lots_final: number | null
           lots_requested: number | null
           notes: string | null
-          risk_per_1lot_usd: number
-          risk_total_usd: number
+          risk_per_1lot_usd: number | null
+          risk_total_usd: number | null
           risk_type: string
-          risk_value: number
+          risk_value: number | null
           side: string
-          stop_loss_price: number
+          stop_loss_price: number | null
           symbol: string
           take_profit_price: number | null
-          ticks_to_sl: number
+          ticks_to_sl: number | null
           user_id: string
         }
         Insert: {
@@ -453,21 +453,21 @@ export type Database = {
           account_currency?: string
           broker_key?: string
           created_at?: string
-          entry_price: number
+          entry_price?: number | null
           id?: string
-          lots_calculated: number
-          lots_final: number
+          lots_calculated?: number | null
+          lots_final?: number | null
           lots_requested?: number | null
           notes?: string | null
-          risk_per_1lot_usd: number
-          risk_total_usd: number
+          risk_per_1lot_usd?: number | null
+          risk_total_usd?: number | null
           risk_type: string
-          risk_value: number
+          risk_value?: number | null
           side: string
-          stop_loss_price: number
+          stop_loss_price?: number | null
           symbol: string
           take_profit_price?: number | null
-          ticks_to_sl: number
+          ticks_to_sl?: number | null
           user_id: string
         }
         Update: {
@@ -475,21 +475,21 @@ export type Database = {
           account_currency?: string
           broker_key?: string
           created_at?: string
-          entry_price?: number
+          entry_price?: number | null
           id?: string
-          lots_calculated?: number
-          lots_final?: number
+          lots_calculated?: number | null
+          lots_final?: number | null
           lots_requested?: number | null
           notes?: string | null
-          risk_per_1lot_usd?: number
-          risk_total_usd?: number
+          risk_per_1lot_usd?: number | null
+          risk_total_usd?: number | null
           risk_type?: string
-          risk_value?: number
+          risk_value?: number | null
           side?: string
-          stop_loss_price?: number
+          stop_loss_price?: number | null
           symbol?: string
           take_profit_price?: number | null
-          ticks_to_sl?: number
+          ticks_to_sl?: number | null
           user_id?: string
         }
         Relationships: []
