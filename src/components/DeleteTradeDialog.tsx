@@ -13,8 +13,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
+
 interface DeleteTradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -51,48 +52,58 @@ export const DeleteTradeDialog = ({
 
     setIsDeleting(true);
 
-    // Get authenticated user from Supabase
-    const authUser = await getAuthUser();
-    
-    if (!authUser) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to manage your trading diary.",
-        variant: "destructive",
-      });
-      setIsDeleting(false);
-      onOpenChange(false);
-      return;
-    }
+    try {
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to manage your trading diary.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        return;
+      }
 
-    const payload = {
-      auth_user_id: authUser.auth_user_id,
-      user_email: authUser.user_email,
-      trade_id: tradeId,
-    };
+      // Delete directly from Supabase
+      const { error } = await supabase
+        .from('trading_diary_trades')
+        .delete()
+        .eq('id', tradeId)
+        .eq('auth_user_id', user.id);
 
-    const result = await sendDiaryWebhook("delete", payload);
+      if (error) {
+        console.error("Delete error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to delete trade. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (result.success) {
       toast({
         title: "Trade deleted",
         description: "Your trade has been removed from the diary.",
       });
-      // Log diary_trade_deleted event
+      
+      // Log event
       await logEvent("diary_trade_deleted", { trade_id: tradeId });
+      
       setConfirmText("");
       onOpenChange(false);
       onSuccess();
-    } else {
-      console.error("Diary action failed:", result.error);
+    } catch (error) {
+      console.error("Failed to delete trade:", error);
       toast({
         title: "Error",
-        description: "Diary action failed. Please try again.",
+        description: "Failed to delete trade. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsDeleting(false);
     }
-
-    setIsDeleting(false);
   };
 
   return (

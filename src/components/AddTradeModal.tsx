@@ -7,9 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useLogEvent } from "@/hooks/useLogEvent";
 
 interface AddTradeModalProps {
   open: boolean;
@@ -20,6 +21,7 @@ interface AddTradeModalProps {
 
 export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: AddTradeModalProps) => {
   const navigate = useNavigate();
+  const { logEvent } = useLogEvent();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     symbol: "",
@@ -44,64 +46,67 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
     setIsSubmitting(true);
 
     try {
-      const authUser = await getAuthUser();
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (!authUser) {
+      if (!user) {
         toast.error("Please log in to manage your trading diary.");
         navigate("/login");
         return;
       }
 
-      const payload = {
-        auth_user_id: authUser.auth_user_id,
-        user_email: authUser.user_email,
-        broker_key: "nasr_trade_mt5",
+      // Insert directly into Supabase
+      const { data, error } = await supabase
+        .from('trading_diary_trades')
+        .insert({
+          auth_user_id: user.id,
+          broker_key: "nasr_trade_mt5",
+          symbol: formData.symbol.toUpperCase(),
+          side: formData.side,
+          entry_price: formData.entry_price ? parseFloat(formData.entry_price) : null,
+          stop_loss_price: formData.stop_loss_price ? parseFloat(formData.stop_loss_price) : null,
+          take_profit_price: formData.take_profit_price ? parseFloat(formData.take_profit_price) : null,
+          lots_final: formData.lots_final ? parseFloat(formData.lots_final) : null,
+          risk_total_usd: formData.risk_total_usd ? parseFloat(formData.risk_total_usd) : null,
+          notes: formData.notes || null,
+          status: formData.status,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("Insert error:", error);
+        toast.error("Failed to save trade. Please try again.");
+        return;
+      }
+
+      toast.success("Saved to diary");
+      
+      // Log event
+      await logEvent("diary_trade_created", {
+        trade_id: data?.id,
         symbol: formData.symbol.toUpperCase(),
         side: formData.side,
-        account_currency: "USD",
-        account_balance: null,
-        risk_type: null,
-        risk_value: null,
-        entry_price: formData.entry_price ? parseFloat(formData.entry_price) : null,
-        stop_loss_price: formData.stop_loss_price ? parseFloat(formData.stop_loss_price) : null,
-        take_profit_price: formData.take_profit_price ? parseFloat(formData.take_profit_price) : null,
-        lots_final: formData.lots_final ? parseFloat(formData.lots_final) : null,
-        risk_total_usd: formData.risk_total_usd ? parseFloat(formData.risk_total_usd) : null,
-        profit_total_usd: null,
-        rr_ratio: null,
-        tick_value_position_usd: null,
-        pip_value_position_usd: null,
-        notes: formData.notes || null,
-        status: formData.status,
-        open_time: null,
-        tags: [],
-      };
+      });
 
-      const result = await sendDiaryWebhook("create", payload);
-
-      if (result.success) {
-        toast.success("Saved to diary");
-        onSuccess();
-        onOpenChange(false);
-        // Reset form
-        setFormData({
-          symbol: "",
-          side: "long",
-          status: "planned",
-          entry_price: "",
-          stop_loss_price: "",
-          take_profit_price: "",
-          lots_final: "",
-          risk_total_usd: "",
-          notes: "",
-        });
-      } else {
-        toast.error("Diary action failed. Please try again.");
-        console.error("Webhook error:", result.error);
-      }
+      onSuccess();
+      onOpenChange(false);
+      
+      // Reset form
+      setFormData({
+        symbol: "",
+        side: "long",
+        status: "planned",
+        entry_price: "",
+        stop_loss_price: "",
+        take_profit_price: "",
+        lots_final: "",
+        risk_total_usd: "",
+        notes: "",
+      });
     } catch (error) {
       console.error("Failed to save trade:", error);
-      toast.error("Diary action failed. Please try again.");
+      toast.error("Failed to save trade. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
