@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const DIARY_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/03362423-8c6c-4c11-bd42-1c56a074a88d";
+const DIARY_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/03362423-8c6c-4c11-bd42-1c56a074a88d";
 const DIARY_SECRET = "DIARY_9fA3kP2xQ7mVZ81sLwT0R";
 
 export interface DiaryUser {

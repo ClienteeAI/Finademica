@@ -7,9 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Save, TrendingUp, TrendingDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useLogEvent } from "@/hooks/useLogEvent";
+import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
 
 interface DiaryEntry {
   id: string;
@@ -19,6 +19,11 @@ interface DiaryEntry {
   stop_loss_price: number;
   take_profit_price?: number;
   lots_final?: number;
+  risk_total_usd?: number;
+  profit_total_usd?: number;
+  rr_ratio?: number;
+  tick_value_position_usd?: number;
+  pip_value_position_usd?: number;
   notes?: string;
   status?: string;
 }
@@ -81,10 +86,9 @@ export const EditTradeModal = ({
     setIsSubmitting(true);
 
     try {
-      // Get authenticated user
-      const { data: { user } } = await supabase.auth.getUser();
+      const authUser = await getAuthUser();
       
-      if (!user) {
+      if (!authUser) {
         toast({
           title: "Login Required",
           description: "Please log in to manage your trading diary.",
@@ -95,25 +99,29 @@ export const EditTradeModal = ({
         return;
       }
 
-      // Update directly in Supabase
-      const { error } = await supabase
-        .from('trading_diary_trades')
-        .update({
-          symbol: symbol.toUpperCase(),
-          side,
-          status,
-          entry_price: parseFloat(entryPrice) || null,
-          stop_loss_price: parseFloat(stopLossPrice) || null,
-          take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
-          lots_final: lotsFinal ? parseFloat(lotsFinal) : null,
-          notes: notes || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', trade.id)
-        .eq('auth_user_id', user.id);
+      const tradeData = {
+        auth_user_id: authUser.auth_user_id,
+        email: authUser.user_email,
+        trade_id: trade.id,
+        broker_key: "nasr_trade_mt5",
+        symbol: symbol.toUpperCase(),
+        side,
+        status,
+        entry_price: parseFloat(entryPrice) || null,
+        stop_loss_price: parseFloat(stopLossPrice) || null,
+        take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
+        lots_final: lotsFinal ? parseFloat(lotsFinal) : null,
+        risk_total_usd: trade.risk_total_usd || null,
+        profit_total_usd: trade.profit_total_usd || null,
+        rr_ratio: trade.rr_ratio || null,
+        tick_value_position_usd: trade.tick_value_position_usd || null,
+        pip_value_position_usd: trade.pip_value_position_usd || null,
+        notes: notes || null,
+      };
 
-      if (error) {
-        console.error("Update error:", error);
+      const result = await sendDiaryWebhook("update", tradeData);
+
+      if (!result.success) {
         toast({
           title: "Error",
           description: "Failed to update trade. Please try again.",
@@ -127,7 +135,6 @@ export const EditTradeModal = ({
         description: "Your trade has been updated successfully.",
       });
       
-      // Log event
       await logEvent("diary_trade_updated", {
         trade_id: trade.id,
         fields_changed: ["symbol", "side", "status", "entry_price", "stop_loss_price", "take_profit_price", "lots_final", "notes"],
