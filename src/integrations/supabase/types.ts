@@ -188,6 +188,44 @@ export type Database = {
           },
         ]
       }
+      crm_events: {
+        Row: {
+          email: string | null
+          event_name: string
+          id: string
+          occurred_at: string
+          phone: string | null
+          props: Json
+          user_id: string | null
+        }
+        Insert: {
+          email?: string | null
+          event_name: string
+          id?: string
+          occurred_at?: string
+          phone?: string | null
+          props?: Json
+          user_id?: string | null
+        }
+        Update: {
+          email?: string | null
+          event_name?: string
+          id?: string
+          occurred_at?: string
+          phone?: string | null
+          props?: Json
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ebooks: {
         Row: {
           call_notes: string | null
@@ -826,33 +864,48 @@ export type Database = {
           action: string | null
           auth_user_id: string | null
           created_at: string
+          email: string | null
+          event_name: string | null
           event_type: string
           event_value: string | null
           id: string
           meta: Json | null
+          occurred_at: string
+          phone: string | null
           points: number
+          props: Json
           user_id: string
         }
         Insert: {
           action?: string | null
           auth_user_id?: string | null
           created_at?: string
+          email?: string | null
+          event_name?: string | null
           event_type: string
           event_value?: string | null
           id?: string
           meta?: Json | null
+          occurred_at?: string
+          phone?: string | null
           points?: number
+          props?: Json
           user_id: string
         }
         Update: {
           action?: string | null
           auth_user_id?: string | null
           created_at?: string
+          email?: string | null
+          event_name?: string | null
           event_type?: string
           event_value?: string | null
           id?: string
           meta?: Json | null
+          occurred_at?: string
+          phone?: string | null
           points?: number
+          props?: Json
           user_id?: string
         }
         Relationships: []
@@ -1086,6 +1139,7 @@ export type Database = {
           id: string
           meta: Json
           ref_id: string | null
+          user_id: string | null
           xp_amount: number | null
           xp_awarded: number
         }
@@ -1097,6 +1151,7 @@ export type Database = {
           id?: string
           meta?: Json
           ref_id?: string | null
+          user_id?: string | null
           xp_amount?: number | null
           xp_awarded?: number
         }
@@ -1108,13 +1163,14 @@ export type Database = {
           id?: string
           meta?: Json
           ref_id?: string | null
+          user_id?: string | null
           xp_amount?: number | null
           xp_awarded?: number
         }
         Relationships: [
           {
-            foreignKeyName: "user_xp_events_user_id_fkey"
-            columns: ["auth_user_id"]
+            foreignKeyName: "user_xp_events_user_id_fk"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
@@ -1516,6 +1572,15 @@ export type Database = {
       increment_user_stats: {
         Args: { p_points: number; p_user_id: string; p_videos: number }
         Returns: Json
+      }
+      log_user_event: {
+        Args: {
+          p_email?: string
+          p_event_name: string
+          p_phone?: string
+          p_props?: Json
+        }
+        Returns: string
       }
     }
     Enums: {
