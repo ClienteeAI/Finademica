@@ -285,9 +285,7 @@ const Dashboard = () => {
 
           {/* Progress Bar */}
           {(() => {
-            const xpInLevel = xp - currentLevelXp;
-            const xpNeeded = nextLevelXp - currentLevelXp;
-            const progressPercent = xpNeeded > 0 ? Math.min((xpInLevel / xpNeeded) * 100, 100) : 0;
+            const progressPercent = nextLevelXp > 0 ? Math.min((xp / nextLevelXp) * 100, 100) : 0;
             
             return (
               <div className="space-y-3">
