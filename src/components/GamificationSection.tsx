@@ -134,9 +134,11 @@ export function GamificationSection() {
     return () => window.removeEventListener('gamification-update', handleUpdate);
   }, [refetch]);
 
-  // Calculate XP progress for display (read-only) - using values from hook
-  const xpPercentage = nextLevelXp > currentLevelXp 
-    ? Math.min(((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100, 100)
+  // Calculate XP progress within current level (read-only)
+  const xpInCurrentLevel = xp - currentLevelXp;
+  const xpNeededForLevel = nextLevelXp - currentLevelXp;
+  const xpPercentage = xpNeededForLevel > 0 
+    ? Math.min((xpInCurrentLevel / xpNeededForLevel) * 100, 100)
     : 0;
 
   // Error state
@@ -211,7 +213,7 @@ export function GamificationSection() {
                 </div>
                 <p className={cn("text-lg font-medium", isNasrTheme ? "text-gold" : "text-[#4DE2E8]")}>{levelName}</p>
                 <p className="text-sm text-muted-foreground font-mono">
-                  {xp} / {nextLevelXp} XP to next level
+                  {xpInCurrentLevel} / {xpNeededForLevel} XP to next level
                 </p>
               </>
             )}

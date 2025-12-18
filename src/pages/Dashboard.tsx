@@ -15,6 +15,7 @@ import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
 import { GamificationSection } from "@/components/GamificationSection";
 import { UserProgressCard } from "@/components/UserProgressCard";
+import { useGamification } from "@/hooks/useGamification";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +66,9 @@ const Dashboard = () => {
   const [lockedVideos, setLockedVideos] = useState<RecommendedVideo[]>([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [completedVideoIds, setCompletedVideoIds] = useState<Set<string>>(new Set());
+  
+  // Gamification data
+  const { xp, level, currentLevelXp, nextLevelXp, streakDays, videosCompleted } = useGamification();
 
   // Theme detection
   const isNasrTheme = client?.subdomain === 'nasr';
@@ -280,26 +284,36 @@ const Dashboard = () => {
           </div>
 
           {/* Progress Bar */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className={cn("text-sm uppercase tracking-wider font-semibold", themeColors.subtext)}>
-                Your Progress
-              </span>
-              <span className={cn("text-xl font-semibold font-mono", themeColors.primary)}>
-                0%
-              </span>
-            </div>
-            <Progress value={0} className="h-2" />
-            <div className={cn(
-              "inline-flex items-center gap-3 px-5 py-3 rounded-full backdrop-blur-sm border",
-              isNasrTheme ? 'bg-nasr-panel/60 border-gold/20' : 'bg-white/60 border-aqua/40'
-            )}>
-              <span className="text-xl animate-pulse-subtle">🔥</span>
-              <span className={cn("text-sm", themeColors.subtext)}>
-                0 day streak - Watch your first video!
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const xpInLevel = xp - currentLevelXp;
+            const xpNeeded = nextLevelXp - currentLevelXp;
+            const progressPercent = xpNeeded > 0 ? Math.min((xpInLevel / xpNeeded) * 100, 100) : 0;
+            
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm uppercase tracking-wider font-semibold", themeColors.subtext)}>
+                    Your Progress
+                  </span>
+                  <span className={cn("text-xl font-semibold font-mono", themeColors.primary)}>
+                    {Math.round(progressPercent)}%
+                  </span>
+                </div>
+                <Progress value={progressPercent} className="h-2" />
+                <div className={cn(
+                  "inline-flex items-center gap-3 px-5 py-3 rounded-full backdrop-blur-sm border",
+                  isNasrTheme ? 'bg-nasr-panel/60 border-gold/20' : 'bg-white/60 border-aqua/40'
+                )}>
+                  <span className="text-xl animate-pulse-subtle">🔥</span>
+                  <span className={cn("text-sm", themeColors.subtext)}>
+                    {streakDays > 0 
+                      ? `${streakDays} day${streakDays !== 1 ? 's' : ''} streak - Keep it up!` 
+                      : 'Start your streak - Watch your first video!'}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Gamification / Trader Progress Section */}
