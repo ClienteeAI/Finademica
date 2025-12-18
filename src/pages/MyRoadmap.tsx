@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AchievementCard from "@/components/AchievementCard";
 import { useAchievements } from "@/hooks/useAchievements";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGamification } from "@/hooks/useGamification";
 
 interface VideoStep {
   id: string;
@@ -32,29 +33,16 @@ interface MountainLocation {
   videos: VideoStep[];
 }
 
-const LEVEL_NAMES: Record<number, string> = {
-  1: "Beginner Trader",
-  2: "Student Trader",
-  3: "Apprentice Trader",
-  4: "Intermediate Trader",
-  5: "Advanced Trader",
-  6: "Expert Trader",
-  7: "Professional Trader",
-  8: "Elite Trader",
-  9: "Master Trader",
-  10: "Legend Trader",
-};
-
-const XP_PER_LEVEL = 150;
-
 const MyRoadmap = () => {
   const navigate = useNavigate();
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
   const [locations, setLocations] = useState<MountainLocation[]>([]);
-  const [userStats, setUserStats] = useState({ level: 1, xp: 0, streak: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const { achievements, loading: achievementsLoading } = useAchievements();
+  
+  // Use the shared gamification hook for XP, level, streak - single source of truth
+  const { xp, level, levelName, streakDays, currentLevelXp, nextLevelXp, isLoading: gamificationLoading } = useGamification();
 
   useEffect(() => {
     const fetchRoadmapData = async () => {
@@ -78,20 +66,7 @@ const MyRoadmap = () => {
         return;
       }
       
-      // Fetch user gamification data
-      const { data: gamification } = await supabase
-        .from("user_gamification")
-        .select("level, experience_points, streak_days")
-        .eq("user_id", userId)
-        .maybeSingle();
-        
-      if (gamification) {
-        setUserStats({
-          level: gamification.level || 1,
-          xp: gamification.experience_points || 0,
-          streak: gamification.streak_days || 0
-        });
-      }
+      // Gamification data now comes from useGamification hook - no direct query needed
 
       // Fetch video recommendations and completion status
       const { data: recommendations } = await supabase
@@ -211,11 +186,11 @@ const MyRoadmap = () => {
     return `${mins} min`;
   };
 
-  const levelName = LEVEL_NAMES[userStats.level] || `Level ${userStats.level} Trader`;
-  const currentLevelXp = (userStats.level - 1) * XP_PER_LEVEL;
-  const nextLevelXp = userStats.level * XP_PER_LEVEL;
-  const progressPercent = Math.min(((userStats.xp - currentLevelXp) / XP_PER_LEVEL) * 100, 100);
-  const xpToNextLevel = nextLevelXp - userStats.xp;
+  // XP progress calculation using hook values (single source of truth)
+  const progressPercent = nextLevelXp > currentLevelXp 
+    ? Math.min(((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100, 100)
+    : 0;
+  const xpToNextLevel = nextLevelXp - xp;
 
   return (
     <DashboardLayout>
@@ -252,23 +227,23 @@ const MyRoadmap = () => {
               <div className="flex items-center gap-4">
                 <div className="relative">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border border-cyan-500/50 flex items-center justify-center">
-                    <span className="text-2xl font-black text-cyan-400">{userStats.level}</span>
+                    <span className="text-2xl font-black text-cyan-400">{level}</span>
                   </div>
                   <div className="absolute -bottom-1 -right-1 bg-cyan-500 text-white text-xs font-bold px-1.5 py-0.5 rounded">
                     LV
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-white">Level {userStats.level} - {levelName}</h2>
-                  <p className="text-sm text-gray-400">{userStats.xp.toLocaleString()} XP total</p>
+                  <h2 className="text-xl font-bold text-white">Level {level} - {levelName}</h2>
+                  <p className="text-sm text-gray-400">{xp.toLocaleString()} XP total</p>
                 </div>
               </div>
 
               {/* Streak Badge */}
-              {userStats.streak > 0 && (
+              {streakDays > 0 && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30">
                   <Flame className="w-5 h-5 text-orange-500" />
-                  <span className="font-bold text-orange-400">{userStats.streak} Day Streak</span>
+                  <span className="font-bold text-orange-400">{streakDays} Day Streak</span>
                 </div>
               )}
             </div>
@@ -276,8 +251,8 @@ const MyRoadmap = () => {
             {/* XP Progress Bar */}
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Progress to Level {userStats.level + 1}</span>
-                <span className="text-cyan-400">{userStats.xp} / {nextLevelXp} XP</span>
+                <span className="text-gray-400">Progress to Level {level + 1}</span>
+                <span className="text-cyan-400">{xp} / {nextLevelXp} XP</span>
               </div>
               <div className="h-3 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/50">
                 <div
@@ -288,7 +263,7 @@ const MyRoadmap = () => {
                 </div>
               </div>
               <p className="text-xs text-gray-500">
-                {xpToNextLevel > 0 ? `Watch ${Math.ceil(xpToNextLevel / 25)} more videos to reach Level ${userStats.level + 1}` : "Level up ready!"}
+                {xpToNextLevel > 0 ? `Watch ${Math.ceil(xpToNextLevel / 25)} more videos to reach Level ${level + 1}` : "Level up ready!"}
               </p>
             </div>
           </Card>

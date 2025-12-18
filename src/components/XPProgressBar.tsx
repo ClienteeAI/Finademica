@@ -1,33 +1,16 @@
 import { useGamification } from "@/hooks/useGamification";
 
-// XP thresholds - should match xp_levels table
-const getXPForNextLevel = (level: number): number => {
-  const thresholds: Record<number, number> = {
-    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
-    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
-  };
-  return thresholds[level + 1] ?? (level + 1) * 150;
-};
-
-const getCurrentLevelXP = (level: number): number => {
-  const thresholds: Record<number, number> = {
-    1: 0, 2: 150, 3: 300, 4: 450, 5: 600,
-    6: 750, 7: 900, 8: 1050, 9: 1200, 10: 1350,
-  };
-  return thresholds[level] ?? (level - 1) * 150;
-};
-
 interface XPProgressBarProps {
   compact?: boolean;
   className?: string;
 }
 
 const XPProgressBar = ({ compact = false, className = "" }: XPProgressBarProps) => {
-  const { xpTotal, level, levelName, isLoading } = useGamification();
+  const { xp, level, levelName, currentLevelXp, nextLevelXp, isLoading } = useGamification();
 
-  const currentLevelXP = getCurrentLevelXP(level);
-  const nextLevelXP = getXPForNextLevel(level);
-  const progressPercent = Math.min(((xpTotal - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100, 100);
+  const progressPercent = nextLevelXp > currentLevelXp 
+    ? Math.min(((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100, 100)
+    : 0;
 
   if (isLoading) {
     return (
@@ -48,7 +31,7 @@ const XPProgressBar = ({ compact = false, className = "" }: XPProgressBarProps) 
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <span className="text-xs text-gray-400">{xpTotal}/{nextLevelXP}</span>
+          <span className="text-xs text-gray-400">{xp}/{nextLevelXp}</span>
         </div>
       </div>
     );
@@ -65,7 +48,7 @@ const XPProgressBar = ({ compact = false, className = "" }: XPProgressBarProps) 
           <span className="text-gray-300 font-medium">{levelName}</span>
         </div>
         <span className="text-sm text-gray-400">
-          {xpTotal.toLocaleString()} / {nextLevelXP.toLocaleString()} XP
+          {xp.toLocaleString()} / {nextLevelXp.toLocaleString()} XP
         </span>
       </div>
 
@@ -87,7 +70,7 @@ const XPProgressBar = ({ compact = false, className = "" }: XPProgressBarProps) 
 
       {/* Next level hint */}
       <p className="text-xs text-gray-500">
-        {nextLevelXP - xpTotal} XP to Level {level + 1}
+        {nextLevelXp - xp} XP to Level {level + 1}
       </p>
     </div>
   );

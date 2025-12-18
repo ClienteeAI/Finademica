@@ -2,40 +2,28 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Video, Clock, TrendingUp, Lock, ChevronRight, Flame } from "lucide-react";
+import { Trophy, Video, Clock, TrendingUp, ChevronRight, Flame } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 import AchievementCard from "@/components/AchievementCard";
 import { useAchievements } from "@/hooks/useAchievements";
 import XPProgressBar from "@/components/XPProgressBar";
-
-const LEVEL_NAMES: Record<number, string> = {
-  1: "Beginner Trader",
-  2: "Student Trader",
-  3: "Apprentice Trader",
-  4: "Intermediate Trader",
-  5: "Advanced Trader",
-  6: "Expert Trader",
-  7: "Professional Trader",
-  8: "Elite Trader",
-  9: "Master Trader",
-  10: "Legend Trader",
-};
+import { useGamification } from "@/hooks/useGamification";
 
 const Progress = () => {
   const navigate = useNavigate();
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === 'nasr';
-  const [userStats, setUserStats] = useState({
+  
+  // Use the shared gamification hook for XP, level, streak
+  const { xp, level, levelName, streakDays, isLoading: gamificationLoading } = useGamification();
+  
+  const [videoStats, setVideoStats] = useState({
     videosWatched: 0,
     totalWatchTime: "0h 0m",
     completionRate: 0,
-    level: 1,
-    xp: 0,
-    streak: 0,
   });
   const [loading, setLoading] = useState(true);
   const { achievements, loading: achievementsLoading } = useAchievements();
@@ -63,17 +51,10 @@ const Progress = () => {
       }
 
       try {
-        // Fetch user stats
+        // Fetch user stats for videos completed
         const { data: stats } = await supabase
           .from("user_stats")
-          .select("videos_completed, total_points, level")
-          .eq("user_id", userId)
-          .maybeSingle();
-
-        // Fetch gamification data
-        const { data: gamification } = await supabase
-          .from("user_gamification")
-          .select("experience_points, level, streak_days")
+          .select("videos_completed")
           .eq("user_id", userId)
           .maybeSingle();
 
@@ -91,13 +72,10 @@ const Progress = () => {
         const hours = Math.floor(totalMinutes / 60);
         const minutes = totalMinutes % 60;
 
-        setUserStats({
+        setVideoStats({
           videosWatched,
           totalWatchTime: `${hours}h ${minutes}m`,
           completionRate,
-          level: gamification?.level || stats?.level || 1,
-          xp: gamification?.experience_points || stats?.total_points || 0,
-          streak: gamification?.streak_days || 0,
         });
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -109,14 +87,14 @@ const Progress = () => {
     fetchStats();
   }, [navigate]);
 
-  const levelName = LEVEL_NAMES[userStats.level] || `Level ${userStats.level} Trader`;
-
   const stats = [
-    { label: "Videos Watched", value: userStats.videosWatched.toString(), icon: Video },
-    { label: "Total Watch Time", value: userStats.totalWatchTime, icon: Clock },
-    { label: "Completion Rate", value: `${userStats.completionRate}%`, icon: TrendingUp },
-    { label: "Current Level", value: `Lv.${userStats.level}`, icon: Trophy },
+    { label: "Videos Watched", value: videoStats.videosWatched.toString(), icon: Video },
+    { label: "Total Watch Time", value: videoStats.totalWatchTime, icon: Clock },
+    { label: "Completion Rate", value: `${videoStats.completionRate}%`, icon: TrendingUp },
+    { label: "Current Level", value: `Lv.${level}`, icon: Trophy },
   ];
+
+  const isPageLoading = loading || gamificationLoading;
 
   return (
     <DashboardLayout>
@@ -149,19 +127,19 @@ const Progress = () => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border border-cyan-500/50 flex items-center justify-center">
-                  <span className="text-xl font-black text-cyan-400">{userStats.level}</span>
+                  <span className="text-xl font-black text-cyan-400">{level}</span>
                 </div>
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">Level {userStats.level} - {levelName}</h2>
-                <p className="text-sm text-gray-400">{userStats.xp.toLocaleString()} XP earned</p>
+                <h2 className="text-lg font-bold text-white">Level {level} - {levelName}</h2>
+                <p className="text-sm text-gray-400">{xp.toLocaleString()} XP earned</p>
               </div>
             </div>
 
-            {userStats.streak > 0 && (
+            {streakDays > 0 && (
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30">
                 <Flame className="w-5 h-5 text-orange-500" />
-                <span className="font-bold text-orange-400">{userStats.streak} Day Streak</span>
+                <span className="font-bold text-orange-400">{streakDays} Day Streak</span>
               </div>
             )}
           </div>
@@ -190,38 +168,38 @@ const Progress = () => {
                 strokeWidth="12"
                 fill="none"
                 strokeDasharray={`${2 * Math.PI * 70}`}
-                strokeDashoffset={`${2 * Math.PI * 70 * (1 - userStats.completionRate / 100)}`}
+                strokeDashoffset={`${2 * Math.PI * 70 * (1 - videoStats.completionRate / 100)}`}
                 className="text-primary transition-all duration-500"
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-4xl font-bold text-foreground">{userStats.completionRate}%</span>
+              <span className="text-4xl font-bold text-foreground">{videoStats.completionRate}%</span>
             </div>
           </div>
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-2">
-              {userStats.completionRate === 0 
+              {videoStats.completionRate === 0 
                 ? "You're just getting started!" 
-                : userStats.completionRate < 25 
+                : videoStats.completionRate < 25 
                 ? "Great start! Keep going!"
-                : userStats.completionRate < 50
+                : videoStats.completionRate < 50
                 ? "You're making progress!"
-                : userStats.completionRate < 75
+                : videoStats.completionRate < 75
                 ? "Impressive dedication!"
                 : "Almost there! Finish strong!"}
             </h2>
             <p className="text-muted-foreground">
-              {userStats.videosWatched === 0 
+              {videoStats.videosWatched === 0 
                 ? "Complete your first video to begin your journey"
-                : `You've completed ${userStats.videosWatched} videos`}
+                : `You've completed ${videoStats.videosWatched} videos`}
             </p>
           </div>
         </Card>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {loading ? (
+          {isPageLoading ? (
             [...Array(4)].map((_, i) => (
               <Skeleton key={i} className="h-32 rounded-xl" />
             ))
@@ -278,7 +256,7 @@ const Progress = () => {
             Watch History
           </h2>
           <Card className="p-12 text-center space-y-4">
-            {userStats.videosWatched === 0 ? (
+            {videoStats.videosWatched === 0 ? (
               <>
                 <Video className="h-16 w-16 text-muted-foreground mx-auto" />
                 <div>
@@ -294,10 +272,10 @@ const Progress = () => {
             ) : (
               <div>
                 <p className="text-lg font-semibold text-foreground">
-                  You've watched {userStats.videosWatched} videos
+                  You've watched {videoStats.videosWatched} videos
                 </p>
                 <p className="text-muted-foreground mb-4">
-                  Total watch time: {userStats.totalWatchTime}
+                  Total watch time: {videoStats.totalWatchTime}
                 </p>
                 <Link to="/videos">
                   <Button variant="outline">Continue Learning</Button>
@@ -315,13 +293,13 @@ const Progress = () => {
           <Card className="p-6">
             <div className="text-center space-y-4">
               <div>
-                <p className="text-4xl font-bold text-foreground">{userStats.streak}</p>
+                <p className="text-4xl font-bold text-foreground">{streakDays}</p>
                 <p className="text-muted-foreground">Day Streak</p>
               </div>
               <p className="text-sm text-muted-foreground">
-                {userStats.streak === 0 
+                {streakDays === 0 
                   ? "Log in and watch videos daily to build your streak!"
-                  : `Keep it up! Watch a video today to maintain your ${userStats.streak}-day streak.`}
+                  : `Keep it up! Watch a video today to maintain your ${streakDays}-day streak.`}
               </p>
             </div>
           </Card>
