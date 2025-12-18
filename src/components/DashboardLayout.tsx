@@ -5,6 +5,7 @@ import { Menu, X, User, Settings, LogOut, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
 import XPNavIndicator from "@/components/XPNavIndicator";
+import TradingDisclaimer from "@/components/TradingDisclaimer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -320,6 +321,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       <main className="container mx-auto px-6 py-12 max-w-[1440px]">
         {children}
       </main>
+
+      {/* Trading Disclaimer Footer */}
+      <TradingDisclaimer isNasrTheme={isNasrTheme} />
     </div>
   );
 };
