@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Save, TrendingUp, TrendingDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { useLogEvent } from "@/hooks/useLogEvent";
+
 interface DiaryEntry {
   id: string;
   symbol: string;
@@ -79,59 +80,71 @@ export const EditTradeModal = ({
 
     setIsSubmitting(true);
 
-    // Get authenticated user from Supabase
-    const authUser = await getAuthUser();
-    
-    if (!authUser) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to manage your trading diary.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      onOpenChange(false);
-      navigate("/login");
-      return;
-    }
+    try {
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to manage your trading diary.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        navigate("/login");
+        return;
+      }
 
-    const payload = {
-      auth_user_id: authUser.auth_user_id,
-      user_email: authUser.user_email,
-      trade_id: trade.id,
-      symbol: symbol.toUpperCase(),
-      side,
-      status,
-      entry_price: parseFloat(entryPrice) || null,
-      stop_loss_price: parseFloat(stopLossPrice) || null,
-      take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
-      lots_final: lotsFinal ? parseFloat(lotsFinal) : null,
-      notes: notes || null,
-    };
+      // Update directly in Supabase
+      const { error } = await supabase
+        .from('trading_diary_trades')
+        .update({
+          symbol: symbol.toUpperCase(),
+          side,
+          status,
+          entry_price: parseFloat(entryPrice) || null,
+          stop_loss_price: parseFloat(stopLossPrice) || null,
+          take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
+          lots_final: lotsFinal ? parseFloat(lotsFinal) : null,
+          notes: notes || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', trade.id)
+        .eq('auth_user_id', user.id);
 
-    const result = await sendDiaryWebhook("update", payload);
+      if (error) {
+        console.error("Update error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to update trade. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (result.success) {
       toast({
         title: "Trade updated",
         description: "Your trade has been updated successfully.",
       });
-      // Log diary_trade_updated event
+      
+      // Log event
       await logEvent("diary_trade_updated", {
         trade_id: trade.id,
         fields_changed: ["symbol", "side", "status", "entry_price", "stop_loss_price", "take_profit_price", "lots_final", "notes"],
       });
+      
       onOpenChange(false);
       onSuccess();
-    } else {
-      console.error("Diary action failed:", result.error);
+    } catch (error) {
+      console.error("Failed to update trade:", error);
       toast({
         title: "Error",
-        description: "Diary action failed. Please try again.",
+        description: "Failed to update trade. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   return (

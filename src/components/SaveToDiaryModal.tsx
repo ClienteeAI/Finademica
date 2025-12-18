@@ -8,8 +8,7 @@ import { Loader2, Save, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/lib/AuthContext";
-import { getAuthUser, sendDiaryWebhook } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
 
 interface CalculationResult {
@@ -54,7 +53,6 @@ export const SaveToDiaryModal = ({
   isNasrTheme,
 }: SaveToDiaryModalProps) => {
   const { toast } = useToast();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { logEvent } = useLogEvent();
   const [status, setStatus] = useState<"planned" | "open">("planned");
@@ -64,7 +62,7 @@ export const SaveToDiaryModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Sync notes when formData.notes changes (e.g., user types in calculator notes)
+  // Sync notes when formData.notes changes
   useEffect(() => {
     setNotes(formData.notes || "");
   }, [formData.notes]);
@@ -84,76 +82,78 @@ export const SaveToDiaryModal = ({
 
     setIsSubmitting(true);
 
-    // Get authenticated user from Supabase
-    const authUser = await getAuthUser();
-    
-    if (!authUser) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to manage your trading diary.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      onOpenChange(false);
-      navigate("/login");
-      return;
-    }
+    try {
+      // Get authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Login Required",
+          description: "Please log in to manage your trading diary.",
+          variant: "destructive",
+        });
+        onOpenChange(false);
+        navigate("/login");
+        return;
+      }
 
-    const tags = tagsInput
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
+      // Insert directly into Supabase
+      const { data, error } = await supabase
+        .from('trading_diary_trades')
+        .insert({
+          auth_user_id: user.id,
+          broker_key: "nasr_trade_mt5",
+          symbol: formData.symbol.toUpperCase(),
+          side: formData.side,
+          entry_price: parseFloat(formData.entryPrice) || null,
+          stop_loss_price: parseFloat(formData.stopLossPrice) || null,
+          take_profit_price: formData.takeProfitPrice ? parseFloat(formData.takeProfitPrice) : null,
+          lots_final: calcResult.lots_final || null,
+          risk_total_usd: calcResult.risk_total_usd || null,
+          profit_total_usd: calcResult.profit_total_usd || null,
+          rr_ratio: calcResult.rr_ratio || null,
+          tick_value_position_usd: calcResult.tick_value_position_usd || null,
+          pip_value_position_usd: calcResult.pip_value_position_usd || null,
+          notes: notes || formData.notes || null,
+          status,
+        })
+        .select()
+        .single();
 
-    const payload = {
-      auth_user_id: authUser.auth_user_id,
-      user_email: authUser.user_email,
-      broker_key: "nasr_trade_mt5",
-      symbol: formData.symbol.toUpperCase(),
-      side: formData.side,
-      account_currency: "USD",
-      account_balance: formData.accountBalance ? parseFloat(formData.accountBalance) : null,
-      risk_type: formData.riskType,
-      risk_value: parseFloat(formData.riskValue) || null,
-      entry_price: parseFloat(formData.entryPrice) || null,
-      stop_loss_price: parseFloat(formData.stopLossPrice) || null,
-      take_profit_price: formData.takeProfitPrice ? parseFloat(formData.takeProfitPrice) : null,
-      lots_requested: formData.lotsRequested ? parseFloat(formData.lotsRequested) : null,
-      lots_final: calcResult.lots_final,
-      risk_total_usd: calcResult.risk_total_usd,
-      profit_total_usd: calcResult.profit_total_usd,
-      rr_ratio: calcResult.rr_ratio,
-      tick_value_position_usd: calcResult.tick_value_position_usd,
-      pip_value_position_usd: calcResult.pip_value_position_usd,
-      notes: notes || formData.notes || null,
-      status,
-      open_time: openTime || null,
-      tags,
-    };
+      if (error) {
+        console.error("Insert error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to save trade. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    const result = await sendDiaryWebhook("create", payload);
-
-    if (result.success) {
       toast({
         title: "Saved to diary",
         description: "Your trade has been saved successfully.",
       });
-      // Log diary_trade_created event
+      
+      // Log event
       await logEvent("diary_trade_created", {
+        trade_id: data?.id,
         symbol: formData.symbol.toUpperCase(),
         side: formData.side,
         rr_ratio: calcResult?.rr_ratio,
       });
+      
       setShowSuccess(true);
-    } else {
-      console.error("Diary action failed:", result.error);
+    } catch (error) {
+      console.error("Failed to save trade:", error);
       toast({
         title: "Error",
-        description: "Diary action failed. Please try again.",
+        description: "Failed to save trade. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setIsSubmitting(false);
   };
 
   const handleClose = () => {
