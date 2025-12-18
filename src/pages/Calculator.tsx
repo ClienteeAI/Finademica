@@ -294,7 +294,27 @@ const Calculator = () => {
         return;
       }
 
-      const normalized = Array.isArray(data) ? (data[0] as unknown) : data;
+      const unwrapN8n = (value: unknown): unknown => {
+        let v = value;
+        if (Array.isArray(v)) v = v[0];
+        if (v && typeof v === "object" && "json" in v) {
+          const maybeJson = (v as any).json;
+          if (maybeJson && typeof maybeJson === "object") v = maybeJson;
+        }
+        return v;
+      };
+
+      const coerceNumber = (v: unknown): number | null | undefined => {
+        if (v == null) return v as null | undefined;
+        if (typeof v === "number") return Number.isFinite(v) ? v : null;
+        if (typeof v === "string") {
+          const n = Number(v);
+          return Number.isFinite(n) ? n : null;
+        }
+        return null;
+      };
+
+      const normalized = unwrapN8n(data);
 
       if (!normalized || typeof normalized !== "object") {
         console.error("Unexpected webhook response shape:", data);
@@ -302,7 +322,16 @@ const Calculator = () => {
         return;
       }
 
-      const resultData = normalized as CalculationResult;
+      const n = normalized as any;
+      const resultData = {
+        ...n,
+        recommended_lots: coerceNumber(n.recommended_lots),
+        lots_calculated: coerceNumber(n.lots_calculated),
+        tick_value_position_usd: coerceNumber(n.tick_value_position_usd),
+        pip_value_position_usd: coerceNumber(n.pip_value_position_usd),
+      } as CalculationResult;
+
+      console.log("Calculator webhook normalized:", resultData);
 
       if (resultData.error) {
         setErrors({ general: resultData.error });
