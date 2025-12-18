@@ -11,6 +11,8 @@ import { ConversionBanner } from "@/components/ConversionBanner";
 import { LockedVideoModal } from "@/components/LockedVideoModal";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/AuthContext";
+import { VideoFilterSheet } from "@/components/VideoFilterSheet";
+import { cn } from "@/lib/utils";
 
 interface Video {
   id: string;
@@ -283,32 +285,68 @@ const MyVideos = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search videos..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+        <div className="flex flex-col gap-4">
+          {/* Search and Filter Row */}
+          <div className="flex gap-3">
+            {/* Search - takes most space */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search videos..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-11 bg-card border-2 border-border focus:border-primary placeholder:text-muted-foreground/70"
+              />
+            </div>
+
+            {/* Mobile: Filter Button with Sheet */}
+            <div className="md:hidden">
+              <VideoFilterSheet 
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategoryChange={setSelectedCategory}
+              />
+            </div>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2">
+          {/* Desktop: Category Pills (wrapped, no horizontal scroll) */}
+          <div className="hidden md:flex flex-wrap gap-2">
             {categories.map((category) => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
-                className="whitespace-nowrap"
+                className={cn(
+                  "h-9 px-4 font-medium transition-all duration-200",
+                  selectedCategory === category 
+                    ? "bg-primary text-primary-foreground shadow-md" 
+                    : "bg-card/50 border-2 border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-card"
+                )}
               >
                 {category}
               </Button>
             ))}
           </div>
+
+          {/* Mobile: Show active filter as badge */}
+          {selectedCategory !== "All" && (
+            <div className="md:hidden flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Filtered by:</span>
+              <Badge 
+                variant="secondary" 
+                className="bg-primary/10 text-primary border border-primary/30"
+              >
+                {selectedCategory}
+                <button 
+                  onClick={() => setSelectedCategory("All")}
+                  className="ml-1.5 hover:text-primary/80"
+                >
+                  ×
+                </button>
+              </Badge>
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
