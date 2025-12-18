@@ -7,10 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useLogEvent } from "@/hooks/useLogEvent";
+import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
 
 interface AddTradeModalProps {
   open: boolean;
@@ -46,45 +46,39 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
     setIsSubmitting(true);
 
     try {
-      // Get authenticated user
-      const { data: { user } } = await supabase.auth.getUser();
+      const authUser = await getAuthUser();
       
-      if (!user) {
+      if (!authUser) {
         toast.error("Please log in to manage your trading diary.");
         navigate("/login");
         return;
       }
 
-      // Insert directly into Supabase
-      const { data, error } = await supabase
-        .from('trading_diary_trades')
-        .insert({
-          auth_user_id: user.id,
-          broker_key: "nasr_trade_mt5",
-          symbol: formData.symbol.toUpperCase(),
-          side: formData.side,
-          entry_price: formData.entry_price ? parseFloat(formData.entry_price) : null,
-          stop_loss_price: formData.stop_loss_price ? parseFloat(formData.stop_loss_price) : null,
-          take_profit_price: formData.take_profit_price ? parseFloat(formData.take_profit_price) : null,
-          lots_final: formData.lots_final ? parseFloat(formData.lots_final) : null,
-          risk_total_usd: formData.risk_total_usd ? parseFloat(formData.risk_total_usd) : null,
-          notes: formData.notes || null,
-          status: formData.status,
-        })
-        .select()
-        .single();
+      const tradeData = {
+        auth_user_id: authUser.auth_user_id,
+        email: authUser.user_email,
+        broker_key: "nasr_trade_mt5",
+        symbol: formData.symbol.toUpperCase(),
+        side: formData.side,
+        entry_price: formData.entry_price ? parseFloat(formData.entry_price) : null,
+        stop_loss_price: formData.stop_loss_price ? parseFloat(formData.stop_loss_price) : null,
+        take_profit_price: formData.take_profit_price ? parseFloat(formData.take_profit_price) : null,
+        lots_final: formData.lots_final ? parseFloat(formData.lots_final) : null,
+        risk_total_usd: formData.risk_total_usd ? parseFloat(formData.risk_total_usd) : null,
+        notes: formData.notes || null,
+        status: formData.status,
+      };
 
-      if (error) {
-        console.error("Insert error:", error);
+      const result = await sendDiaryWebhook("create", tradeData);
+
+      if (!result.success) {
         toast.error("Failed to save trade. Please try again.");
         return;
       }
 
       toast.success("Saved to diary");
       
-      // Log event
       await logEvent("diary_trade_created", {
-        trade_id: data?.id,
         symbol: formData.symbol.toUpperCase(),
         side: formData.side,
       });
@@ -92,7 +86,6 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
       onSuccess();
       onOpenChange(false);
       
-      // Reset form
       setFormData({
         symbol: "",
         side: "long",

@@ -348,7 +348,7 @@ export type Database = {
           role: string
         }
         Insert: {
-          auth_user_id: string
+          auth_user_id?: string
           content: string
           created_at?: string
           id?: string

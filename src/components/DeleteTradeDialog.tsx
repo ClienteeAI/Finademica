@@ -13,8 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
+import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
 
 interface DeleteTradeDialogProps {
   open: boolean;
@@ -53,10 +53,9 @@ export const DeleteTradeDialog = ({
     setIsDeleting(true);
 
     try {
-      // Get authenticated user
-      const { data: { user } } = await supabase.auth.getUser();
+      const authUser = await getAuthUser();
       
-      if (!user) {
+      if (!authUser) {
         toast({
           title: "Login Required",
           description: "Please log in to manage your trading diary.",
@@ -66,15 +65,14 @@ export const DeleteTradeDialog = ({
         return;
       }
 
-      // Delete directly from Supabase
-      const { error } = await supabase
-        .from('trading_diary_trades')
-        .delete()
-        .eq('id', tradeId)
-        .eq('auth_user_id', user.id);
+      const result = await sendDiaryWebhook("delete", {
+        auth_user_id: authUser.auth_user_id,
+        email: authUser.user_email,
+        trade_id: tradeId,
+        symbol: tradeSymbol,
+      });
 
-      if (error) {
-        console.error("Delete error:", error);
+      if (!result.success) {
         toast({
           title: "Error",
           description: "Failed to delete trade. Please try again.",
@@ -88,7 +86,6 @@ export const DeleteTradeDialog = ({
         description: "Your trade has been removed from the diary.",
       });
       
-      // Log event
       await logEvent("diary_trade_deleted", { trade_id: tradeId });
       
       setConfirmText("");
