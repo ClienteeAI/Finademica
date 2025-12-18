@@ -18,6 +18,7 @@ export function AIMentor() {
   const [isLoading, setIsLoading] = useState(false);
   const [authUserId, setAuthUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const lastMessageTimestamp = useRef<string | null>(null);
 
@@ -25,8 +26,16 @@ export function AIMentor() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const isNearBottom = () => {
+    const container = messagesContainerRef.current;
+    if (!container) return true;
+    return container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+  };
+
   useEffect(() => {
-    scrollToBottom();
+    if (isNearBottom()) {
+      scrollToBottom();
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -55,7 +64,8 @@ export function AIMentor() {
         .from("mentor_messages")
         .select("*")
         .eq("auth_user_id", authUserId)
-        .order("created_at", { ascending: true });
+        .order("created_at", { ascending: true })
+        .limit(100);
 
       if (error) {
         console.error("Error loading messages:", error);
@@ -283,7 +293,7 @@ export function AIMentor() {
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && !isLoading && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
@@ -299,8 +309,8 @@ export function AIMentor() {
                 <div
                   key={message.id}
                   className={cn(
-                    "flex animate-fade-in",
-                    message.role === "user" ? "justify-end" : "justify-start"
+                    "flex flex-col animate-fade-in",
+                    message.role === "user" ? "items-end" : "items-start"
                   )}
                 >
                   <div
@@ -313,6 +323,9 @@ export function AIMentor() {
                   >
                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                   </div>
+                  <p className="text-[10px] text-[#9CA3AF] mt-1 px-1">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               ))}
 
