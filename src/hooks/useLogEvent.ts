@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import type { Json } from "@/integrations/supabase/types";
 
 type EventAction =
   | "video_completed"
@@ -26,7 +27,7 @@ interface EventMeta {
 }
 
 /**
- * Hook to log user events to public.user_events table.
+ * Hook to log user events and award XP via Supabase RPC.
  * Call `logEvent` after any trackable user action.
  * Call `onEventLogged` callback to trigger gamification refresh.
  */
@@ -40,33 +41,22 @@ export function useLogEvent(onEventLogged?: () => void) {
           return;
         }
 
-        // Get public.users.id from auth_user_id
-        const { data: publicUser } = await supabase
-          .from("users")
-          .select("id")
-          .eq("auth_user_id", user.id)
-          .maybeSingle();
+        // Map action to award_xp event_type
+        const xpEventType = action === "video_completed" ? "video_watched" : action;
 
-        if (!publicUser?.id) {
-          console.warn("useLogEvent: No public user found");
-          return;
-        }
-
-        // Insert event into user_events table
-        const { error } = await supabase.from("user_events").insert({
-          auth_user_id: user.id,
-          user_id: publicUser.id,
-          event_type: action,
-          event_value: JSON.stringify(meta),
-          points: 0, // Points are handled by DB triggers
+        // Call award_xp RPC to log event and award XP
+        const { data, error } = await supabase.rpc("award_xp", {
+          p_event_type: xpEventType,
+          p_ref_id: meta.video_id || meta.trade_id || null,
+          p_meta: JSON.parse(JSON.stringify(meta)) as Json,
         });
 
         if (error) {
-          console.error("useLogEvent insert error:", error);
+          console.error("useLogEvent award_xp error:", error);
           return;
         }
 
-        console.log(`Event logged: ${action}`, meta);
+        console.log(`Event logged with XP: ${action}`, data);
 
         // Trigger callback to refresh gamification widget
         if (onEventLogged) {
