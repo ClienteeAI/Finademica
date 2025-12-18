@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLogEvent } from "@/hooks/useLogEvent";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 interface Message {
   id: string;
@@ -17,7 +18,6 @@ export function AIMentor() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const { logEvent } = useLogEvent();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,12 +45,33 @@ export function AIMentor() {
       timestamp: new Date(),
     };
 
-    // Log mentor_message_sent event
-    logEvent("mentor_message_sent", { message_length: messageContent.length });
-
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+
+    // Award XP for mentor message using the correct action_key
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: xpResult } = await supabase.rpc("award_xp", {
+          p_action_key: "mentor_message",
+          p_auth_user_id: user.id,
+          p_meta: { message_length: messageContent.length }
+        });
+        
+        const result = xpResult as { xp_awarded?: number } | null;
+        if (result?.xp_awarded && result.xp_awarded > 0) {
+          toast({
+            title: `+${result.xp_awarded} XP earned!`,
+            description: "Keep chatting with your mentor!",
+          });
+          // Trigger gamification refresh
+          window.dispatchEvent(new Event('gamification-update'));
+        }
+      }
+    } catch (err) {
+      console.error("XP award error:", err);
+    }
 
     try {
       const userData = localStorage.getItem("user");
