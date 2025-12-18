@@ -4,13 +4,14 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Video, Flame, Target, Zap } from "lucide-react";
+import { Trophy, Video, Target, Zap } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 import AchievementCard from "@/components/AchievementCard";
 import { useAchievements } from "@/hooks/useAchievements";
 import XPProgressBar from "@/components/XPProgressBar";
 import { useGamification } from "@/hooks/useGamification";
+import StreakCelebration from "@/components/StreakCelebration";
 
 const Progress = () => {
   const navigate = useNavigate();
@@ -200,27 +201,9 @@ const Progress = () => {
           </Card>
         </div>
 
-        {/* Learning Streak - Minimal, neutral messaging */}
-        <Card className="p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/20 to-amber-500/20 border border-orange-500/30 flex items-center justify-center">
-                <Flame className="w-5 h-5 text-orange-400" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-foreground">Learning Streak</p>
-                <p className="text-xs text-muted-foreground">
-                  {streakDays > 0 
-                    ? `${streakDays} day${streakDays !== 1 ? 's' : ''} and counting!`
-                    : "Watch a video daily to build your streak"}
-                </p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-foreground">{streakDays}</p>
-              <p className="text-xs text-muted-foreground">days</p>
-            </div>
-          </div>
+        {/* Learning Streak - With celebration animations */}
+        <Card className="p-0 overflow-hidden">
+          <StreakCelebration streakDays={streakDays} isNasrTheme={isNasrTheme} />
         </Card>
 
         {/* Achievements - Only completed achievements */}
