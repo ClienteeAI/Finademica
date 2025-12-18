@@ -3,33 +3,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
 
-const XP_PER_VIDEO = 25; // XP awarded per video completion
+const XP_PER_VIDEO = 25;
 
-// Dispatch custom event for XP gain (listened by XPGainToastProvider)
+// Dispatch custom event for XP gain
 const dispatchXPGainEvent = (xpAmount: number, title?: string) => {
   window.dispatchEvent(new CustomEvent('xp-gain', { 
     detail: { xpAmount, title } 
   }));
 };
 
-// Dispatch custom event for level-up (listened by XPGainToastProvider)
+// Dispatch custom event for level-up
 const dispatchLevelUpEvent = (level: number) => {
   window.dispatchEvent(new CustomEvent('level-up', { 
     detail: { level } 
   }));
-};
-
-// Calculate level from XP using xp_levels thresholds
-const calculateLevelFromXP = (xp: number): number => {
-  const thresholds = [0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700];
-  let level = 1;
-  for (let i = thresholds.length - 1; i >= 0; i--) {
-    if (xp >= thresholds[i]) {
-      level = i + 1;
-      break;
-    }
-  }
-  return Math.min(level, 10);
 };
 
 export const useVideoCompletion = (
@@ -69,13 +56,11 @@ export const useVideoCompletion = (
         return;
       }
 
-      const authUid = user.id;
-
       // 2. Get profile_id from public.users
       const { data: publicUser, error: userError } = await supabase
         .from("users")
         .select("id")
-        .eq("auth_user_id", authUid)
+        .eq("auth_user_id", user.id)
         .maybeSingle();
 
       if (userError || !publicUser?.id) {
@@ -90,101 +75,59 @@ export const useVideoCompletion = (
 
       const profileId = publicUser.id;
 
-      // 3. Get current XP before completion to detect level-up
+      // 3. Get current level before completion to detect level-up
       const { data: gamificationBefore } = await supabase
         .from("user_gamification")
-        .select("experience_points")
+        .select("level")
         .eq("user_id", profileId)
         .maybeSingle();
 
-      const xpBefore = gamificationBefore?.experience_points ?? 0;
-      const levelBefore = calculateLevelFromXP(xpBefore);
+      const levelBefore = gamificationBefore?.level ?? 1;
 
-      // 4. Check if video_view exists, then insert or update
-      const { data: existingView } = await supabase
-        .from("video_views")
-        .select("id")
-        .eq("user_id", profileId)
-        .eq("video_id", videoId)
-        .maybeSingle();
+      // 4. Call the complete_video RPC - this handles EVERYTHING
+      const { data: result, error: rpcError } = await supabase.rpc('complete_video', {
+        p_user_id: profileId,
+        p_video_id: videoId,
+        p_points: XP_PER_VIDEO
+      });
 
-      let viewError;
-      if (existingView) {
-        // Update existing record
-        const { error } = await supabase
-          .from("video_views")
-          .update({
-            status: "completed",
-            completed_at: new Date().toISOString(),
-          })
-          .eq("id", existingView.id);
-        viewError = error;
-      } else {
-        // Insert new record
-        const { error } = await supabase
-          .from("video_views")
-          .insert({
-            user_id: profileId,
-            video_id: videoId,
-            status: "completed",
-            completed_at: new Date().toISOString(),
-          });
-        viewError = error;
-      }
-
-      if (viewError) {
-        console.error("Error upserting video_views:", viewError);
+      if (rpcError) {
+        console.error("Error calling complete_video RPC:", rpcError);
         toast({
           title: "Failed to save progress",
-          description: viewError.message,
+          description: rpcError.message,
           variant: "destructive",
         });
         setIsCompleting(false);
         return;
       }
 
-      // 5. Insert into user_events for XP tracking (ignore if already exists)
-      const { error: eventError } = await supabase
-        .from("user_events")
-        .insert({
-          auth_user_id: authUid,
-          user_id: profileId,
-          event_type: "video_completed",
-          event_value: JSON.stringify({ 
-            video_id: videoId, 
-            video_title: videoTitle || "Unknown" 
-          }),
-          points: 0, // Points handled by DB triggers
-        });
-
-      // Don't fail if event already exists (duplicate completion)
-      if (eventError && !eventError.message.includes("duplicate")) {
-        console.warn("Event logging error:", eventError.message);
-      }
-
       hasTriggeredRef.current = true;
 
-      // 6. Success - show XP toast with animation and confetti
-      triggerConfetti();
-      dispatchXPGainEvent(XP_PER_VIDEO, "Lesson Complete!");
+      // 5. Check RPC response
+      const rpcResult = result as {
+        user_id: string;
+        total_points: number;
+        videos_completed: number;
+        level: number;
+        experience_points?: number;
+        already_completed: boolean;
+      };
 
-      // 7. Check for level-up after a brief delay (allow DB triggers to update)
-      setTimeout(async () => {
-        const { data: gamificationAfter } = await supabase
-          .from("user_gamification")
-          .select("experience_points")
-          .eq("user_id", profileId)
-          .maybeSingle();
+      // 6. Only show celebration if NOT already completed
+      if (!rpcResult.already_completed) {
+        triggerConfetti();
+        dispatchXPGainEvent(XP_PER_VIDEO, "Lesson Complete!");
 
-        const xpAfter = gamificationAfter?.experience_points ?? xpBefore + XP_PER_VIDEO;
-        const levelAfter = calculateLevelFromXP(xpAfter);
-
-        if (levelAfter > levelBefore) {
-          dispatchLevelUpEvent(levelAfter);
+        // Check for level-up
+        if (rpcResult.level > levelBefore) {
+          setTimeout(() => {
+            dispatchLevelUpEvent(rpcResult.level);
+          }, 500);
         }
-      }, 500);
+      }
 
-      // 8. Refresh XP widget
+      // 7. Refresh XP widget regardless (to sync UI)
       if (onEventLogged) {
         onEventLogged();
       }
