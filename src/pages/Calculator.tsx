@@ -18,6 +18,7 @@ import { useLogEvent } from "@/hooks/useLogEvent";
 
 interface CalculationResult {
   lots_final: number;
+  recommended_lots?: number;
   risk_total_usd: number;
   ticks_to_sl: number;
   risk_per_1lot_usd: number;
@@ -671,7 +672,7 @@ const Calculator = () => {
                     Recommended Lots
                   </p>
                   <p className="text-5xl md:text-6xl font-bold font-mono bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
-                    {result.lots_final?.toFixed(2) ?? "—"}
+                    {result.recommended_lots?.toFixed(2) ?? "—"}
                   </p>
                 </div>
               </div>
