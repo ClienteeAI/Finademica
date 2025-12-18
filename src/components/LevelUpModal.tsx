@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import confetti from "canvas-confetti";
+import { Crown, Star, Trophy } from "lucide-react";
 
 interface LevelUpModalProps {
   level: number;
@@ -22,12 +24,54 @@ const LEVEL_NAMES: Record<number, string> = {
 const LevelUpModal = ({ level, onClose }: LevelUpModalProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [showBadge, setShowBadge] = useState(false);
 
   useEffect(() => {
     // Fade in backdrop
     setTimeout(() => setIsVisible(true), 50);
     // Show content with delay
     setTimeout(() => setShowContent(true), 300);
+    // Reveal badge with delay
+    setTimeout(() => setShowBadge(true), 800);
+    
+    // Trigger celebratory confetti burst
+    setTimeout(() => {
+      // Center burst
+      confetti({
+        particleCount: 150,
+        spread: 100,
+        origin: { y: 0.5, x: 0.5 },
+        colors: ["#22d3ee", "#a855f7", "#f59e0b", "#10b981", "#3b82f6"],
+      });
+      
+      // Left side burst
+      confetti({
+        particleCount: 50,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.6 },
+        colors: ["#22d3ee", "#a855f7", "#f59e0b"],
+      });
+      
+      // Right side burst
+      confetti({
+        particleCount: 50,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.6 },
+        colors: ["#22d3ee", "#a855f7", "#f59e0b"],
+      });
+    }, 400);
+    
+    // Second confetti wave
+    setTimeout(() => {
+      confetti({
+        particleCount: 100,
+        spread: 120,
+        origin: { y: 0.4 },
+        colors: ["#ffd700", "#ffec00", "#ffc107"],
+      });
+    }, 1200);
   }, []);
 
   const handleClose = () => {
@@ -96,20 +140,40 @@ const LevelUpModal = ({ level, onClose }: LevelUpModalProps) => {
               </h1>
             </div>
 
-            {/* Level Number */}
-            <div className="relative py-6">
+            {/* Badge reveal */}
+            <div className={`relative py-6 transition-all duration-700 ${showBadge ? "scale-100 opacity-100" : "scale-50 opacity-0"}`}>
+              {/* Outer glow ring */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 animate-ping" />
+                <div className="w-40 h-40 rounded-full bg-gradient-to-br from-yellow-500/30 via-amber-500/20 to-orange-500/30 animate-ping" />
               </div>
-              <div className="relative">
-                <span className="text-8xl md:text-9xl font-black bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent drop-shadow-2xl">
-                  {level}
-                </span>
+              
+              {/* Badge container */}
+              <div className="relative flex items-center justify-center">
+                {/* Background shield */}
+                <div className="absolute w-36 h-36 rounded-full bg-gradient-to-br from-yellow-500/20 via-amber-600/30 to-yellow-500/20 blur-xl" />
+                
+                {/* Main badge */}
+                <div className="relative w-32 h-32 rounded-full bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 shadow-[0_0_60px_rgba(251,191,36,0.5)] flex items-center justify-center border-4 border-yellow-300/50">
+                  {/* Inner circle with level */}
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center border-2 border-yellow-400/30">
+                    <span className="text-5xl font-black bg-gradient-to-br from-yellow-300 via-amber-400 to-orange-400 bg-clip-text text-transparent">
+                      {level}
+                    </span>
+                  </div>
+                  
+                  {/* Crown icon on top */}
+                  <Crown className="absolute -top-3 w-8 h-8 text-yellow-300 fill-yellow-400 drop-shadow-lg" />
+                  
+                  {/* Star decorations */}
+                  <Star className="absolute -left-2 top-4 w-5 h-5 text-yellow-300 fill-yellow-300 animate-pulse" />
+                  <Star className="absolute -right-2 top-4 w-5 h-5 text-yellow-300 fill-yellow-300 animate-pulse" style={{ animationDelay: "200ms" }} />
+                  <Trophy className="absolute -bottom-1 w-6 h-6 text-yellow-400 fill-yellow-500" />
+                </div>
               </div>
             </div>
 
             {/* Level Name */}
-            <div className="space-y-1">
+            <div className={`space-y-1 transition-all duration-500 delay-300 ${showBadge ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
               <p className="text-gray-400 text-sm">You're now a</p>
               <p className="text-xl md:text-2xl font-bold text-white">
                 {levelName}
@@ -121,7 +185,7 @@ const LevelUpModal = ({ level, onClose }: LevelUpModalProps) => {
               onClick={handleClose}
               className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold py-6 text-lg rounded-xl shadow-lg shadow-cyan-500/25 transition-all hover:shadow-cyan-500/40 hover:scale-105"
             >
-              Continue
+              Continue Your Journey
             </Button>
           </div>
         </div>
