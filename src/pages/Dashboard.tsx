@@ -5,8 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Input } from "@/components/ui/input";
-import { Video, Clock, TrendingUp, Trophy, ChevronDown, ChevronUp, Play, CheckCircle, Lock } from "lucide-react";
+import { Video, Clock, ChevronDown, ChevronUp, Play, CheckCircle, Lock } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -309,64 +308,32 @@ const Dashboard = () => {
         {/* Your Progress Card */}
         <UserProgressCard />
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            {
-              icon: Video,
-              label: "Videos Watched",
-              value: `${completedVideoIds.size} / ${freeVideos.length + lockedVideos.length || 5}`,
-              subtext: `${Math.max(0, freeVideos.length - completedVideoIds.size)} free videos remaining`,
-              color: "success",
-            },
-            {
-              icon: Clock,
-              label: "Total Watch Time",
-              value: "0h 0m",
-              subtext: "Start learning today",
-              color: "info",
-            },
-            {
-              icon: TrendingUp,
-              label: "Progress",
-              value: "0%",
-              subtext: "Complete your first video",
-              color: "warning",
-            },
-            {
-              icon: Trophy,
-              label: "Achievements",
-              value: "0",
-              subtext: "1 badge available",
-              color: "success",
-            },
-          ].map((stat, index) => (
-            <Card
-              key={stat.label}
-              className="p-8 space-y-5 group cursor-pointer"
-              style={{
-                animationDelay: `${0.2 + index * 0.1}s`,
-                animationFillMode: "backwards",
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <div
-                  className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <stat.icon className={`w-6 h-6 text-${stat.color}`} />
-                </div>
+        {/* Quick Stats - Only showing Videos Watched (real data) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 max-w-2xl">
+          <Card
+            className="p-8 space-y-5 group cursor-pointer"
+            style={{
+              animationDelay: `0.2s`,
+              animationFillMode: "backwards",
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Video className="w-6 h-6 text-success" />
               </div>
-              <div className="space-y-2">
-                <p className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
-                  {stat.label}
-                </p>
-                <p className="text-4xl font-semibold text-[#1D3557] font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
-                  {stat.value}
-                </p>
-                <p className="text-sm text-[#6B7280]">{stat.subtext}</p>
-              </div>
-            </Card>
-          ))}
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
+                Videos Watched
+              </p>
+              <p className="text-4xl font-semibold text-[#1D3557] font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
+                {completedVideoIds.size} / {freeVideos.length + lockedVideos.length || 5}
+              </p>
+              <p className="text-sm text-[#6B7280]">
+                {Math.max(0, freeVideos.length - completedVideoIds.size)} free videos remaining
+              </p>
+            </div>
+          </Card>
         </div>
 
         {/* Trading Profile */}
@@ -404,13 +371,7 @@ const Dashboard = () => {
                       </div>
                     ))}
                   </div>
-                  <Button
-                    variant="outline"
-                    onClick={() => console.log("Edit clicked")}
-                    className="mt-6"
-                  >
-                    Edit My Answers
-                  </Button>
+                  {/* Edit button hidden for v1 - quiz editing flow not implemented */}
                 </div>
               </CollapsibleContent>
             </Card>
@@ -552,116 +513,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Learning Roadmap Preview */}
-        <Card className="p-12 space-y-8">
-          <div className="space-y-3">
-            <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-3">
-              <span className="text-3xl">🗺️</span>
-              Your Personalized Roadmap
-            </h2>
-            <p className="text-lg text-[#6B7280]">
-              Follow this step-by-step path to success
-            </p>
-          </div>
-
-          <div className="space-y-6">
-            {/* Phase 1 - Active */}
-            <div className="relative pl-8 border-l-4 border-[#4DE2E8]">
-              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-[#4DE2E8] border-4 border-white animate-pulse-subtle" />
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-semibold text-[#1D3557] uppercase tracking-wider">
-                    Phase 1: Getting Started
-                  </h3>
-                  <Badge variant="success">Active</Badge>
-                </div>
-                <p className="text-sm text-[#6B7280] uppercase tracking-wider">Week 1-2 • 10% Complete</p>
-
-                <div className="space-y-3 mt-6">
-                  {[
-                    { done: true, text: "Create your account", icon: "✅" },
-                    { done: false, current: true, text: "Watch your first video", icon: "⏳" },
-                    { done: false, text: "Complete beginner module", icon: "⬜" },
-                  ].map((step, i) => (
-                    <div
-                      key={i}
-                      className={`flex items-center gap-3 text-base ${
-                        step.done
-                          ? "text-[#4DE2E8]"
-                          : step.current
-                          ? "text-[#1D3557]"
-                          : "text-[#6B7280]"
-                      }`}
-                    >
-                      <span className="text-lg">{step.icon}</span>
-                      <span className={step.current ? "font-medium" : ""}>{step.text}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Phase 2 - Locked */}
-            <div className="relative pl-8 border-l-4 border-[#D4E0EC] opacity-50">
-              <div className="absolute -left-[14px] top-0 w-6 h-6 rounded-full bg-[#D4E0EC] border-4 border-white" />
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-semibold text-[#1D3557] uppercase tracking-wider">
-                    Phase 2: Building Skills
-                  </h3>
-                  <Badge variant="secondary">Locked</Badge>
-                </div>
-                <p className="text-sm text-[#6B7280] uppercase tracking-wider">Week 3-4</p>
-                <p className="text-base text-[#6B7280]">🔒 Complete Phase 1 to unlock</p>
-              </div>
-            </div>
-          </div>
-
-          <Button
-            onClick={() => navigate("/roadmap")}
-            className="w-full"
-            size="lg"
-          >
-            View Full Roadmap
-          </Button>
-        </Card>
-
-        {/* AI Stock Analyzer Teaser */}
-        <Card className="p-12 space-y-8 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1D3557]/5 to-transparent" />
-          <div className="relative z-10 space-y-3">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-[#1D3557]/10 flex items-center justify-center mb-6">
-              <span className="text-4xl">📊</span>
-            </div>
-            <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight">
-              AI Stock Analyzer
-            </h2>
-            <p className="text-lg text-[#6B7280] max-w-md mx-auto">
-              Analyze any stock in real-time with advanced AI technology
-            </p>
-          </div>
-
-          <div className="max-w-md mx-auto space-y-4 relative z-10">
-            <Input
-              placeholder="Enter symbol (e.g., AAPL, TSLA)"
-              disabled
-              className="h-14 text-base bg-white/60 border-[#D4E0EC] rounded-xl"
-            />
-            <div className="flex gap-3">
-              <Button disabled className="flex-1" size="lg">
-                Analyze
-              </Button>
-              <Button
-                onClick={() => navigate("/analyzer")}
-                variant="outline"
-                className="flex-1"
-                size="lg"
-              >
-                Go to Analyzer →
-              </Button>
-            </div>
-          </div>
-        </Card>
+        {/* Roadmap and Analyzer sections hidden for v1 - backend logic not fully connected */}
 
       </div>
     </DashboardLayout>

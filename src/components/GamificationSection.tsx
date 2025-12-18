@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sparkles, Trophy, Target, Flame, ChevronRight } from "lucide-react";
+import { Sparkles, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useGamification } from "@/hooks/useGamification";
@@ -168,8 +168,8 @@ export function GamificationSection() {
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
+      {/* Main Grid - showing only wired features for v1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {/* Level & XP Card */}
         <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
           <div className="flex items-center justify-between">
@@ -330,102 +330,11 @@ export function GamificationSection() {
           </div>
 
           <p className="text-xs text-[#6B7280] leading-relaxed border-t border-[#D4E0EC]/60 pt-3">
-            Skill levels grow as you complete specific lessons and actions.
+            Skill XP grows as you complete new lessons.
           </p>
         </Card>
 
-        {/* Achievements & Missions Card */}
-        <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm uppercase tracking-widest text-[#6B7280] font-semibold">
-              Achievements & Missions
-            </h3>
-            <Trophy className="w-4 h-4 text-[#4DE2E8]" />
-          </div>
-
-          {/* Streak */}
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/10 to-[#A7E9FF]/10 border border-[#4DE2E8]/30">
-            <Flame className="w-5 h-5 text-[#2FB3C6]" />
-            <div>
-              {isLoading ? (
-                <>
-                  <Skeleton className="h-4 w-24 mb-1" />
-                  <Skeleton className="h-3 w-16" />
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-semibold text-[#1D3557]">
-                    Streak: {streakDays} day{streakDays !== 1 ? 's' : ''}
-                  </p>
-                  <p className="text-xs text-[#6B7280]">
-                    {streakDays > 0 ? "Keep it going!" : "Start your streak today!"}
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Unlocked Badges */}
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wider text-[#6B7280] font-semibold">
-              Latest Badge{achievements.length > 1 ? 's' : ''}
-            </p>
-            {detailsLoading ? (
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/5 to-[#A7E9FF]/10 border border-[#4DE2E8]/25">
-                <Skeleton className="w-8 h-8 rounded-lg" />
-                <div className="flex-1">
-                  <Skeleton className="h-4 w-20 mb-1" />
-                  <Skeleton className="h-3 w-32" />
-                </div>
-              </div>
-            ) : achievements.length > 0 ? (
-              achievements.slice(0, 3).map((achievement) => (
-                <div
-                  key={achievement.achievement_id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-[#4DE2E8]/5 to-[#A7E9FF]/10 border border-[#4DE2E8]/25"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_12px_rgba(77,226,232,0.4)]">
-                    <Trophy className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#1D3557]">{achievement.name}</p>
-                    <p className="text-xs text-[#6B7280] truncate">
-                      Unlocked {new Date(achievement.unlocked_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-3 rounded-xl bg-[#D4E0EC]/20 border border-[#D4E0EC]/50">
-                <p className="text-xs text-[#6B7280] text-center">
-                  No achievements yet. Keep learning!
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Active Mission */}
-          <div className="space-y-2">
-            <p className="text-xs uppercase tracking-wider text-[#6B7280] font-semibold">
-              Active Mission
-            </p>
-            <div className="p-3 rounded-xl bg-[#D4E0EC]/20 border border-[#D4E0EC]/50">
-              <p className="text-xs text-[#4B5563] leading-relaxed">
-                Watch 2 videos and ask the Mentor 1 question this week.
-              </p>
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-xs text-[#6B7280] hover:text-[#1D3557]"
-            onClick={() => console.log("View all achievements")}
-          >
-            View all achievements
-            <ChevronRight className="w-3 h-3 ml-1" />
-          </Button>
-        </Card>
+        {/* Achievements & Missions Card - Hidden for v1 (backend logic not implemented) */}
       </div>
     </div>
   );
