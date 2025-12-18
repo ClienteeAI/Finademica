@@ -268,7 +268,29 @@ const Calculator = () => {
         }
       );
 
-      const data = await response.json();
+      if (!response.ok) {
+        setErrors({ general: `Server error: ${response.status}. Please try again.` });
+        setIsLoading(false);
+        return;
+      }
+
+      const text = await response.text();
+      
+      if (!text || text.trim() === '') {
+        setErrors({ general: "No response from server. Please try again." });
+        setIsLoading(false);
+        return;
+      }
+
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (parseError) {
+        console.error("Failed to parse response:", text);
+        setErrors({ general: "Invalid response from server. Please try again." });
+        setIsLoading(false);
+        return;
+      }
 
       if (data.error) {
         setErrors({ general: data.error });
@@ -283,7 +305,8 @@ const Calculator = () => {
         });
       }
     } catch (error) {
-      setErrors({ general: "Calculation failed. Please try again." });
+      console.error("Calculator fetch error:", error);
+      setErrors({ general: "Network error. Please check your connection and try again." });
     } finally {
       setIsLoading(false);
     }

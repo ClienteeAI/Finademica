@@ -1560,6 +1560,14 @@ export type Database = {
             Returns: Json
           }
         | {
+            Args: {
+              p_action_key: string
+              p_auth_user_id: string
+              p_user_id: string
+            }
+            Returns: Json
+          }
+        | {
             Args: { p_event_type: string; p_meta?: Json; p_ref_id?: string }
             Returns: Json
           }
