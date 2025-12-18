@@ -12,6 +12,26 @@ const dispatchXPGainEvent = (xpAmount: number, title?: string) => {
   }));
 };
 
+// Dispatch custom event for level-up (listened by XPGainToastProvider)
+const dispatchLevelUpEvent = (level: number) => {
+  window.dispatchEvent(new CustomEvent('level-up', { 
+    detail: { level } 
+  }));
+};
+
+// Calculate level from XP using xp_levels thresholds
+const calculateLevelFromXP = (xp: number): number => {
+  const thresholds = [0, 100, 250, 450, 700, 1000, 1350, 1750, 2200, 2700];
+  let level = 1;
+  for (let i = thresholds.length - 1; i >= 0; i--) {
+    if (xp >= thresholds[i]) {
+      level = i + 1;
+      break;
+    }
+  }
+  return Math.min(level, 10);
+};
+
 export const useVideoCompletion = (
   videoId: string | undefined, 
   videoTitle?: string,
@@ -70,7 +90,17 @@ export const useVideoCompletion = (
 
       const profileId = publicUser.id;
 
-      // 3. Check if video_view exists, then insert or update
+      // 3. Get current XP before completion to detect level-up
+      const { data: gamificationBefore } = await supabase
+        .from("user_gamification")
+        .select("experience_points")
+        .eq("user_id", profileId)
+        .maybeSingle();
+
+      const xpBefore = gamificationBefore?.experience_points ?? 0;
+      const levelBefore = calculateLevelFromXP(xpBefore);
+
+      // 4. Check if video_view exists, then insert or update
       const { data: existingView } = await supabase
         .from("video_views")
         .select("id")
@@ -113,7 +143,7 @@ export const useVideoCompletion = (
         return;
       }
 
-      // 4. Insert into user_events for XP tracking (ignore if already exists)
+      // 5. Insert into user_events for XP tracking (ignore if already exists)
       const { error: eventError } = await supabase
         .from("user_events")
         .insert({
@@ -134,11 +164,27 @@ export const useVideoCompletion = (
 
       hasTriggeredRef.current = true;
 
-      // 5. Success - show XP toast with animation and confetti
+      // 6. Success - show XP toast with animation and confetti
       triggerConfetti();
       dispatchXPGainEvent(XP_PER_VIDEO, "Lesson Complete!");
 
-      // 6. Refresh XP widget
+      // 7. Check for level-up after a brief delay (allow DB triggers to update)
+      setTimeout(async () => {
+        const { data: gamificationAfter } = await supabase
+          .from("user_gamification")
+          .select("experience_points")
+          .eq("user_id", profileId)
+          .maybeSingle();
+
+        const xpAfter = gamificationAfter?.experience_points ?? xpBefore + XP_PER_VIDEO;
+        const levelAfter = calculateLevelFromXP(xpAfter);
+
+        if (levelAfter > levelBefore) {
+          dispatchLevelUpEvent(levelAfter);
+        }
+      }, 500);
+
+      // 8. Refresh XP widget
       if (onEventLogged) {
         onEventLogged();
       }

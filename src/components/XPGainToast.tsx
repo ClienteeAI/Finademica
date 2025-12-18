@@ -1,10 +1,15 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Sparkles, TrendingUp, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LevelUpModal from "@/components/LevelUpModal";
 
 interface XPGainEvent {
   xpAmount: number;
   title?: string;
+}
+
+interface LevelUpEvent {
+  level: number;
 }
 
 interface XPToastState extends XPGainEvent {
@@ -159,9 +164,10 @@ const XPToastContent = ({ xpAmount, title, onComplete }: XPGainEvent & { onCompl
   );
 };
 
-// Provider component that listens for XP gain events
+// Provider component that listens for XP gain and level-up events
 export const XPGainToastProvider = () => {
   const [toasts, setToasts] = useState<XPToastState[]>([]);
+  const [levelUpData, setLevelUpData] = useState<LevelUpEvent | null>(null);
   const idCounter = useRef(0);
 
   const handleXPGain = useCallback((event: CustomEvent<XPGainEvent>) => {
@@ -169,16 +175,29 @@ export const XPGainToastProvider = () => {
     setToasts(prev => [...prev, { ...event.detail, id }]);
   }, []);
 
+  const handleLevelUp = useCallback((event: CustomEvent<LevelUpEvent>) => {
+    // Delay level-up modal slightly so XP toast shows first
+    setTimeout(() => {
+      setLevelUpData(event.detail);
+    }, 1500);
+  }, []);
+
   const removeToast = useCallback((id: number) => {
     setToasts(prev => prev.filter(t => t.id !== id));
   }, []);
 
+  const closeLevelUpModal = useCallback(() => {
+    setLevelUpData(null);
+  }, []);
+
   useEffect(() => {
     window.addEventListener('xp-gain', handleXPGain as EventListener);
+    window.addEventListener('level-up', handleLevelUp as EventListener);
     return () => {
       window.removeEventListener('xp-gain', handleXPGain as EventListener);
+      window.removeEventListener('level-up', handleLevelUp as EventListener);
     };
-  }, [handleXPGain]);
+  }, [handleXPGain, handleLevelUp]);
 
   return (
     <>
@@ -190,6 +209,13 @@ export const XPGainToastProvider = () => {
           onComplete={() => removeToast(toast.id)}
         />
       ))}
+      
+      {levelUpData && (
+        <LevelUpModal
+          level={levelUpData.level}
+          onClose={closeLevelUpModal}
+        />
+      )}
     </>
   );
 };
@@ -202,7 +228,13 @@ export const useXPToast = () => {
     }));
   }, []);
 
-  return { showXPGain };
+  const showLevelUp = useCallback((level: number) => {
+    window.dispatchEvent(new CustomEvent('level-up', { 
+      detail: { level } 
+    }));
+  }, []);
+
+  return { showXPGain, showLevelUp };
 };
 
 export default XPGainToastProvider;
