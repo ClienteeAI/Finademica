@@ -55,12 +55,12 @@ const Progress = () => {
       }
 
       try {
-        // Fetch user stats for videos completed
-        const { data: stats } = await supabase
-          .from("user_stats")
-          .select("videos_completed")
+        // Count completed videos directly from video_views table (same as Dashboard)
+        const { count: videosWatched } = await supabase
+          .from("video_views")
+          .select("*", { count: "exact", head: true })
           .eq("user_id", userId)
-          .maybeSingle();
+          .eq("status", "completed");
 
         // Calculate total videos for completion rate
         const { count: totalVideos } = await supabase
@@ -68,11 +68,11 @@ const Progress = () => {
           .select("*", { count: "exact", head: true })
           .eq("is_active", true);
 
-        const videosWatched = stats?.videos_completed || 0;
-        const completionRate = totalVideos ? Math.round((videosWatched / totalVideos) * 100) : 0;
+        const watchedCount = videosWatched || 0;
+        const completionRate = totalVideos ? Math.round((watchedCount / totalVideos) * 100) : 0;
 
         setVideoStats({
-          videosWatched,
+          videosWatched: watchedCount,
           totalVideos: totalVideos || 0,
           completionRate,
         });
