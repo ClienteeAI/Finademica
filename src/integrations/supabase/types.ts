@@ -437,6 +437,8 @@ export type Database = {
           lots_final: number | null
           lots_requested: number | null
           notes: string | null
+          pip_value_position_usd: number | null
+          recommended_lots: number | null
           risk_per_1lot_usd: number | null
           risk_total_usd: number | null
           risk_type: string
@@ -445,6 +447,7 @@ export type Database = {
           stop_loss_price: number | null
           symbol: string
           take_profit_price: number | null
+          tick_value_position_usd: number | null
           ticks_to_sl: number | null
           user_id: string
         }
@@ -459,6 +462,8 @@ export type Database = {
           lots_final?: number | null
           lots_requested?: number | null
           notes?: string | null
+          pip_value_position_usd?: number | null
+          recommended_lots?: number | null
           risk_per_1lot_usd?: number | null
           risk_total_usd?: number | null
           risk_type: string
@@ -467,6 +472,7 @@ export type Database = {
           stop_loss_price?: number | null
           symbol: string
           take_profit_price?: number | null
+          tick_value_position_usd?: number | null
           ticks_to_sl?: number | null
           user_id: string
         }
@@ -481,6 +487,8 @@ export type Database = {
           lots_final?: number | null
           lots_requested?: number | null
           notes?: string | null
+          pip_value_position_usd?: number | null
+          recommended_lots?: number | null
           risk_per_1lot_usd?: number | null
           risk_total_usd?: number | null
           risk_type?: string
@@ -489,6 +497,7 @@ export type Database = {
           stop_loss_price?: number | null
           symbol?: string
           take_profit_price?: number | null
+          tick_value_position_usd?: number | null
           ticks_to_sl?: number | null
           user_id?: string
         }
