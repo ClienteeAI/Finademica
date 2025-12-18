@@ -16,8 +16,10 @@ export function AIMentor() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const lastMessageTimestamp = useRef<string | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,90 +35,173 @@ export function AIMentor() {
     }
   }, [isOpen]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+  // Get auth user ID on mount
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setAuthUserId(user.id);
+      }
+    };
+    getUser();
+  }, []);
 
-    const messageContent = input.trim();
+  // Load messages from Supabase when panel opens
+  useEffect(() => {
+    if (!isOpen || !authUserId) return;
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      role: "user",
-      content: messageContent,
-      timestamp: new Date(),
+    const loadMessages = async () => {
+      const { data, error } = await supabase
+        .from("mentor_messages")
+        .select("*")
+        .eq("auth_user_id", authUserId)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("Error loading messages:", error);
+        return;
+      }
+
+      if (data) {
+        const loadedMessages: Message[] = data.map((msg) => ({
+          id: msg.id,
+          role: msg.role === "user" ? "user" : "assistant",
+          content: msg.content,
+          timestamp: new Date(msg.created_at),
+        }));
+        setMessages(loadedMessages);
+        
+        // Track the last message timestamp
+        if (data.length > 0) {
+          lastMessageTimestamp.current = data[data.length - 1].created_at;
+        }
+      }
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    loadMessages();
+  }, [isOpen, authUserId]);
+
+  // Subscribe to realtime updates for mentor replies
+  useEffect(() => {
+    if (!authUserId) return;
+
+    const channel = supabase
+      .channel("mentor-messages-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "mentor_messages",
+          filter: `auth_user_id=eq.${authUserId}`,
+        },
+        (payload) => {
+          console.log("New mentor message received:", payload);
+          const newMsg = payload.new as {
+            id: string;
+            role: string;
+            content: string;
+            created_at: string;
+            auth_user_id: string;
+          };
+
+          // Only add if it's a new message we don't already have
+          setMessages((prev) => {
+            const exists = prev.some((m) => m.id === newMsg.id);
+            if (exists) return prev;
+
+            const message: Message = {
+              id: newMsg.id,
+              role: newMsg.role === "user" ? "user" : "assistant",
+              content: newMsg.content,
+              timestamp: new Date(newMsg.created_at),
+            };
+
+            // If mentor message arrives, stop loading
+            if (newMsg.role === "assistant" || newMsg.role === "mentor") {
+              setIsLoading(false);
+            }
+
+            return [...prev, message];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [authUserId]);
+
+  const sendMessage = async () => {
+    if (!input.trim() || isLoading || !authUserId) return;
+
+    const messageContent = input.trim();
     setInput("");
     setIsLoading(true);
 
-    // Award XP for mentor message using the correct action_key
+    // Insert message into Supabase
+    const { data: insertedMsg, error } = await supabase
+      .from("mentor_messages")
+      .insert({
+        auth_user_id: authUserId,
+        role: "user",
+        content: messageContent,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error sending message:", error);
+      setIsLoading(false);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Add user message to UI immediately (realtime will also fire, but we check for duplicates)
+    if (insertedMsg) {
+      setMessages((prev) => {
+        const exists = prev.some((m) => m.id === insertedMsg.id);
+        if (exists) return prev;
+        return [
+          ...prev,
+          {
+            id: insertedMsg.id,
+            role: "user" as const,
+            content: insertedMsg.content,
+            timestamp: new Date(insertedMsg.created_at),
+          },
+        ];
+      });
+    }
+
+    // Award XP for mentor message
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: xpResult } = await supabase.rpc("award_xp", {
-          p_action_key: "mentor_message",
-          p_auth_user_id: user.id,
-          p_meta: { message_length: messageContent.length }
+      const { data: xpResult } = await supabase.rpc("award_xp", {
+        p_action_key: "mentor_message",
+        p_auth_user_id: authUserId,
+        p_meta: { message_length: messageContent.length },
+      });
+
+      const result = xpResult as { xp_awarded?: number } | null;
+      if (result?.xp_awarded && result.xp_awarded > 0) {
+        toast({
+          title: `+${result.xp_awarded} XP earned!`,
+          description: "Keep chatting with your mentor!",
         });
-        
-        const result = xpResult as { xp_awarded?: number } | null;
-        if (result?.xp_awarded && result.xp_awarded > 0) {
-          toast({
-            title: `+${result.xp_awarded} XP earned!`,
-            description: "Keep chatting with your mentor!",
-          });
-          // Trigger gamification refresh
-          window.dispatchEvent(new Event('gamification-update'));
-        }
+        window.dispatchEvent(new Event("gamification-update"));
       }
     } catch (err) {
       console.error("XP award error:", err);
     }
 
-    try {
-      const userData = localStorage.getItem("user");
-      const user = userData ? JSON.parse(userData) : null;
-
-      const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook/81b2df02-b127-41cf-9e40-f846b4a2bd47",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userMessage.content,
-            user: {
-              id: user?.id || "anonymous",
-              name: user?.firstName || "User",
-              email: user?.email || "",
-            },
-          }),
-        }
-      );
-
-      const data = await response.json();
-      
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: data.output || data.reply || "I'm here to help! Ask me anything about trading.",
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
-    } catch (error) {
-      console.error("Error sending message:", error);
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "Sorry, I'm having trouble connecting. Please try again.",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
+    // Note: We don't call webhook here anymore!
+    // Supabase trigger handles calling n8n when user message is inserted.
+    // The mentor reply will come via realtime subscription.
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -199,7 +284,7 @@ export function AIMentor() {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.length === 0 && (
+              {messages.length === 0 && !isLoading && (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
                     <Sparkles className="w-8 h-8 text-[#2FB3C6]" />
@@ -234,10 +319,13 @@ export function AIMentor() {
               {isLoading && (
                 <div className="flex justify-start animate-fade-in">
                   <div className="bg-white/80 backdrop-blur-sm rounded-[18px] px-4 py-3 border border-[#D4E0EC]">
-                    <div className="flex gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse" />
-                      <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse delay-150" />
-                      <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse delay-300" />
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-[#6B7280]">Mentor is typing</span>
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse" />
+                        <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse delay-150" />
+                        <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse delay-300" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -256,7 +344,7 @@ export function AIMentor() {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask your mentor…"
-                  disabled={isLoading}
+                  disabled={isLoading || !authUserId}
                   className={cn(
                     "flex-1 px-4 py-3 rounded-full",
                     "bg-white/80 border border-[#D4E0EC]",
@@ -268,7 +356,7 @@ export function AIMentor() {
                 />
                 <button
                   onClick={sendMessage}
-                  disabled={!input.trim() || isLoading}
+                  disabled={!input.trim() || isLoading || !authUserId}
                   className={cn(
                     "w-12 h-12 rounded-full",
                     "bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6]",
