@@ -182,20 +182,39 @@ const StockAnalyzer = () => {
                 </div>
               ) : analysisData ? (
                 <div className="space-y-8">
-                  {/* Buy Button - Top Right Corner */}
-                  <div className="flex justify-end">
-                    <a
-                      href="https://nasrtrade.com"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:scale-105 transition-all duration-300"
-                    >
-                      Trade {analyzedSymbol}
-                    </a>
-                  </div>
-                  
                   {/* Analysis Results */}
                   <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
+                  
+                  {/* Prominent Trade CTA Banner */}
+                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 p-8 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                    {/* Animated background glow */}
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_50%)]" />
+                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" />
+                    <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+                    
+                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+                      <div className="text-center md:text-left">
+                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                          Ready to Trade {analyzedSymbol}?
+                        </h3>
+                        <p className="text-white/80 text-lg">
+                          Open a position now with our trusted trading platform
+                        </p>
+                      </div>
+                      
+                      <a
+                        href="https://nasrtrade.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-bold text-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.3)] hover:scale-105 transition-all duration-300"
+                      >
+                        <TrendingUp className="w-6 h-6 group-hover:animate-pulse" />
+                        Trade {analyzedSymbol} Now
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full" />
+                      </a>
+                    </div>
+                  </div>
                   
                   {/* Divider */}
                   <div className="border-t border-[#D4E0EC]" />
