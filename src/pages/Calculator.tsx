@@ -339,8 +339,9 @@ const Calculator = () => {
         setErrors({ general: resultData.error });
       } else {
         setResult(resultData);
-        // Log calculator_used event
+        // Log calculator_used event with unique ref_id to allow multiple calculations
         await logEvent("calculator_used", {
+          ref_id: `calc_${Date.now()}`,
           symbol: symbol.toUpperCase().trim(),
           side,
           lots_final: resultData.lots_final,
