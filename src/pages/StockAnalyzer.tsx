@@ -221,11 +221,10 @@ const StockAnalyzer = () => {
                   <div className="flex justify-center">
                     <Button
                       onClick={() => setShowDiaryModal(true)}
-                      variant="outline"
                       size="lg"
-                      className="gap-2 px-8 border-[#4DE2E8]/50 text-[#2FB3C6] hover:bg-[#4DE2E8]/10 hover:border-[#4DE2E8]"
+                      className="gap-2 px-10 py-6 text-lg font-semibold bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6] text-white hover:opacity-90 shadow-[0_4px_20px_rgba(77,226,232,0.4)] hover:shadow-[0_6px_25px_rgba(77,226,232,0.5)] transition-all"
                     >
-                      <BookOpen className="w-5 h-5" />
+                      <BookOpen className="w-6 h-6" />
                       Save to Trading Diary
                     </Button>
                   </div>
