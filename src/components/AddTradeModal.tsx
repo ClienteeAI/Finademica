@@ -5,12 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { Loader2, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { format } from "date-fns";
 
 interface AddTradeModalProps {
   open: boolean;
@@ -23,6 +26,8 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
   const navigate = useNavigate();
   const { logEvent } = useLogEvent();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openTime, setOpenTime] = useState<Date | undefined>(undefined);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [formData, setFormData] = useState({
     symbol: "",
     side: "long" as "long" | "short",
@@ -67,6 +72,7 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
         risk_total_usd: formData.risk_total_usd ? parseFloat(formData.risk_total_usd) : null,
         notes: formData.notes || null,
         status: formData.status,
+        open_time: openTime ? openTime.toISOString() : null,
       };
 
       const result = await sendDiaryWebhook("create", tradeData);
@@ -97,6 +103,8 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
         risk_total_usd: "",
         notes: "",
       });
+      setOpenTime(undefined);
+      setIsDatePickerOpen(false);
     } catch (error) {
       console.error("Failed to save trade:", error);
       toast.error("Failed to save trade. Please try again.");
@@ -142,18 +150,50 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Status</Label>
-            <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
-              <SelectTrigger className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
-                <SelectItem value="planned">Planned</SelectItem>
-                <SelectItem value="open">Open</SelectItem>
-                <SelectItem value="closed">Closed</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Status</Label>
+              <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                <SelectTrigger className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                  <SelectItem value="planned">Planned</SelectItem>
+                  <SelectItem value="open">Open</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Date</Label>
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      isNasrTheme && "bg-nasr-bg/60 border-gold/20",
+                      !openTime && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {openTime ? format(openTime, "PPP") : <span>Pick date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={openTime}
+                    onSelect={(date) => {
+                      setOpenTime(date);
+                      setIsDatePickerOpen(false);
+                    }}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-3">
