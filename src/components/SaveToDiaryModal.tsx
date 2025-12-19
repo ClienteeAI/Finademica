@@ -4,12 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Loader2, Save, BookOpen } from "lucide-react";
+import { Loader2, Save, BookOpen, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 interface CalculationResult {
   lots_final?: number;
@@ -56,7 +59,8 @@ export const SaveToDiaryModal = ({
   const navigate = useNavigate();
   const { logEvent } = useLogEvent();
   const [status, setStatus] = useState<"planned" | "open">("planned");
-  const [openTime, setOpenTime] = useState("");
+  const [openTime, setOpenTime] = useState<Date | undefined>(undefined);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [notes, setNotes] = useState(formData.notes || "");
   const [tagsInput, setTagsInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -117,7 +121,7 @@ export const SaveToDiaryModal = ({
         pip_value_position_usd: calcResult.pip_value_position_usd || null,
         notes: notes || formData.notes || null,
         status,
-        open_time: openTime || null,
+        open_time: openTime ? openTime.toISOString() : null,
         tags: tags.length > 0 ? tags : null,
       };
 
@@ -159,7 +163,8 @@ export const SaveToDiaryModal = ({
   const handleClose = () => {
     setShowSuccess(false);
     setStatus("planned");
-    setOpenTime("");
+    setOpenTime(undefined);
+    setIsDatePickerOpen(false);
     setNotes(formData.notes || "");
     setTagsInput("");
     onOpenChange(false);
@@ -273,16 +278,34 @@ export const SaveToDiaryModal = ({
           {/* Open Time */}
           <div className="space-y-2">
             <Label className={themeColors.subtext}>Open Time (optional)</Label>
-            <Input
-              type="datetime-local"
-              value={openTime}
-              onChange={(e) => setOpenTime(e.target.value)}
-              className={cn(
-                "h-11",
-                themeColors.inputBg,
-                themeColors.inputBorder
-              )}
-            />
+            <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full h-11 justify-start text-left font-normal",
+                    themeColors.inputBg,
+                    themeColors.inputBorder,
+                    !openTime && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {openTime ? format(openTime, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={openTime}
+                  onSelect={(date) => {
+                    setOpenTime(date);
+                    setIsDatePickerOpen(false);
+                  }}
+                  initialFocus
+                  className="p-3 pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           {/* Notes */}
