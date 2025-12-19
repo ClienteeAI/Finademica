@@ -76,15 +76,19 @@ export const SaveAnalysisToDiaryModal = ({
         return;
       }
 
+      const entryPriceNum = parseFloat(entryPrice) || 0;
+      const stopLossPriceNum = stopLossPrice ? parseFloat(stopLossPrice) : (side === "long" ? entryPriceNum * 0.98 : entryPriceNum * 1.02);
+      const takeProfitPriceNum = takeProfitPrice ? parseFloat(takeProfitPrice) : null;
+
       const tradeData = {
         auth_user_id: authUser.auth_user_id,
         email: authUser.user_email,
         broker_key: "nasr_trade_mt5",
         symbol: symbol.toUpperCase(),
         side,
-        entry_price: parseFloat(entryPrice) || null,
-        stop_loss_price: stopLossPrice ? parseFloat(stopLossPrice) : null,
-        take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
+        entry_price: entryPriceNum,
+        stop_loss_price: stopLossPriceNum,
+        take_profit_price: takeProfitPriceNum,
         lots_final: null,
         risk_total_usd: null,
         profit_total_usd: null,
@@ -97,12 +101,15 @@ export const SaveAnalysisToDiaryModal = ({
         tags: ["ai-analysis"],
       };
 
+      console.log("Sending trade to diary:", tradeData);
       const result = await sendDiaryWebhook("create", tradeData);
+      console.log("Diary webhook result:", result);
 
       if (!result.success) {
+        console.error("Failed to save trade:", result.error);
         toast({
           title: "Error",
-          description: "Failed to save trade. Please try again.",
+          description: result.error || "Failed to save trade. Please try again.",
           variant: "destructive",
         });
         return;
