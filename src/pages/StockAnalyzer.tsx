@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Search, TrendingUp, Loader2 } from "lucide-react";
+import { Search, TrendingUp, Loader2, BookOpen } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import StockAnalysisCard from "@/components/StockAnalysisCard";
 import StockChat from "@/components/StockChat";
@@ -12,6 +12,7 @@ import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
+import { SaveAnalysisToDiaryModal } from "@/components/SaveAnalysisToDiaryModal";
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
@@ -39,6 +40,7 @@ const StockAnalyzer = () => {
   const [analyzedSymbol, setAnalyzedSymbol] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [showDiaryModal, setShowDiaryModal] = useState(false);
 
   const handleAnalyze = async () => {
     const trimmedSymbol = symbol.trim().toUpperCase();
@@ -214,6 +216,19 @@ const StockAnalyzer = () => {
                       </button>
                     </div>
                   </div>
+
+                  {/* Save to Diary Button */}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={() => setShowDiaryModal(true)}
+                      variant="outline"
+                      size="lg"
+                      className="gap-2 px-8 border-[#4DE2E8]/50 text-[#2FB3C6] hover:bg-[#4DE2E8]/10 hover:border-[#4DE2E8]"
+                    >
+                      <BookOpen className="w-5 h-5" />
+                      Save to Trading Diary
+                    </Button>
+                  </div>
                   
                   {/* Divider */}
                   <div className="border-t border-[#D4E0EC]" />
@@ -301,6 +316,16 @@ const StockAnalyzer = () => {
       <LiveAccountRegistrationModal
         open={showRegistrationModal}
         onOpenChange={setShowRegistrationModal}
+      />
+
+      {/* Save to Diary Modal */}
+      <SaveAnalysisToDiaryModal
+        open={showDiaryModal}
+        onOpenChange={setShowDiaryModal}
+        symbol={analyzedSymbol || symbol}
+        currentPrice={(analysisData as any)?.output?.expectedFields?.currentPrice || 0}
+        aiMessage={(analysisData as any)?.output?.expectedFields?.aiMessage || ""}
+        isNasrTheme={isNasrTheme}
       />
     </DashboardLayout>
   );
