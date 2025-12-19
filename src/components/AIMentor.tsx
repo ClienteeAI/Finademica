@@ -150,68 +150,86 @@ export function AIMentor() {
     setInput("");
     setIsLoading(true);
 
-    // Insert message into Supabase
-    const { data: insertedMsg, error } = await supabase
-      .from("mentor_messages")
-      .insert({
-        auth_user_id: authUserId,
-        role: "user",
-        content: messageContent,
-      })
-      .select()
-      .single();
+    // Add user message to UI immediately
+    const userMsgId = crypto.randomUUID();
+    const userMessage: Message = {
+      id: userMsgId,
+      role: "user",
+      content: messageContent,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
 
-    if (error) {
+    // Build conversation history for the webhook
+    const conversationHistory = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
+    conversationHistory.push({ role: "user", content: messageContent });
+
+    try {
+      // Send to n8n webhook
+      const response = await fetch(
+        "https://clientee.app.n8n.cloud/webhook/81b2df02-b127-41cf-9e40-f846b4a2bd47",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            auth_user_id: authUserId,
+            message: messageContent,
+            conversation: conversationHistory,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Webhook error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      // Extract assistant reply from response
+      const assistantContent =
+        data?.reply || data?.message || data?.content || data?.text || 
+        (typeof data === "string" ? data : "I couldn't generate a response.");
+
+      const assistantMessage: Message = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: assistantContent,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      // Award XP for mentor message
+      try {
+        const { data: xpResult } = await supabase.rpc("award_xp", {
+          p_action_key: "mentor_message",
+          p_auth_user_id: authUserId,
+          p_meta: { message_length: messageContent.length },
+        });
+
+        const result = xpResult as { xp_awarded?: number } | null;
+        if (result?.xp_awarded && result.xp_awarded > 0) {
+          toast({
+            title: `+${result.xp_awarded} XP earned!`,
+            description: "Keep chatting with your mentor!",
+          });
+          window.dispatchEvent(new Event("gamification-update"));
+        }
+      } catch (err) {
+        console.error("XP award error:", err);
+      }
+    } catch (error) {
       console.error("Error sending message:", error);
-      setIsLoading(false);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: "Failed to get mentor response. Please try again.",
         variant: "destructive",
       });
-      return;
+    } finally {
+      setIsLoading(false);
     }
-
-    // Add user message to UI immediately (realtime will also fire, but we check for duplicates)
-    if (insertedMsg) {
-      setMessages((prev) => {
-        const exists = prev.some((m) => m.id === insertedMsg.id);
-        if (exists) return prev;
-        return [
-          ...prev,
-          {
-            id: insertedMsg.id,
-            role: "user" as const,
-            content: insertedMsg.content,
-            timestamp: new Date(insertedMsg.created_at),
-          },
-        ];
-      });
-    }
-
-    // Award XP for mentor message
-    try {
-      const { data: xpResult } = await supabase.rpc("award_xp", {
-        p_action_key: "mentor_message",
-        p_auth_user_id: authUserId,
-        p_meta: { message_length: messageContent.length },
-      });
-
-      const result = xpResult as { xp_awarded?: number } | null;
-      if (result?.xp_awarded && result.xp_awarded > 0) {
-        toast({
-          title: `+${result.xp_awarded} XP earned!`,
-          description: "Keep chatting with your mentor!",
-        });
-        window.dispatchEvent(new Event("gamification-update"));
-      }
-    } catch (err) {
-      console.error("XP award error:", err);
-    }
-
-    // Note: We don't call webhook here anymore!
-    // Supabase trigger handles calling n8n when user message is inserted.
-    // The mentor reply will come via realtime subscription.
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
