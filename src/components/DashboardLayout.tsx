@@ -96,7 +96,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className={`min-h-screen ${isNasrTheme ? 'bg-nasr-bg nasr-grid-bg gold-particles' : 'bg-background'}`}>
       {/* Top Navigation */}
-      <nav className="sticky top-0 z-50 glass-nav animate-slide-down">
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-nav animate-slide-down">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between h-18">
             {/* Logo */}
@@ -149,12 +149,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-10">
+            <div className="hidden md:flex items-center gap-5 flex-nowrap">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`relative text-[15px] font-semibold tracking-tight transition-all duration-250 ${
+                  className={`relative text-sm font-medium tracking-wide transition-all duration-250 whitespace-nowrap ${
                     isActive(item.path) 
                       ? isNasrTheme ? 'text-gold' : 'text-aqua'
                       : isNasrTheme ? 'text-nasr-text-muted hover:text-nasr-text hover:scale-105' : 'text-ocean-muted hover:text-ocean hover:scale-105'
@@ -174,6 +174,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* XP Widget + User Profile */}
             <div className="hidden md:flex items-center gap-4">
+              {/* Separator */}
+              <div className={`h-8 w-px ${isNasrTheme ? 'bg-gold/20' : 'bg-ice'}`} />
               {/* Compact XP Indicator */}
               <XPNavIndicator isNasrTheme={isNasrTheme} />
               <DropdownMenu>
@@ -318,7 +320,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </nav>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12 max-w-[1440px]">
+      <main className="container mx-auto px-6 py-12 pt-24 max-w-[1440px]">
         {children}
       </main>
 

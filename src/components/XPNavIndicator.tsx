@@ -39,10 +39,10 @@ const XPNavIndicator = ({ isNasrTheme = false }: XPNavIndicatorProps) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <div className={cn(
-            "flex items-center gap-3 px-3 py-1.5 rounded-full cursor-default transition-all",
+            "flex items-center gap-3 px-4 py-2 rounded-xl cursor-default transition-all border backdrop-blur-sm",
             isNasrTheme 
-              ? "hover:bg-gold/10" 
-              : "hover:bg-aqua/10"
+              ? "bg-nasr-panel/60 border-gold/20 hover:border-gold/40 shadow-[0_2px_12px_rgba(212,175,55,0.15)]" 
+              : "bg-white/60 border-ice hover:border-aqua/30 shadow-[0_2px_12px_rgba(77,226,232,0.1)]"
           )}>
             {/* Level Badge */}
             <div className={cn(
