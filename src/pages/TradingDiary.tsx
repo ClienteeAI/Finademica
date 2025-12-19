@@ -448,6 +448,24 @@ const TradingDiary = () => {
                         </td>
                         <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-1">
+                            {entry.status === 'planned' && (
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRegistrationModalOpen(true);
+                                }}
+                                className={cn(
+                                  "h-7 px-3 text-xs font-semibold rounded-lg",
+                                  isNasrTheme 
+                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
+                                    : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                )}
+                              >
+                                <TrendingUp className="w-3 h-3 mr-1" />
+                                Open Trade
+                              </Button>
+                            )}
                             {entry.notes && (
                               <FileText className={cn("w-4 h-4", themeColors.subtext)} />
                             )}
@@ -543,6 +561,24 @@ const TradingDiary = () => {
                     </div>
 
                     <div className="flex justify-end gap-2 mt-3 pt-3 border-t" style={{ borderColor: isNasrTheme ? 'rgba(212,175,55,0.1)' : 'rgba(0,0,0,0.1)' }}>
+                      {entry.status === 'planned' && (
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRegistrationModalOpen(true);
+                          }}
+                          className={cn(
+                            "h-8 px-3 text-xs font-semibold",
+                            isNasrTheme 
+                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
+                              : 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                          )}
+                        >
+                          <TrendingUp className="w-3.5 h-3.5 mr-1" />
+                          Open Trade
+                        </Button>
+                      )}
                       <Button
                         variant="ghost"
                         size="sm"
