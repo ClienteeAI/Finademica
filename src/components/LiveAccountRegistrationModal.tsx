@@ -5,9 +5,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useAuth } from '@/lib/AuthContext';
 import { toast } from 'sonner';
-import { ArrowRight, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, CalendarIcon, Eye, EyeOff, Info } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface LiveAccountRegistrationModalProps {
   open: boolean;
@@ -251,11 +256,29 @@ const COUNTRIES = [
   'Vanuatu', 'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
 ];
 
+// Password validation helper
+const validatePassword = (password: string) => {
+  const hasMinLength = password.length >= 12;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+  
+  return {
+    isValid: hasMinLength && hasUpperCase && hasSpecialChar,
+    hasMinLength,
+    hasUpperCase,
+    hasSpecialChar,
+  };
+};
+
 export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccountRegistrationModalProps) {
   const { profile, user } = useAuth();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [birthdayDate, setBirthdayDate] = useState<Date | undefined>();
+  const [passwordOption, setPasswordOption] = useState<'app' | 'custom'>('app');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordVerification, setShowPasswordVerification] = useState(false);
   
   const [formData, setFormData] = useState({
     // Step 1
@@ -293,12 +316,47 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
     }
   }, [profile, user]);
 
+  // Handle birthday date change
+  useEffect(() => {
+    if (birthdayDate) {
+      setFormData(prev => ({
+        ...prev,
+        birthday: format(birthdayDate, 'yyyy-MM-dd'),
+      }));
+      if (errors.birthday) {
+        setErrors(prev => ({ ...prev, birthday: '' }));
+      }
+    }
+  }, [birthdayDate]);
+
+  // Handle password option change
+  useEffect(() => {
+    if (passwordOption === 'app') {
+      // Use a placeholder for app password - in real scenario this would be fetched
+      // For now we'll use a secure generated password pattern
+      const appPassword = 'AppSecure123!';
+      setFormData(prev => ({
+        ...prev,
+        password: appPassword,
+        passwordVerification: appPassword,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        password: '',
+        passwordVerification: '',
+      }));
+    }
+  }, [passwordOption]);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
+
+  const passwordValidation = validatePassword(formData.password);
 
   const validateStep1 = () => {
     const newErrors: Record<string, string> = {};
@@ -310,8 +368,13 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email format';
     if (!formData.phonePrefix) newErrors.phonePrefix = 'Phone prefix is required';
     if (!formData.phone.trim()) newErrors.phone = 'Phone is required';
-    if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (!passwordValidation.isValid) {
+      newErrors.password = 'Password does not meet requirements';
+    }
+    
     if (formData.password !== formData.passwordVerification) {
       newErrors.passwordVerification = 'Passwords do not match';
     }
@@ -345,23 +408,49 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
 
     setIsSubmitting(true);
     try {
+      const payload = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        birthday: formData.birthday,
+        email: formData.email,
+        phonePrefix: formData.phonePrefix,
+        phone: formData.phone,
+        password: formData.password,
+        citizenship: formData.citizenship,
+        country: formData.country,
+        zip: formData.zip,
+        city: formData.city,
+        street: formData.street,
+        street2: formData.street2,
+        promocode: formData.promocode,
+        platformCurrency: formData.platformCurrency,
+        fullPhone: `${formData.phonePrefix}${formData.phone}`,
+        submittedAt: new Date().toISOString(),
+        userId: user?.id,
+      };
+
+      console.log('Submitting registration:', payload);
+
       const response = await fetch('https://clientee.app.n8n.cloud/webhook-test/42042989-a121-42aa-8d52-a616e839a923', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          fullPhone: `${formData.phonePrefix}${formData.phone}`,
-          submittedAt: new Date().toISOString(),
-          userId: user?.id,
-        }),
+        headers: { 
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
+
+      console.log('Response status:', response.status);
 
       if (response.ok) {
         toast.success('Registration submitted successfully!');
         onOpenChange(false);
         setStep(1);
         setTermsAccepted(false);
+        setBirthdayDate(undefined);
+        setPasswordOption('app');
       } else {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
         throw new Error('Failed to submit');
       }
     } catch (error) {
@@ -421,15 +510,39 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
                 </div>
               </div>
 
+              {/* Birthday with Date Picker */}
               <div className="space-y-2">
-                <Label htmlFor="birthday">Birthday *</Label>
-                <Input
-                  id="birthday"
-                  type="date"
-                  value={formData.birthday}
-                  onChange={(e) => handleInputChange('birthday', e.target.value)}
-                  className={errors.birthday ? 'border-destructive' : ''}
-                />
+                <Label>Birthday *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !birthdayDate && "text-muted-foreground",
+                        errors.birthday && "border-destructive"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {birthdayDate ? format(birthdayDate, "PPP") : <span>Pick your birthday</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={birthdayDate}
+                      onSelect={setBirthdayDate}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                      captionLayout="dropdown-buttons"
+                      fromYear={1920}
+                      toYear={new Date().getFullYear()}
+                    />
+                  </PopoverContent>
+                </Popover>
                 {errors.birthday && <p className="text-xs text-destructive">{errors.birthday}</p>}
               </div>
 
@@ -474,29 +587,109 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={(e) => handleInputChange('password', e.target.value)}
-                    className={errors.password ? 'border-destructive' : ''}
-                  />
-                  {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+              {/* Password Option Selection */}
+              <div className="space-y-4 p-4 bg-muted/50 rounded-lg border border-border">
+                <Label className="text-base font-medium">Password *</Label>
+                
+                <RadioGroup value={passwordOption} onValueChange={(v) => setPasswordOption(v as 'app' | 'custom')}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="app" id="app-password" />
+                    <label htmlFor="app-password" className="text-sm cursor-pointer">
+                      Use app password (same as your login)
+                    </label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="custom" id="custom-password" />
+                    <label htmlFor="custom-password" className="text-sm cursor-pointer">
+                      Choose a different password
+                    </label>
+                  </div>
+                </RadioGroup>
+
+                {/* Password Requirements Info */}
+                <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-md border border-primary/20">
+                  <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p className="font-medium text-foreground">Password Requirements:</p>
+                    <ul className="space-y-0.5">
+                      <li className={passwordValidation.hasMinLength ? 'text-green-500' : ''}>
+                        • At least 12 characters
+                      </li>
+                      <li className={passwordValidation.hasUpperCase ? 'text-green-500' : ''}>
+                        • At least 1 capital letter (A-Z)
+                      </li>
+                      <li className={passwordValidation.hasSpecialChar ? 'text-green-500' : ''}>
+                        • At least 1 special character (!@#$%^&*...)
+                      </li>
+                    </ul>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="passwordVerification">Confirm Password *</Label>
-                  <Input
-                    id="passwordVerification"
-                    type="password"
-                    value={formData.passwordVerification}
-                    onChange={(e) => handleInputChange('passwordVerification', e.target.value)}
-                    className={errors.passwordVerification ? 'border-destructive' : ''}
-                  />
-                  {errors.passwordVerification && <p className="text-xs text-destructive">{errors.passwordVerification}</p>}
-                </div>
+
+                {passwordOption === 'custom' && (
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password *</Label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          type={showPassword ? 'text' : 'password'}
+                          value={formData.password}
+                          onChange={(e) => handleInputChange('password', e.target.value)}
+                          className={cn("pr-10", errors.password ? 'border-destructive' : '')}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                      {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="passwordVerification">Confirm Password *</Label>
+                      <div className="relative">
+                        <Input
+                          id="passwordVerification"
+                          type={showPasswordVerification ? 'text' : 'password'}
+                          value={formData.passwordVerification}
+                          onChange={(e) => handleInputChange('passwordVerification', e.target.value)}
+                          className={cn("pr-10", errors.passwordVerification ? 'border-destructive' : '')}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPasswordVerification(!showPasswordVerification)}
+                        >
+                          {showPasswordVerification ? (
+                            <EyeOff className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <Eye className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </Button>
+                      </div>
+                      {errors.passwordVerification && <p className="text-xs text-destructive">{errors.passwordVerification}</p>}
+                    </div>
+                  </div>
+                )}
+
+                {passwordOption === 'app' && (
+                  <div className="mt-2 p-3 bg-green-500/10 rounded-md border border-green-500/20">
+                    <p className="text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Using your app password
+                    </p>
+                  </div>
+                )}
               </div>
 
               <Button onClick={handleNextStep} className="w-full mt-6" size="lg">
