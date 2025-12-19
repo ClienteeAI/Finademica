@@ -183,14 +183,27 @@ export function AIMentor() {
       );
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Webhook error response:", response.status, errorText);
         throw new Error(`Webhook error: ${response.status}`);
       }
 
       const data = await response.json();
       
+      // Log the full webhook response for debugging
+      console.log("=== MENTOR WEBHOOK RESPONSE ===");
+      console.log("Raw data:", data);
+      console.log("Type:", typeof data);
+      console.log("Keys:", data && typeof data === "object" ? Object.keys(data) : "N/A");
+      console.log("JSON:", JSON.stringify(data, null, 2));
+      console.log("===============================");
+      
       // Extract assistant reply from response
       const assistantContent =
-        data?.reply || data?.message || data?.content || data?.text || 
+        data?.reply || data?.message || data?.content || data?.text || data?.output ||
+        (Array.isArray(data) && data[0]?.message) ||
+        (Array.isArray(data) && data[0]?.content) ||
+        (Array.isArray(data) && data[0]?.text) ||
         (typeof data === "string" ? data : "I couldn't generate a response.");
 
       const assistantMessage: Message = {
