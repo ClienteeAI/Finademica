@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { BookOpen, Search, TrendingUp, TrendingDown, X, Loader2, Plus, MoreVertical, Edit2, Trash2, FileText, Info } from "lucide-react";
+import { BookOpen, Search, TrendingUp, TrendingDown, X, Loader2, Plus, MoreVertical, Edit2, Trash2, FileText, Info, Sparkles } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditTradeModal } from "@/components/EditTradeModal";
 import { DeleteTradeDialog } from "@/components/DeleteTradeDialog";
 import { AddTradeModal } from "@/components/AddTradeModal";
+import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
 import { useAuth } from "@/lib/AuthContext";
 
 interface DiaryEntry {
@@ -60,6 +61,7 @@ const TradingDiary = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
   const [tradeToEdit, setTradeToEdit] = useState<DiaryEntry | null>(null);
   const [tradeToDelete, setTradeToDelete] = useState<{ id: string; symbol: string } | null>(null);
 
@@ -228,6 +230,42 @@ const TradingDiary = () => {
             New Trade
           </Button>
         </div>
+
+        {/* Live Trading CTA Banner */}
+        <Card className={cn(
+          "relative overflow-hidden",
+          isNasrTheme ? "bg-gradient-to-r from-emerald-900/80 to-green-800/80 border-emerald-500/30" : "bg-gradient-to-r from-emerald-600 to-green-500 border-emerald-400/30"
+        )}>
+          {/* Animated glow */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-400 opacity-20 blur-xl animate-pulse" />
+          
+          <div className="relative p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className={cn(
+                "w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm",
+                isNasrTheme ? "bg-emerald-500/20" : "bg-white/20"
+              )}>
+                <Sparkles className="w-6 h-6 text-white" />
+              </div>
+              <div className="text-center md:text-left">
+                <h3 className="text-lg md:text-xl font-bold text-white">
+                  Ready to Execute Your Trades?
+                </h3>
+                <p className="text-white/80 text-sm">
+                  Open a live trading account and start trading with real capital
+                </p>
+              </div>
+            </div>
+            <Button
+              onClick={() => setRegistrationModalOpen(true)}
+              size="lg"
+              className="h-12 px-6 text-base font-bold bg-white text-emerald-600 hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-xl whitespace-nowrap"
+            >
+              <TrendingUp className="w-5 h-5 mr-2" />
+              Start Trading Now
+            </Button>
+          </div>
+        </Card>
 
         {/* Filters */}
         <Card className={cn("p-5", isNasrTheme && "bg-nasr-panel/80 border-gold/20")}>
@@ -758,6 +796,12 @@ const TradingDiary = () => {
         onOpenChange={setAddModalOpen}
         onSuccess={refreshEntries}
         isNasrTheme={isNasrTheme}
+      />
+
+      {/* Live Account Registration Modal */}
+      <LiveAccountRegistrationModal
+        open={registrationModalOpen}
+        onOpenChange={setRegistrationModalOpen}
       />
     </DashboardLayout>
   );

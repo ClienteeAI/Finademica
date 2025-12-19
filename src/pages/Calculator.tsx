@@ -8,11 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X, Save, BookOpen, BarChart3, Activity, FileText } from "lucide-react";
+import { Calculator as CalcIcon, AlertTriangle, Loader2, TrendingUp, TrendingDown, DollarSign, Target, Info, X, Save, BookOpen, BarChart3, Activity, FileText, Sparkles } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { SaveToDiaryModal } from "@/components/SaveToDiaryModal";
+import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
 
@@ -159,6 +160,7 @@ const Calculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saveDiaryOpen, setSaveDiaryOpen] = useState(false);
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -854,6 +856,42 @@ const Calculator = () => {
                 View Diary
               </Button>
             </div>
+
+            {/* Live Trading CTA */}
+            <div className="relative overflow-hidden rounded-2xl mt-6">
+              {/* Animated gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 animate-pulse" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
+              
+              {/* Glowing effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-400 opacity-30 blur-xl animate-pulse" />
+              
+              <div className="relative p-6 md:p-8">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                      <Sparkles className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="text-center md:text-left">
+                      <h3 className="text-xl md:text-2xl font-bold text-white">
+                        Ready to Trade {symbol.toUpperCase() || 'Live'}?
+                      </h3>
+                      <p className="text-white/80 text-sm md:text-base">
+                        Open a live trading account and start executing your calculated positions
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => setRegistrationModalOpen(true)}
+                    size="lg"
+                    className="h-14 px-8 text-lg font-bold bg-white text-emerald-600 hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 rounded-xl whitespace-nowrap"
+                  >
+                    <TrendingUp className="w-5 h-5 mr-2" />
+                    Start Trading Now
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -890,6 +928,11 @@ const Calculator = () => {
           notes,
         }}
         isNasrTheme={isNasrTheme}
+      />
+
+      <LiveAccountRegistrationModal
+        open={registrationModalOpen}
+        onOpenChange={setRegistrationModalOpen}
       />
     </DashboardLayout>
   );
