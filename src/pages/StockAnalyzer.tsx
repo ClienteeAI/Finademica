@@ -11,7 +11,7 @@ import StockChat from "@/components/StockChat";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
-
+import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
@@ -38,6 +38,7 @@ const StockAnalyzer = () => {
   const [analysisData, setAnalysisData] = useState<unknown>(null);
   const [analyzedSymbol, setAnalyzedSymbol] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
 
   const handleAnalyze = async () => {
     const trimmedSymbol = symbol.trim().toUpperCase();
@@ -202,17 +203,15 @@ const StockAnalyzer = () => {
                         </p>
                       </div>
                       
-                      <a
-                        href="https://nasrtrade.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <button
+                        onClick={() => setShowRegistrationModal(true)}
                         className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-bold text-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.3)] hover:scale-105 transition-all duration-300"
                       >
                         <TrendingUp className="w-6 h-6 group-hover:animate-pulse" />
                         Trade {analyzedSymbol} Now
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full" />
-                      </a>
+                      </button>
                     </div>
                   </div>
                   
@@ -297,6 +296,12 @@ const StockAnalyzer = () => {
           </div>
         </div>
       </div>
+      
+      {/* Live Account Registration Modal */}
+      <LiveAccountRegistrationModal
+        open={showRegistrationModal}
+        onOpenChange={setShowRegistrationModal}
+      />
     </DashboardLayout>
   );
 };
