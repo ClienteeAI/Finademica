@@ -425,6 +425,21 @@ export type Database = {
         }
         Relationships: []
       }
+      super_admins: {
+        Row: {
+          auth_user_id: string
+          created_at: string
+        }
+        Insert: {
+          auth_user_id: string
+          created_at?: string
+        }
+        Update: {
+          auth_user_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       trade_calculations: {
         Row: {
           account_balance: number | null
@@ -937,7 +952,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          experience_points: number
+          experience_points?: number
           last_activity_at?: string | null
           last_activity_date?: string | null
           level?: number
@@ -1590,6 +1605,7 @@ export type Database = {
         Args: { p_points: number; p_user_id: string; p_videos: number }
         Returns: Json
       }
+      is_super_admin: { Args: { p_auth_user_id: string }; Returns: boolean }
       log_user_event: {
         Args: {
           p_email?: string

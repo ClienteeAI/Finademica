@@ -35,9 +35,24 @@ export function ClientProvider({ children }: ClientProviderProps) {
   }, []);
 
   async function initializeClient() {
-    // Check if user is admin
-    const userEmail = localStorage.getItem('email');
-    const isAdmin = userEmail === 'petr@clientee.co';
+    // Check if user is Super Admin via secure Supabase RPC
+    let isAdmin = false;
+    
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const { data, error } = await supabase.rpc('is_super_admin', {
+          p_auth_user_id: session.user.id
+        });
+        
+        if (!error && data === true) {
+          isAdmin = true;
+        }
+      }
+    } catch (err) {
+      console.error('Error checking super admin status:', err);
+    }
+    
     setIsAdminMode(isAdmin);
 
     if (isAdmin) {
