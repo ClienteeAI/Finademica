@@ -12,6 +12,7 @@ type EventAction =
   | "mentor_message_sent";
 
 interface EventMeta {
+  ref_id?: string;
   video_id?: string;
   video_title?: string;
   symbol?: string;
@@ -138,19 +139,44 @@ export function useLogEvent(onEventLogged?: () => void) {
         // Map action to award_xp event_type
         const xpEventType = action === "video_completed" ? "video_watched" : action;
 
-        // Call award_xp RPC to log event and award XP
-        const { data, error } = await supabase.rpc("award_xp", {
-          p_auth_user_id: user.id,
-          p_action_key: xpEventType,
-          p_meta: JSON.parse(JSON.stringify(meta)) as Json,
-        });
+        // Extract ref_id from meta for uniqueness
+        const refId = meta.ref_id || null;
+        const cleanMeta = { ...meta };
+        delete cleanMeta.ref_id;
 
-        if (error) {
-          console.error("useLogEvent award_xp error:", error);
-          return;
+        // Call award_xp RPC - use variant with p_ref_id if available
+        let data, error;
+        
+        if (refId) {
+          // Use the variant that accepts ref_id for unique calculations
+          const result = await supabase.rpc("award_xp", {
+            p_event_type: xpEventType,
+            p_meta: JSON.parse(JSON.stringify(cleanMeta)) as Json,
+            p_ref_id: refId,
+          });
+          data = result.data;
+          error = result.error;
+        } else {
+          const result = await supabase.rpc("award_xp", {
+            p_auth_user_id: user.id,
+            p_action_key: xpEventType,
+            p_meta: JSON.parse(JSON.stringify(cleanMeta)) as Json,
+          });
+          data = result.data;
+          error = result.error;
         }
 
-        console.log(`Event logged with XP: ${action}`, data);
+        if (error) {
+          // If it's a duplicate key error, the action was already awarded - still award skill XP
+          if (error.code === "23505") {
+            console.log(`XP already awarded for ${action}, but will still award skill XP`);
+          } else {
+            console.error("useLogEvent award_xp error:", error);
+            return;
+          }
+        } else {
+          console.log(`Event logged with XP: ${action}`, data);
+        }
 
         // Award skill-specific XP if profile exists and action has a skill mapping
         if (publicUser?.id) {
