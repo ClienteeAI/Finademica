@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { sendUserLoginEvent } from '@/lib/crmWebhook';
 
 interface UserProfile {
   id: string;
@@ -116,6 +117,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email,
       password,
     });
+
+    // Send CRM webhook on successful login
+    if (!error) {
+      sendUserLoginEvent("password").catch(console.error);
+    }
 
     return { error: error as Error | null };
   };

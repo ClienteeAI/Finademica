@@ -2,6 +2,7 @@ import { useRef, useCallback, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import confetti from "canvas-confetti";
+import { sendVideoCompletedEvent } from "@/lib/crmWebhook";
 
 const XP_PER_VIDEO = 25;
 
@@ -125,6 +126,9 @@ export const useVideoCompletion = (
             dispatchLevelUpEvent(rpcResult.level);
           }, 500);
         }
+        
+        // Send CRM webhook for video completion
+        sendVideoCompletedEvent(videoId, videoTitle || null).catch(console.error);
       }
 
       // 7. Refresh XP widget regardless (to sync UI)

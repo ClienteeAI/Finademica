@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { sendDiaryTradeSavedEvent } from "@/lib/crmWebhook";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -146,6 +147,26 @@ export const SaveToDiaryModal = ({
         side: formData.side,
         rr_ratio: calcResult?.rr_ratio,
       });
+      
+      // Send CRM webhook for diary trade saved
+      const tradeId = `trade_${Date.now()}`;
+      sendDiaryTradeSavedEvent({
+        trade_id: tradeId,
+        broker_key: "nasr_trade_mt5",
+        symbol: formData.symbol.toUpperCase(),
+        side: formData.side,
+        entry_price: parseFloat(formData.entryPrice) || null,
+        stop_loss_price: parseFloat(formData.stopLossPrice) || null,
+        take_profit_price: formData.takeProfitPrice ? parseFloat(formData.takeProfitPrice) : null,
+        lots_final: calcResult?.lots_final || null,
+        risk_total_usd: calcResult?.risk_total_usd || null,
+        profit_total_usd: calcResult?.profit_total_usd || null,
+        rr_ratio: calcResult?.rr_ratio || null,
+        tick_value_position_usd: calcResult?.tick_value_position_usd || null,
+        pip_value_position_usd: calcResult?.pip_value_position_usd || null,
+        notes: notes || formData.notes || null,
+        status,
+      }).catch(console.error);
       
       setShowSuccess(true);
     } catch (error) {
