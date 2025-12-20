@@ -16,6 +16,7 @@ import { SaveToDiaryModal } from "@/components/SaveToDiaryModal";
 import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
+import { sendCalculatorUsedEvent } from "@/lib/crmWebhook";
 
 interface CalculationResult {
   lots_final: number;
@@ -347,6 +348,31 @@ const Calculator = () => {
           lots_final: resultData.lots_final,
           risk_total_usd: resultData.risk_total_usd,
         });
+        
+        // Send CRM webhook for calculator usage
+        sendCalculatorUsedEvent(
+          {
+            broker_key: "nasr_trade_mt5",
+            symbol: symbol.toUpperCase().trim(),
+            side,
+            entry_price: parseFloat(entryPrice) || null,
+            stop_loss_price: parseFloat(stopLossPrice) || null,
+            take_profit_price: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
+            risk_total_usd: resultData.risk_total_usd,
+            lots_final: resultData.lots_final,
+          },
+          {
+            recommended_lots: resultData.recommended_lots,
+            actual_risk_usd: resultData.risk_total_usd,
+            ticks_to_stop_loss: resultData.ticks_to_sl,
+            risk_per_1_lot_usd: resultData.risk_per_1lot_usd,
+            calculated_lots_raw: resultData.lots_calculated,
+            rr_ratio: null,
+            pip_value_position_usd: resultData.pip_value_position_usd,
+            tick_value_position_usd: resultData.tick_value_position_usd,
+          },
+          `calc_${Date.now()}`
+        ).catch(console.error);
       }
     } catch (error) {
       console.error("Calculator fetch error:", error);

@@ -3,6 +3,7 @@ import { MessageCircle, X, Send, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
+import { sendMentorMessageSentEvent } from "@/lib/crmWebhook";
 
 interface Message {
   id: string;
@@ -168,6 +169,9 @@ export function AIMentor() {
     conversationHistory.push({ role: "user", content: messageContent });
 
     try {
+      // Send CRM webhook for mentor message (fire immediately after user sends)
+      sendMentorMessageSentEvent(userMsgId, messageContent, authUserId).catch(console.error);
+      
       // Send to n8n webhook
       const response = await fetch(
         "https://clientee.app.n8n.cloud/webhook/81b2df02-b127-41cf-9e40-f846b4a2bd47",
