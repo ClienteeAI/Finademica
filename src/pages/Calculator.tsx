@@ -454,6 +454,64 @@ const Calculator = () => {
           </p>
         </div>
 
+        {/* Explanation Section */}
+        <div className="backdrop-blur-xl bg-gradient-to-br from-yellow-500/5 to-amber-500/5 border border-yellow-500/20 rounded-2xl p-6 animate-fade-in" style={{ animationDelay: '0.05s' }}>
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+              <Info className="w-5 h-5 text-yellow-400" />
+            </div>
+            <div className="space-y-4">
+              <p className="text-slate-300 leading-relaxed">
+                This tool tells you how big your trade should be so you don't risk too much money.
+              </p>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">You enter:</h4>
+                  <ul className="text-slate-400 text-sm space-y-1.5">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                      How much money you have
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                      How much you are willing to lose on one trade
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                      Entry price and stop loss
+                    </li>
+                  </ul>
+                </div>
+                
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">The calculator then:</h4>
+                  <ul className="text-slate-400 text-sm space-y-1.5">
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
+                      Calculates the correct lot size
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
+                      Shows you exact risk in money
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
+                      Helps you protect your account
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="pt-2 border-t border-white/5">
+                <p className="text-sm text-slate-500 italic">
+                  <span className="text-yellow-500 font-medium not-italic">Why it matters:</span> Good traders don't guess position size. They control risk first — profit comes after.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Trade Parameters Card */}
         <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl shadow-blue-500/10 p-6 md:p-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
