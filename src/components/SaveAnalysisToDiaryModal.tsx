@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { Link, useNavigate } from "react-router-dom";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { sendDiaryTradeSavedEvent } from "@/lib/crmWebhook";
 
 interface SaveAnalysisToDiaryModalProps {
   open: boolean;
@@ -114,6 +115,25 @@ export const SaveAnalysisToDiaryModal = ({
         });
         return;
       }
+
+      // Send CRM webhook for diary trade saved
+      sendDiaryTradeSavedEvent({
+        trade_id: `trade_${Date.now()}`,
+        broker_key: "nasr_trade_mt5",
+        symbol: symbol.toUpperCase(),
+        side,
+        entry_price: entryPriceNum,
+        stop_loss_price: stopLossPriceNum,
+        take_profit_price: takeProfitPriceNum,
+        lots_final: null,
+        risk_total_usd: null,
+        profit_total_usd: null,
+        rr_ratio: null,
+        tick_value_position_usd: null,
+        pip_value_position_usd: null,
+        notes: notes || null,
+        status: "planned",
+      }).catch(console.error);
 
       toast({
         title: "Saved to diary",

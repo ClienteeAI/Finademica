@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, MessageSquare, Bot, User } from "lucide-react";
+import { sendMentorMessageSentEvent } from "@/lib/crmWebhook";
 
 const CHAT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/2f5da978-0085-4212-bf66-277f85e2022f";
 
@@ -44,6 +45,9 @@ const StockChat = ({ symbol }: StockChatProps) => {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsLoading(true);
+
+    // Send CRM webhook for stock chat message
+    sendMentorMessageSentEvent(userMessage.id, trimmedInput, symbol || null).catch(console.error);
 
     try {
       const response = await fetch(CHAT_WEBHOOK_URL, {
