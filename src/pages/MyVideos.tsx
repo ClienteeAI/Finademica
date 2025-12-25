@@ -47,6 +47,25 @@ const formatDuration = (seconds: number | null): string => {
   return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
 };
 
+// Generate YouTube thumbnail from video URL
+const getYouTubeThumbnail = (videoUrl: string): string | null => {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
+  ];
+  for (const pattern of patterns) {
+    const match = videoUrl.match(pattern);
+    if (match && match[1]) {
+      return `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg`;
+    }
+  }
+  return null;
+};
+
+const getThumbnail = (video: Video): string | null => {
+  if (video.thumbnail_url) return video.thumbnail_url;
+  return getYouTubeThumbnail(video.video_url);
+};
+
 const MyVideos = () => {
   const navigate = useNavigate();
   const { profile, loading: authLoading } = useAuth();
@@ -182,16 +201,19 @@ const MyVideos = () => {
     setLockedModalOpen(true);
   };
 
-  const VideoCard = ({ video, isLocked = false, isCompleted = false, reason }: { video: Video; isLocked?: boolean; isCompleted?: boolean; reason?: string | null }) => (
+  const VideoCard = ({ video, isLocked = false, isCompleted = false, reason }: { video: Video; isLocked?: boolean; isCompleted?: boolean; reason?: string | null }) => {
+    const thumbnail = getThumbnail(video);
+    
+    return (
     <Card
       className={`overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${isLocked ? 'cursor-pointer opacity-90' : 'cursor-pointer'}`}
       onClick={() => isLocked ? handleLockedVideoClick(video.title) : navigate(`/video/${video.id}`)}
     >
       {/* Thumbnail */}
       <div className="relative aspect-video bg-muted">
-        {video.thumbnail_url ? (
+        {thumbnail ? (
           <img 
-            src={video.thumbnail_url} 
+            src={thumbnail} 
             alt={video.title}
             className={`w-full h-full object-cover ${isLocked ? 'grayscale' : ''}`}
           />
@@ -271,7 +293,8 @@ const MyVideos = () => {
         </div>
       </div>
     </Card>
-  );
+    );
+  };
 
   return (
     <DashboardLayout>
