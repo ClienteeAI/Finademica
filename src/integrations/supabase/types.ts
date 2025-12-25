@@ -1325,76 +1325,145 @@ export type Database = {
       }
       videos: {
         Row: {
+          asset_type: Database["public"]["Enums"]["asset_type"]
+          audience: Database["public"]["Enums"]["audience_type"] | null
+          blocked_by_ai: boolean
           category: string | null
           client_id: string | null
           created_at: string | null
           description: string | null
           difficulty: string | null
-          duration_seconds: number | null
+          difficulty_score: number
+          duration_seconds: number
           for_concerns: string[] | null
           for_experience_level: string[] | null
           for_goals: string[] | null
           for_markets: string[] | null
           for_time_available: string[] | null
+          goal: Database["public"]["Enums"]["video_goal"]
           id: string
           is_active: boolean | null
           keywords: string[] | null
+          language: string
+          language_subtitles: string | null
+          level: number
+          mandatory: boolean
+          market_relevance:
+            | Database["public"]["Enums"]["market_relevance"]
+            | null
+          module: Database["public"]["Enums"]["video_module"]
           order_priority: number | null
+          prerequisites: string[]
+          presenter_gender: Database["public"]["Enums"]["presenter_gender"]
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          slug: string
           subcategory: string | null
+          subtopic: string | null
+          summary: string | null
           thumbnail_url: string | null
           title: string
+          topic: string
           transcript: string | null
           updated_at: string | null
+          use_case: Database["public"]["Enums"]["use_case"] | null
+          version: Database["public"]["Enums"]["video_version"]
           video_id: string
           video_url: string
+          visibility: Database["public"]["Enums"]["visibility_type"]
         }
         Insert: {
+          asset_type: Database["public"]["Enums"]["asset_type"]
+          audience?: Database["public"]["Enums"]["audience_type"] | null
+          blocked_by_ai?: boolean
           category?: string | null
           client_id?: string | null
           created_at?: string | null
           description?: string | null
           difficulty?: string | null
-          duration_seconds?: number | null
+          difficulty_score: number
+          duration_seconds: number
           for_concerns?: string[] | null
           for_experience_level?: string[] | null
           for_goals?: string[] | null
           for_markets?: string[] | null
           for_time_available?: string[] | null
+          goal: Database["public"]["Enums"]["video_goal"]
           id?: string
           is_active?: boolean | null
           keywords?: string[] | null
+          language?: string
+          language_subtitles?: string | null
+          level: number
+          mandatory?: boolean
+          market_relevance?:
+            | Database["public"]["Enums"]["market_relevance"]
+            | null
+          module: Database["public"]["Enums"]["video_module"]
           order_priority?: number | null
+          prerequisites?: string[]
+          presenter_gender?: Database["public"]["Enums"]["presenter_gender"]
+          risk_level: Database["public"]["Enums"]["risk_level"]
+          slug: string
           subcategory?: string | null
+          subtopic?: string | null
+          summary?: string | null
           thumbnail_url?: string | null
           title: string
+          topic: string
           transcript?: string | null
           updated_at?: string | null
+          use_case?: Database["public"]["Enums"]["use_case"] | null
+          version?: Database["public"]["Enums"]["video_version"]
           video_id: string
           video_url: string
+          visibility?: Database["public"]["Enums"]["visibility_type"]
         }
         Update: {
+          asset_type?: Database["public"]["Enums"]["asset_type"]
+          audience?: Database["public"]["Enums"]["audience_type"] | null
+          blocked_by_ai?: boolean
           category?: string | null
           client_id?: string | null
           created_at?: string | null
           description?: string | null
           difficulty?: string | null
-          duration_seconds?: number | null
+          difficulty_score?: number
+          duration_seconds?: number
           for_concerns?: string[] | null
           for_experience_level?: string[] | null
           for_goals?: string[] | null
           for_markets?: string[] | null
           for_time_available?: string[] | null
+          goal?: Database["public"]["Enums"]["video_goal"]
           id?: string
           is_active?: boolean | null
           keywords?: string[] | null
+          language?: string
+          language_subtitles?: string | null
+          level?: number
+          mandatory?: boolean
+          market_relevance?:
+            | Database["public"]["Enums"]["market_relevance"]
+            | null
+          module?: Database["public"]["Enums"]["video_module"]
           order_priority?: number | null
+          prerequisites?: string[]
+          presenter_gender?: Database["public"]["Enums"]["presenter_gender"]
+          risk_level?: Database["public"]["Enums"]["risk_level"]
+          slug?: string
           subcategory?: string | null
+          subtopic?: string | null
+          summary?: string | null
           thumbnail_url?: string | null
           title?: string
+          topic?: string
           transcript?: string | null
           updated_at?: string | null
+          use_case?: Database["public"]["Enums"]["use_case"] | null
+          version?: Database["public"]["Enums"]["video_version"]
           video_id?: string
           video_url?: string
+          visibility?: Database["public"]["Enums"]["visibility_type"]
         }
         Relationships: [
           {
@@ -1617,8 +1686,36 @@ export type Database = {
       }
     }
     Enums: {
+      asset_type:
+        | "forex"
+        | "stocks"
+        | "crypto"
+        | "commodities"
+        | "indices"
+        | "bonds"
+      audience_type: "beginner" | "trader" | "investor" | "professional"
+      market_relevance: "forex-only" | "multi-asset"
+      presenter_gender: "male" | "female" | "neutral"
+      risk_level: "low" | "medium" | "high"
       trade_side: "long" | "short"
       trade_status: "planned" | "open" | "closed"
+      use_case: "learning" | "onboarding" | "upsell" | "safety"
+      video_category:
+        | "basics"
+        | "mechanics"
+        | "risk"
+        | "psychology"
+        | "strategy"
+      video_goal: "understanding" | "execution" | "awareness"
+      video_language: "en" | "cs" | "pt" | "es" | "ar" | "pl"
+      video_module:
+        | "beginner"
+        | "foundation"
+        | "intermediate"
+        | "advanced"
+        | "professional"
+      video_version: "original" | "localized"
+      visibility_type: "public" | "gated" | "internal"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1746,8 +1843,33 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      asset_type: [
+        "forex",
+        "stocks",
+        "crypto",
+        "commodities",
+        "indices",
+        "bonds",
+      ],
+      audience_type: ["beginner", "trader", "investor", "professional"],
+      market_relevance: ["forex-only", "multi-asset"],
+      presenter_gender: ["male", "female", "neutral"],
+      risk_level: ["low", "medium", "high"],
       trade_side: ["long", "short"],
       trade_status: ["planned", "open", "closed"],
+      use_case: ["learning", "onboarding", "upsell", "safety"],
+      video_category: ["basics", "mechanics", "risk", "psychology", "strategy"],
+      video_goal: ["understanding", "execution", "awareness"],
+      video_language: ["en", "cs", "pt", "es", "ar", "pl"],
+      video_module: [
+        "beginner",
+        "foundation",
+        "intermediate",
+        "advanced",
+        "professional",
+      ],
+      video_version: ["original", "localized"],
+      visibility_type: ["public", "gated", "internal"],
     },
   },
 } as const
