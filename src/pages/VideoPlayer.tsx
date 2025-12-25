@@ -181,6 +181,11 @@ const VideoPlayer = () => {
                 </div>
               )}
             </div>
+            
+            {/* AI Disclaimer */}
+            <p className="text-xs text-muted-foreground text-center mt-2">
+              Videos are prepared by professionals and presented by AI
+            </p>
 
             {/* Video Info */}
             <div className="space-y-4">
