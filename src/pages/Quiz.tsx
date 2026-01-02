@@ -51,7 +51,10 @@ const Quiz = () => {
     try {
       const payload = {
         user_id: user?.id || null,
+        client_id: client?.id || null,
+        asset_type: module,
         module: module,
+        level: 1,
       };
 
       const response = await fetch(GENERATE_WEBHOOK_URL, {
