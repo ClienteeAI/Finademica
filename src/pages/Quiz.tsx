@@ -7,7 +7,7 @@ import { useClient } from "@/lib/clientContext";
 import { Loader2, Trophy, Play, TrendingUp, BarChart3, Bitcoin, Package } from "lucide-react";
 import { toast } from "sonner";
 
-const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/88584f24-fb56-47c4-b7da-c7c94fa1e710";
+const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/674ea19a-33ae-40af-9794-6c641f1b8215";
 
 type Module = "forex" | "stocks" | "crypto" | "commodities";
 
