@@ -1515,7 +1515,15 @@ export type Database = {
           user_id?: string
           video_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_video_unlocks_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_xp: {
         Row: {
@@ -2225,6 +2233,63 @@ export type Database = {
           p_props?: Json
         }
         Returns: string
+      }
+      unlock_next_5_videos: {
+        Args: {
+          p_asset_type: string
+          p_client_id: string
+          p_level: number
+          p_module: string
+          p_quiz_id: string
+          p_quiz_score: number
+          p_user_id: string
+        }
+        Returns: number
+      }
+      unlock_next_videos: {
+        Args: {
+          p_asset_type: string
+          p_client_id: string
+          p_level: number
+          p_module: string
+          p_quiz_score: number
+          p_unlock_count?: number
+          p_user_id: string
+        }
+        Returns: number
+      }
+      unlock_next_videos_by_asset: {
+        Args: {
+          p_asset_type: string
+          p_client_id: string
+          p_level: number
+          p_quiz_id: string
+          p_quiz_score: number
+          p_unlock_count?: number
+          p_user_id: string
+        }
+        Returns: number
+      }
+      unlock_next_videos_by_module: {
+        Args: {
+          p_client_id: string
+          p_level: number
+          p_module: string
+          p_quiz_id: string
+          p_quiz_score: number
+          p_unlock_count?: number
+          p_user_id: string
+        }
+        Returns: number
+      }
+      unlock_videos_after_quiz: {
+        Args: {
+          p_client_id: string
+          p_quiz_id: string
+          p_quiz_score: number
+          p_user_id: string
+        }
+        Returns: number
       }
     }
     Enums: {
