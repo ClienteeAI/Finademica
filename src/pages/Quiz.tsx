@@ -19,8 +19,9 @@ interface QuizQuestion {
 }
 
 interface WebhookResponse {
-  quiz_id: string;
-  questions: QuizQuestion[];
+  quiz_id?: string;
+  questions?: QuizQuestion[];
+  [key: string]: unknown;
 }
 
 const moduleOptions: { id: Module; label: string; icon: React.ReactNode }[] = [
@@ -39,6 +40,7 @@ const Quiz = () => {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [quizId, setQuizId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [rawResponse, setRawResponse] = useState<WebhookResponse | null>(null);
 
   const handleAttemptQuiz = () => {
     setStep("select-module");
@@ -68,7 +70,8 @@ const Quiz = () => {
       if (text) {
         try {
           const data: WebhookResponse = JSON.parse(text);
-          setQuizId(data.quiz_id);
+          setRawResponse(data);
+          setQuizId(data.quiz_id || null);
           setQuestions(data.questions || []);
           setStep("quiz");
           toast.success("Quiz loaded!");
@@ -92,6 +95,7 @@ const Quiz = () => {
     setSelectedModule(null);
     setQuizId(null);
     setQuestions([]);
+    setRawResponse(null);
   };
 
   return (
@@ -194,45 +198,76 @@ const Quiz = () => {
             {/* Step: Quiz */}
             {step === "quiz" && (
               <div className="space-y-6">
-                <div className={`p-3 rounded-lg ${isNasrTheme ? "bg-gold/10 border border-gold/20" : "bg-muted"}`}>
-                  <p className={`text-sm ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
-                    Quiz ID: <span className="font-mono">{quizId}</span>
-                  </p>
+                {/* Response Summary */}
+                <div className={`p-4 rounded-lg ${isNasrTheme ? "bg-gold/10 border border-gold/20" : "bg-muted border border-border"}`}>
+                  <h4 className={`text-sm font-semibold mb-2 ${isNasrTheme ? "text-gold" : "text-primary"}`}>
+                    Webhook Response
+                  </h4>
+                  <div className="space-y-2">
+                    {quizId && (
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>Quiz ID:</span>
+                        <span className={`font-mono text-sm px-2 py-0.5 rounded ${isNasrTheme ? "bg-gold/20 text-nasr-text" : "bg-primary/10 text-foreground"}`}>
+                          {quizId}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className={`text-sm ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>Questions:</span>
+                      <span className={`font-mono text-sm px-2 py-0.5 rounded ${isNasrTheme ? "bg-gold/20 text-nasr-text" : "bg-primary/10 text-foreground"}`}>
+                        {questions.length}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {questions.length > 0 ? (
-                  <div className="space-y-6">
-                    {questions.map((q, index) => (
-                      <div
-                        key={q.id || index}
-                        className={`p-4 rounded-lg border ${isNasrTheme ? "bg-nasr-bg border-gold/20" : "bg-muted/50 border-border"}`}
-                      >
-                        <p className={`font-medium mb-3 ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
-                          {index + 1}. {q.question}
-                        </p>
-                        <div className="space-y-2">
-                          {q.options?.map((option, optIndex) => (
-                            <div
-                              key={optIndex}
-                              className={`p-3 rounded-md border cursor-pointer transition-colors ${
-                                isNasrTheme
-                                  ? "border-gold/20 hover:bg-gold/10"
-                                  : "border-border hover:bg-muted"
-                              }`}
-                            >
-                              <span className={isNasrTheme ? "text-nasr-text" : "text-foreground"}>
-                                {option}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                {/* Raw JSON Response */}
+                <div className={`rounded-lg border overflow-hidden ${isNasrTheme ? "border-gold/20" : "border-border"}`}>
+                  <div className={`px-4 py-2 ${isNasrTheme ? "bg-gold/20" : "bg-muted"}`}>
+                    <h4 className={`text-sm font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                      Raw JSON Response
+                    </h4>
                   </div>
-                ) : (
-                  <p className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
-                    No questions received from the server.
-                  </p>
+                  <pre className={`p-4 overflow-auto max-h-96 text-xs ${isNasrTheme ? "bg-nasr-bg text-nasr-text" : "bg-card text-foreground"}`}>
+                    <code>{JSON.stringify(rawResponse, null, 2)}</code>
+                  </pre>
+                </div>
+
+                {/* Questions Preview */}
+                {questions.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className={`text-sm font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                      Questions Preview
+                    </h4>
+                    <div className="space-y-4">
+                      {questions.map((q, index) => (
+                        <div
+                          key={q.id || index}
+                          className={`p-4 rounded-lg border ${isNasrTheme ? "bg-nasr-bg border-gold/20" : "bg-muted/50 border-border"}`}
+                        >
+                          <p className={`font-medium mb-3 ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                            {index + 1}. {q.question}
+                          </p>
+                          <div className="space-y-2">
+                            {q.options?.map((option, optIndex) => (
+                              <div
+                                key={optIndex}
+                                className={`p-3 rounded-md border transition-colors ${
+                                  isNasrTheme
+                                    ? "border-gold/20 bg-gold/5"
+                                    : "border-border bg-background"
+                                }`}
+                              >
+                                <span className={`text-sm ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                                  {option}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <div className="flex gap-4 pt-4">
