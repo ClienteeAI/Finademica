@@ -13,14 +13,18 @@ const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/674ea1
 type Module = "forex" | "stocks" | "crypto" | "commodities";
 
 interface QuizQuestion {
-  id: string;
+  id: number | string;
   question: string;
   options: string[];
+  correct_index?: number;
   correct_answer?: string;
 }
 
 interface WebhookResponse {
   quiz_id?: string;
+  quiz?: {
+    questions?: QuizQuestion[];
+  };
   questions?: QuizQuestion[];
   [key: string]: unknown;
 }
@@ -72,10 +76,12 @@ const Quiz = () => {
       if (text) {
         try {
           const data: WebhookResponse = JSON.parse(text);
+          // Handle both { quiz: { questions: [...] } } and { questions: [...] } formats
+          const questionsData = data.quiz?.questions || data.questions || [];
           setQuizId(data.quiz_id || null);
-          setQuestions(data.questions || []);
+          setQuestions(questionsData);
           setStep("quiz");
-          toast.success("Quiz loaded!");
+          toast.success(`Quiz loaded! ${questionsData.length} questions`);
         } catch {
           toast.error("Invalid response from server");
           setStep("select-module");
