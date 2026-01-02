@@ -93,6 +93,39 @@ export type Database = {
           },
         ]
       }
+      ai_quiz_questions: {
+        Row: {
+          correct_answer: string
+          created_at: string
+          id: string
+          level: string
+          module: string
+          options: Json
+          question: string
+          quiz_id: string
+        }
+        Insert: {
+          correct_answer: string
+          created_at?: string
+          id?: string
+          level: string
+          module: string
+          options: Json
+          question: string
+          quiz_id: string
+        }
+        Update: {
+          correct_answer?: string
+          created_at?: string
+          id?: string
+          level?: string
+          module?: string
+          options?: Json
+          question?: string
+          quiz_id?: string
+        }
+        Relationships: []
+      }
       client_videos: {
         Row: {
           client_id: string
