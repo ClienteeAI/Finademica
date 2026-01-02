@@ -17,6 +17,7 @@ import MyRoadmap from "./pages/MyRoadmap";
 import Progress from "./pages/Progress";
 import Calculator from "./pages/Calculator";
 import TradingDiary from "./pages/TradingDiary";
+import Quiz from "./pages/Quiz";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/calculator" element={<Calculator />} />
             <Route path="/diary" element={<TradingDiary />} />
             <Route path="/trading-diary" element={<TradingDiary />} />
+            <Route path="/quiz" element={<Quiz />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

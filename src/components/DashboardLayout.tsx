@@ -50,6 +50,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navItems = [
     { path: "/dashboard", label: "Dashboard" },
     { path: "/videos", label: "My Videos" },
+    { path: "/quiz", label: "Quiz" },
     { path: "/analyzer", label: "Stock Analyzer" },
     { path: "/calculator", label: "Calculator" },
     { path: "/diary", label: "Trading Diary" },
