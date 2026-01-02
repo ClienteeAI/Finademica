@@ -81,10 +81,53 @@ export type Database = {
             foreignKeyName: "activity_log_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "activity_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
+      }
+      client_videos: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          order_priority: number | null
+          video_id: string
+          visibility_override:
+            | Database["public"]["Enums"]["visibility_type"]
+            | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          order_priority?: number | null
+          video_id: string
+          visibility_override?:
+            | Database["public"]["Enums"]["visibility_type"]
+            | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          order_priority?: number | null
+          video_id?: string
+          visibility_override?:
+            | Database["public"]["Enums"]["visibility_type"]
+            | null
+        }
+        Relationships: []
       }
       clients: {
         Row: {
@@ -183,6 +226,13 @@ export type Database = {
             foreignKeyName: "conversations_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "conversations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -219,6 +269,64 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "crm_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "crm_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposits: {
+        Row: {
+          amount_usd: number
+          client_id: string | null
+          confirmed_at: string | null
+          created_at: string
+          id: string
+          provider: string | null
+          provider_txn_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          amount_usd: number
+          client_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          provider?: string | null
+          provider_txn_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          amount_usd?: number
+          client_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string
+          id?: string
+          provider?: string | null
+          provider_txn_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposits_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "deposits_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -261,6 +369,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ebooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "ebooks_user_id_fkey"
             columns: ["user_id"]
@@ -399,10 +514,131 @@ export type Database = {
             foreignKeyName: "quiz_answers_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "quiz_answers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
+      }
+      quiz_attempts: {
+        Row: {
+          assigned_track: string | null
+          client_id: string | null
+          id: string
+          metadata: Json
+          passed: boolean | null
+          quiz_key: string
+          score_percent: number
+          started_at: string
+          submitted_at: string
+          user_id: string
+        }
+        Insert: {
+          assigned_track?: string | null
+          client_id?: string | null
+          id?: string
+          metadata?: Json
+          passed?: boolean | null
+          quiz_key: string
+          score_percent: number
+          started_at?: string
+          submitted_at?: string
+          user_id: string
+        }
+        Update: {
+          assigned_track?: string | null
+          client_id?: string | null
+          id?: string
+          metadata?: Json
+          passed?: boolean | null
+          quiz_key?: string
+          score_percent?: number
+          started_at?: string
+          submitted_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_video_unlocks: {
+        Row: {
+          created_at: string
+          quiz_id: string
+          video_id: string
+        }
+        Insert: {
+          created_at?: string
+          quiz_id: string
+          video_id: string
+        }
+        Update: {
+          created_at?: string
+          quiz_id?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_video_unlocks_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_video_unlocks_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quizzes: {
+        Row: {
+          created_at: string
+          id: string
+          level: string
+          module: string
+          pass_score: number
+          question_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level: string
+          module: string
+          pass_score?: number
+          question_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: string
+          module?: string
+          pass_score?: number
+          question_count?: number
+        }
+        Relationships: []
       }
       skills: {
         Row: {
@@ -750,6 +986,13 @@ export type Database = {
             foreignKeyName: "trading_diary_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "trading_diary_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -852,6 +1095,13 @@ export type Database = {
             foreignKeyName: "user_achievements_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_achievements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -874,6 +1124,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_avatar_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "user_avatar_user_id_fkey"
             columns: ["user_id"]
@@ -985,6 +1242,49 @@ export type Database = {
             foreignKeyName: "user_gamification_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_progress: {
+        Row: {
+          client_id: string | null
+          level: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          level?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          level?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_progress_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1019,6 +1319,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "skills"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_skills_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "user_skills_user_id_fkey"
@@ -1086,6 +1393,13 @@ export type Database = {
             foreignKeyName: "user_video_recommendations_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_video_recommendations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1121,6 +1435,13 @@ export type Database = {
             foreignKeyName: "user_video_selections_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_video_selections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1132,6 +1453,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_video_unlocks: {
+        Row: {
+          client_id: string
+          id: string
+          quiz_score: number | null
+          unlock_reason: string
+          unlocked_at: string
+          user_id: string
+          video_id: string
+        }
+        Insert: {
+          client_id: string
+          id?: string
+          quiz_score?: number | null
+          unlock_reason: string
+          unlocked_at?: string
+          user_id: string
+          video_id: string
+        }
+        Update: {
+          client_id?: string
+          id?: string
+          quiz_score?: number | null
+          unlock_reason?: string
+          unlocked_at?: string
+          user_id?: string
+          video_id?: string
+        }
+        Relationships: []
       }
       user_xp: {
         Row: {
@@ -1192,6 +1543,13 @@ export type Database = {
           xp_awarded?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "user_xp_events_user_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "user_xp_events_user_id_fk"
             columns: ["user_id"]
@@ -1283,6 +1641,104 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_access_rules: {
+        Row: {
+          applies_to_asset: Database["public"]["Enums"]["asset_type"] | null
+          applies_to_category:
+            | Database["public"]["Enums"]["video_category"]
+            | null
+          applies_to_module: Database["public"]["Enums"]["video_module"] | null
+          client_id: string
+          created_at: string
+          deposit_min_usd: number | null
+          grant_visibility: Database["public"]["Enums"]["visibility_type"]
+          id: string
+          is_active: boolean
+          priority: number
+          quiz_min_score: number | null
+          user_stage: string
+        }
+        Insert: {
+          applies_to_asset?: Database["public"]["Enums"]["asset_type"] | null
+          applies_to_category?:
+            | Database["public"]["Enums"]["video_category"]
+            | null
+          applies_to_module?: Database["public"]["Enums"]["video_module"] | null
+          client_id: string
+          created_at?: string
+          deposit_min_usd?: number | null
+          grant_visibility?: Database["public"]["Enums"]["visibility_type"]
+          id?: string
+          is_active?: boolean
+          priority?: number
+          quiz_min_score?: number | null
+          user_stage: string
+        }
+        Update: {
+          applies_to_asset?: Database["public"]["Enums"]["asset_type"] | null
+          applies_to_category?:
+            | Database["public"]["Enums"]["video_category"]
+            | null
+          applies_to_module?: Database["public"]["Enums"]["video_module"] | null
+          client_id?: string
+          created_at?: string
+          deposit_min_usd?: number | null
+          grant_visibility?: Database["public"]["Enums"]["visibility_type"]
+          id?: string
+          is_active?: boolean
+          priority?: number
+          quiz_min_score?: number | null
+          user_stage?: string
+        }
+        Relationships: []
+      }
+      video_unlock_rules: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          min_deposit_usd: number | null
+          min_quiz_score: number | null
+          priority: number | null
+          required_level: number | null
+          unlock_type: string
+          video_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_deposit_usd?: number | null
+          min_quiz_score?: number | null
+          priority?: number | null
+          required_level?: number | null
+          unlock_type: string
+          video_id: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          min_deposit_usd?: number | null
+          min_quiz_score?: number | null
+          priority?: number | null
+          required_level?: number | null
+          unlock_type?: string
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_unlock_rules_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "videos"
             referencedColumns: ["id"]
           },
         ]
@@ -1558,6 +2014,38 @@ export type Database = {
       }
     }
     Views: {
+      user_access_context: {
+        Row: {
+          best_quiz_score: number | null
+          client_id: string | null
+          total_deposit_usd: number | null
+          user_id: string | null
+          user_level: number | null
+        }
+        Insert: {
+          best_quiz_score?: never
+          client_id?: string | null
+          total_deposit_usd?: never
+          user_id?: string | null
+          user_level?: never
+        }
+        Update: {
+          best_quiz_score?: never
+          client_id?: string | null
+          total_deposit_usd?: never
+          user_id?: string | null
+          user_level?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "users_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_gamification_with_level: {
         Row: {
           created_at: string | null
@@ -1577,6 +2065,13 @@ export type Database = {
           xp_total: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "user_gamification_user_id_fkey"
             columns: ["user_id"]
@@ -1616,6 +2111,13 @@ export type Database = {
             foreignKeyName: "user_gamification_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -1632,6 +2134,13 @@ export type Database = {
           xp_total: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "user_gamification_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "user_gamification_user_id_fkey"
             columns: ["user_id"]
