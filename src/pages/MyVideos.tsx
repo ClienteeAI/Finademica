@@ -5,16 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Play, CheckCircle, Clock, BookOpen } from "lucide-react";
+import { Search, Play, CheckCircle, Clock, BookOpen, Lock, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/AuthContext";
 import { VideoFilterSheet } from "@/components/VideoFilterSheet";
 import { cn } from "@/lib/utils";
+import { LockedVideoModal } from "@/components/LockedVideoModal";
 
-/**
- * Video interface matching the required output fields
- */
 interface Video {
   id: string;
   title: string;
@@ -29,7 +27,8 @@ interface Video {
   duration_seconds: number;
   mandatory: boolean;
   created_at: string;
-  is_unlocked: boolean; // Always true for visible videos
+  is_unlocked: boolean;
+  is_mandatory: boolean;
 }
 
 const categoryColors: Record<string, string> = {
@@ -70,15 +69,47 @@ const getThumbnail = (video: Video): string => {
   return "/placeholder.svg";
 };
 
+// Seeded random shuffle using user_id + today's date
+const seededShuffle = <T,>(array: T[], seed: string): T[] => {
+  const result = [...array];
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  
+  for (let i = result.length - 1; i > 0; i--) {
+    hash = ((hash * 1103515245) + 12345) & 0x7fffffff;
+    const j = hash % (i + 1);
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+
+const getTodayDateString = (): string => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+};
+
+const VIDEOS_PER_PAGE = 3;
+const LOCKED_PREVIEW_COUNT = 12;
+
 const MyVideos = () => {
   const navigate = useNavigate();
   const { profile, loading: authLoading } = useAuth();
   
-  const [videos, setVideos] = useState<Video[]>([]);
+  const [playableVideos, setPlayableVideos] = useState<Video[]>([]);
+  const [lockedVideos, setLockedVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [completedVideoIds, setCompletedVideoIds] = useState<Set<string>>(new Set());
+  const [showLockedModal, setShowLockedModal] = useState(false);
+  const [selectedLockedVideo, setSelectedLockedVideo] = useState<Video | null>(null);
+  
+  // Show more state for playable and locked sections
+  const [playableShowCount, setPlayableShowCount] = useState(VIDEOS_PER_PAGE);
+  const [lockedShowCount, setLockedShowCount] = useState(VIDEOS_PER_PAGE);
 
   useEffect(() => {
     if (authLoading) return;
@@ -89,19 +120,27 @@ const MyVideos = () => {
       return;
     }
 
-    fetchVisibleVideos(userId);
+    fetchVideos(userId);
   }, [authLoading, profile]);
 
-  /**
-   * Fetch videos following strict visibility rules:
-   * - Video is visible if mandatory = true OR exists in user_video_unlocks
-   * - All visible videos are playable (is_unlocked = true)
-   * - No locked videos are shown
-   */
-  const fetchVisibleVideos = async (userId: string) => {
+  const fetchVideos = async (userId: string) => {
     setLoading(true);
     try {
-      // Step 1: Fetch ALL active videos from public.videos
+      // Step A: Load unlocks for current user
+      const { data: unlockedData, error: unlocksError } = await supabase
+        .from("user_video_unlocks")
+        .select("video_id")
+        .eq("user_id", userId);
+
+      if (unlocksError) {
+        console.error("Error fetching unlocks:", unlocksError);
+      }
+
+      const unlockedVideoIds = new Set(
+        (unlockedData || []).map((u) => u.video_id)
+      );
+
+      // Step B: Load videos
       const { data: allVideos, error: videosError } = await supabase
         .from("videos")
         .select(`
@@ -130,40 +169,42 @@ const MyVideos = () => {
       }
 
       if (!allVideos || allVideos.length === 0) {
-        setVideos([]);
+        setPlayableVideos([]);
+        setLockedVideos([]);
         setLoading(false);
         return;
       }
 
-      // Step 2: Fetch user's unlocked videos from user_video_unlocks
-      const { data: unlockedData, error: unlocksError } = await supabase
-        .from("user_video_unlocks")
-        .select("video_id")
-        .eq("user_id", userId);
+      // Split videos into playable and locked
+      const playable: Video[] = [];
+      const locked: Video[] = [];
 
-      if (unlocksError) {
-        console.error("Error fetching unlocks:", unlocksError);
-      }
+      allVideos.forEach((video) => {
+        const isMandatory = video.mandatory === true;
+        const isUnlocked = unlockedVideoIds.has(video.id);
+        const isPlayable = isMandatory || isUnlocked;
 
-      // Create a Set of unlocked video IDs for fast lookup
-      const unlockedVideoIds = new Set(
-        (unlockedData || []).map((u) => u.video_id)
-      );
-
-      // Step 3: Filter videos - ONLY show mandatory OR unlocked
-      // Rule: visible if mandatory = true OR exists in user_video_unlocks
-      const visibleVideos: Video[] = allVideos
-        .filter((video) => {
-          return video.mandatory === true || unlockedVideoIds.has(video.id);
-        })
-        .map((video) => ({
+        const videoWithFlags: Video = {
           ...video,
-          is_unlocked: true, // All visible videos are playable
-        }));
+          is_unlocked: isPlayable,
+          is_mandatory: isMandatory,
+        };
 
-      setVideos(visibleVideos);
+        if (isPlayable) {
+          playable.push(videoWithFlags);
+        } else {
+          locked.push(videoWithFlags);
+        }
+      });
 
-      // Step 4: Fetch completed video IDs
+      setPlayableVideos(playable);
+
+      // Seeded shuffle for locked videos (changes daily)
+      const seed = userId + getTodayDateString();
+      const shuffledLocked = seededShuffle(locked, seed);
+      setLockedVideos(shuffledLocked.slice(0, LOCKED_PREVIEW_COUNT));
+
+      // Fetch completed video IDs
       const { data: views } = await supabase
         .from("video_views")
         .select("video_id")
@@ -174,21 +215,22 @@ const MyVideos = () => {
         setCompletedVideoIds(new Set(views.map((v) => v.video_id)));
       }
     } catch (err) {
-      console.error("Error in fetchVisibleVideos:", err);
+      console.error("Error in fetchVideos:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Get unique categories from visible videos
+  // Get unique categories from all videos
   const categories = useMemo(() => {
-    const cats = ["All", ...new Set(videos.map((v) => v.category).filter(Boolean))];
+    const allVids = [...playableVideos, ...lockedVideos];
+    const cats = ["All", ...new Set(allVids.map((v) => v.category).filter(Boolean))];
     return cats as string[];
-  }, [videos]);
+  }, [playableVideos, lockedVideos]);
 
   // Filter videos by search and category
-  const filteredVideos = useMemo(() => {
-    return videos.filter((video) => {
+  const filteredPlayable = useMemo(() => {
+    return playableVideos.filter((video) => {
       const matchesSearch =
         !searchQuery ||
         video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -199,35 +241,83 @@ const MyVideos = () => {
 
       return matchesSearch && matchesCategory;
     });
-  }, [videos, searchQuery, selectedCategory]);
+  }, [playableVideos, searchQuery, selectedCategory]);
 
-  const handleVideoClick = (videoId: string) => {
-    navigate(`/video/${videoId}`);
+  const filteredLocked = useMemo(() => {
+    return lockedVideos.filter((video) => {
+      const matchesSearch =
+        !searchQuery ||
+        video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "All" || video.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [lockedVideos, searchQuery, selectedCategory]);
+
+  const handleVideoClick = (video: Video) => {
+    if (video.is_unlocked) {
+      navigate(`/video/${video.id}`);
+    } else {
+      setSelectedLockedVideo(video);
+      setShowLockedModal(true);
+    }
   };
 
-  const VideoCard = ({ video }: { video: Video }) => {
+  const handleShowMorePlayable = () => {
+    setPlayableShowCount((prev) => prev + VIDEOS_PER_PAGE);
+  };
+
+  const handleShowMoreLocked = () => {
+    setLockedShowCount((prev) => prev + VIDEOS_PER_PAGE);
+  };
+
+  const displayedPlayable = filteredPlayable.slice(0, playableShowCount);
+  const displayedLocked = filteredLocked.slice(0, lockedShowCount);
+  const hasMorePlayable = playableShowCount < filteredPlayable.length;
+  const hasMoreLocked = lockedShowCount < filteredLocked.length;
+
+  const VideoCard = ({ video, isLocked = false }: { video: Video; isLocked?: boolean }) => {
     const isCompleted = completedVideoIds.has(video.id);
     const thumbnail = getThumbnail(video);
 
     return (
       <Card
-        className="group overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 bg-card border-border hover:border-primary/50"
-        onClick={() => handleVideoClick(video.id)}
+        className={cn(
+          "group overflow-hidden cursor-pointer transition-all duration-300 bg-card border-border",
+          isLocked 
+            ? "hover:shadow-md opacity-80 hover:opacity-100" 
+            : "hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 hover:border-primary/50"
+        )}
+        onClick={() => handleVideoClick(video)}
       >
         {/* Thumbnail */}
         <div className="relative aspect-video overflow-hidden bg-muted">
           <img
             src={thumbnail}
             alt={video.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-300",
+              isLocked ? "filter grayscale-[30%]" : "group-hover:scale-105"
+            )}
           />
           
-          {/* Play overlay */}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center">
-              <Play className="h-6 w-6 text-primary-foreground ml-1" />
+          {/* Overlay */}
+          {isLocked ? (
+            <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-muted/90 flex items-center justify-center">
+                <Lock className="h-6 w-6 text-muted-foreground" />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center">
+                <Play className="h-6 w-6 text-primary-foreground ml-1" />
+              </div>
+            </div>
+          )}
 
           {/* Duration badge */}
           <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
@@ -236,7 +326,7 @@ const MyVideos = () => {
           </div>
 
           {/* Mandatory badge */}
-          {video.mandatory && (
+          {video.is_mandatory && (
             <div className="absolute top-2 left-2">
               <Badge className="bg-amber-500/90 text-white border-0">
                 Required
@@ -244,8 +334,18 @@ const MyVideos = () => {
             </div>
           )}
 
+          {/* Locked badge */}
+          {isLocked && (
+            <div className="absolute top-2 left-2">
+              <Badge variant="secondary" className="bg-muted/90 text-muted-foreground border-0">
+                <Lock className="h-3 w-3 mr-1" />
+                Locked
+              </Badge>
+            </div>
+          )}
+
           {/* Completed badge */}
-          {isCompleted && (
+          {isCompleted && !isLocked && (
             <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/90 text-white text-xs font-semibold">
               <CheckCircle className="w-3 h-3" />
               Done
@@ -257,12 +357,18 @@ const MyVideos = () => {
         <div className="p-4 space-y-2">
           {video.category && (
             <Badge
-              className={`${categoryColors[video.category] || "bg-gray-500"} text-white text-xs`}
+              className={cn(
+                "text-white text-xs",
+                isLocked ? "bg-gray-500" : categoryColors[video.category] || "bg-gray-500"
+              )}
             >
               {video.category}
             </Badge>
           )}
-          <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className={cn(
+            "font-semibold line-clamp-2 transition-colors",
+            isLocked ? "text-muted-foreground" : "text-foreground group-hover:text-primary"
+          )}>
             {video.title}
           </h3>
           {video.description && (
@@ -276,14 +382,23 @@ const MyVideos = () => {
               <span>•</span>
               <span>Level {video.level}</span>
             </div>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              {isCompleted ? "Rewatch" : "Watch"}
-            </Button>
+            {isLocked ? (
+              <Button size="sm" variant="secondary" className="bg-muted text-muted-foreground">
+                <Lock className="h-3 w-3 mr-1" />
+                Unlock
+              </Button>
+            ) : (
+              <Button size="sm" className="bg-primary hover:bg-primary/90">
+                {isCompleted ? "Rewatch" : "Watch"}
+              </Button>
+            )}
           </div>
         </div>
       </Card>
     );
   };
+
+  const totalVideos = playableVideos.length + lockedVideos.length;
 
   return (
     <DashboardLayout>
@@ -294,7 +409,7 @@ const MyVideos = () => {
             My Video Library
           </h1>
           <p className="text-muted-foreground">
-            {videos.length} video{videos.length !== 1 ? "s" : ""} available
+            {playableVideos.length} playable • {lockedVideos.length} locked
           </p>
         </div>
 
@@ -363,7 +478,7 @@ const MyVideos = () => {
         {/* Loading State */}
         {loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3].map((i) => (
               <div
                 key={i}
                 className="bg-card rounded-xl overflow-hidden border border-border"
@@ -379,17 +494,65 @@ const MyVideos = () => {
           </div>
         )}
 
-        {/* Video Grid */}
-        {!loading && filteredVideos.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredVideos.map((video) => (
-              <VideoCard key={video.id} video={video} />
-            ))}
+        {/* Playable Videos Section */}
+        {!loading && filteredPlayable.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+              <Play className="h-5 w-5 text-primary" />
+              Your Videos ({filteredPlayable.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedPlayable.map((video) => (
+                <VideoCard key={video.id} video={video} />
+              ))}
+            </div>
+            {hasMorePlayable && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleShowMorePlayable}
+                  className="gap-2"
+                >
+                  Show More
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Locked Videos Section */}
+        {!loading && filteredLocked.length > 0 && (
+          <div className="space-y-4 pt-8 border-t border-border">
+            <h2 className="text-xl font-semibold text-muted-foreground flex items-center gap-2">
+              <Lock className="h-5 w-5" />
+              Unlock More Videos ({filteredLocked.length})
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Pass quizzes to unlock these videos
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {displayedLocked.map((video) => (
+                <VideoCard key={video.id} video={video} isLocked />
+              ))}
+            </div>
+            {hasMoreLocked && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  onClick={handleShowMoreLocked}
+                  className="gap-2"
+                >
+                  Show More
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         )}
 
         {/* Empty State */}
-        {!loading && filteredVideos.length === 0 && (
+        {!loading && filteredPlayable.length === 0 && filteredLocked.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <BookOpen className="h-16 w-16 text-muted-foreground/50 mb-4" />
             <h3 className="text-lg font-medium text-foreground">
@@ -403,6 +566,13 @@ const MyVideos = () => {
           </div>
         )}
       </div>
+
+      {/* Locked Video Modal */}
+      <LockedVideoModal
+        isOpen={showLockedModal}
+        onClose={() => setShowLockedModal(false)}
+        videoTitle={selectedLockedVideo?.title || ""}
+      />
     </DashboardLayout>
   );
 };
