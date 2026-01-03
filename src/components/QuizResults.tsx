@@ -414,7 +414,7 @@ const QuizResults = ({ result, onRetry, isNasrTheme = false }: QuizResultsProps)
                         </div>
 
                         <div className="grid gap-2">
-                          {item.options.map((option, optIndex) => {
+                          {(item.options || []).map((option, optIndex) => {
                             const isUserAnswer = optIndex === item.user_answer_index;
                             const isCorrectAnswer = optIndex === item.correct_answer_index;
                             const optionLetter = String.fromCharCode(65 + optIndex);
