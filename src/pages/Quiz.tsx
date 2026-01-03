@@ -8,6 +8,7 @@ import { Loader2, Trophy, Play, TrendingUp, BarChart3, Bitcoin, Package, CheckCi
 import { toast } from "sonner";
 import QuizLoadingAnimation from "@/components/QuizLoadingAnimation";
 import { Progress } from "@/components/ui/progress";
+import QuizResults from "@/components/QuizResults";
 
 const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/674ea19a-33ae-40af-9794-6c641f1b8215";
 
@@ -30,7 +31,27 @@ interface WebhookResponse {
   [key: string]: unknown;
 }
 
-interface SubmitResponse {
+interface ReviewItem {
+  question_id: string;
+  question: string;
+  options: string[];
+  user_answer_index: number;
+  correct_answer_index: number;
+  is_correct: boolean;
+}
+
+interface QuizResultData {
+  status: "passed" | "failed" | "daily_locked";
+  score_percent: number;
+  pass_score: number;
+  attempt_id: string;
+  attempted_at: string;
+  next_allowed_at: string | null;
+  unlocked_count: number;
+  review: ReviewItem[];
+}
+
+interface SubmitResponse extends Partial<QuizResultData> {
   score?: number;
   passed?: boolean;
   message?: string;
@@ -471,88 +492,52 @@ const Quiz = () => {
             )}
 
             {/* Step: Results */}
-            {step === "results" && (
+            {step === "results" && submitResponse && (
+              <QuizResults
+                result={{
+                  status: submitResponse.status || (
+                    submitResponse.passed === true ? "passed" :
+                    submitResponse.passed === false ? "failed" : 
+                    (submitResponse.score_percent ?? submitResponse.score ?? 0) >= (submitResponse.pass_score ?? 75) ? "passed" : "failed"
+                  ),
+                  score_percent: submitResponse.score_percent ?? submitResponse.score ?? 0,
+                  pass_score: submitResponse.pass_score ?? 75,
+                  attempt_id: submitResponse.attempt_id ?? quizId ?? "",
+                  attempted_at: submitResponse.attempted_at ?? new Date().toISOString(),
+                  next_allowed_at: submitResponse.next_allowed_at ?? null,
+                  unlocked_count: submitResponse.unlocked_count ?? 0,
+                  review: submitResponse.review ?? questions.map((q, idx) => ({
+                    question_id: String(q.id),
+                    question: q.question,
+                    options: q.options || [],
+                    user_answer_index: q.options?.indexOf(answers[idx]) ?? -1,
+                    correct_answer_index: q.correct_index ?? -1,
+                    is_correct: q.correct_index !== undefined 
+                      ? q.options?.indexOf(answers[idx]) === q.correct_index
+                      : q.correct_answer !== undefined 
+                        ? answers[idx] === q.correct_answer 
+                        : false
+                  }))
+                }}
+                onRetry={handleReset}
+                isNasrTheme={isNasrTheme}
+              />
+            )}
+
+            {/* Step: Results - No response */}
+            {step === "results" && !submitResponse && (
               <div className="text-center py-12 space-y-6">
                 <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${isNasrTheme ? "bg-gold/20" : "bg-primary/20"}`}>
                   <Trophy className={`h-10 w-10 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
                 </div>
                 <div className="space-y-2">
                   <h3 className={`text-2xl font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
-                    Quiz Completed!
+                    Quiz Submitted
                   </h3>
                   <p className={`${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
-                    You answered {answeredCount} out of {questions.length} questions
+                    No detailed results received from server.
                   </p>
                 </div>
-
-                {/* Webhook Response */}
-                {submitResponse && (
-                  <div className={`p-4 rounded-lg text-left max-w-md mx-auto ${isNasrTheme ? "bg-green-900/20 border border-green-500/30" : "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-500/30"}`}>
-                    <h4 className={`text-sm font-semibold mb-3 ${isNasrTheme ? "text-green-400" : "text-green-700 dark:text-green-400"}`}>
-                      Results from Server
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      {submitResponse.score !== undefined && (
-                        <div className="flex justify-between">
-                          <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>Score:</span>
-                          <span className={`font-bold ${isNasrTheme ? "text-gold" : "text-primary"}`}>{submitResponse.score}%</span>
-                        </div>
-                      )}
-                      {submitResponse.correct_count !== undefined && (
-                        <div className="flex justify-between">
-                          <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>Correct:</span>
-                          <span className={isNasrTheme ? "text-nasr-text" : "text-foreground"}>{submitResponse.correct_count} / {submitResponse.total_questions || questions.length}</span>
-                        </div>
-                      )}
-                      {submitResponse.passed !== undefined && (
-                        <div className="flex justify-between">
-                          <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>Status:</span>
-                          <span className={submitResponse.passed ? "text-green-500 font-semibold" : "text-red-500 font-semibold"}>
-                            {submitResponse.passed ? "Passed ✓" : "Failed ✗"}
-                          </span>
-                        </div>
-                      )}
-                      {submitResponse.message && (
-                        <p className={`mt-2 ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
-                          {submitResponse.message}
-                        </p>
-                      )}
-                      {/* Show any additional fields from webhook */}
-                      {Object.entries(submitResponse)
-                        .filter(([key]) => !["score", "passed", "message", "correct_count", "total_questions"].includes(key))
-                        .map(([key, value]) => (
-                          <div key={key} className="flex justify-between">
-                            <span className={`capitalize ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
-                              {key.replace(/_/g, " ")}:
-                            </span>
-                            <span className={isNasrTheme ? "text-nasr-text" : "text-foreground"}>
-                              {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                            </span>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Your Answers Summary */}
-                <div className={`p-4 rounded-lg text-left max-w-md mx-auto ${isNasrTheme ? "bg-gold/10 border border-gold/20" : "bg-muted border border-border"}`}>
-                  <h4 className={`text-sm font-semibold mb-3 ${isNasrTheme ? "text-gold" : "text-primary"}`}>
-                    Your Answers
-                  </h4>
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {questions.map((q, idx) => (
-                      <div key={idx} className="flex items-start gap-2 text-sm">
-                        <span className={`font-medium ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
-                          Q{idx + 1}:
-                        </span>
-                        <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
-                          {answers[idx] || "Not answered"}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 <Button
                   onClick={handleReset}
                   size="lg"
