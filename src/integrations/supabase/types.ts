@@ -641,6 +641,13 @@ export type Database = {
             foreignKeyName: "quiz_video_unlocks_video_id_fkey"
             columns: ["video_id"]
             isOneToOne: false
+            referencedRelation: "v_user_visible_videos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_video_unlocks_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
             referencedRelation: "videos"
             referencedColumns: ["id"]
           },
@@ -1482,6 +1489,13 @@ export type Database = {
             foreignKeyName: "user_video_selections_video_id_fkey"
             columns: ["video_id"]
             isOneToOne: false
+            referencedRelation: "v_user_visible_videos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_video_selections_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
             referencedRelation: "videos"
             referencedColumns: ["id"]
           },
@@ -1516,6 +1530,13 @@ export type Database = {
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "user_video_unlocks_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_visible_videos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "user_video_unlocks_video_id_fkey"
             columns: ["video_id"]
@@ -1775,6 +1796,13 @@ export type Database = {
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "video_unlock_rules_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "v_user_visible_videos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "video_unlock_rules_video_id_fkey"
             columns: ["video_id"]
@@ -2187,6 +2215,167 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_user_visible_videos: {
+        Row: {
+          asset_type: Database["public"]["Enums"]["asset_type"] | null
+          audience: Database["public"]["Enums"]["audience_type"] | null
+          blocked_by_ai: boolean | null
+          category: string | null
+          client_id: string | null
+          created_at: string | null
+          description: string | null
+          difficulty: string | null
+          difficulty_score: number | null
+          duration_seconds: number | null
+          for_concerns: string[] | null
+          for_experience_level: string[] | null
+          for_goals: string[] | null
+          for_markets: string[] | null
+          for_time_available: string[] | null
+          goal: Database["public"]["Enums"]["video_goal"] | null
+          id: string | null
+          is_active: boolean | null
+          is_unlocked: boolean | null
+          keywords: string[] | null
+          language: string | null
+          language_subtitles: string | null
+          level: number | null
+          mandatory: boolean | null
+          market_relevance:
+            | Database["public"]["Enums"]["market_relevance"]
+            | null
+          module: Database["public"]["Enums"]["video_module"] | null
+          order_priority: number | null
+          prerequisites: string[] | null
+          presenter_gender:
+            | Database["public"]["Enums"]["presenter_gender"]
+            | null
+          risk_level: Database["public"]["Enums"]["risk_level"] | null
+          slug: string | null
+          subcategory: string | null
+          subtopic: string | null
+          summary: string | null
+          thumbnail_url: string | null
+          title: string | null
+          topic: string | null
+          transcript: string | null
+          updated_at: string | null
+          use_case: Database["public"]["Enums"]["use_case"] | null
+          version: Database["public"]["Enums"]["video_version"] | null
+          video_id: string | null
+          video_url: string | null
+          visibility: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Insert: {
+          asset_type?: Database["public"]["Enums"]["asset_type"] | null
+          audience?: Database["public"]["Enums"]["audience_type"] | null
+          blocked_by_ai?: boolean | null
+          category?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          difficulty_score?: number | null
+          duration_seconds?: number | null
+          for_concerns?: string[] | null
+          for_experience_level?: string[] | null
+          for_goals?: string[] | null
+          for_markets?: string[] | null
+          for_time_available?: string[] | null
+          goal?: Database["public"]["Enums"]["video_goal"] | null
+          id?: string | null
+          is_active?: boolean | null
+          is_unlocked?: never
+          keywords?: string[] | null
+          language?: string | null
+          language_subtitles?: string | null
+          level?: number | null
+          mandatory?: boolean | null
+          market_relevance?:
+            | Database["public"]["Enums"]["market_relevance"]
+            | null
+          module?: Database["public"]["Enums"]["video_module"] | null
+          order_priority?: number | null
+          prerequisites?: string[] | null
+          presenter_gender?:
+            | Database["public"]["Enums"]["presenter_gender"]
+            | null
+          risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          slug?: string | null
+          subcategory?: string | null
+          subtopic?: string | null
+          summary?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          topic?: string | null
+          transcript?: string | null
+          updated_at?: string | null
+          use_case?: Database["public"]["Enums"]["use_case"] | null
+          version?: Database["public"]["Enums"]["video_version"] | null
+          video_id?: string | null
+          video_url?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Update: {
+          asset_type?: Database["public"]["Enums"]["asset_type"] | null
+          audience?: Database["public"]["Enums"]["audience_type"] | null
+          blocked_by_ai?: boolean | null
+          category?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string | null
+          difficulty_score?: number | null
+          duration_seconds?: number | null
+          for_concerns?: string[] | null
+          for_experience_level?: string[] | null
+          for_goals?: string[] | null
+          for_markets?: string[] | null
+          for_time_available?: string[] | null
+          goal?: Database["public"]["Enums"]["video_goal"] | null
+          id?: string | null
+          is_active?: boolean | null
+          is_unlocked?: never
+          keywords?: string[] | null
+          language?: string | null
+          language_subtitles?: string | null
+          level?: number | null
+          mandatory?: boolean | null
+          market_relevance?:
+            | Database["public"]["Enums"]["market_relevance"]
+            | null
+          module?: Database["public"]["Enums"]["video_module"] | null
+          order_priority?: number | null
+          prerequisites?: string[] | null
+          presenter_gender?:
+            | Database["public"]["Enums"]["presenter_gender"]
+            | null
+          risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          slug?: string | null
+          subcategory?: string | null
+          subtopic?: string | null
+          summary?: string | null
+          thumbnail_url?: string | null
+          title?: string | null
+          topic?: string | null
+          transcript?: string | null
+          updated_at?: string | null
+          use_case?: Database["public"]["Enums"]["use_case"] | null
+          version?: Database["public"]["Enums"]["video_version"] | null
+          video_id?: string | null
+          video_url?: string | null
+          visibility?: Database["public"]["Enums"]["visibility_type"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "videos_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]

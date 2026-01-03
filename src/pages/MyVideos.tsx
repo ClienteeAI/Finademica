@@ -1,37 +1,35 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Play, Lock, CheckCircle } from "lucide-react";
+import { Search, Play, CheckCircle, Clock, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { ConversionBanner } from "@/components/ConversionBanner";
-import { LockedVideoModal } from "@/components/LockedVideoModal";
 import { Card } from "@/components/ui/card";
 import { useAuth } from "@/lib/AuthContext";
 import { VideoFilterSheet } from "@/components/VideoFilterSheet";
 import { cn } from "@/lib/utils";
 
+/**
+ * Video interface matching the required output fields
+ */
 interface Video {
   id: string;
-  video_id: string;
   title: string;
-  category: string | null;
-  duration_seconds: number | null;
-  thumbnail_url: string | null;
-  video_url: string;
   description: string | null;
-}
-
-interface RecommendedVideo {
-  id: string;
-  priority: number | null;
-  tier: string | null;
-  reason: string | null;
-  video_id: string | null;
-  video: Video | null;
+  video_url: string;
+  thumbnail_url: string | null;
+  asset_type: string;
+  module: string;
+  level: number;
+  order_priority: number | null;
+  category: string | null;
+  duration_seconds: number;
+  mandatory: boolean;
+  created_at: string;
+  is_unlocked: boolean; // Always true for visible videos
 }
 
 const categoryColors: Record<string, string> = {
@@ -39,15 +37,19 @@ const categoryColors: Record<string, string> = {
   "Trading Strategies": "bg-purple-500",
   "Risk Management": "bg-red-500",
   "Technical Analysis": "bg-green-500",
+  "Forex": "bg-emerald-500",
+  "Stocks": "bg-blue-500",
+  "Crypto": "bg-orange-500",
+  "Psychology": "bg-pink-500",
+  "Fundamentals": "bg-cyan-500",
 };
 
 const formatDuration = (seconds: number | null): string => {
-  if (!seconds) return "Unknown";
+  if (!seconds) return "0 min";
   const minutes = Math.floor(seconds / 60);
-  return `${minutes} minute${minutes !== 1 ? "s" : ""}`;
+  return `${minutes} min`;
 };
 
-// Generate YouTube thumbnail from video URL
 const getYouTubeThumbnail = (videoUrl: string): string | null => {
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s?]+)/,
@@ -61,238 +63,225 @@ const getYouTubeThumbnail = (videoUrl: string): string | null => {
   return null;
 };
 
-const getThumbnail = (video: Video): string | null => {
+const getThumbnail = (video: Video): string => {
   if (video.thumbnail_url) return video.thumbnail_url;
-  return getYouTubeThumbnail(video.video_url);
+  const ytThumb = getYouTubeThumbnail(video.video_url);
+  if (ytThumb) return ytThumb;
+  return "/placeholder.svg";
 };
 
 const MyVideos = () => {
   const navigate = useNavigate();
   const { profile, loading: authLoading } = useAuth();
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [freeVideos, setFreeVideos] = useState<RecommendedVideo[]>([]);
-  const [lockedVideos, setLockedVideos] = useState<RecommendedVideo[]>([]);
-  const [allVideos, setAllVideos] = useState<Video[]>([]);
+  
+  const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<string[]>(["All"]);
-  const [accountStatus, setAccountStatus] = useState<string>("quiz_completed");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [completedVideoIds, setCompletedVideoIds] = useState<Set<string>>(new Set());
-  const [lockedModalOpen, setLockedModalOpen] = useState(false);
-  const [selectedLockedVideo, setSelectedLockedVideo] = useState<string>("");
 
   useEffect(() => {
-    // Skip if auth is still loading
     if (authLoading) return;
     
-    // Use profile.id (public.users.id) for all queries
     const userId = profile?.id;
     if (!userId) {
       setLoading(false);
       return;
     }
 
-    const fetchVideos = async () => {
-      setLoading(true);
+    fetchVisibleVideos(userId);
+  }, [authLoading, profile]);
 
-      // Fetch user account status
-      const { data: userData, error: userError } = await supabase
-        .from("users")
-        .select("account_status")
-        .eq("id", userId)
-        .maybeSingle();
+  /**
+   * Fetch videos following strict visibility rules:
+   * - Video is visible if mandatory = true OR exists in user_video_unlocks
+   * - All visible videos are playable (is_unlocked = true)
+   * - No locked videos are shown
+   */
+  const fetchVisibleVideos = async (userId: string) => {
+    setLoading(true);
+    try {
+      // Step 1: Fetch ALL active videos from public.videos
+      const { data: allVideos, error: videosError } = await supabase
+        .from("videos")
+        .select(`
+          id,
+          title,
+          description,
+          video_url,
+          thumbnail_url,
+          asset_type,
+          module,
+          level,
+          order_priority,
+          category,
+          duration_seconds,
+          mandatory,
+          created_at
+        `)
+        .eq("is_active", true)
+        .order("order_priority", { ascending: true, nullsFirst: false })
+        .order("created_at", { ascending: true });
 
-      if (!userError && userData) {
-        setAccountStatus(userData.account_status || "quiz_completed");
+      if (videosError) {
+        console.error("Error fetching videos:", videosError);
+        setLoading(false);
+        return;
       }
 
-      const isPremium = userData?.account_status === "live_account";
-
-      if (isPremium) {
-        // Premium users: Show ALL videos
-        const { data: videos, error } = await supabase
-          .from("videos")
-          .select("id, video_id, title, category, duration_seconds, thumbnail_url, video_url, description")
-          .eq("is_active", true)
-          .order("order_priority", { ascending: true });
-
-        if (!error && videos) {
-          setAllVideos(videos);
-          const uniqueCategories = [...new Set(videos.map(v => v.category).filter(Boolean))] as string[];
-          setCategories(["All", ...uniqueCategories]);
-        }
-      } else {
-        // Free users: Fetch from recommendations
-        const { data: recommendations, error: recError } = await supabase
-          .from("user_video_recommendations")
-          .select("id, priority, tier, reason, video_id")
-          .eq("user_id", userId)
-          .order("priority", { ascending: true });
-
-        if (recError) {
-          console.error("Error fetching recommendations:", recError);
-          setLoading(false);
-          return;
-        }
-
-        if (recommendations && recommendations.length > 0) {
-          const videoIds = recommendations
-            .map(r => r.video_id)
-            .filter((id): id is string => id !== null);
-
-          const { data: videos, error: vidError } = await supabase
-            .from("videos")
-            .select("id, video_id, title, category, duration_seconds, thumbnail_url, video_url, description")
-            .in("video_id", videoIds);
-
-          if (!vidError && videos) {
-            const videosMap = new Map(videos.map(v => [v.video_id, v]));
-            const enrichedRecommendations: RecommendedVideo[] = recommendations.map(rec => ({
-              ...rec,
-              video: rec.video_id ? videosMap.get(rec.video_id) || null : null
-            }));
-
-            const free = enrichedRecommendations.filter(v => v.tier === 'free_to_watch' && v.video);
-            const locked = enrichedRecommendations.filter(v => v.tier === 'preview_only' && v.video);
-            
-            setFreeVideos(free);
-            setLockedVideos(locked);
-
-            const allVids = [...free, ...locked].map(r => r.video).filter((v): v is Video => v !== null);
-            const uniqueCategories = [...new Set(allVids.map(v => v.category).filter(Boolean))] as string[];
-            setCategories(["All", ...uniqueCategories]);
-          }
-        }
+      if (!allVideos || allVideos.length === 0) {
+        setVideos([]);
+        setLoading(false);
+        return;
       }
 
-      // Fetch completed videos using profile userId
+      // Step 2: Fetch user's unlocked videos from user_video_unlocks
+      const { data: unlockedData, error: unlocksError } = await supabase
+        .from("user_video_unlocks")
+        .select("video_id")
+        .eq("user_id", userId);
+
+      if (unlocksError) {
+        console.error("Error fetching unlocks:", unlocksError);
+      }
+
+      // Create a Set of unlocked video IDs for fast lookup
+      const unlockedVideoIds = new Set(
+        (unlockedData || []).map((u) => u.video_id)
+      );
+
+      // Step 3: Filter videos - ONLY show mandatory OR unlocked
+      // Rule: visible if mandatory = true OR exists in user_video_unlocks
+      const visibleVideos: Video[] = allVideos
+        .filter((video) => {
+          return video.mandatory === true || unlockedVideoIds.has(video.id);
+        })
+        .map((video) => ({
+          ...video,
+          is_unlocked: true, // All visible videos are playable
+        }));
+
+      setVideos(visibleVideos);
+
+      // Step 4: Fetch completed video IDs
       const { data: views } = await supabase
         .from("video_views")
         .select("video_id")
         .eq("user_id", userId)
         .eq("status", "completed");
-      
+
       if (views) {
-        setCompletedVideoIds(new Set(views.map(v => v.video_id)));
+        setCompletedVideoIds(new Set(views.map((v) => v.video_id)));
       }
-
+    } catch (err) {
+      console.error("Error in fetchVisibleVideos:", err);
+    } finally {
       setLoading(false);
-    };
-
-    fetchVideos();
-  }, [authLoading, profile]);
-
-  const isPremium = accountStatus === "live_account";
-
-  // Filter videos based on search and category
-  const filterVideo = (video: Video | null) => {
-    if (!video) return false;
-    const matchesCategory = selectedCategory === "All" || video.category === selectedCategory;
-    const matchesSearch = video.title.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    }
   };
 
-  const filteredFreeVideos = freeVideos.filter(r => filterVideo(r.video));
-  const filteredLockedVideos = lockedVideos.filter(r => filterVideo(r.video));
-  const filteredAllVideos = allVideos.filter(filterVideo);
+  // Get unique categories from visible videos
+  const categories = useMemo(() => {
+    const cats = ["All", ...new Set(videos.map((v) => v.category).filter(Boolean))];
+    return cats as string[];
+  }, [videos]);
 
-  const handleLockedVideoClick = (title: string) => {
-    setSelectedLockedVideo(title);
-    setLockedModalOpen(true);
+  // Filter videos by search and category
+  const filteredVideos = useMemo(() => {
+    return videos.filter((video) => {
+      const matchesSearch =
+        !searchQuery ||
+        video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        video.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "All" || video.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    });
+  }, [videos, searchQuery, selectedCategory]);
+
+  const handleVideoClick = (videoId: string) => {
+    navigate(`/video/${videoId}`);
   };
 
-  const VideoCard = ({ video, isLocked = false, isCompleted = false, reason }: { video: Video; isLocked?: boolean; isCompleted?: boolean; reason?: string | null }) => {
+  const VideoCard = ({ video }: { video: Video }) => {
+    const isCompleted = completedVideoIds.has(video.id);
     const thumbnail = getThumbnail(video);
-    
+
     return (
-    <Card
-      className={`overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg ${isLocked ? 'cursor-pointer opacity-90' : 'cursor-pointer'}`}
-      onClick={() => isLocked ? handleLockedVideoClick(video.title) : navigate(`/video/${video.id}`)}
-    >
-      {/* Thumbnail */}
-      <div className="relative aspect-video bg-muted">
-        {thumbnail ? (
-          <img 
-            src={thumbnail} 
+      <Card
+        className="group overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 bg-card border-border hover:border-primary/50"
+        onClick={() => handleVideoClick(video.id)}
+      >
+        {/* Thumbnail */}
+        <div className="relative aspect-video overflow-hidden bg-muted">
+          <img
+            src={thumbnail}
             alt={video.title}
-            className={`w-full h-full object-cover ${isLocked ? 'grayscale' : ''}`}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Play className="h-12 w-12 text-muted-foreground" />
-          </div>
-        )}
-        
-        {/* Lock Overlay */}
-        {isLocked && (
-          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <div className="text-center space-y-2">
-              <div className="w-14 h-14 mx-auto rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Lock className="w-7 h-7 text-white" />
-              </div>
-              <p className="text-white text-sm font-medium px-4">
-                Unlock with Live Account
-              </p>
+          
+          {/* Play overlay */}
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center">
+              <Play className="h-6 w-6 text-primary-foreground ml-1" />
             </div>
           </div>
-        )}
 
-        {/* Completed badge */}
-        {isCompleted && !isLocked && (
-          <div className="absolute top-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-semibold">
-            <CheckCircle className="w-3.5 h-3.5" />
-            Completed
+          {/* Duration badge */}
+          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {formatDuration(video.duration_seconds)}
           </div>
-        )}
-        
-        {/* Play overlay for unlocked */}
-        {!isLocked && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-            <Play className="h-12 w-12 text-white" />
-          </div>
-        )}
-      </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-foreground line-clamp-2">{video.title}</h3>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Badge className={`${categoryColors[video.category || ""] || "bg-gray-500"} text-white`}>
-            {video.category || "Uncategorized"}
-          </Badge>
-          <span className="text-sm text-muted-foreground">⏱ {formatDuration(video.duration_seconds)}</span>
-        </div>
-
-        {reason && (
-          <p className="text-xs text-muted-foreground italic line-clamp-2">{reason}</p>
-        )}
-
-        <div className="flex items-center justify-between">
-          {isLocked ? (
-            <>
-              <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-                🔒 Premium
+          {/* Mandatory badge */}
+          {video.mandatory && (
+            <div className="absolute top-2 left-2">
+              <Badge className="bg-amber-500/90 text-white border-0">
+                Required
               </Badge>
-              <Button size="sm" variant="outline" className="text-amber-600 border-amber-300 hover:bg-amber-50">
-                Unlock
-              </Button>
-            </>
-          ) : (
-            <>
-              <Badge variant="outline" className="text-xs">
-                {isCompleted ? "✓ Watched" : "Free"}
-              </Badge>
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
-                {isCompleted ? "Watch Again" : "Watch Now"}
-              </Button>
-            </>
+            </div>
+          )}
+
+          {/* Completed badge */}
+          {isCompleted && (
+            <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/90 text-white text-xs font-semibold">
+              <CheckCircle className="w-3 h-3" />
+              Done
+            </div>
           )}
         </div>
-      </div>
-    </Card>
+
+        {/* Content */}
+        <div className="p-4 space-y-2">
+          {video.category && (
+            <Badge
+              className={`${categoryColors[video.category] || "bg-gray-500"} text-white text-xs`}
+            >
+              {video.category}
+            </Badge>
+          )}
+          <h3 className="font-semibold text-foreground line-clamp-2 group-hover:text-primary transition-colors">
+            {video.title}
+          </h3>
+          {video.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2">
+              {video.description}
+            </p>
+          )}
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="capitalize">{video.asset_type}</span>
+              <span>•</span>
+              <span>Level {video.level}</span>
+            </div>
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              {isCompleted ? "Rewatch" : "Watch"}
+            </Button>
+          </div>
+        </div>
+      </Card>
     );
   };
 
@@ -301,17 +290,17 @@ const MyVideos = () => {
       <div className="space-y-8 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">My Video Library</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+            My Video Library
+          </h1>
           <p className="text-muted-foreground">
-            {isPremium ? "Full access to all videos" : `${freeVideos.length} free videos available`}
+            {videos.length} video{videos.length !== 1 ? "s" : ""} available
           </p>
         </div>
 
         {/* Filters */}
         <div className="flex flex-col gap-4">
-          {/* Search and Filter Row */}
           <div className="flex gap-3">
-            {/* Search - takes most space */}
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -322,9 +311,8 @@ const MyVideos = () => {
               />
             </div>
 
-            {/* Mobile: Filter Button with Sheet */}
             <div className="md:hidden">
-              <VideoFilterSheet 
+              <VideoFilterSheet
                 categories={categories}
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
@@ -332,7 +320,7 @@ const MyVideos = () => {
             </div>
           </div>
 
-          {/* Desktop: Category Pills (wrapped, no horizontal scroll) */}
+          {/* Desktop: Category Pills */}
           <div className="hidden md:flex flex-wrap gap-2">
             {categories.map((category) => (
               <Button
@@ -342,8 +330,8 @@ const MyVideos = () => {
                 onClick={() => setSelectedCategory(category)}
                 className={cn(
                   "h-9 px-4 font-medium transition-all duration-200",
-                  selectedCategory === category 
-                    ? "bg-primary text-primary-foreground shadow-md" 
+                  selectedCategory === category
+                    ? "bg-primary text-primary-foreground shadow-md"
                     : "bg-card/50 border-2 border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-card"
                 )}
               >
@@ -352,16 +340,16 @@ const MyVideos = () => {
             ))}
           </div>
 
-          {/* Mobile: Show active filter as badge */}
+          {/* Mobile: Active filter badge */}
           {selectedCategory !== "All" && (
             <div className="md:hidden flex items-center gap-2">
               <span className="text-sm text-muted-foreground">Filtered by:</span>
-              <Badge 
-                variant="secondary" 
+              <Badge
+                variant="secondary"
                 className="bg-primary/10 text-primary border border-primary/30"
               >
                 {selectedCategory}
-                <button 
+                <button
                   onClick={() => setSelectedCategory("All")}
                   className="ml-1.5 hover:text-primary/80"
                 >
@@ -376,7 +364,10 @@ const MyVideos = () => {
         {loading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-card rounded-xl overflow-hidden border border-border">
+              <div
+                key={i}
+                className="bg-card rounded-xl overflow-hidden border border-border"
+              >
                 <Skeleton className="aspect-video w-full" />
                 <div className="p-4 space-y-3">
                   <Skeleton className="h-5 w-3/4" />
@@ -388,86 +379,29 @@ const MyVideos = () => {
           </div>
         )}
 
-        {/* Premium User: Show all videos */}
-        {!loading && isPremium && (
+        {/* Video Grid */}
+        {!loading && filteredVideos.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredAllVideos.map((video) => (
-              <VideoCard 
-                key={video.id} 
-                video={video} 
-                isCompleted={completedVideoIds.has(video.id)}
-              />
+            {filteredVideos.map((video) => (
+              <VideoCard key={video.id} video={video} />
             ))}
           </div>
         )}
 
-        {/* Free User: Show free + locked videos with conversion banner */}
-        {!loading && !isPremium && (
-          <div className="space-y-12">
-            {/* Free Videos Section */}
-            {filteredFreeVideos.length > 0 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-semibold text-foreground">Your Free Videos</h2>
-                  <Badge className="bg-emerald-500 text-white">{filteredFreeVideos.length} available</Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredFreeVideos.map((rec) => rec.video && (
-                    <VideoCard 
-                      key={rec.id} 
-                      video={rec.video} 
-                      isCompleted={completedVideoIds.has(rec.video.id)}
-                      reason={rec.reason}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Conversion Banner */}
-            <ConversionBanner />
-
-            {/* Locked Videos Section */}
-            {filteredLockedVideos.length > 0 && (
-              <div className="space-y-6">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
-                    <Lock className="w-5 h-5" />
-                    Premium Content - Advanced Strategies
-                  </h2>
-                  <Badge variant="secondary">100+ locked</Badge>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredLockedVideos.map((rec) => rec.video && (
-                    <VideoCard 
-                      key={rec.id} 
-                      video={rec.video} 
-                      isLocked={true}
-                      reason={rec.reason}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* Empty State */}
+        {!loading && filteredVideos.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <BookOpen className="h-16 w-16 text-muted-foreground/50 mb-4" />
+            <h3 className="text-lg font-medium text-foreground">
+              No videos available
+            </h3>
+            <p className="text-muted-foreground mt-1">
+              {searchQuery || selectedCategory !== "All"
+                ? "Try adjusting your filters"
+                : "Complete quizzes to unlock more videos"}
+            </p>
           </div>
         )}
-
-        {/* Empty state */}
-        {!loading && (
-          (isPremium && filteredAllVideos.length === 0) ||
-          (!isPremium && filteredFreeVideos.length === 0 && filteredLockedVideos.length === 0)
-        ) && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No videos found matching your criteria.</p>
-          </div>
-        )}
-
-        {/* Locked Video Modal */}
-        <LockedVideoModal 
-          isOpen={lockedModalOpen}
-          onClose={() => setLockedModalOpen(false)}
-          videoTitle={selectedLockedVideo}
-        />
       </div>
     </DashboardLayout>
   );
