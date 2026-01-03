@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import QuizLoadingAnimation from "@/components/QuizLoadingAnimation";
 import { Progress } from "@/components/ui/progress";
 
-const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/674ea19a-33ae-40af-9794-6c641f1b8215";
+const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/674ea19a-33ae-40af-9794-6c641f1b8215";
 
 type Module = "forex" | "stocks" | "crypto" | "commodities";
 
@@ -40,10 +40,10 @@ interface SubmitResponse {
 }
 
 const moduleOptions: { id: Module; label: string; icon: React.ReactNode }[] = [
-  { id: "forex", label: "Forex", icon: <TrendingUp className="h-6 w-6" /> },
-  { id: "stocks", label: "Stocks", icon: <BarChart3 className="h-6 w-6" /> },
-  { id: "crypto", label: "Crypto", icon: <Bitcoin className="h-6 w-6" /> },
-  { id: "commodities", label: "Commodities", icon: <Package className="h-6 w-6" /> },
+  { id: "forex", label: "Forex", icon: <TrendingUp className="h-10 w-10" /> },
+  { id: "stocks", label: "Stocks", icon: <BarChart3 className="h-10 w-10" /> },
+  { id: "crypto", label: "Crypto", icon: <Bitcoin className="h-10 w-10" /> },
+  { id: "commodities", label: "Commodities", icon: <Package className="h-10 w-10" /> },
 ];
 
 const SUBMIT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/quiz/submit";
@@ -280,20 +280,20 @@ const Quiz = () => {
                 <p className={`text-center ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
                   Select a module to take the quiz for:
                 </p>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                   {moduleOptions.map((option) => (
                     <Button
                       key={option.id}
                       onClick={() => handleModuleSelect(option.id)}
                       variant="outline"
-                      className={`h-24 flex flex-col items-center justify-center gap-2 transition-all ${
+                      className={`h-36 md:h-44 flex flex-col items-center justify-center gap-4 transition-all border-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] ${
                         isNasrTheme
-                          ? "border-gold/30 text-nasr-text hover:bg-gold/20 hover:border-gold"
-                          : "hover:bg-primary/10 hover:border-primary"
+                          ? "border-gold/40 text-nasr-text hover:bg-gold/20 hover:border-gold bg-nasr-bg/50"
+                          : "border-primary/30 hover:bg-primary/10 hover:border-primary bg-card"
                       }`}
                     >
-                      <span className={isNasrTheme ? "text-gold" : "text-primary"}>{option.icon}</span>
-                      <span className="font-medium">{option.label}</span>
+                      <span className={`${isNasrTheme ? "text-gold" : "text-primary"}`}>{option.icon}</span>
+                      <span className="font-bold text-xl md:text-2xl">{option.label}</span>
                     </Button>
                   ))}
                 </div>
