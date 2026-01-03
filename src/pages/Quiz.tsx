@@ -144,30 +144,47 @@ const Quiz = () => {
 
     setStep("submitting");
 
-    // Build the submission payload
+    // Build the submission payload with all user and quiz information
     const questionsWithAnswers = questions.map((q, idx) => ({
       question_id: q.id,
       question: q.question,
       options: q.options,
       correct_index: q.correct_index,
+      correct_answer: q.correct_answer || null,
       user_answer: answers[idx] || null,
       user_answer_index: q.options?.indexOf(answers[idx]) ?? -1,
     }));
 
     const payload = {
-      user_id: profile?.id || null,
-      auth_user_id: user?.id || null,
-      user_email: profile?.email || user?.email || null,
-      user_first_name: profile?.first_name || null,
-      user_last_name: profile?.last_name || null,
-      client_id: profile?.client_id || client?.id || null,
-      client_subdomain: client?.subdomain || null,
-      quiz_id: quizId,
-      module: selectedModule,
-      submitted_at: new Date().toISOString(),
+      // User information
+      user: {
+        id: profile?.id || null,
+        auth_user_id: user?.id || null,
+        email: profile?.email || user?.email || null,
+        first_name: profile?.first_name || null,
+        last_name: profile?.last_name || null,
+        phone: profile?.phone || null,
+        is_admin: profile?.is_admin || false,
+        client_id: profile?.client_id || null,
+        quiz_answers: profile?.quiz_answers || null,
+      },
+      // Client information
+      client: {
+        id: client?.id || null,
+        subdomain: client?.subdomain || null,
+        company_name: client?.company_name || null,
+      },
+      // Quiz information
+      quiz: {
+        quiz_id: quizId,
+        module: selectedModule,
+        level: 1,
+        total_questions: questions.length,
+        answered_count: Object.keys(answers).length,
+        submitted_at: new Date().toISOString(),
+      },
+      // Questions with answers
       questions: questionsWithAnswers,
-      total_questions: questions.length,
-      answered_count: Object.keys(answers).length,
     };
 
     try {
