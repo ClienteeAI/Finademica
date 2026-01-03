@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useClient } from "@/lib/clientContext";
 import { Loader2, Trophy, Play, TrendingUp, BarChart3, Bitcoin, Package, CheckCircle2, Circle, Send } from "lucide-react";
 import { toast } from "sonner";
+import QuizLoadingAnimation from "@/components/QuizLoadingAnimation";
 import { Progress } from "@/components/ui/progress";
 
 const GENERATE_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/674ea19a-33ae-40af-9794-6c641f1b8215";
@@ -310,12 +311,10 @@ const Quiz = () => {
 
             {/* Step: Loading */}
             {step === "loading" && (
-              <div className="text-center py-12 space-y-4">
-                <Loader2 className={`h-12 w-12 mx-auto animate-spin ${isNasrTheme ? "text-gold" : "text-primary"}`} />
-                <p className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
-                  Generating your {selectedModule} quiz...
-                </p>
-              </div>
+              <QuizLoadingAnimation 
+                module={selectedModule || "trading"} 
+                isNasrTheme={isNasrTheme} 
+              />
             )}
 
             {/* Step: Submitting */}
