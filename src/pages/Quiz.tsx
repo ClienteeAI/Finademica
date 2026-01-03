@@ -29,6 +29,15 @@ interface WebhookResponse {
   [key: string]: unknown;
 }
 
+interface SubmitResponse {
+  score?: number;
+  passed?: boolean;
+  message?: string;
+  correct_count?: number;
+  total_questions?: number;
+  [key: string]: unknown;
+}
+
 const moduleOptions: { id: Module; label: string; icon: React.ReactNode }[] = [
   { id: "forex", label: "Forex", icon: <TrendingUp className="h-6 w-6" /> },
   { id: "stocks", label: "Stocks", icon: <BarChart3 className="h-6 w-6" /> },
@@ -36,17 +45,20 @@ const moduleOptions: { id: Module; label: string; icon: React.ReactNode }[] = [
   { id: "commodities", label: "Commodities", icon: <Package className="h-6 w-6" /> },
 ];
 
+const SUBMIT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/quiz/submit";
+
 const Quiz = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { client } = useClient();
   const isNasrTheme = client?.subdomain === "nasr";
 
-  const [step, setStep] = useState<"intro" | "select-module" | "loading" | "quiz" | "results">("intro");
+  const [step, setStep] = useState<"intro" | "select-module" | "loading" | "quiz" | "submitting" | "results">("intro");
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [quizId, setQuizId] = useState<string | null>(null);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [submitResponse, setSubmitResponse] = useState<SubmitResponse | null>(null);
 
   const handleAttemptQuiz = () => {
     setStep("select-module");
@@ -104,6 +116,7 @@ const Quiz = () => {
     setQuestions([]);
     setCurrentQuestionIndex(0);
     setAnswers({});
+    setSubmitResponse(null);
   };
 
   const handleSelectAnswer = (questionIndex: number, answer: string) => {
@@ -122,14 +135,69 @@ const Quiz = () => {
     }
   };
 
-  const handleSubmitQuiz = () => {
+  const handleSubmitQuiz = async () => {
     const unansweredCount = questions.length - Object.keys(answers).length;
     if (unansweredCount > 0) {
       toast.error(`Please answer all questions. ${unansweredCount} remaining.`);
       return;
     }
-    setStep("results");
-    toast.success("Quiz submitted!");
+
+    setStep("submitting");
+
+    // Build the submission payload
+    const questionsWithAnswers = questions.map((q, idx) => ({
+      question_id: q.id,
+      question: q.question,
+      options: q.options,
+      correct_index: q.correct_index,
+      user_answer: answers[idx] || null,
+      user_answer_index: q.options?.indexOf(answers[idx]) ?? -1,
+    }));
+
+    const payload = {
+      user_id: profile?.id || null,
+      auth_user_id: user?.id || null,
+      user_email: profile?.email || user?.email || null,
+      user_first_name: profile?.first_name || null,
+      user_last_name: profile?.last_name || null,
+      client_id: profile?.client_id || client?.id || null,
+      client_subdomain: client?.subdomain || null,
+      quiz_id: quizId,
+      module: selectedModule,
+      submitted_at: new Date().toISOString(),
+      questions: questionsWithAnswers,
+      total_questions: questions.length,
+      answered_count: Object.keys(answers).length,
+    };
+
+    try {
+      const response = await fetch(SUBMIT_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await response.text();
+      
+      if (text) {
+        try {
+          const data: SubmitResponse = JSON.parse(text);
+          setSubmitResponse(data);
+        } catch {
+          // Non-JSON response, store as message
+          setSubmitResponse({ message: text });
+        }
+      } else {
+        setSubmitResponse({ message: "Quiz submitted successfully!" });
+      }
+
+      setStep("results");
+      toast.success("Quiz submitted!");
+    } catch (error) {
+      console.error("Quiz submit error:", error);
+      toast.error("Failed to submit quiz. Please try again.");
+      setStep("quiz");
+    }
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -229,6 +297,16 @@ const Quiz = () => {
                 <Loader2 className={`h-12 w-12 mx-auto animate-spin ${isNasrTheme ? "text-gold" : "text-primary"}`} />
                 <p className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
                   Generating your {selectedModule} quiz...
+                </p>
+              </div>
+            )}
+
+            {/* Step: Submitting */}
+            {step === "submitting" && (
+              <div className="text-center py-12 space-y-4">
+                <Loader2 className={`h-12 w-12 mx-auto animate-spin ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+                <p className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
+                  Submitting your answers...
                 </p>
               </div>
             )}
@@ -391,7 +469,56 @@ const Quiz = () => {
                   </p>
                 </div>
 
-                {/* Summary */}
+                {/* Webhook Response */}
+                {submitResponse && (
+                  <div className={`p-4 rounded-lg text-left max-w-md mx-auto ${isNasrTheme ? "bg-green-900/20 border border-green-500/30" : "bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-500/30"}`}>
+                    <h4 className={`text-sm font-semibold mb-3 ${isNasrTheme ? "text-green-400" : "text-green-700 dark:text-green-400"}`}>
+                      Results from Server
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      {submitResponse.score !== undefined && (
+                        <div className="flex justify-between">
+                          <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>Score:</span>
+                          <span className={`font-bold ${isNasrTheme ? "text-gold" : "text-primary"}`}>{submitResponse.score}%</span>
+                        </div>
+                      )}
+                      {submitResponse.correct_count !== undefined && (
+                        <div className="flex justify-between">
+                          <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>Correct:</span>
+                          <span className={isNasrTheme ? "text-nasr-text" : "text-foreground"}>{submitResponse.correct_count} / {submitResponse.total_questions || questions.length}</span>
+                        </div>
+                      )}
+                      {submitResponse.passed !== undefined && (
+                        <div className="flex justify-between">
+                          <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>Status:</span>
+                          <span className={submitResponse.passed ? "text-green-500 font-semibold" : "text-red-500 font-semibold"}>
+                            {submitResponse.passed ? "Passed ✓" : "Failed ✗"}
+                          </span>
+                        </div>
+                      )}
+                      {submitResponse.message && (
+                        <p className={`mt-2 ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                          {submitResponse.message}
+                        </p>
+                      )}
+                      {/* Show any additional fields from webhook */}
+                      {Object.entries(submitResponse)
+                        .filter(([key]) => !["score", "passed", "message", "correct_count", "total_questions"].includes(key))
+                        .map(([key, value]) => (
+                          <div key={key} className="flex justify-between">
+                            <span className={`capitalize ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+                              {key.replace(/_/g, " ")}:
+                            </span>
+                            <span className={isNasrTheme ? "text-nasr-text" : "text-foreground"}>
+                              {typeof value === "object" ? JSON.stringify(value) : String(value)}
+                            </span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Your Answers Summary */}
                 <div className={`p-4 rounded-lg text-left max-w-md mx-auto ${isNasrTheme ? "bg-gold/10 border border-gold/20" : "bg-muted border border-border"}`}>
                   <h4 className={`text-sm font-semibold mb-3 ${isNasrTheme ? "text-gold" : "text-primary"}`}>
                     Your Answers
