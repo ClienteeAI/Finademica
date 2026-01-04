@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const CRM_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook-test/9a38c577-c0ad-4a51-adc5-e3e9901992f6";
+const CRM_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/9a38c577-c0ad-4a51-adc5-e3e9901992f6";
 
 export type CrmEventName = 
   | "user_login"
