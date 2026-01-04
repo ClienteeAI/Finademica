@@ -37,9 +37,8 @@ interface QuizResultsProps {
 
 const QuizResults = ({ result, onRetry, isNasrTheme = false }: QuizResultsProps) => {
   const navigate = useNavigate();
-  const [displayScore, setDisplayScore] = useState(0);
+  const [displayScore, setDisplayScore] = useState(result.score_percent);
   const [showOnlyWrong, setShowOnlyWrong] = useState(false);
-  const [hasAnimated, setHasAnimated] = useState(false);
 
   // Debug: log the result from webhook
   useEffect(() => {
@@ -48,11 +47,13 @@ const QuizResults = ({ result, onRetry, isNasrTheme = false }: QuizResultsProps)
 
   const isPassed = result.score_percent >= 75;
 
-  // Animate score counting up
+  // Animate score counting up on mount
   useEffect(() => {
-    if (hasAnimated) return;
-    
     const targetScore = result.score_percent;
+    
+    // Start from 0 and animate to target
+    setDisplayScore(0);
+    
     const duration = 1500;
     const steps = 60;
     const increment = targetScore / steps;
@@ -68,9 +69,8 @@ const QuizResults = ({ result, onRetry, isNasrTheme = false }: QuizResultsProps)
       }
     }, duration / steps);
 
-    setHasAnimated(true);
     return () => clearInterval(timer);
-  }, [result.score_percent, hasAnimated]);
+  }, [result.score_percent]);
 
   // Trigger confetti for passed (75%+)
   useEffect(() => {
