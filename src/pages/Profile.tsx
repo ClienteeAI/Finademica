@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Phone, Calendar, Award, TrendingUp, BookOpen, Target } from "lucide-react";
+import { User, Mail, Phone, Calendar, Award, TrendingUp, BookOpen, Target, Play } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { IntroVideoModal } from "@/components/IntroVideoModal";
 
 const Profile = () => {
   const { user, profile } = useAuth();
@@ -20,6 +21,7 @@ const Profile = () => {
   const [lastName, setLastName] = useState(profile?.last_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
   const [saving, setSaving] = useState(false);
+  const [showIntroVideo, setShowIntroVideo] = useState(false);
 
   const handleSave = async () => {
     if (!user) return;
@@ -106,6 +108,19 @@ const Profile = () => {
                 <p className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
                   {user?.email}
                 </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowIntroVideo(true)}
+                  className={`mt-3 ${
+                    isNasrTheme 
+                      ? 'border-gold/30 text-gold hover:bg-gold/10 hover:border-gold/50' 
+                      : 'border-aqua/30 text-aqua hover:bg-aqua/10'
+                  }`}
+                >
+                  <Play className="h-4 w-4 mr-2" />
+                  Watch Intro Video
+                </Button>
               </div>
             </div>
 
@@ -331,6 +346,11 @@ const Profile = () => {
             </div>
           </CardContent>
         </Card>
+        {/* Intro Video Modal */}
+        <IntroVideoModal 
+          isOpen={showIntroVideo} 
+          onClose={() => setShowIntroVideo(false)} 
+        />
       </div>
     </DashboardLayout>
   );
