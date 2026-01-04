@@ -217,16 +217,20 @@ const Quiz = () => {
       });
 
       const text = await response.text();
+      console.log("Quiz webhook raw response:", text);
       
       if (text) {
         try {
           const data: SubmitResponse = JSON.parse(text);
+          console.log("Quiz webhook parsed response:", data);
           setSubmitResponse(data);
         } catch {
           // Non-JSON response, store as message
+          console.log("Quiz webhook non-JSON response");
           setSubmitResponse({ message: text });
         }
       } else {
+        console.log("Quiz webhook empty response");
         setSubmitResponse({ message: "Quiz submitted successfully!" });
       }
 
