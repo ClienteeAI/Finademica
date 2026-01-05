@@ -37,7 +37,12 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    initializeClient();
+    // Wait a tick to ensure auth session is loaded
+    const timeout = setTimeout(() => {
+      initializeClient();
+    }, 100);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   async function initializeClient() {
@@ -46,13 +51,18 @@ export function ClientProvider({ children }: ClientProviderProps) {
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('ClientContext: Session user:', session?.user?.id);
+      
       if (session?.user) {
         const { data, error } = await supabase.rpc('is_super_admin', {
           p_auth_user_id: session.user.id
         });
         
+        console.log('ClientContext: is_super_admin result:', data, 'error:', error);
+        
         if (!error && data === true) {
           isAdmin = true;
+          console.log('ClientContext: User IS super admin');
         }
       }
     } catch (err) {
