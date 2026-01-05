@@ -1,14 +1,20 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 
 interface Client {
   id: string;
   company_name: string;
   subdomain: string;
-  logo_url?: string;
-  primary_color: string;
-  secondary_color: string;
-  company_tagline?: string;
+  custom_domain?: string | null;
+  logo_url?: string | null;
+  primary_color: string | null;
+  secondary_color: string | null;
+  company_tagline?: string | null;
+  skip_landing_page?: boolean | null;
+  require_quiz?: boolean | null;
+  signup_config?: Json | null;
+  onboarding_config?: Json | null;
 }
 
 interface ClientContextType {
@@ -86,7 +92,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         localStorage.setItem('client_id', firstClient.id);
       }
     } else {
-      // Regular user - detect client from subdomain/query param
+      // Regular user - detect client from query param > subdomain > custom_domain > fallback
       const urlParams = new URLSearchParams(window.location.search);
       const clientParam = urlParams.get('client');
       
@@ -107,21 +113,55 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
       
-      // Default to 'nasr' for testing / preview environments
-      subdomain = subdomain || 'nasr';
+      // If we have a subdomain, try to find client by subdomain
+      if (subdomain) {
+        const { data } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('subdomain', subdomain)
+          .eq('active', true)
+          .single();
 
-      const { data } = await supabase
+        if (data) {
+          setClient(data);
+          applyClientTheme(data);
+          localStorage.setItem('client_id', data.id);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Try custom_domain lookup (for white-label domains like app.client.com)
+      const hostname = window.location.hostname;
+      const { data: customDomainClient } = await supabase
         .from('clients')
         .select('*')
-        .eq('subdomain', subdomain)
+        .eq('custom_domain', hostname)
+        .eq('active', true)
+        .maybeSingle();
+      
+      if (customDomainClient) {
+        setClient(customDomainClient);
+        applyClientTheme(customDomainClient);
+        localStorage.setItem('client_id', customDomainClient.id);
+        setLoading(false);
+        return;
+      }
+
+      // Fallback to 'nallio' for testing / preview environments
+      const { data: fallbackClient } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('subdomain', 'nallio')
+        .eq('active', true)
         .single();
 
-      if (data) {
-        setClient(data);
-        applyClientTheme(data);
-        localStorage.setItem('client_id', data.id);
+      if (fallbackClient) {
+        setClient(fallbackClient);
+        applyClientTheme(fallbackClient);
+        localStorage.setItem('client_id', fallbackClient.id);
       } else {
-        console.error('Client not found:', subdomain);
+        console.error('Client not found: nallio (fallback)');
       }
     }
     

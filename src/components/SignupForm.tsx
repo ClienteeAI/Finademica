@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Eye, EyeOff, Check } from "lucide-react";
+import { Eye, EyeOff, Check, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,6 +24,7 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
   const navigate = useNavigate();
   const { client } = useClient();
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -57,66 +58,6 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const getQuizLabels = () => {
-    const questionLabels = [
-      [
-        { value: "beginner", label: "🌱 Complete beginner (never traded)" },
-        { value: "researched", label: "📚 I've researched but never traded" },
-        { value: "few-trades", label: "📈 I've made a few trades" },
-        { value: "regular", label: "💼 I trade regularly" }
-      ],
-      [
-        { value: "stocks", label: "📊 Stocks" },
-        { value: "forex", label: "💱 Forex" },
-        { value: "crypto", label: "₿ Cryptocurrency" },
-        { value: "commodities", label: "🛢️ Commodities" }
-      ],
-      [
-        { value: "extra-income", label: "💰 Generate extra income" },
-        { value: "replace-income", label: "🚀 Replace my full-time income" },
-        { value: "wealth", label: "🏦 Build long-term wealth" },
-        { value: "hobby", label: "🎓 Learn as a hobby" }
-      ],
-      [
-        { value: "losing-money", label: "😰 Losing money / Risk management" },
-        { value: "understanding", label: "🤔 Not understanding how it works" },
-        { value: "time", label: "⏰ Not having enough time" },
-        { value: "decisions", label: "🎯 Making bad decisions / Psychology" },
-        { value: "capital", label: "💸 Don't have enough capital to start" }
-      ],
-      [
-        { value: "1-3", label: "⏱️ 1-3 hours (casual)" },
-        { value: "4-6", label: "📅 4-6 hours (part-time)" },
-        { value: "7-10", label: "💪 7-10 hours (serious commitment)" },
-        { value: "10+", label: "🔥 10+ hours (full-time focus)" }
-      ]
-    ];
-
-    return {
-      experience: {
-        value: quizAnswers.experience,
-        label: questionLabels[0].find(o => o.value === quizAnswers.experience)?.label || quizAnswers.experience
-      },
-      markets: {
-        values: quizAnswers.markets.map(m => 
-          questionLabels[1].find(o => o.value === m)?.label || m
-        )
-      },
-      goal: {
-        value: quizAnswers.goal,
-        label: questionLabels[2].find(o => o.value === quizAnswers.goal)?.label || quizAnswers.goal
-      },
-      concern: {
-        value: quizAnswers.concern,
-        label: questionLabels[3].find(o => o.value === quizAnswers.concern)?.label || quizAnswers.concern
-      },
-      timeCommitment: {
-        value: quizAnswers.timeCommitment,
-        label: questionLabels[4].find(o => o.value === quizAnswers.timeCommitment)?.label || quizAnswers.timeCommitment
-      }
-    };
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -127,44 +68,52 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
       return;
     }
 
+    setIsSubmitting(true);
+
     try {
-      // INSERT user into Supabase users table
-      const { data: newUser, error } = await supabase
+      // Get current auth user
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert('You must be logged in. Please sign up first.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // UPDATE existing user (created by trigger), never INSERT
+      const { error } = await supabase
         .from('users')
-        .insert({
-          client_id: client.id,
-          email: formData.email,
+        .update({
           first_name: formData.firstName,
           last_name: formData.lastName,
-          phone: formData.phone || null,
+          phone: formData.phone,
           quiz_answers: quizAnswers,
-          is_admin: false
+          account_status: 'active',
+          updated_at: new Date().toISOString()
         })
-        .select()
-        .single();
+        .eq('auth_user_id', user.id);
 
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Supabase update error:', error);
         throw new Error(error.message);
       }
 
-      console.log('User created in Supabase:', newUser);
-
-      // Create webhook payload
-      const webhookData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        timestamp: new Date().toISOString(),
-        source: `${client.company_name} - Quiz`,
-        clientId: client.id,
-        clientSubdomain: client.subdomain,
-        quizAnswers: getQuizLabels()
-      };
+      console.log('User updated in Supabase');
 
       // Send to webhook (don't block on this)
       try {
+        const webhookData = {
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          timestamp: new Date().toISOString(),
+          source: `${client.company_name} - Quiz`,
+          clientId: client.id,
+          clientSubdomain: client.subdomain,
+          quizAnswers
+        };
+
         await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -174,7 +123,6 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
         console.log("Signup data sent to webhook successfully");
       } catch (error) {
         console.error("Error sending signup data to webhook:", error);
-        // Continue anyway - don't block the user
       }
 
       // Save to localStorage
@@ -194,7 +142,9 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
 
     } catch (err: any) {
       console.error('Signup error:', err);
-      alert('Signup failed: ' + (err.message || 'Unknown error'));
+      alert('Update failed: ' + (err.message || 'Unknown error'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -206,7 +156,7 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
             Your Personalized Trading Academy is Ready!
           </DialogTitle>
           <p className="text-center text-muted-foreground mt-2">
-            Create your free account to access everything:
+            Complete your profile to access everything:
           </p>
         </DialogHeader>
 
@@ -234,9 +184,10 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
                 placeholder="John"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className={errors.firstName ? "border-error" : ""}
+                className={errors.firstName ? "border-destructive" : ""}
+                disabled={isSubmitting}
               />
-              {errors.firstName && <p className="text-xs text-error">{errors.firstName}</p>}
+              {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name</Label>
@@ -245,9 +196,10 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className={errors.lastName ? "border-error" : ""}
+                className={errors.lastName ? "border-destructive" : ""}
+                disabled={isSubmitting}
               />
-              {errors.lastName && <p className="text-xs text-error">{errors.lastName}</p>}
+              {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
             </div>
           </div>
 
@@ -259,9 +211,10 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
               placeholder="john@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={errors.email ? "border-error" : ""}
+              className={errors.email ? "border-destructive" : ""}
+              disabled={isSubmitting}
             />
-            {errors.email && <p className="text-xs text-error">{errors.email}</p>}
+            {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
 
           <div className="space-y-2">
@@ -272,9 +225,10 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
               placeholder="+1 (555) 123-4567"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className={errors.phone ? "border-error" : ""}
+              className={errors.phone ? "border-destructive" : ""}
+              disabled={isSubmitting}
             />
-            {errors.phone && <p className="text-xs text-error">{errors.phone}</p>}
+            {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
           </div>
 
           <div className="space-y-2">
@@ -286,7 +240,8 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
                 placeholder="Create a secure password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={errors.password ? "border-error pr-10" : "pr-10"}
+                className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                disabled={isSubmitting}
               />
               <button
                 type="button"
@@ -299,15 +254,15 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
             
             {/* Password requirements */}
             <div className="space-y-1 text-xs">
-              <div className={`flex items-center gap-1 ${passwordValidation.hasLength ? "text-success" : "text-muted-foreground"}`}>
+              <div className={`flex items-center gap-1 ${passwordValidation.hasLength ? "text-green-500" : "text-muted-foreground"}`}>
                 <Check className="w-3 h-3" />
                 <span>At least 8 characters</span>
               </div>
-              <div className={`flex items-center gap-1 ${passwordValidation.hasUppercase ? "text-success" : "text-muted-foreground"}`}>
+              <div className={`flex items-center gap-1 ${passwordValidation.hasUppercase ? "text-green-500" : "text-muted-foreground"}`}>
                 <Check className="w-3 h-3" />
                 <span>One uppercase letter</span>
               </div>
-              <div className={`flex items-center gap-1 ${passwordValidation.hasNumber ? "text-success" : "text-muted-foreground"}`}>
+              <div className={`flex items-center gap-1 ${passwordValidation.hasNumber ? "text-green-500" : "text-muted-foreground"}`}>
                 <Check className="w-3 h-3" />
                 <span>One number</span>
               </div>
@@ -316,16 +271,24 @@ const SignupForm = ({ open, onOpenChange, quizAnswers }: SignupFormProps) => {
 
           <Button
             type="submit"
+            disabled={isSubmitting}
             className="w-full bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            Create My Free Account
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              "Complete My Profile"
+            )}
           </Button>
 
           <div className="text-center space-y-2">
             <button
               type="button"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => console.log("Sign in clicked")}
+              onClick={() => navigate('/login')}
             >
               Already have an account? <span className="text-primary font-semibold">Sign In</span>
             </button>

@@ -176,9 +176,14 @@ export type Database = {
           id: string
           logo_url: string | null
           max_users: number | null
+          onboarding_config: Json | null
           plan_type: string | null
           primary_color: string | null
+          quiz_config: Json | null
+          require_quiz: boolean | null
           secondary_color: string | null
+          signup_config: Json | null
+          skip_landing_page: boolean | null
           subdomain: string
           updated_at: string | null
         }
@@ -195,9 +200,14 @@ export type Database = {
           id?: string
           logo_url?: string | null
           max_users?: number | null
+          onboarding_config?: Json | null
           plan_type?: string | null
           primary_color?: string | null
+          quiz_config?: Json | null
+          require_quiz?: boolean | null
           secondary_color?: string | null
+          signup_config?: Json | null
+          skip_landing_page?: boolean | null
           subdomain: string
           updated_at?: string | null
         }
@@ -214,9 +224,14 @@ export type Database = {
           id?: string
           logo_url?: string | null
           max_users?: number | null
+          onboarding_config?: Json | null
           plan_type?: string | null
           primary_color?: string | null
+          quiz_config?: Json | null
+          require_quiz?: boolean | null
           secondary_color?: string | null
+          signup_config?: Json | null
+          skip_landing_page?: boolean | null
           subdomain?: string
           updated_at?: string | null
         }
@@ -679,6 +694,38 @@ export type Database = {
           question_count?: number
         }
         Relationships: []
+      }
+      signup_sessions: {
+        Row: {
+          client_id: string
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          token: string
+        }
+        Insert: {
+          client_id: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          token?: string
+        }
+        Update: {
+          client_id?: string
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signup_sessions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       skills: {
         Row: {
@@ -1289,6 +1336,52 @@ export type Database = {
             foreignKeyName: "user_gamification_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_onboarding_answers: {
+        Row: {
+          answers: Json
+          client_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          answers?: Json
+          client_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          client_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uoa_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uoa_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "uoa_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2407,6 +2500,10 @@ export type Database = {
       complete_video: {
         Args: { p_points: number; p_user_id: string; p_video_id: string }
         Returns: Json
+      }
+      create_signup_session: {
+        Args: { p_client_slug: string }
+        Returns: string
       }
       get_gamification: { Args: { uid: string }; Returns: Json }
       increment_user_stats: {
