@@ -154,53 +154,83 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
     setWebhookError(null);
 
     try {
-      // Get userId from localStorage (created during signup form)
-      const userId = localStorage.getItem('userId');
+      // Get current auth user
+      const { data: { user } } = await supabase.auth.getUser();
       
-      // 1. Send quiz webhook
-      const quizPayload = {
-        user_id: userId,
-        email: userData.email,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        experience_level: answers.experience,
-        markets_interested: answers.markets,
-        primary_goal: answers.goal,
-        main_concern: answers.problem,
-        time_available: answers.expectation,
-        client_id: client?.id,
-        client_name: client?.company_name,
-        source: "lovable_quiz"
-      };
-
-      await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quizPayload),
-      });
-
-      console.log("Quiz webhook sent successfully");
-
-      // 2. Update existing user with quiz answers in Supabase
-      if (userId) {
-        const { error } = await supabase
-          .from('users')
-          .update({
-            quiz_answers: answers as any,
-            account_status: 'active'
-          })
-          .eq('id', userId);
-
-        if (error) {
-          console.error('Supabase update error:', error);
-          throw new Error(error.message);
-        }
-        console.log('User updated with quiz answers');
-      } else {
-        console.warn('No userId found, quiz answers not saved to database');
+      if (!user) {
+        setWebhookError("Session expired. Please sign up again.");
+        setIsSubmitting(false);
+        return;
       }
 
-      // Save to localStorage - UNLOCK ACCESS
+      // 1. Update existing user with quiz answers (use auth_user_id, NOT legacy userId)
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          phone: userData.phone,
+          quiz_answers: answers as any,
+          account_status: 'active',
+          updated_at: new Date().toISOString()
+        })
+        .eq('auth_user_id', user.id);
+
+      if (updateError) {
+        console.error('User update error:', updateError);
+        throw new Error(updateError.message);
+      }
+
+      console.log('User updated with quiz answers');
+
+      // 2. If onboarding is enabled for client, save to user_onboarding_answers
+      const onboardingConfig = client?.onboarding_config as { enabled?: boolean } | null;
+      if (onboardingConfig?.enabled) {
+        // First get the public.users.id (not auth_user_id)
+        const { data: userRecord } = await supabase
+          .from('users')
+          .select('id')
+          .eq('auth_user_id', user.id)
+          .single();
+
+        if (userRecord && client) {
+          await supabase.from('user_onboarding_answers').insert({
+            user_id: userRecord.id,
+            client_id: client.id,
+            answers: answers as any
+          });
+          console.log('Onboarding answers saved');
+        }
+      }
+
+      // 3. Send quiz webhook (non-blocking)
+      try {
+        const quizPayload = {
+          auth_user_id: user.id,
+          email: userData.email,
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          experience_level: answers.experience,
+          markets_interested: answers.markets,
+          primary_goal: answers.goal,
+          expectation: answers.expectation,
+          main_concern: answers.problem,
+          client_id: client?.id,
+          client_name: client?.company_name,
+          source: "lovable_quiz"
+        };
+
+        await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(quizPayload),
+        });
+        console.log("Quiz webhook sent successfully");
+      } catch (webhookErr) {
+        console.warn("Quiz webhook failed, continuing:", webhookErr);
+      }
+
+      // 4. Save to localStorage
       const storedUserData = {
         firstName: userData.firstName,
         lastName: userData.lastName,

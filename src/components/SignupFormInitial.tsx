@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface SignupUserData {
   firstName: string;
@@ -73,33 +74,46 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
     setIsSubmitting(true);
 
     try {
-      // 1. Send signup webhook
-      const webhookPayload = {
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        source: "lovable_signup"
-      };
+      // 1. Create signup session token via RPC (REQUIRED - blocks signup if fails)
+      const { data: signup_token, error: tokenError } = await supabase.rpc(
+        'create_signup_session',
+        { p_client_slug: client.subdomain }
+      );
 
-      await fetch('https://clientee.app.n8n.cloud/webhook/f9b5acc5-f4a9-4a0b-8956-37e174289f51', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(webhookPayload),
-      });
+      if (tokenError || !signup_token) {
+        console.error('Failed to create signup session:', tokenError);
+        setWebhookError("Failed to initialize signup. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
 
-      console.log("Signup webhook sent successfully");
+      console.log("Signup token created:", signup_token);
 
-      // 2. Create user with Supabase Auth
+      // 2. Send signup webhook (optional, non-blocking)
+      try {
+        const webhookPayload = {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          source: "lovable_signup"
+        };
+
+        await fetch('https://clientee.app.n8n.cloud/webhook/f9b5acc5-f4a9-4a0b-8956-37e174289f51', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(webhookPayload),
+        });
+        console.log("Signup webhook sent successfully");
+      } catch (webhookErr) {
+        console.warn("Webhook failed, continuing:", webhookErr);
+      }
+
+      // 3. Create user with Supabase Auth using signup_token (NOT client_id)
       const { error: signUpError } = await signUp(
         formData.email,
         formData.password,
-        {
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          phone: formData.phone,
-          client_id: client.id,
-        }
+        { signup_token }
       );
 
       if (signUpError) {

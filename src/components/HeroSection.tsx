@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LogIn } from "lucide-react";
@@ -12,6 +12,13 @@ const HeroSection = () => {
   const [quizOpen, setQuizOpen] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
   const navigate = useNavigate();
+
+  // Auto-open signup for skip_landing_page clients
+  useEffect(() => {
+    if (client?.skip_landing_page) {
+      setSignupOpen(true);
+    }
+  }, [client]);
 
   const handleSignupComplete = (data: SignupUserData) => {
     setUserData(data);
