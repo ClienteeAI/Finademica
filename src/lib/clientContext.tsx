@@ -37,38 +37,46 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Wait a tick to ensure auth session is loaded
-    const timeout = setTimeout(() => {
-      initializeClient();
-    }, 100);
-    
-    return () => clearTimeout(timeout);
+    let cancelled = false;
+
+    const run = async () => {
+      if (cancelled) return;
+      await initializeClient();
+    };
+
+    run();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      run();
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   async function initializeClient() {
+    setLoading(true);
+
     // Check if user is Super Admin via secure Supabase RPC
     let isAdmin = false;
-    
+
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('ClientContext: Session user:', session?.user?.id);
-      
       if (session?.user) {
         const { data, error } = await supabase.rpc('is_super_admin', {
-          p_auth_user_id: session.user.id
+          p_auth_user_id: session.user.id,
         });
-        
-        console.log('ClientContext: is_super_admin result:', data, 'error:', error);
-        
+
         if (!error && data === true) {
           isAdmin = true;
-          console.log('ClientContext: User IS super admin');
         }
       }
     } catch (err) {
       console.error('Error checking super admin status:', err);
     }
-    
+
     setIsAdminMode(isAdmin);
 
     if (isAdmin) {
