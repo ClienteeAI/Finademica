@@ -108,7 +108,7 @@ const Dashboard = () => {
       }
     }
 
-    // Fetch AI-recommended videos from Supabase
+    // Fetch videos - try recommendations first, fallback to mandatory/beginner videos
     const fetchRecommendedVideos = async (profileId: string) => {
       if (!profileId) {
         setVideosLoading(false);
@@ -116,51 +116,65 @@ const Dashboard = () => {
       }
       const userId = profileId;
 
-      // First, fetch recommendations
-      const { data: recommendations, error: recError } = await supabase
+      // First, try AI recommendations
+      const { data: recommendations } = await supabase
         .from("user_video_recommendations")
         .select("id, priority, tier, reason, video_id")
         .eq("user_id", userId)
         .order("priority", { ascending: true });
 
-      if (recError) {
-        console.error("Error fetching recommendations:", recError);
-        setVideosLoading(false);
-        return;
+      let matchedVideos: RecommendedVideo[] = [];
+
+      if (recommendations && recommendations.length > 0) {
+        // Get unique video IDs (filter out nulls)
+        const videoIds = recommendations
+          .map(r => r.video_id)
+          .filter((id): id is string => id !== null);
+
+        // Fetch video details using video_id (text field)
+        const { data: videos } = await supabase
+          .from("videos")
+          .select("id, video_id, title, category, duration_seconds, thumbnail_url")
+          .in("video_id", videoIds);
+
+        if (videos && videos.length > 0) {
+          // Map videos by video_id (text) to match recommendations
+          const videosMap = new Map(videos.map(v => [v.video_id, v]));
+          matchedVideos = recommendations
+            .map(rec => ({
+              ...rec,
+              video: rec.video_id ? videosMap.get(rec.video_id) || null : null
+            }))
+            .filter(rec => rec.video !== null);
+        }
       }
 
-      if (!recommendations || recommendations.length === 0) {
-        setVideosLoading(false);
-        return;
+      // If no valid recommendations, fallback to mandatory/beginner videos
+      if (matchedVideos.length === 0) {
+        const { data: fallbackVideos } = await supabase
+          .from("videos")
+          .select("id, video_id, title, category, duration_seconds, thumbnail_url, mandatory")
+          .eq("is_active", true)
+          .or("mandatory.eq.true,module.eq.beginner")
+          .order("order_priority", { ascending: true, nullsFirst: false })
+          .order("created_at", { ascending: true })
+          .limit(10);
+
+        if (fallbackVideos && fallbackVideos.length > 0) {
+          matchedVideos = fallbackVideos.map((v, idx) => ({
+            id: v.id,
+            priority: idx + 1,
+            tier: "free_to_watch",
+            reason: v.mandatory ? "Essential beginner video" : "Recommended for your level",
+            video_id: v.video_id,
+            video: v
+          }));
+        }
       }
-
-      // Get unique video IDs (filter out nulls)
-      const videoIds = recommendations
-        .map(r => r.video_id)
-        .filter((id): id is string => id !== null);
-
-      // Fetch video details using video_id (text field, not UUID)
-      const { data: videos, error: vidError } = await supabase
-        .from("videos")
-        .select("id, video_id, title, category, duration_seconds, thumbnail_url")
-        .in("video_id", videoIds);
-
-      if (vidError) {
-        console.error("Error fetching videos:", vidError);
-        setVideosLoading(false);
-        return;
-      }
-
-      // Map videos by video_id (text) to match recommendations
-      const videosMap = new Map(videos?.map(v => [v.video_id, v]) || []);
-      const enrichedRecommendations: RecommendedVideo[] = recommendations.map(rec => ({
-        ...rec,
-        video: rec.video_id ? videosMap.get(rec.video_id) || null : null
-      }));
 
       // Separate by tier
-      const free = enrichedRecommendations.filter(v => v.tier === 'free_to_watch');
-      const locked = enrichedRecommendations.filter(v => v.tier === 'preview_only');
+      const free = matchedVideos.filter(v => v.tier === 'free_to_watch');
+      const locked = matchedVideos.filter(v => v.tier === 'preview_only');
       setFreeVideos(free);
       setLockedVideos(locked);
       setVideosLoading(false);
