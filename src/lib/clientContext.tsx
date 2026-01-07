@@ -210,17 +210,73 @@ export function ClientProvider({ children }: ClientProviderProps) {
     }
   }
 
+  function hexToHSL(hex: string): string {
+    // Remove # if present
+    hex = hex.replace(/^#/, '');
+    
+    // Parse hex to RGB
+    const r = parseInt(hex.substring(0, 2), 16) / 255;
+    const g = parseInt(hex.substring(2, 4), 16) / 255;
+    const b = parseInt(hex.substring(4, 6), 16) / 255;
+    
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    let h = 0;
+    let s = 0;
+    const l = (max + min) / 2;
+    
+    if (max !== min) {
+      const d = max - min;
+      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+      
+      switch (max) {
+        case r:
+          h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+          break;
+        case g:
+          h = ((b - r) / d + 2) / 6;
+          break;
+        case b:
+          h = ((r - g) / d + 4) / 6;
+          break;
+      }
+    }
+    
+    // Return as "H S% L%" format for CSS variables
+    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+  }
+
   function applyClientTheme(client: Client) {
-    // Apply CSS variables for dynamic theming
-    document.documentElement.style.setProperty('--client-primary', client.primary_color);
-    document.documentElement.style.setProperty('--client-secondary', client.secondary_color);
+    const root = document.documentElement;
+    
+    // Apply raw hex values for legacy usage
+    root.style.setProperty('--client-primary', client.primary_color);
+    root.style.setProperty('--client-secondary', client.secondary_color);
+    
+    // Convert and apply HSL values to semantic design tokens
+    if (client.primary_color) {
+      const primaryHSL = hexToHSL(client.primary_color);
+      root.style.setProperty('--primary', primaryHSL);
+      root.style.setProperty('--ring', primaryHSL);
+      root.style.setProperty('--success', primaryHSL);
+      root.style.setProperty('--success-from', primaryHSL);
+      root.style.setProperty('--premium-from', primaryHSL);
+      root.style.setProperty('--border-hover', primaryHSL);
+    }
+    
+    if (client.secondary_color) {
+      const secondaryHSL = hexToHSL(client.secondary_color);
+      root.style.setProperty('--accent', secondaryHSL);
+      root.style.setProperty('--success-to', secondaryHSL);
+      root.style.setProperty('--premium-to', secondaryHSL);
+    }
     
     // Apply theme class for Nasr Trade (dark gold theme)
     if (client.subdomain === 'nasr') {
-      document.documentElement.classList.add('theme-nasr');
+      root.classList.add('theme-nasr');
       document.body.classList.add('theme-nasr');
     } else {
-      document.documentElement.classList.remove('theme-nasr');
+      root.classList.remove('theme-nasr');
       document.body.classList.remove('theme-nasr');
     }
   }
