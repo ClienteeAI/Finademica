@@ -86,20 +86,13 @@ export default function Feed() {
   }, []);
 
   const fetchCommunityPosts = useCallback(async () => {
-    // IMPORTANT: prefer the authenticated user's client_id (from public.users)
-    // because ClientContext can fall back to a different client in preview environments.
-    const effectiveClientId = currentClientId ?? client?.id;
-    if (!effectiveClientId) {
-      setLoadingCommunity(false);
-      return;
-    }
-
     setLoadingCommunity(true);
     try {
+      // Let RLS handle client isolation - do NOT filter by client_id in frontend
+      // The RLS policy ensures users only see approved posts from their own client
       const { data, error } = await supabase
         .from('feed_posts')
         .select('*')
-        .eq('client_id', effectiveClientId)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(FEED_CONFIG.POSTS_PER_PAGE);
@@ -117,7 +110,7 @@ export default function Feed() {
     } finally {
       setLoadingCommunity(false);
     }
-  }, [client?.id, currentClientId, fetchProfiles]);
+  }, [fetchProfiles]);
 
   const fetchMyPosts = useCallback(async () => {
     if (!currentUserId) return;
@@ -146,11 +139,8 @@ export default function Feed() {
   }, [currentUserId, fetchProfiles]);
 
   useEffect(() => {
-    // Only fetch when we have a valid client ID
-    if (client?.id || currentClientId) {
-      fetchCommunityPosts();
-    }
-  }, [fetchCommunityPosts, client?.id, currentClientId]);
+    fetchCommunityPosts();
+  }, [fetchCommunityPosts]);
 
   useEffect(() => {
     if (currentUserId) {
