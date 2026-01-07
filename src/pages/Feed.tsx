@@ -39,25 +39,32 @@ export default function Feed() {
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingMyPosts, setLoadingMyPosts] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentClientId, setCurrentClientId] = useState<string | null>(null);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
-  // Get current user's public.users.id
+  // Get current user's public.users.id + client_id
   useEffect(() => {
-    const fetchUserId = async () => {
+    const fetchUserContext = async () => {
       if (!user) return;
-      
-      const { data } = await supabase
+
+      const { data, error } = await supabase
         .from('users')
-        .select('id')
+        .select('id, client_id')
         .eq('auth_user_id', user.id)
-        .single();
-      
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching user context:', error);
+        return;
+      }
+
       if (data) {
         setCurrentUserId(data.id);
+        setCurrentClientId(data.client_id);
       }
     };
-    
-    fetchUserId();
+
+    fetchUserContext();
   }, [user]);
 
   const fetchProfiles = useCallback(async (userIds: string[]) => {
@@ -79,23 +86,27 @@ export default function Feed() {
   }, []);
 
   const fetchCommunityPosts = useCallback(async () => {
-    if (!client) return;
-    
+    const effectiveClientId = client?.id ?? currentClientId;
+    if (!effectiveClientId) {
+      setLoadingCommunity(false);
+      return;
+    }
+
     setLoadingCommunity(true);
     try {
       const { data, error } = await supabase
         .from('feed_posts')
         .select('*')
-        .eq('client_id', client.id)
+        .eq('client_id', effectiveClientId)
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(FEED_CONFIG.POSTS_PER_PAGE);
-      
+
       if (error) throw error;
-      
+
       const posts = data || [];
       setCommunityPosts(posts);
-      
+
       // Fetch profiles for these posts
       const userIds = posts.map(p => p.user_id);
       await fetchProfiles(userIds);
@@ -104,7 +115,7 @@ export default function Feed() {
     } finally {
       setLoadingCommunity(false);
     }
-  }, [client, fetchProfiles]);
+  }, [client?.id, currentClientId, fetchProfiles]);
 
   const fetchMyPosts = useCallback(async () => {
     if (!currentUserId) return;
