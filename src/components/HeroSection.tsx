@@ -13,9 +13,12 @@ const HeroSection = () => {
   const [userData, setUserData] = useState<SignupUserData | null>(null);
   const navigate = useNavigate();
 
-  // Auto-open signup for skip_landing_page clients
+  // Auto-open signup when ?signup=1 is present OR skip_landing_page is true
   useEffect(() => {
-    if (client?.skip_landing_page) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const signupParam = urlParams.get('signup');
+    
+    if (signupParam === '1' || client?.skip_landing_page) {
       setSignupOpen(true);
     }
   }, [client]);

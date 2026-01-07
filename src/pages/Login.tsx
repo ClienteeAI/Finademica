@@ -226,7 +226,7 @@ function Login() {
             <p className="text-sm text-white/60">
               Don't have an account?{' '}
               <button
-                onClick={() => navigate('/')}
+                onClick={() => navigate('/?signup=1')}
                 className="text-success hover:text-success/80 hover:underline font-medium transition-colors"
               >
                 Sign up
@@ -234,48 +234,6 @@ function Login() {
             </p>
           </div>
 
-          {/* Quick Test Logins */}
-          <div className="mt-10 pt-8 border-t border-white/5 animate-fade-in" style={{ animationDelay: '700ms' }}>
-            <p className="text-xs uppercase tracking-wider text-white/40 mb-4 font-semibold">Quick Access</p>
-            <div className="space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('petr@clientee.co');
-                  setPassword('test');
-                }}
-                className="w-full h-12 px-4 flex items-center gap-3 bg-purple-500/10 border border-purple-500/30 rounded-xl
-                         text-purple-300 text-sm font-medium hover:bg-purple-500/20 transition-all duration-200"
-              >
-                <span>🔧</span>
-                <span>Admin: petr@clientee.co</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('test-naga@email.com');
-                  setPassword('test');
-                }}
-                className="w-full h-12 px-4 flex items-center gap-3 bg-orange-500/10 border border-orange-500/30 rounded-xl
-                         text-orange-300 text-sm font-medium hover:bg-orange-500/20 transition-all duration-200"
-              >
-                <span>👤</span>
-                <span>NAGA User: test-naga@email.com</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('test-forex@email.com');
-                  setPassword('test');
-                }}
-                className="w-full h-12 px-4 flex items-center gap-3 bg-green-500/10 border border-green-500/30 rounded-xl
-                         text-green-300 text-sm font-medium hover:bg-green-500/20 transition-all duration-200"
-              >
-                <span>👤</span>
-                <span>Forex User: test-forex@email.com</span>
-              </button>
-            </div>
-          </div>
 
         </div>
       </div>

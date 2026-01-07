@@ -89,7 +89,18 @@ export function ClientProvider({ children }: ClientProviderProps) {
       
       setAllClients(data || []);
 
-      // Check if client override in localStorage
+      // PRIORITY 1: Match by custom_domain (so admin sees correct client on white-label domains)
+      const hostname = window.location.hostname;
+      const domainMatchedClient = data?.find(c => c.custom_domain === hostname);
+      if (domainMatchedClient) {
+        setClient(domainMatchedClient);
+        applyClientTheme(domainMatchedClient);
+        localStorage.setItem('client_id', domainMatchedClient.id);
+        setLoading(false);
+        return;
+      }
+
+      // PRIORITY 2: Check if client override in localStorage (for Lovable/admin domain)
       const savedClient = localStorage.getItem('admin_selected_client');
       if (savedClient) {
         const selectedClient = data?.find(c => c.subdomain === savedClient);
@@ -102,7 +113,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
 
-      // Default to first client
+      // PRIORITY 3: Default to first client
       const firstClient = data?.[0];
       if (firstClient) {
         setClient(firstClient);
