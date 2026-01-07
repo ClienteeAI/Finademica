@@ -102,7 +102,7 @@ function Login() {
         <div 
           className={`
             relative bg-[#121827]/40 backdrop-blur-[40px] backdrop-saturate-[180%]
-            border border-white/10 rounded-[32px] p-16
+            border border-white/10 rounded-[32px] p-6 sm:p-10 md:p-16
             shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.05)_inset]
             transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]
             hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.08)_inset]

@@ -380,7 +380,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       </nav>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12 pt-28 max-w-[1440px]">
+      <main className="container mx-auto px-4 sm:px-6 py-12 pt-28 max-w-[1440px]">
         {children}
       </main>
 
