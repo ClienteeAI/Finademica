@@ -86,7 +86,9 @@ export default function Feed() {
   }, []);
 
   const fetchCommunityPosts = useCallback(async () => {
-    const effectiveClientId = client?.id ?? currentClientId;
+    // IMPORTANT: prefer the authenticated user's client_id (from public.users)
+    // because ClientContext can fall back to a different client in preview environments.
+    const effectiveClientId = currentClientId ?? client?.id;
     if (!effectiveClientId) {
       setLoadingCommunity(false);
       return;
