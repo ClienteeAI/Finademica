@@ -149,9 +149,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 )}
               </Link>
 
-              {/* ADMIN MODE: Client Switcher */}
+              {/* ADMIN MODE: Client Switcher - hidden on mobile */}
               {isAdminMode && (
-                <div className="flex items-center gap-3 pl-6 border-l border-gold/20">
+                <div className="hidden md:flex items-center gap-3 pl-6 border-l border-gold/20">
                   <span className="px-3 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide bg-gold/20 text-gold">
                     ADMIN
                   </span>
