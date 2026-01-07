@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       achievements: {
         Row: {
+          code: string | null
           description: string
           icon: string | null
           id: string
@@ -24,6 +25,7 @@ export type Database = {
           points: number
         }
         Insert: {
+          code?: string | null
           description: string
           icon?: string | null
           id?: string
@@ -32,6 +34,7 @@ export type Database = {
           points?: number
         }
         Update: {
+          code?: string | null
           description?: string
           icon?: string | null
           id?: string
@@ -465,6 +468,66 @@ export type Database = {
           },
         ]
       }
+      feed_likes: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_likes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feed_moderation_audit: {
         Row: {
           actor_type: string
@@ -538,6 +601,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "feed_moderation_audit_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "feed_moderation_audit_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -546,6 +616,125 @@ export type Database = {
           },
           {
             foreignKeyName: "feed_moderation_audit_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_post_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_post_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_post_likes: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_post_likes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_post_likes_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -675,6 +864,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
             referencedColumns: ["id"]
           },
           {
@@ -2633,6 +2829,44 @@ export type Database = {
           },
         ]
       }
+      v_feed_posts: {
+        Row: {
+          avatar_url: string | null
+          client_id: string | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          like_count: number | null
+          media_urls: Json | null
+          nickname: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_user_gamification: {
         Row: {
           last_activity_at: string | null
@@ -2903,6 +3137,8 @@ export type Database = {
         Args: { p_client_slug: string }
         Returns: string
       }
+      current_client_id: { Args: never; Returns: string }
+      current_public_user_id: { Args: never; Returns: string }
       get_gamification: { Args: { uid: string }; Returns: Json }
       increment_user_stats: {
         Args: { p_points: number; p_user_id: string; p_videos: number }
@@ -2996,6 +3232,7 @@ export type Database = {
         | "indices"
         | "bonds"
       audience_type: "beginner" | "trader" | "investor" | "professional"
+      feed_post_status: "pending" | "approved" | "rejected"
       market_relevance: "forex-only" | "multi-asset"
       presenter_gender: "male" | "female" | "neutral"
       risk_level: "low" | "medium" | "high"
@@ -3154,6 +3391,7 @@ export const Constants = {
         "bonds",
       ],
       audience_type: ["beginner", "trader", "investor", "professional"],
+      feed_post_status: ["pending", "approved", "rejected"],
       market_relevance: ["forex-only", "multi-asset"],
       presenter_gender: ["male", "female", "neutral"],
       risk_level: ["low", "medium", "high"],

@@ -70,11 +70,13 @@ export default function Feed() {
       .in('user_id', uniqueIds);
     
     if (data) {
-      const profileMap = new Map(profiles);
-      data.forEach(p => profileMap.set(p.user_id, p));
-      setProfiles(profileMap);
+      setProfiles(prev => {
+        const profileMap = new Map(prev);
+        data.forEach(p => profileMap.set(p.user_id, p));
+        return profileMap;
+      });
     }
-  }, [profiles]);
+  }, []);
 
   const fetchCommunityPosts = useCallback(async () => {
     if (!client) return;
