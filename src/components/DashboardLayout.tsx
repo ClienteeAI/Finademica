@@ -52,6 +52,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const mainNavItems = [
     { path: "/dashboard", label: "Dashboard" },
     { path: "/videos", label: "My Videos" },
+    { path: "/feed", label: "Feed" },
     { path: "/quiz", label: "Quiz" },
   ];
 

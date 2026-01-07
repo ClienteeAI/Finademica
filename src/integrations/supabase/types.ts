@@ -126,6 +126,35 @@ export type Database = {
         }
         Relationships: []
       }
+      client_reserved_nicknames: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          nickname: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          nickname: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          nickname?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_reserved_nicknames_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_videos: {
         Row: {
           client_id: string
@@ -170,6 +199,7 @@ export type Database = {
           created_at: string | null
           custom_domain: string | null
           features: Json | null
+          feed_config: Json | null
           ghl_api_key: string | null
           ghl_location_id: string | null
           ghl_pipeline_id: string | null
@@ -194,6 +224,7 @@ export type Database = {
           created_at?: string | null
           custom_domain?: string | null
           features?: Json | null
+          feed_config?: Json | null
           ghl_api_key?: string | null
           ghl_location_id?: string | null
           ghl_pipeline_id?: string | null
@@ -218,6 +249,7 @@ export type Database = {
           created_at?: string | null
           custom_domain?: string | null
           features?: Json | null
+          feed_config?: Json | null
           ghl_api_key?: string | null
           ghl_location_id?: string | null
           ghl_pipeline_id?: string | null
@@ -426,6 +458,234 @@ export type Database = {
           },
           {
             foreignKeyName: "ebooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_moderation_audit: {
+        Row: {
+          actor_type: string
+          actor_user_id: string | null
+          client_id: string
+          created_at: string
+          decision: string
+          id: string
+          model_name: string | null
+          model_score: number | null
+          post_id: string
+          raw_flags: Json
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          actor_type?: string
+          actor_user_id?: string | null
+          client_id: string
+          created_at?: string
+          decision: string
+          id?: string
+          model_name?: string | null
+          model_score?: number | null
+          post_id: string
+          raw_flags?: Json
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          actor_type?: string
+          actor_user_id?: string | null
+          client_id?: string
+          created_at?: string
+          decision?: string
+          id?: string
+          model_name?: string | null
+          model_score?: number | null
+          post_id?: string
+          raw_flags?: Json
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_moderation_audit_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_moderation_audit_actor_user_id_fkey"
+            columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_moderation_audit_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_moderation_audit_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_moderation_audit_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_moderation_audit_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_posts: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          id: string
+          media_storage_paths: Json
+          media_urls: Json
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
+          post_type: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          created_at?: string
+          id?: string
+          media_storage_paths?: Json
+          media_urls?: Json
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          post_type?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          media_storage_paths?: Json
+          media_urls?: Json
+          moderated_at?: string | null
+          moderated_by?: string | null
+          moderation_reason?: string | null
+          post_type?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_posts_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_reactions: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          post_id: string
+          reaction: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          post_id: string
+          reaction?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          reaction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_reactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_reactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -1341,6 +1601,75 @@ export type Database = {
           },
         ]
       }
+      user_moderation: {
+        Row: {
+          client_id: string
+          created_at: string
+          is_shadowbanned: boolean
+          shadowban_reason: string | null
+          shadowbanned_at: string | null
+          shadowbanned_by: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          is_shadowbanned?: boolean
+          shadowban_reason?: string | null
+          shadowbanned_at?: string | null
+          shadowbanned_by?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          is_shadowbanned?: boolean
+          shadowban_reason?: string | null
+          shadowbanned_at?: string | null
+          shadowbanned_by?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_moderation_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_moderation_shadowbanned_by_fkey"
+            columns: ["shadowbanned_by"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_moderation_shadowbanned_by_fkey"
+            columns: ["shadowbanned_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_moderation_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_moderation_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_onboarding_answers: {
         Row: {
           answers: Json
@@ -1382,6 +1711,67 @@ export type Database = {
             foreignKeyName: "uoa_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          avatar_storage_path: string | null
+          avatar_type: string
+          avatar_url: string | null
+          bio: string | null
+          client_id: string
+          created_at: string
+          is_public: boolean
+          nickname: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_storage_path?: string | null
+          avatar_type?: string
+          avatar_url?: string | null
+          bio?: string | null
+          client_id: string
+          created_at?: string
+          is_public?: boolean
+          nickname: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_storage_path?: string | null
+          avatar_type?: string
+          avatar_url?: string | null
+          bio?: string | null
+          client_id?: string
+          created_at?: string
+          is_public?: boolean
+          nickname?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
@@ -2501,6 +2891,14 @@ export type Database = {
         Args: { p_points: number; p_user_id: string; p_video_id: string }
         Returns: Json
       }
+      create_feed_post: {
+        Args: {
+          p_content: string
+          p_media_storage_paths?: Json
+          p_post_type?: string
+        }
+        Returns: string
+      }
       create_signup_session: {
         Args: { p_client_slug: string }
         Returns: string
@@ -2519,6 +2917,17 @@ export type Database = {
           p_props?: Json
         }
         Returns: string
+      }
+      set_my_profile: {
+        Args: {
+          p_avatar_storage_path?: string
+          p_avatar_type?: string
+          p_avatar_url?: string
+          p_bio?: string
+          p_is_public?: boolean
+          p_nickname: string
+        }
+        Returns: undefined
       }
       unlock_next_5_videos: {
         Args: {
