@@ -20,6 +20,7 @@ import TradingDiary from "./pages/TradingDiary";
 import Quiz from "./pages/Quiz";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
+import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/diary" element={<TradingDiary />} />
             <Route path="/trading-diary" element={<TradingDiary />} />
             <Route path="/quiz" element={<Quiz />} />
+            <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
