@@ -144,8 +144,11 @@ export default function Feed() {
   }, [currentUserId, fetchProfiles]);
 
   useEffect(() => {
-    fetchCommunityPosts();
-  }, [fetchCommunityPosts]);
+    // Only fetch when we have a valid client ID
+    if (client?.id || currentClientId) {
+      fetchCommunityPosts();
+    }
+  }, [fetchCommunityPosts, client?.id, currentClientId]);
 
   useEffect(() => {
     if (currentUserId) {
