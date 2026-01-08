@@ -530,6 +530,42 @@ export type Database = {
           },
         ]
       }
+      feed_events_outbox: {
+        Row: {
+          actor_user_id: string | null
+          client_id: string
+          created_at: string
+          entity_id: string
+          entity_table: string
+          event_type: string
+          id: string
+          payload: Json
+          processed_at: string | null
+        }
+        Insert: {
+          actor_user_id?: string | null
+          client_id: string
+          created_at?: string
+          entity_id: string
+          entity_table: string
+          event_type: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+        }
+        Update: {
+          actor_user_id?: string | null
+          client_id?: string
+          created_at?: string
+          entity_id?: string
+          entity_table?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          processed_at?: string | null
+        }
+        Relationships: []
+      }
       feed_likes: {
         Row: {
           client_id: string
@@ -1799,6 +1835,61 @@ export type Database = {
         }
         Relationships: []
       }
+      user_feed_stats: {
+        Row: {
+          client_id: string
+          comments_count: number
+          created_at: string
+          likes_given_count: number
+          likes_received_count: number
+          posts_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          comments_count?: number
+          created_at?: string
+          likes_given_count?: number
+          likes_received_count?: number
+          posts_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          comments_count?: number
+          created_at?: string
+          likes_given_count?: number
+          likes_received_count?: number
+          posts_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_feed_stats_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_feed_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_feed_stats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_gamification: {
         Row: {
           created_at: string | null
@@ -2143,6 +2234,49 @@ export type Database = {
           videos_completed?: number
         }
         Relationships: []
+      }
+      user_tip_seen: {
+        Row: {
+          client_id: string
+          seen_at: string
+          tip_key: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          seen_at?: string
+          tip_key: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          seen_at?: string
+          tip_key?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tip_seen_client_fk"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_tip_seen_user_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "user_tip_seen_user_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_video_recommendations: {
         Row: {
@@ -2893,6 +3027,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      v_feed_activity: {
+        Row: {
+          client_id: string | null
+          content_preview: string | null
+          created_at: string | null
+          event_type: string | null
+          id: string | null
+          post_id: string | null
+          user_id: string | null
+        }
+        Relationships: []
       }
       v_feed_post_comments: {
         Row: {
