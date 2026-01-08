@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { SYSTEM_AVATARS } from '@/lib/feedConfig';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Comment {
   id: string;
@@ -38,6 +39,7 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
   const [submitting, setSubmitting] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentClientId, setCurrentClientId] = useState<string | null>(null);
+  const [showPointFeedback, setShowPointFeedback] = useState(false);
 
   useEffect(() => {
     const fetchUserContext = async () => {
@@ -120,8 +122,21 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
         return;
       }
 
+      // Award points for commenting
+      try {
+        await supabase.rpc('increment_user_stats', {
+          p_user_id: currentUserId,
+          p_points: 2,
+          p_videos: 0,
+        });
+        setShowPointFeedback(true);
+        setTimeout(() => setShowPointFeedback(false), 1500);
+      } catch (pointsError) {
+        console.error('Error awarding points:', pointsError);
+      }
+
       setNewComment('');
-      toast({ title: 'Comment submitted', description: 'Your comment is pending approval.' });
+      toast({ title: 'Comment submitted +2 points', description: 'Your comment is pending approval.' });
       // Realtime will refresh, but we can also refresh manually
       fetchComments();
     } catch (err: any) {
@@ -195,7 +210,7 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
 
       {/* Add Comment */}
       {user && (
-        <div className="flex gap-2">
+        <div className="flex gap-2 relative">
           <Textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -215,6 +230,18 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
               <Send className="h-4 w-4" />
             )}
           </Button>
+          <AnimatePresence>
+            {showPointFeedback && (
+              <motion.span
+                initial={{ opacity: 0, y: 0 }}
+                animate={{ opacity: 1, y: -20 }}
+                exit={{ opacity: 0 }}
+                className="absolute -top-4 right-5 text-xs font-bold text-primary"
+              >
+                +2
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       )}
     </div>

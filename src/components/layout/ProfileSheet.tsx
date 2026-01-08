@@ -21,6 +21,7 @@ import { useClient } from '@/lib/clientContext';
 import { useGamification } from '@/hooks/useGamification';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { RoadmapDialog } from '@/components/RoadmapDialog';
 import {
   Loader2,
   User,
@@ -60,6 +61,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
   const [avatarType, setAvatarType] = useState<'system' | 'custom'>('system');
+  const [roadmapOpen, setRoadmapOpen] = useState(false);
 
   useEffect(() => {
     if (open && user) {
@@ -429,7 +431,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
                   <p className="text-sm text-muted-foreground">Track your learning path</p>
                 </div>
               </div>
-              <Button className="w-full" onClick={() => { navigate('/roadmap'); onOpenChange(false); }}>
+              <Button className="w-full" onClick={() => setRoadmapOpen(true)}>
                 View Roadmap
               </Button>
             </Card>
@@ -482,6 +484,8 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
             </Button>
           </TabsContent>
         </Tabs>
+
+        <RoadmapDialog open={roadmapOpen} onOpenChange={setRoadmapOpen} />
       </SheetContent>
     </Sheet>
   );
