@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/AuthContext";
@@ -248,7 +248,7 @@ const Quiz = () => {
   const answeredCount = Object.keys(answers).length;
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <div className="space-y-6 max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -554,7 +554,7 @@ const Quiz = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { useAuth } from "@/lib/AuthContext";
 import { useClient } from "@/lib/clientContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -41,7 +41,7 @@ const Settings = () => {
   };
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -248,7 +248,7 @@ const Settings = () => {
           </CardContent>
         </Card>
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -401,7 +401,7 @@ const MyVideos = () => {
   const totalVideos = playableVideos.length + lockedVideos.length;
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <div className="space-y-8 animate-fade-in">
         {/* Header */}
         <div>
@@ -573,7 +573,7 @@ const MyVideos = () => {
         onClose={() => setShowLockedModal(false)}
         videoTitle={selectedLockedVideo?.title || ""}
       />
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 
