@@ -5,12 +5,14 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Send, X, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
+import { useCoachTips } from '@/hooks/useCoachTips';
 import { toast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
 import { SYSTEM_AVATARS } from '@/lib/feedConfig';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCommentsRealtime } from '@/hooks/useCommentsRealtime';
+import { CoachTip } from '@/components/CoachTip';
 
 interface Comment {
   id: string;
@@ -35,6 +37,7 @@ interface PostCommentsProps {
 
 export function PostComments({ postId, commentCount, onClose, inputRef }: PostCommentsProps) {
   const { user } = useAuth();
+  const { hasSeen, dismissTip, tipsEnabled } = useCoachTips();
   const [comments, setComments] = useState<Comment[]>([]);
   const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
   const [loading, setLoading] = useState(true);
@@ -44,6 +47,14 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
   const [currentClientId, setCurrentClientId] = useState<string | null>(null);
   const [showPointFeedback, setShowPointFeedback] = useState(false);
   const [newCommentsAvailable, setNewCommentsAvailable] = useState(false);
+  const [showCommentsTip, setShowCommentsTip] = useState(false);
+
+  // Show comments tip once when drawer opened
+  useEffect(() => {
+    if (tipsEnabled && !hasSeen('TIP_COMMENTS')) {
+      setShowCommentsTip(true);
+    }
+  }, [tipsEnabled, hasSeen]);
 
   useEffect(() => {
     const fetchUserContext = async () => {
@@ -198,8 +209,24 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
     }
   };
 
+  const handleDismissCommentsTip = () => {
+    setShowCommentsTip(false);
+    dismissTip('TIP_COMMENTS');
+  };
+
   return (
     <div className="border-t border-border mt-4 pt-4 space-y-4">
+      {/* Comments Tip */}
+      <AnimatePresence>
+        {showCommentsTip && (
+          <CoachTip
+            tipId="TIP_COMMENTS"
+            variant="inline"
+            onDismiss={handleDismissCommentsTip}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-semibold flex items-center gap-2 text-foreground">
           <MessageCircle className="h-4 w-4" />

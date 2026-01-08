@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, RefObject } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -6,12 +6,16 @@ import { FEED_CONFIG, SYSTEM_AVATARS } from '@/lib/feedConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/clientContext';
+import { useCoachTips } from '@/hooks/useCoachTips';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Send, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { CoachTip } from '@/components/CoachTip';
+import { AnimatePresence } from 'framer-motion';
 
 interface FeedComposerProps {
   onPostCreated: () => void;
+  composerRef?: RefObject<HTMLTextAreaElement>;
 }
 
 interface UserProfile {
@@ -19,14 +23,24 @@ interface UserProfile {
   avatar_url: string | null;
 }
 
-export function FeedComposer({ onPostCreated }: FeedComposerProps) {
+export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) {
   const { user } = useAuth();
   const { client } = useClient();
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { hasSeen, dismissTip, tipsEnabled } = useCoachTips();
+  const internalRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = composerRef || internalRef;
   
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [showPostGuideTip, setShowPostGuideTip] = useState(false);
+
+  // Show post guide tip once
+  useEffect(() => {
+    if (tipsEnabled && !hasSeen('TIP_POST_GUIDE')) {
+      setShowPostGuideTip(true);
+    }
+  }, [tipsEnabled, hasSeen]);
 
   // Fetch user profile for avatar and nickname
   useEffect(() => {
@@ -164,9 +178,26 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
   const avatar = SYSTEM_AVATARS.find((a) => a.id === userProfile?.avatar_url);
   const canSubmit = content.trim().length >= 3;
 
+  const handleDismissPostGuideTip = () => {
+    setShowPostGuideTip(false);
+    dismissTip('TIP_POST_GUIDE');
+  };
+
   return (
-    <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
-      <CardContent className="pt-4 space-y-4">
+    <div className="space-y-3">
+      {/* Post Guide Tip */}
+      <AnimatePresence>
+        {showPostGuideTip && (
+          <CoachTip
+            tipId="TIP_POST_GUIDE"
+            variant="inline"
+            onDismiss={handleDismissPostGuideTip}
+          />
+        )}
+      </AnimatePresence>
+
+      <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
+        <CardContent className="pt-4 space-y-4">
         <div className="flex gap-3">
           {/* User Avatar */}
           <div
@@ -226,5 +257,6 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
