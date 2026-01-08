@@ -26,6 +26,7 @@ interface FeedPost {
   like_count: number;
   liked_by_me: boolean;
   comment_count: number;
+  is_official?: boolean;
 }
 
 export default function Feed() {
@@ -74,7 +75,7 @@ export default function Feed() {
       // Use v_feed_posts view which includes like_count, liked_by_me, comment_count
       const { data, error } = await supabase
         .from('v_feed_posts')
-        .select('id, content, post_type, status, moderation_reason, created_at, user_id, nickname, avatar_url, like_count, liked_by_me, comment_count')
+        .select('id, content, post_type, status, moderation_reason, created_at, user_id, nickname, avatar_url, like_count, liked_by_me, comment_count, is_official')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(FEED_CONFIG.POSTS_PER_PAGE);
@@ -95,7 +96,7 @@ export default function Feed() {
     try {
       const { data, error } = await supabase
         .from('v_feed_posts')
-        .select('id, content, post_type, status, moderation_reason, created_at, user_id, nickname, avatar_url, like_count, liked_by_me, comment_count')
+        .select('id, content, post_type, status, moderation_reason, created_at, user_id, nickname, avatar_url, like_count, liked_by_me, comment_count, is_official')
         .eq('user_id', currentUserId)
         .order('created_at', { ascending: false })
         .limit(FEED_CONFIG.POSTS_PER_PAGE);
