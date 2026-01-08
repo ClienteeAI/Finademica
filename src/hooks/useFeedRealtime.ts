@@ -6,15 +6,46 @@ interface UseFeedRealtimeOptions {
   onPostChange?: () => void;
   onLikeChange?: (postId: string) => void;
   onCommentChange?: (postId: string) => void;
+  clientId?: string | null;
+}
+
+// Simple debounce helper
+function debounce<T extends (...args: any[]) => void>(fn: T, ms: number): T {
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
+  return ((...args: any[]) => {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), ms);
+  }) as T;
 }
 
 export function useFeedRealtime({
   onPostChange,
   onLikeChange,
   onCommentChange,
+  clientId,
 }: UseFeedRealtimeOptions) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const subscribedRef = useRef(false);
+
+  // Debounced callbacks to prevent spam
+  const debouncedPostChange = useCallback(
+    debounce(() => onPostChange?.(), 400),
+    [onPostChange]
+  );
+  const debouncedLikeChange = useCallback(
+    debounce((postId: string) => {
+      onLikeChange?.(postId);
+      onPostChange?.(); // Also refresh posts for like_count
+    }, 400),
+    [onLikeChange, onPostChange]
+  );
+  const debouncedCommentChange = useCallback(
+    debounce((postId: string) => {
+      onCommentChange?.(postId);
+      onPostChange?.(); // Also refresh posts for comment_count
+    }, 400),
+    [onCommentChange, onPostChange]
+  );
 
   const setupSubscription = useCallback(() => {
     // Prevent double-subscribe in React Strict Mode
@@ -30,10 +61,11 @@ export function useFeedRealtime({
           event: '*',
           schema: 'public',
           table: 'feed_posts',
+          ...(clientId ? { filter: `client_id=eq.${clientId}` } : {}),
         },
         (payload) => {
           console.log('[Realtime] feed_posts change:', payload.eventType);
-          onPostChange?.();
+          debouncedPostChange();
         }
       )
       .on(
@@ -42,15 +74,15 @@ export function useFeedRealtime({
           event: '*',
           schema: 'public',
           table: 'feed_post_likes',
+          ...(clientId ? { filter: `client_id=eq.${clientId}` } : {}),
         },
         (payload) => {
           console.log('[Realtime] feed_post_likes change:', payload.eventType);
           const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
           if (postId) {
-            onLikeChange?.(postId);
+            debouncedLikeChange(postId);
           } else {
-            // Fallback to full refresh
-            onPostChange?.();
+            debouncedPostChange();
           }
         }
       )
@@ -60,14 +92,15 @@ export function useFeedRealtime({
           event: '*',
           schema: 'public',
           table: 'feed_post_comments',
+          ...(clientId ? { filter: `client_id=eq.${clientId}` } : {}),
         },
         (payload) => {
           console.log('[Realtime] feed_post_comments change:', payload.eventType);
           const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
           if (postId) {
-            onCommentChange?.(postId);
+            debouncedCommentChange(postId);
           } else {
-            onPostChange?.();
+            debouncedPostChange();
           }
         }
       )
@@ -76,7 +109,7 @@ export function useFeedRealtime({
       });
 
     channelRef.current = channel;
-  }, [onPostChange, onLikeChange, onCommentChange]);
+  }, [clientId, debouncedPostChange, debouncedLikeChange, debouncedCommentChange]);
 
   useEffect(() => {
     setupSubscription();
