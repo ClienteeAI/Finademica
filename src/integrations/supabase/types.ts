@@ -3096,6 +3096,7 @@ export type Database = {
           email: string | null
           first_name: string | null
           id: string | null
+          is_official: boolean | null
           last_name: string | null
           like_count: number | null
           liked_by_me: boolean | null
