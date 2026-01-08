@@ -277,19 +277,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-[#0C0F15]">
+      <div className="min-h-screen flex w-full bg-[#0D1117]">
         <Sidebar
           collapsible="icon"
           variant="floating"
           className="m-3 rounded-[18px] shadow-[0_10px_50px_rgba(0,0,0,0.45)] border border-[#1e293b]/30"
           style={{
-            background: '#121924',
+            background: '#131A24',
           }}
         >
           <SidebarNavContent />
         </Sidebar>
 
-        <SidebarInset className="flex flex-col bg-[#0C0F15]">
+        <SidebarInset className="flex flex-col bg-[#0D1117]">
           <TopHeader />
 
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
