@@ -158,12 +158,13 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
     if (!newComment.trim() || !currentUserId || !currentClientId) return;
 
     setSubmitting(true);
+    const commentContent = newComment.trim();
     try {
       const { error } = await supabase.from('feed_post_comments').insert({
         post_id: postId,
         user_id: currentUserId,
         client_id: currentClientId,
-        content: newComment.trim(),
+        content: commentContent,
         status: 'pending',
       });
 
@@ -179,6 +180,19 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
         }
         return;
       }
+
+      // Send to webhook (non-blocking)
+      fetch('https://clientee.app.n8n.cloud/webhook-test/feed-commennts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id: postId,
+          user_id: currentUserId,
+          client_id: currentClientId,
+          content: commentContent,
+          created_at: new Date().toISOString(),
+        }),
+      }).catch(console.error);
 
       // Award points for commenting
       try {
