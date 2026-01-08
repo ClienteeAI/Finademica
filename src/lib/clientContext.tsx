@@ -145,10 +145,12 @@ export function ClientProvider({ children }: ClientProviderProps) {
       }
 
       // PRIORITY 2: Custom domain lookup FIRST (for white-label domains like trade.nasrlector.com)
+      // Use trimmed and lowercased hostname for robust matching
+      const trimmedHostname = hostname.trim().toLowerCase();
       const { data: customDomainClient } = await supabase
         .from('clients')
         .select('*')
-        .eq('custom_domain', hostname)
+        .eq('custom_domain', trimmedHostname)
         .eq('active', true)
         .maybeSingle();
       
