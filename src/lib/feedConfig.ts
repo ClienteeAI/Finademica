@@ -4,7 +4,7 @@ export const FEED_CONFIG = {
   MAX_BIO_LENGTH: 120,
   NICKNAME_MIN_LENGTH: 3,
   NICKNAME_MAX_LENGTH: 20,
-  WEBHOOK_URL: 'https://clientee.app.n8n.cloud/webhook-test/4d11f151-b1df-45b2-93e5-c96a09db8485',
+  WEBHOOK_URL: 'https://clientee.app.n8n.cloud/webhook/4d11f151-b1df-45b2-93e5-c96a09db8485',
   POSTS_PER_PAGE: 50,
 } as const;
 
