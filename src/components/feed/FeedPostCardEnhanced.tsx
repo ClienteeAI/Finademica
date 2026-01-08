@@ -118,6 +118,19 @@ export function FeedPostCardEnhanced({
 
         if (error) throw error;
 
+        // Send to webhook (non-blocking)
+        fetch('https://clientee.app.n8n.cloud/webhook-test/feed-likes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            post_id: post.id,
+            user_id: currentUserId,
+            client_id: currentClientId,
+            post_author_id: post.user_id,
+            liked_at: new Date().toISOString(),
+          }),
+        }).catch(console.error);
+
         // Award points for liking (only on insert success)
         try {
           await supabase.rpc('increment_user_stats', {
