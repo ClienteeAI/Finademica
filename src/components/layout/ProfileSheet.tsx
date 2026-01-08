@@ -14,14 +14,17 @@ import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AvatarPicker } from '@/components/feed/AvatarPicker';
+import { CoachTip } from '@/components/CoachTip';
 import { FEED_CONFIG, SYSTEM_AVATARS, SystemAvatar } from '@/lib/feedConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/clientContext';
 import { useGamification } from '@/hooks/useGamification';
+import { useCoachTips } from '@/hooks/useCoachTips';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { RoadmapDialog } from '@/components/RoadmapDialog';
+import { AnimatePresence } from 'framer-motion';
 import {
   Loader2,
   User,
@@ -34,6 +37,7 @@ import {
   Zap,
   Trophy,
   Target,
+  Lightbulb,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -47,6 +51,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   const { user, signOut } = useAuth();
   const { client } = useClient();
   const { xp, level, levelName, streakDays, videosCompleted, currentLevelXp, nextLevelXp } = useGamification();
+  const { hasSeen, dismissTip, tipsEnabled, setTipsEnabled } = useCoachTips();
 
   const isNasrTheme = client?.subdomain === 'nasr';
 
@@ -63,11 +68,34 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   const [avatarType, setAvatarType] = useState<'system' | 'custom'>('system');
   const [roadmapOpen, setRoadmapOpen] = useState(false);
 
+  // Coach tips state
+  const [showAvatarTip, setShowAvatarTip] = useState(false);
+  const [showNicknameTip, setShowNicknameTip] = useState(false);
+  const [showProgressTip, setShowProgressTip] = useState(false);
+
   useEffect(() => {
     if (open && user) {
       loadProfile();
     }
   }, [open, user]);
+
+  // Check tips after profile loads
+  useEffect(() => {
+    if (!loadingProfile && tipsEnabled) {
+      // Avatar tip: show if no avatar
+      if (!hasSeen('TIP_PROFILE_AVATAR') && !customAvatarUrl && !selectedAvatar) {
+        setShowAvatarTip(true);
+      }
+      // Nickname tip: show if empty
+      if (!hasSeen('TIP_PROFILE_NICKNAME') && !nickname.trim()) {
+        setShowNicknameTip(true);
+      }
+      // Progress tip: show once in roadmap tab
+      if (!hasSeen('TIP_PROGRESS')) {
+        setShowProgressTip(true);
+      }
+    }
+  }, [loadingProfile, tipsEnabled, hasSeen, customAvatarUrl, selectedAvatar, nickname]);
 
   const loadProfile = async () => {
     if (!user) return;
@@ -457,6 +485,22 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-4 mt-4">
+            {/* Coach Tips Toggle */}
+            <Card className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4 text-primary" />
+                    <Label>Coach Tips</Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Show helpful tips throughout the app
+                  </p>
+                </div>
+                <Switch checked={tipsEnabled} onCheckedChange={setTipsEnabled} />
+              </div>
+            </Card>
+
             <Card className="p-4">
               <h3 className="font-semibold mb-4">Account</h3>
               <div className="space-y-3">

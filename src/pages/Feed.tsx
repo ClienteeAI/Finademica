@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import SidebarLayout from '@/components/layout/SidebarLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { FeedComposer } from '@/components/feed/FeedComposer';
 import { FeedPostCardEnhanced } from '@/components/feed/FeedPostCardEnhanced';
 import { FeedPostSkeleton } from '@/components/feed/FeedPostSkeleton';
+import { FloatingCoachTip, CoachTip } from '@/components/CoachTip';
 import { FEED_CONFIG } from '@/lib/feedConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
 import { useFeedRealtime } from '@/hooks/useFeedRealtime';
+import { useCoachTips } from '@/hooks/useCoachTips';
 import { Users, User, RefreshCw } from 'lucide-react';
 
 interface FeedPost {
@@ -28,6 +30,8 @@ interface FeedPost {
 
 export default function Feed() {
   const { user } = useAuth();
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const { showTip, dismissTip, hasSeen, activeTip, tipsEnabled } = useCoachTips();
 
   const [activeTab, setActiveTab] = useState('community');
   const [communityPosts, setCommunityPosts] = useState<FeedPost[]>([]);
@@ -36,6 +40,8 @@ export default function Feed() {
   const [loadingMyPosts, setLoadingMyPosts] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentClientId, setCurrentClientId] = useState<string | null>(null);
+  const [viewedPostCount, setViewedPostCount] = useState(0);
+  const [userLikeCount, setUserLikeCount] = useState(0);
 
   // Get current user's public.users.id + client_id
   useEffect(() => {
@@ -130,9 +136,59 @@ export default function Feed() {
     }
   }, [currentUserId, fetchMyPosts]);
 
+  // Fetch user like count for tip logic
+  useEffect(() => {
+    const fetchUserLikes = async () => {
+      if (!currentUserId || !currentClientId) return;
+      const { count } = await supabase
+        .from('feed_post_likes')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', currentUserId)
+        .eq('client_id', currentClientId);
+      setUserLikeCount(count || 0);
+    };
+    fetchUserLikes();
+  }, [currentUserId, currentClientId]);
+
+  // Coach Tips logic
+  useEffect(() => {
+    if (!tipsEnabled || loadingCommunity || loadingMyPosts) return;
+
+    // TIP_FEED_WELCOME: show once first time
+    if (!hasSeen('TIP_FEED_WELCOME')) {
+      showTip('TIP_FEED_WELCOME');
+      return;
+    }
+
+    // TIP_FEED_POST: show if user has 0 posts
+    if (!hasSeen('TIP_FEED_POST') && myPosts.length === 0) {
+      showTip('TIP_FEED_POST');
+      return;
+    }
+
+    // TIP_FEED_LIKE: show if viewed 3+ posts but 0 likes
+    if (!hasSeen('TIP_FEED_LIKE') && viewedPostCount >= 3 && userLikeCount === 0) {
+      showTip('TIP_FEED_LIKE');
+    }
+  }, [tipsEnabled, loadingCommunity, loadingMyPosts, myPosts.length, viewedPostCount, userLikeCount, hasSeen, showTip]);
+
+  // Track viewed posts (simple: count community posts shown)
+  useEffect(() => {
+    if (communityPosts.length > 0) {
+      setViewedPostCount(communityPosts.length);
+    }
+  }, [communityPosts.length]);
+
   const handlePostCreated = () => {
     fetchCommunityPosts();
     fetchMyPosts();
+    dismissTip('TIP_FEED_POST');
+  };
+
+  const handleCtaAction = (action: string) => {
+    if (action === 'focus-composer') {
+      composerRef.current?.focus();
+    }
   };
 
   const renderPosts = (posts: FeedPost[], loading: boolean, showStatus: boolean) => {
@@ -188,7 +244,7 @@ export default function Feed() {
         </div>
 
         {/* Composer */}
-        <FeedComposer onPostCreated={handlePostCreated} />
+        <FeedComposer onPostCreated={handlePostCreated} composerRef={composerRef} />
 
         {/* Feed Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -229,6 +285,13 @@ export default function Feed() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Floating Coach Tip */}
+      <FloatingCoachTip
+        tipId={activeTip}
+        onDismiss={dismissTip}
+        onCta={handleCtaAction}
+      />
     </SidebarLayout>
   );
 }
