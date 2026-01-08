@@ -14,12 +14,14 @@ import {
   Loader2,
   Wrench,
   ChevronDown,
+  Map,
 } from 'lucide-react';
 import { useClient } from '@/lib/clientContext';
 import { useAuth } from '@/lib/AuthContext';
 import XPNavIndicator from '@/components/XPNavIndicator';
 import TradingDisclaimer from '@/components/TradingDisclaimer';
 import { ProfileSheet } from '@/components/layout/ProfileSheet';
+import { RoadmapDialog } from '@/components/RoadmapDialog';
 import {
   SidebarProvider,
   Sidebar,
@@ -59,7 +61,11 @@ const toolsItems = [
   { path: '/diary', label: 'Trading Diary', icon: BookOpen },
 ];
 
-function SidebarNavContent() {
+interface SidebarNavContentProps {
+  onOpenRoadmap: () => void;
+}
+
+function SidebarNavContent({ onOpenRoadmap }: SidebarNavContentProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { client, allClients, isAdminMode, switchClient } = useClient();
@@ -135,6 +141,16 @@ function SidebarNavContent() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              {/* Roadmap Button */}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={onOpenRoadmap}
+                  tooltip="Roadmap"
+                >
+                  <Map className="h-4 w-4" />
+                  <span>Roadmap</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -250,6 +266,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   const { user, loading } = useAuth();
   const { client } = useClient();
   const navigate = useNavigate();
+  const [roadmapOpen, setRoadmapOpen] = useState(false);
 
   const isNasrTheme = client?.subdomain === 'nasr';
 
@@ -279,7 +296,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
               : 'bg-sidebar border-r border-sidebar-border'
           )}
         >
-          <SidebarNavContent />
+          <SidebarNavContent onOpenRoadmap={() => setRoadmapOpen(true)} />
         </Sidebar>
 
         <SidebarInset className="flex flex-col">
@@ -292,6 +309,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           <TradingDisclaimer isNasrTheme={isNasrTheme} />
         </SidebarInset>
       </div>
+
+      <RoadmapDialog open={roadmapOpen} onOpenChange={setRoadmapOpen} />
     </SidebarProvider>
   );
 }
