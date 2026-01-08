@@ -121,33 +121,17 @@ export function ClientProvider({ children }: ClientProviderProps) {
         localStorage.setItem('client_id', firstClient.id);
       }
     } else {
-      // Regular user - detect client from query param > subdomain > custom_domain > fallback
+      // Regular user - detect client from query param > custom_domain > subdomain > fallback
       const urlParams = new URLSearchParams(window.location.search);
       const clientParam = urlParams.get('client');
+      const hostname = window.location.hostname;
       
-      let subdomain = clientParam;
-      
-      // If no query param, try to extract from subdomain for real production domains
-      if (!subdomain) {
-        const hostname = window.location.hostname;
-        const isLocalhostOrIp = hostname.includes('localhost') || hostname.match(/^\d+\.\d+\.\d+\.\d+$/);
-        const isLovablePreview = hostname.includes('lovable.app') || hostname.includes('lovableproject.com');
-
-        // Only treat the first part of the hostname as a client subdomain on real custom domains
-        if (!isLocalhostOrIp && !isLovablePreview) {
-          const parts = hostname.split('.');
-          if (parts.length > 2) {
-            subdomain = parts[0]; // Get first part as subdomain
-          }
-        }
-      }
-      
-      // If we have a subdomain, try to find client by subdomain
-      if (subdomain) {
+      // PRIORITY 1: Query param override (for testing)
+      if (clientParam) {
         const { data } = await supabase
           .from('clients')
           .select('*')
-          .eq('subdomain', subdomain)
+          .eq('subdomain', clientParam)
           .eq('active', true)
           .single();
 
@@ -160,8 +144,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
 
-      // Try custom_domain lookup (for white-label domains like app.client.com)
-      const hostname = window.location.hostname;
+      // PRIORITY 2: Custom domain lookup FIRST (for white-label domains like trade.nasrlector.com)
       const { data: customDomainClient } = await supabase
         .from('clients')
         .select('*')
@@ -175,6 +158,31 @@ export function ClientProvider({ children }: ClientProviderProps) {
         localStorage.setItem('client_id', customDomainClient.id);
         setLoading(false);
         return;
+      }
+
+      // PRIORITY 3: Try subdomain extraction for multi-tenant subdomains
+      const isLocalhostOrIp = hostname.includes('localhost') || hostname.match(/^\d+\.\d+\.\d+\.\d+$/);
+      const isLovablePreview = hostname.includes('lovable.app') || hostname.includes('lovableproject.com');
+
+      if (!isLocalhostOrIp && !isLovablePreview) {
+        const parts = hostname.split('.');
+        if (parts.length > 2) {
+          const subdomain = parts[0];
+          const { data } = await supabase
+            .from('clients')
+            .select('*')
+            .eq('subdomain', subdomain)
+            .eq('active', true)
+            .single();
+
+          if (data) {
+            setClient(data);
+            applyClientTheme(data);
+            localStorage.setItem('client_id', data.id);
+            setLoading(false);
+            return;
+          }
+        }
       }
 
       // Fallback to 'nallio' for testing / preview environments
