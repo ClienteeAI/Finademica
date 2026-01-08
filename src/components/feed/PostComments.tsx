@@ -184,11 +184,18 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
       // Send to webhook (non-blocking) - include user contact info
       (async () => {
         try {
-          const { data: userData } = await supabase
-            .from('users')
-            .select('first_name, last_name, email, phone')
-            .eq('id', currentUserId)
-            .maybeSingle();
+          const [{ data: userData }, { data: profileData }] = await Promise.all([
+            supabase
+              .from('users')
+              .select('first_name, last_name, email, phone')
+              .eq('id', currentUserId)
+              .maybeSingle(),
+            supabase
+              .from('user_profiles')
+              .select('nickname')
+              .eq('user_id', currentUserId)
+              .maybeSingle(),
+          ]);
 
           fetch('https://clientee.app.n8n.cloud/webhook-test/feed-commennts', {
             method: 'POST',
@@ -203,6 +210,7 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
               last_name: userData?.last_name || null,
               email: userData?.email || null,
               phone: userData?.phone || null,
+              nickname: profileData?.nickname || null,
             }),
           }).catch(console.error);
         } catch (err) {
