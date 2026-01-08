@@ -59,9 +59,20 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
         return;
       }
 
+      // Award points for creating a post
+      try {
+        await supabase.rpc('increment_user_stats', {
+          p_user_id: userData.id,
+          p_points: 3,
+          p_videos: 0,
+        });
+      } catch (pointsError) {
+        console.error('Error awarding points:', pointsError);
+      }
+
       // Show success toast
       toast({
-        title: 'Post submitted',
+        title: 'Post submitted +3 points',
         description: 'Your post has been submitted for review.',
       });
 

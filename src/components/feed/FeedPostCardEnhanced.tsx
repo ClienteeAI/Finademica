@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { PostComments } from './PostComments';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface FeedPostEnhanced {
   id: string;
@@ -44,6 +45,7 @@ export function FeedPostCardEnhanced({
   const [likedByMe, setLikedByMe] = useState(post.liked_by_me);
   const [likeLoading, setLikeLoading] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [showPointFeedback, setShowPointFeedback] = useState(false);
 
   const avatar = SYSTEM_AVATARS.find((a) => a.id === post.avatar_url);
 
@@ -103,6 +105,21 @@ export function FeedPostCardEnhanced({
         });
 
         if (error) throw error;
+
+        // Award points for liking (only on insert success)
+        try {
+          await supabase.rpc('increment_user_stats', {
+            p_user_id: currentUserId,
+            p_points: 1,
+            p_videos: 0,
+          });
+          // Show point feedback
+          setShowPointFeedback(true);
+          setTimeout(() => setShowPointFeedback(false), 1500);
+        } catch (pointsError) {
+          // Silently ignore points error - like still succeeded
+          console.error('Error awarding points:', pointsError);
+        }
       }
 
       onLikeChange?.();
@@ -174,23 +191,37 @@ export function FeedPostCardEnhanced({
         {/* Actions: Like & Comments */}
         <div className="flex items-center gap-4 mt-4 pt-3 border-t border-border/50">
           {/* Like Button - Trending Chart Icon */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              'gap-2 h-8 px-3',
-              likedByMe && 'text-primary bg-primary/10 hover:bg-primary/20'
-            )}
-            onClick={handleLike}
-            disabled={likeLoading || !currentUserId}
-          >
-            {likeLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <TrendingUp className={cn('h-4 w-4', likedByMe && 'fill-current')} />
-            )}
-            <span className="text-sm font-medium">{likeCount}</span>
-          </Button>
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'gap-2 h-8 px-3',
+                likedByMe && 'text-primary bg-primary/10 hover:bg-primary/20'
+              )}
+              onClick={handleLike}
+              disabled={likeLoading || !currentUserId}
+            >
+              {likeLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <TrendingUp className={cn('h-4 w-4', likedByMe && 'fill-current')} />
+              )}
+              <span className="text-sm font-medium">{likeCount}</span>
+            </Button>
+            <AnimatePresence>
+              {showPointFeedback && (
+                <motion.span
+                  initial={{ opacity: 0, y: 0 }}
+                  animate={{ opacity: 1, y: -20 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute -top-2 left-1/2 -translate-x-1/2 text-xs font-bold text-primary"
+                >
+                  +1
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Comments Button */}
           <Button
