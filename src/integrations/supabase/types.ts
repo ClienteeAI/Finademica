@@ -849,6 +849,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          is_official: boolean
           media_storage_paths: Json
           media_urls: Json
           moderated_at: string | null
@@ -864,6 +865,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          is_official?: boolean
           media_storage_paths?: Json
           media_urls?: Json
           moderated_at?: string | null
@@ -879,6 +881,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          is_official?: boolean
           media_storage_paths?: Json
           media_urls?: Json
           moderated_at?: string | null
