@@ -222,26 +222,26 @@ function TopHeader() {
   return (
     <>
       <header
-        className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b px-4 md:px-6 bg-[#0a0e1a]/95 backdrop-blur-xl border-[rgba(148,163,184,0.08)]"
+        className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b px-4 md:px-6 bg-white/95 backdrop-blur-xl border-[#e2e8f0]"
       >
         {/* Left: Sidebar trigger for mobile */}
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="md:hidden text-[#cbd5e1] hover:text-[#38bdf8] hover:bg-[rgba(56,189,248,0.12)]" />
+          <SidebarTrigger className="md:hidden text-[#334155] hover:text-[#0ea5e9] hover:bg-[#0ea5e9]/10" />
           <XPNavIndicator isNasrTheme={true} />
         </div>
 
         {/* Right: Profile button */}
         <Button
           variant="ghost"
-          className="flex items-center gap-3 h-auto py-2 px-3 rounded-full border border-transparent transition-all duration-200 hover:bg-[rgba(148,163,184,0.08)] hover:border-[rgba(148,163,184,0.12)]"
+          className="flex items-center gap-3 h-auto py-2 px-3 rounded-full border border-transparent transition-all duration-200 hover:bg-[#f1f5f9] hover:border-[#e2e8f0]"
           onClick={() => setProfileSheetOpen(true)}
         >
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-base transition-all bg-gradient-to-br from-[#38bdf8] to-[#0ea5e9] text-[#020617] ring-2 ring-[#38bdf8]/30"
+            className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-base transition-all bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] text-white ring-2 ring-[#0ea5e9]/30"
           >
             {firstName.charAt(0).toUpperCase()}
           </div>
-          <span className="hidden sm:inline text-sm font-medium text-[#e2e8f0]">
+          <span className="hidden sm:inline text-sm font-medium text-[#1e293b]">
             {firstName}
           </span>
           <User className="h-4 w-4 text-[#64748b]" />
@@ -277,19 +277,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-[#0a0e1a]">
+      <div className="min-h-screen flex w-full bg-[#f1f5f9]">
         <Sidebar
           collapsible="icon"
           variant="floating"
-          className="m-3 rounded-[18px] shadow-[0_10px_40px_rgba(0,0,0,0.35)] border-0"
+          className="m-3 rounded-[18px] shadow-[0_10px_50px_rgba(0,0,0,0.45)] border border-[rgba(30,41,59,0.3)]"
           style={{
-            background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)',
+            background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)',
           }}
         >
           <SidebarNavContent />
         </Sidebar>
 
-        <SidebarInset className="flex flex-col bg-[#0a0e1a]">
+        <SidebarInset className="flex flex-col bg-[#f1f5f9]">
           <TopHeader />
 
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
