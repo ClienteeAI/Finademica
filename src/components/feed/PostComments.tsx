@@ -181,18 +181,34 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
         return;
       }
 
-      // Send to webhook (non-blocking)
-      fetch('https://clientee.app.n8n.cloud/webhook-test/feed-commennts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          post_id: postId,
-          user_id: currentUserId,
-          client_id: currentClientId,
-          content: commentContent,
-          created_at: new Date().toISOString(),
-        }),
-      }).catch(console.error);
+      // Send to webhook (non-blocking) - include user contact info
+      (async () => {
+        try {
+          const { data: userData } = await supabase
+            .from('users')
+            .select('first_name, last_name, email, phone')
+            .eq('id', currentUserId)
+            .maybeSingle();
+
+          fetch('https://clientee.app.n8n.cloud/webhook-test/feed-commennts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              post_id: postId,
+              user_id: currentUserId,
+              client_id: currentClientId,
+              content: commentContent,
+              created_at: new Date().toISOString(),
+              first_name: userData?.first_name || null,
+              last_name: userData?.last_name || null,
+              email: userData?.email || null,
+              phone: userData?.phone || null,
+            }),
+          }).catch(console.error);
+        } catch (err) {
+          console.error('Error fetching user data for webhook:', err);
+        }
+      })();
 
       // Award points for commenting
       try {

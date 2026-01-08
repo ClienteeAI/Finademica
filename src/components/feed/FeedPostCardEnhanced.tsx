@@ -118,18 +118,34 @@ export function FeedPostCardEnhanced({
 
         if (error) throw error;
 
-        // Send to webhook (non-blocking)
-        fetch('https://clientee.app.n8n.cloud/webhook-test/feed-likes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            post_id: post.id,
-            user_id: currentUserId,
-            client_id: currentClientId,
-            post_author_id: post.user_id,
-            liked_at: new Date().toISOString(),
-          }),
-        }).catch(console.error);
+        // Send to webhook (non-blocking) - include user contact info
+        (async () => {
+          try {
+            const { data: userData } = await supabase
+              .from('users')
+              .select('first_name, last_name, email, phone')
+              .eq('id', currentUserId)
+              .maybeSingle();
+
+            fetch('https://clientee.app.n8n.cloud/webhook-test/feed-likes', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                post_id: post.id,
+                user_id: currentUserId,
+                client_id: currentClientId,
+                post_author_id: post.user_id,
+                liked_at: new Date().toISOString(),
+                first_name: userData?.first_name || null,
+                last_name: userData?.last_name || null,
+                email: userData?.email || null,
+                phone: userData?.phone || null,
+              }),
+            }).catch(console.error);
+          } catch (err) {
+            console.error('Error fetching user data for webhook:', err);
+          }
+        })();
 
         // Award points for liking (only on insert success)
         try {
