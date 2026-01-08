@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -256,7 +256,7 @@ const Dashboard = () => {
   };
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       {/* Nasr Trade Academy Video Background */}
       {isNasrTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -544,7 +544,7 @@ const Dashboard = () => {
         {/* Roadmap and Analyzer sections hidden for v1 - backend logic not fully connected */}
 
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

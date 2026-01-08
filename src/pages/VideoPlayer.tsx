@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -112,7 +112,7 @@ const VideoPlayer = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <SidebarLayout>
         <div className="space-y-6 animate-fade-in">
           <Skeleton className="h-10 w-32" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -126,27 +126,27 @@ const VideoPlayer = () => {
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </SidebarLayout>
     );
   }
 
   if (!video) {
     return (
-      <DashboardLayout>
+      <SidebarLayout>
         <div className="text-center py-12">
           <p className="text-muted-foreground">Video not found</p>
           <Button onClick={() => navigate("/videos")} className="mt-4">
             Back to Videos
           </Button>
         </div>
-      </DashboardLayout>
+      </SidebarLayout>
     );
   }
 
   const embedUrl = getYouTubeEmbedUrl(video.video_url);
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <div className="space-y-6 animate-fade-in">
         {/* Back Button */}
         <Button
@@ -268,7 +268,7 @@ const VideoPlayer = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

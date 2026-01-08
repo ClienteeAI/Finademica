@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -415,7 +415,7 @@ const Calculator = () => {
   };
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       {/* Premium Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         {isNasrTheme ? (
@@ -1019,7 +1019,7 @@ const Calculator = () => {
         open={registrationModalOpen}
         onOpenChange={setRegistrationModalOpen}
       />
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

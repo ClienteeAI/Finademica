@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -105,7 +105,7 @@ const StockAnalyzer = () => {
   };
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       {/* Nasr Trade Academy Video Background */}
       {isNasrTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -326,7 +326,7 @@ const StockAnalyzer = () => {
         aiMessage={(analysisData as any)?.output?.expectedFields?.aiMessage || ""}
         isNasrTheme={isNasrTheme}
       />
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

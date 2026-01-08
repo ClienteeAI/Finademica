@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CheckCircle, Clock, Lock, Play, ChevronRight, Trophy, Flame } from "lucide-react";
@@ -193,7 +193,7 @@ const MyRoadmap = () => {
   const xpToNextLevel = nextLevelXp - xp;
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       {/* Full-screen Video Background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <video
@@ -509,7 +509,7 @@ const MyRoadmap = () => {
           <p>🏔️ Keep climbing — your trading mastery awaits!</p>
         </div>
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

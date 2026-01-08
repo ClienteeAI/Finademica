@@ -1,5 +1,5 @@
 import { useState } from "react";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { useAuth } from "@/lib/AuthContext";
 import { useClient } from "@/lib/clientContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,7 +53,7 @@ const Profile = () => {
   const quizAnswers = profile?.quiz_answers as Record<string, unknown> | null;
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
@@ -352,7 +352,7 @@ const Profile = () => {
           onClose={() => setShowIntroVideo(false)} 
         />
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 

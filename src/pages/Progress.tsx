@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import DashboardLayout from "@/components/DashboardLayout";
+import SidebarLayout from "@/components/layout/SidebarLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -89,7 +89,7 @@ const Progress = () => {
   const isPageLoading = loading || gamificationLoading;
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       {/* Nasr Trade Academy Video Background */}
       {isNasrTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -268,7 +268,7 @@ const Progress = () => {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
+    </SidebarLayout>
   );
 };
 
