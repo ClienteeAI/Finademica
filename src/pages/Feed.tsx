@@ -1,16 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import DashboardLayout from '@/components/DashboardLayout';
+import SidebarLayout from '@/components/layout/SidebarLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { FeedComposer } from '@/components/feed/FeedComposer';
-import { FeedPostCard } from '@/components/feed/FeedPostCard';
+import { FeedPostCardEnhanced } from '@/components/feed/FeedPostCardEnhanced';
 import { FeedPostSkeleton } from '@/components/feed/FeedPostSkeleton';
-import { ProfileModal } from '@/components/feed/ProfileModal';
 import { FEED_CONFIG } from '@/lib/feedConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
-import { useClient } from '@/lib/clientContext';
-import { Users, User, UserCircle, RefreshCw } from 'lucide-react';
+import { useFeedRealtime } from '@/hooks/useFeedRealtime';
+import { Users, User, RefreshCw } from 'lucide-react';
 
 interface FeedPost {
   id: string;
@@ -20,27 +19,23 @@ interface FeedPost {
   moderation_reason: string | null;
   created_at: string;
   user_id: string;
-}
-
-interface UserProfile {
-  user_id: string;
-  nickname: string;
+  nickname: string | null;
   avatar_url: string | null;
+  like_count: number;
+  liked_by_me: boolean;
+  comment_count: number;
 }
 
 export default function Feed() {
   const { user } = useAuth();
-  const { client } = useClient();
-  
+
   const [activeTab, setActiveTab] = useState('community');
   const [communityPosts, setCommunityPosts] = useState<FeedPost[]>([]);
   const [myPosts, setMyPosts] = useState<FeedPost[]>([]);
-  const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
   const [loadingCommunity, setLoadingCommunity] = useState(true);
   const [loadingMyPosts, setLoadingMyPosts] = useState(true);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentClientId, setCurrentClientId] = useState<string | null>(null);
-  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   // Get current user's public.users.id + client_id
   useEffect(() => {
@@ -67,76 +62,62 @@ export default function Feed() {
     fetchUserContext();
   }, [user]);
 
-  const fetchProfiles = useCallback(async (userIds: string[]) => {
-    if (userIds.length === 0) return;
-    
-    const uniqueIds = [...new Set(userIds)];
-    const { data } = await supabase
-      .from('user_profiles')
-      .select('user_id, nickname, avatar_url')
-      .in('user_id', uniqueIds);
-    
-    if (data) {
-      setProfiles(prev => {
-        const profileMap = new Map(prev);
-        data.forEach(p => profileMap.set(p.user_id, p));
-        return profileMap;
-      });
-    }
-  }, []);
-
   const fetchCommunityPosts = useCallback(async () => {
     setLoadingCommunity(true);
     try {
-      // Let RLS handle client isolation - do NOT filter by client_id in frontend
-      // The RLS policy ensures users only see approved posts from their own client
+      // Use v_feed_posts view which includes like_count, liked_by_me, comment_count
       const { data, error } = await supabase
-        .from('feed_posts')
-        .select('*')
+        .from('v_feed_posts')
+        .select('id, content, post_type, status, moderation_reason, created_at, user_id, nickname, avatar_url, like_count, liked_by_me, comment_count')
         .eq('status', 'approved')
         .order('created_at', { ascending: false })
         .limit(FEED_CONFIG.POSTS_PER_PAGE);
 
       if (error) throw error;
-
-      const posts = data || [];
-      setCommunityPosts(posts);
-
-      // Fetch profiles for these posts
-      const userIds = posts.map(p => p.user_id);
-      await fetchProfiles(userIds);
+      setCommunityPosts((data as FeedPost[]) || []);
     } catch (err) {
       console.error('Error fetching community posts:', err);
     } finally {
       setLoadingCommunity(false);
     }
-  }, [fetchProfiles]);
+  }, []);
 
   const fetchMyPosts = useCallback(async () => {
     if (!currentUserId) return;
-    
+
     setLoadingMyPosts(true);
     try {
       const { data, error } = await supabase
-        .from('feed_posts')
-        .select('*')
+        .from('v_feed_posts')
+        .select('id, content, post_type, status, moderation_reason, created_at, user_id, nickname, avatar_url, like_count, liked_by_me, comment_count')
         .eq('user_id', currentUserId)
         .order('created_at', { ascending: false })
         .limit(FEED_CONFIG.POSTS_PER_PAGE);
-      
+
       if (error) throw error;
-      
-      const posts = data || [];
-      setMyPosts(posts);
-      
-      // Fetch profile for current user
-      await fetchProfiles([currentUserId]);
+      setMyPosts((data as FeedPost[]) || []);
     } catch (err) {
       console.error('Error fetching my posts:', err);
     } finally {
       setLoadingMyPosts(false);
     }
-  }, [currentUserId, fetchProfiles]);
+  }, [currentUserId]);
+
+  // Setup realtime subscriptions
+  useFeedRealtime({
+    onPostChange: () => {
+      fetchCommunityPosts();
+      if (currentUserId) fetchMyPosts();
+    },
+    onLikeChange: () => {
+      fetchCommunityPosts();
+      if (currentUserId) fetchMyPosts();
+    },
+    onCommentChange: () => {
+      fetchCommunityPosts();
+      if (currentUserId) fetchMyPosts();
+    },
+  });
 
   useEffect(() => {
     fetchCommunityPosts();
@@ -177,12 +158,17 @@ export default function Feed() {
 
     return (
       <div className="space-y-4">
-        {posts.map(post => (
-          <FeedPostCard
+        {posts.map((post) => (
+          <FeedPostCardEnhanced
             key={post.id}
             post={post}
-            profile={profiles.get(post.user_id)}
             showStatus={showStatus}
+            currentUserId={currentUserId}
+            currentClientId={currentClientId}
+            onLikeChange={() => {
+              fetchCommunityPosts();
+              fetchMyPosts();
+            }}
           />
         ))}
       </div>
@@ -190,25 +176,14 @@ export default function Feed() {
   };
 
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Community Feed</h1>
-            <p className="text-muted-foreground text-sm">
-              Share updates and connect with your community
-            </p>
-          </div>
-          
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setProfileModalOpen(true)}
-          >
-            <UserCircle className="h-4 w-4 mr-2" />
-            Profile
-          </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Community Feed</h1>
+          <p className="text-muted-foreground text-sm">
+            Share updates and connect with your community
+          </p>
         </div>
 
         {/* Composer */}
@@ -227,7 +202,7 @@ export default function Feed() {
                 My Posts
               </TabsTrigger>
             </TabsList>
-            
+
             <Button
               variant="ghost"
               size="icon"
@@ -253,12 +228,6 @@ export default function Feed() {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Profile Modal */}
-      <ProfileModal
-        open={profileModalOpen}
-        onOpenChange={setProfileModalOpen}
-      />
-    </DashboardLayout>
+    </SidebarLayout>
   );
 }
