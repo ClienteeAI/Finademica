@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { SYSTEM_AVATARS } from '@/lib/feedConfig';
 import { formatDistanceToNow } from 'date-fns';
-import { Trophy, Clock, CheckCircle, XCircle, AlertCircle, TrendingUp, MessageCircle, Loader2, X } from 'lucide-react';
+import { Trophy, Clock, CheckCircle, XCircle, AlertCircle, TrendingUp, MessageCircle, Loader2, X, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { PostComments } from './PostComments';
@@ -26,6 +26,7 @@ interface FeedPostEnhanced {
   liked_by_me: boolean;
   comment_count: number;
   media_urls?: string[];
+  is_official?: boolean;
 }
 
 interface FeedPostCardEnhancedProps {
@@ -53,6 +54,7 @@ export function FeedPostCardEnhanced({
 
   const avatar = SYSTEM_AVATARS.find((a) => a.id === post.avatar_url);
   const mediaUrls = Array.isArray(post.media_urls) ? post.media_urls.filter(Boolean) : [];
+  const isOfficial = post.is_official === true;
 
   // Autofocus comment input when drawer opens
   useEffect(() => {
@@ -87,7 +89,6 @@ export function FeedPostCardEnhanced({
         );
     }
   };
-
   const handleLike = async () => {
     if (!currentUserId || !currentClientId || likeLoading) return;
 
@@ -235,7 +236,12 @@ export function FeedPostCardEnhanced({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15, ease: 'easeOut' }}
       >
-        <Card className="border-border/50 hover:border-primary/30 transition-all duration-200">
+        <Card className={cn(
+          'transition-all duration-200',
+          isOfficial 
+            ? 'border-primary/50 bg-gradient-to-br from-primary/5 to-transparent shadow-[0_0_15px_-3px_hsl(var(--primary)/0.2)]' 
+            : 'border-border/50 hover:border-primary/30'
+        )}>
           <CardContent className="pt-4">
             {/* Author Row */}
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -244,25 +250,42 @@ export function FeedPostCardEnhanced({
                 <div
                   className={cn(
                     'w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0',
-                    avatar?.bg || 'bg-muted'
+                    isOfficial 
+                      ? 'bg-primary/20 ring-2 ring-primary/40' 
+                      : avatar?.bg || 'bg-muted'
                   )}
                 >
-                  {avatar?.emoji || '👤'}
+                  {isOfficial ? '📢' : avatar?.emoji || '👤'}
                 </div>
 
                 {/* Name & Time */}
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-foreground truncate">
+                    <span className={cn(
+                      'font-medium truncate',
+                      isOfficial ? 'text-primary' : 'text-foreground'
+                    )}>
                       {post.nickname || 'Anonymous'}
                     </span>
-                    {post.post_type === 'achievement' && (
+                    {isOfficial && (
+                      <Badge className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/30">
+                        <Shield className="h-3 w-3 mr-1" />
+                        Official
+                      </Badge>
+                    )}
+                    {post.post_type === 'achievement' && !isOfficial && (
                       <Trophy className="h-4 w-4 text-yellow-500 flex-shrink-0" />
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {isOfficial && (
+                      <span className="text-xs text-primary/70">Posted by Admin</span>
+                    )}
+                    {isOfficial && <span className="text-xs text-muted-foreground">•</span>}
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+                    </span>
+                  </div>
                 </div>
               </div>
 
