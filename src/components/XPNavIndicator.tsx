@@ -44,63 +44,46 @@ const XPNavIndicator = ({ isNasrTheme = false }: XPNavIndicatorProps) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-3 cursor-default">
-            {/* Level Badge - Circular with gold outline */}
+          <div className="flex items-center gap-2 cursor-default px-3 py-1.5 rounded-full bg-[#1e293b]/80 backdrop-blur-sm border border-[#334155]/50 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            {/* Level Badge - Compact circular */}
             <div className={cn(
-              "relative flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm",
+              "relative flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs",
               isNasrTheme 
-                ? "bg-[#1A1A1A] text-gold ring-2 ring-gold/40" 
-                : "bg-white/80 text-aqua ring-2 ring-aqua/40"
+                ? "bg-[#0f172a] text-gold ring-2 ring-gold/50" 
+                : "bg-[#0f172a] text-aqua ring-2 ring-aqua/40"
             )}>
               {level}
-              {/* Subtle glow effect */}
-              {isNasrTheme && (
-                <div className="absolute inset-0 rounded-full bg-gold/10 animate-gold-pulse" />
-              )}
             </div>
 
-            {/* XP Progress Section */}
-            <div className="flex flex-col gap-1">
-              {/* Level text */}
-              <span className={cn(
-                "text-[11px] font-semibold uppercase tracking-wider",
-                isNasrTheme ? "text-gold" : "text-aqua"
-              )}>
-                Level {level}
-              </span>
-              
-              {/* XP Bar */}
-              <div className="flex items-center gap-2">
-                <div className={cn(
-                  "w-20 h-[6px] rounded-full overflow-hidden",
-                  isNasrTheme ? "bg-[#1A1A1A]" : "bg-aqua/20"
-                )}>
-                  <div
-                    className={cn(
-                      "h-full rounded-full transition-all duration-500",
-                      isNasrTheme 
-                        ? "bg-gradient-to-r from-gold to-gold-light shadow-[0_0_8px_rgba(212,175,55,0.4)]"
-                        : "bg-gradient-to-r from-aqua to-aqua-light"
-                    )}
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-                
-                {/* XP Count */}
-                <span className={cn(
-                  "text-[11px] font-medium tabular-nums",
-                  isNasrTheme ? "text-[#808080]" : "text-ocean-muted"
-                )}>
-                  {xp.toLocaleString()} XP
-                </span>
-              </div>
+            {/* Compact XP Bar */}
+            <div className={cn(
+              "w-14 h-[5px] rounded-full overflow-hidden",
+              isNasrTheme ? "bg-[#0f172a]" : "bg-[#0f172a]"
+            )}>
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all duration-500",
+                  isNasrTheme 
+                    ? "bg-gradient-to-r from-gold to-gold-light shadow-[0_0_6px_rgba(212,175,55,0.4)]"
+                    : "bg-gradient-to-r from-aqua to-aqua-light"
+                )}
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
+            
+            {/* XP Count - compact */}
+            <span className={cn(
+              "text-[10px] font-medium tabular-nums",
+              isNasrTheme ? "text-[#94a3b8]" : "text-[#94a3b8]"
+            )}>
+              {xp.toLocaleString()} XP
+            </span>
 
-            {/* Streak indicator */}
+            {/* Streak indicator - inline */}
             {streakDays > 0 && (
-              <div className="flex items-center gap-1 ml-2 px-2 py-1 rounded-full bg-amber-500/10">
-                <Flame className="w-3.5 h-3.5 text-amber-500" />
-                <span className="text-[11px] font-semibold text-amber-500">{streakDays}</span>
+              <div className="flex items-center gap-0.5">
+                <Flame className="w-3 h-3 text-amber-500" />
+                <span className="text-[10px] font-semibold text-amber-500">{streakDays}</span>
               </div>
             )}
           </div>
