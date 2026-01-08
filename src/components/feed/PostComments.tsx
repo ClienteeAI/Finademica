@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, RefObject } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Loader2, Send, X, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
@@ -29,9 +30,10 @@ interface PostCommentsProps {
   postId: string;
   commentCount: number;
   onClose: () => void;
+  inputRef?: RefObject<HTMLTextAreaElement>;
 }
 
-export function PostComments({ postId, commentCount, onClose }: PostCommentsProps) {
+export function PostComments({ postId, commentCount, onClose, inputRef }: PostCommentsProps) {
   const { user } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
   const [profiles, setProfiles] = useState<Map<string, UserProfile>>(new Map());
@@ -41,6 +43,7 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [currentClientId, setCurrentClientId] = useState<string | null>(null);
   const [showPointFeedback, setShowPointFeedback] = useState(false);
+  const [newCommentsAvailable, setNewCommentsAvailable] = useState(false);
 
   useEffect(() => {
     const fetchUserContext = async () => {
@@ -73,8 +76,21 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
   // Scroll to bottom if user was at bottom before update
   const maybeScrollToBottom = () => {
     const container = scrollContainerRef.current;
-    if (container && wasAtBottomRef.current) {
+    if (container) {
+      if (wasAtBottomRef.current) {
+        container.scrollTop = container.scrollHeight;
+        setNewCommentsAvailable(false);
+      } else {
+        setNewCommentsAvailable(true);
+      }
+    }
+  };
+
+  const scrollToBottom = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
       container.scrollTop = container.scrollHeight;
+      setNewCommentsAvailable(false);
     }
   };
 
@@ -185,9 +201,9 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
   return (
     <div className="border-t border-border mt-4 pt-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold flex items-center gap-2">
+        <h4 className="text-sm font-semibold flex items-center gap-2 text-foreground">
           <MessageCircle className="h-4 w-4" />
-          Comments ({commentCount})
+          Comments ({comments.length})
         </h4>
         <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6">
           <X className="h-4 w-4" />
@@ -195,22 +211,37 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
       </div>
 
       {/* Comments List */}
-      <div ref={scrollContainerRef} className="space-y-3 max-h-64 overflow-y-auto">
+      <div ref={scrollContainerRef} className="space-y-3 max-h-64 overflow-y-auto scroll-smooth">
         {loading ? (
-          <div className="flex items-center justify-center py-4">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          // Loading Skeleton
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="flex gap-3">
+                <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : comments.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-4">
             No comments yet. Be the first!
           </p>
         ) : (
-          comments.map((comment) => {
+          comments.map((comment, idx) => {
             const profile = profiles.get(comment.user_id);
             const avatar = SYSTEM_AVATARS.find((a) => a.id === profile?.avatar_url);
 
             return (
-              <div key={comment.id} className="flex gap-3">
+              <motion.div
+                key={comment.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.03, duration: 0.15 }}
+                className="flex gap-3"
+              >
                 <div
                   className={cn(
                     'w-8 h-8 rounded-full flex items-center justify-center text-sm flex-shrink-0',
@@ -220,8 +251,8 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
                   {avatar?.emoji || '👤'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-medium text-foreground">
                       {profile?.nickname || 'Anonymous'}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -233,21 +264,43 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
                   </div>
                   <p className="text-sm text-foreground/90 break-words">{comment.content}</p>
                 </div>
-              </div>
+              </motion.div>
             );
           })
         )}
       </div>
 
+      {/* New Comments Pill */}
+      <AnimatePresence>
+        {newCommentsAvailable && (
+          <motion.button
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            onClick={scrollToBottom}
+            className="w-full py-1.5 text-xs font-medium text-primary bg-primary/10 rounded-full hover:bg-primary/20 transition-colors"
+          >
+            New comments ↓
+          </motion.button>
+        )}
+      </AnimatePresence>
+
       {/* Add Comment */}
       {user && (
         <div className="flex gap-2 relative">
           <Textarea
+            ref={inputRef}
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             placeholder="Write a comment..."
-            className="min-h-[60px] resize-none text-sm"
+            className="min-h-[60px] max-h-[120px] resize-none text-sm"
             maxLength={500}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
           />
           <Button
             size="icon"

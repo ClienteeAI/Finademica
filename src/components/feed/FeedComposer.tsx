@@ -1,29 +1,74 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { FEED_CONFIG } from '@/lib/feedConfig';
+import { FEED_CONFIG, SYSTEM_AVATARS } from '@/lib/feedConfig';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/clientContext';
 import { toast } from '@/hooks/use-toast';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2, Send, Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface FeedComposerProps {
   onPostCreated: () => void;
 }
 
+interface UserProfile {
+  nickname: string | null;
+  avatar_url: string | null;
+}
+
 export function FeedComposer({ onPostCreated }: FeedComposerProps) {
   const { user } = useAuth();
   const { client } = useClient();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   
   const [content, setContent] = useState('');
-  const [postType, setPostType] = useState<'text' | 'achievement'>('text');
   const [loading, setLoading] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  // Fetch user profile for avatar and nickname
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) return;
+      
+      const { data: userData } = await supabase
+        .from('users')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .maybeSingle();
+      
+      if (userData) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('nickname, avatar_url')
+          .eq('user_id', userData.id)
+          .maybeSingle();
+        
+        if (profile) {
+          setUserProfile(profile);
+        }
+      }
+    };
+    
+    fetchProfile();
+  }, [user]);
+
+  // Auto-resize textarea
+  const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    
+    // Auto-expand
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!content.trim() || !user || !client) return;
+    if (!content.trim() || content.trim().length < 3 || !user || !client) return;
     
     setLoading(true);
     try {
@@ -46,7 +91,7 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
       // Call RPC to create post
       const { data: postId, error } = await supabase.rpc('create_feed_post', {
         p_content: content.trim(),
-        p_post_type: postType,
+        p_post_type: 'text',
         p_media_storage_paths: [],
       });
 
@@ -72,7 +117,7 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
 
       // Show success toast
       toast({
-        title: 'Post submitted +3 points',
+        title: 'Posted! +3 points',
         description: 'Your post has been submitted for review.',
       });
 
@@ -84,7 +129,7 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
         user_id: userData.id,
         auth_user_id: user.id,
         email: userData.email,
-        post_type: postType,
+        post_type: 'text',
         content_preview: content.trim().substring(0, 120),
         created_at: new Date().toISOString(),
         source: 'lovable_feed',
@@ -99,9 +144,11 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
         // Silently ignore webhook errors
       });
 
-      // Clear and refresh
+      // Clear and reset textarea height
       setContent('');
-      setPostType('text');
+      if (textareaRef.current) {
+        textareaRef.current.style.height = 'auto';
+      }
       onPostCreated();
     } catch (err: any) {
       toast({
@@ -114,30 +161,48 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
     }
   };
 
+  const avatar = SYSTEM_AVATARS.find((a) => a.id === userProfile?.avatar_url);
+  const canSubmit = content.trim().length >= 3;
+
   return (
-    <Card className="border-primary/20">
+    <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
       <CardContent className="pt-4 space-y-4">
-        <Textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Share an update with your community..."
-          maxLength={FEED_CONFIG.MAX_POST_LENGTH}
-          rows={3}
-          className="resize-none"
-        />
-        
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Select value={postType} onValueChange={(v) => setPostType(v as 'text' | 'achievement')}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="text">Text</SelectItem>
-                <SelectItem value="achievement">Achievement</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="flex gap-3">
+          {/* User Avatar */}
+          <div
+            className={cn(
+              'w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0',
+              avatar?.bg || 'bg-muted'
+            )}
+          >
+            {avatar?.emoji || '👤'}
+          </div>
+          
+          {/* Input Area */}
+          <div className="flex-1 space-y-3">
+            {/* Nickname */}
+            {userProfile?.nickname && (
+              <span className="text-sm font-medium text-foreground">
+                {userProfile.nickname}
+              </span>
+            )}
             
+            <Textarea
+              ref={textareaRef}
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Share an update with your community..."
+              maxLength={FEED_CONFIG.MAX_POST_LENGTH}
+              rows={2}
+              className="resize-none min-h-[60px] border-0 bg-transparent p-0 focus-visible:ring-0 text-base placeholder:text-muted-foreground/60"
+            />
+          </div>
+        </div>
+        
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-4 pt-2 border-t border-border/50">
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-primary/60" />
             <span className="text-xs text-muted-foreground">
               {content.length}/{FEED_CONFIG.MAX_POST_LENGTH}
             </span>
@@ -145,14 +210,15 @@ export function FeedComposer({ onPostCreated }: FeedComposerProps) {
           
           <Button
             onClick={handleSubmit}
-            disabled={loading || !content.trim()}
+            disabled={loading || !canSubmit}
             size="sm"
+            className="gap-2"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Send className="h-4 w-4 mr-2" />
+                <Send className="h-4 w-4" />
                 Post
               </>
             )}
