@@ -468,6 +468,68 @@ export type Database = {
           },
         ]
       }
+      feed_comments: {
+        Row: {
+          client_id: string
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feed_likes: {
         Row: {
           client_id: string
@@ -625,6 +687,7 @@ export type Database = {
       }
       feed_post_comments: {
         Row: {
+          client_id: string | null
           content: string
           created_at: string
           id: string
@@ -634,6 +697,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          client_id?: string | null
           content: string
           created_at?: string
           id?: string
@@ -643,6 +707,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          client_id?: string | null
           content?: string
           created_at?: string
           id?: string
@@ -2829,16 +2894,69 @@ export type Database = {
           },
         ]
       }
+      v_feed_post_comments: {
+        Row: {
+          avatar_url: string | null
+          content: string | null
+          created_at: string | null
+          first_name: string | null
+          id: string | null
+          last_name: string | null
+          nickname: string | null
+          post_id: string | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "v_feed_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_post_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_post_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_feed_posts: {
         Row: {
           avatar_url: string | null
           client_id: string | null
+          comment_count: number | null
           content: string | null
           created_at: string | null
+          email: string | null
+          first_name: string | null
           id: string | null
+          last_name: string | null
           like_count: number | null
+          liked_by_me: boolean | null
+          media_storage_paths: Json | null
           media_urls: Json | null
+          moderated_at: string | null
+          moderated_by: string | null
+          moderation_reason: string | null
           nickname: string | null
+          post_type: string | null
           status: string | null
           updated_at: string | null
           user_id: string | null
@@ -2849,6 +2967,20 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "user_access_context"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "feed_posts_moderated_by_fkey"
+            columns: ["moderated_by"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -3099,6 +3231,10 @@ export type Database = {
       }
     }
     Functions: {
+      add_feed_post_comment: {
+        Args: { p_content: string; p_post_id: string }
+        Returns: string
+      }
       award_xp:
         | {
             Args: {
@@ -3139,6 +3275,10 @@ export type Database = {
       }
       current_client_id: { Args: never; Returns: string }
       current_public_user_id: { Args: never; Returns: string }
+      delete_feed_post_comment: {
+        Args: { p_comment_id: string }
+        Returns: boolean
+      }
       get_gamification: { Args: { uid: string }; Returns: Json }
       increment_user_stats: {
         Args: { p_points: number; p_user_id: string; p_videos: number }
@@ -3164,6 +3304,13 @@ export type Database = {
           p_nickname: string
         }
         Returns: undefined
+      }
+      toggle_feed_post_like: {
+        Args: { p_post_id: string }
+        Returns: {
+          like_count: number
+          liked: boolean
+        }[]
       }
       unlock_next_5_videos: {
         Args: {

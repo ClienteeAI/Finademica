@@ -44,6 +44,8 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/home" element={<Feed />} />
+            <Route path="/feed" element={<Feed />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/videos" element={<MyVideos />} />
             <Route path="/video/:id" element={<VideoPlayer />} />
@@ -54,7 +56,6 @@ const App = () => (
             <Route path="/diary" element={<TradingDiary />} />
             <Route path="/trading-diary" element={<TradingDiary />} />
             <Route path="/quiz" element={<Quiz />} />
-            <Route path="/feed" element={<Feed />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
