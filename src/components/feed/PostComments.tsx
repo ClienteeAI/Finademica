@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, Send, X, MessageCircle } from 'lucide-react';
@@ -9,6 +9,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { SYSTEM_AVATARS } from '@/lib/feedConfig';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCommentsRealtime } from '@/hooks/useCommentsRealtime';
 
 interface Comment {
   id: string;
@@ -56,6 +57,36 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
     };
     fetchUserContext();
   }, [user]);
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const wasAtBottomRef = useRef(true);
+
+  // Check if user is scrolled to bottom before fetching
+  const checkScrollPosition = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 50;
+      wasAtBottomRef.current = isAtBottom;
+    }
+  };
+
+  // Scroll to bottom if user was at bottom before update
+  const maybeScrollToBottom = () => {
+    const container = scrollContainerRef.current;
+    if (container && wasAtBottomRef.current) {
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  // Subscribe to realtime comment changes
+  useCommentsRealtime({
+    postId,
+    clientId: currentClientId,
+    onCommentChange: () => {
+      checkScrollPosition();
+      fetchComments().then(maybeScrollToBottom);
+    },
+  });
 
   useEffect(() => {
     fetchComments();
@@ -164,7 +195,7 @@ export function PostComments({ postId, commentCount, onClose }: PostCommentsProp
       </div>
 
       {/* Comments List */}
-      <div className="space-y-3 max-h-64 overflow-y-auto">
+      <div ref={scrollContainerRef} className="space-y-3 max-h-64 overflow-y-auto">
         {loading ? (
           <div className="flex items-center justify-center py-4">
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

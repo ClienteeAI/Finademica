@@ -103,8 +103,9 @@ export default function Feed() {
     }
   }, [currentUserId]);
 
-  // Setup realtime subscriptions
+  // Setup realtime subscriptions with client filter
   useFeedRealtime({
+    clientId: currentClientId,
     onPostChange: () => {
       fetchCommunityPosts();
       if (currentUserId) fetchMyPosts();
