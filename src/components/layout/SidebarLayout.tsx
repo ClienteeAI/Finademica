@@ -73,7 +73,7 @@ function SidebarNavContent() {
 
   return (
     <>
-      <SidebarHeader className="border-b border-sidebar-border p-4">
+      <SidebarHeader className="p-4 pb-3">
         <Link to="/feed" className="flex items-center gap-3 group">
           {client?.logo_url && !isNasrTheme ? (
             <img
@@ -85,9 +85,7 @@ function SidebarNavContent() {
             <span
               className={cn(
                 'text-lg font-medium tracking-tight transition-all duration-300',
-                isNasrTheme
-                  ? 'font-playfair text-[#E8E8E8] group-hover:text-primary'
-                  : 'font-playfair text-primary'
+                'font-playfair text-[#e2e8f0] group-hover:text-[#38bdf8]'
               )}
             >
               {collapsed ? (isNasrTheme ? 'N' : client?.company_name?.[0] || 'L') : (isNasrTheme ? 'NASR Academy' : client?.company_name)}
@@ -95,19 +93,19 @@ function SidebarNavContent() {
           )}
         </Link>
 
-        {/* Admin Mode Client Switcher */}
+        {/* Admin Mode Client Switcher - hidden on mobile */}
         {isAdminMode && !collapsed && (
-          <div className="mt-3 pt-3 border-t border-sidebar-border">
-            <span className="px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide bg-primary/20 text-primary">
+          <div className="mt-3 pt-3 border-t border-[rgba(148,163,184,0.08)] hidden md:block">
+            <span className="px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide bg-[#38bdf8]/20 text-[#38bdf8]">
               ADMIN
             </span>
             <select
               value={client?.subdomain}
               onChange={(e) => switchClient(e.target.value)}
-              className="mt-2 w-full px-3 py-2 bg-sidebar-accent border border-sidebar-border rounded-lg text-sm font-medium cursor-pointer transition-all hover:border-primary/40"
+              className="mt-2 w-full px-3 py-2 bg-[rgba(255,255,255,0.04)] border border-[rgba(148,163,184,0.12)] rounded-lg text-sm font-medium cursor-pointer transition-all hover:border-[#38bdf8]/40 text-[#cbd5e1]"
             >
               {allClients.map((c) => (
-                <option key={c.id} value={c.subdomain}>
+                <option key={c.id} value={c.subdomain} className="bg-[#0f172a]">
                   {c.company_name}
                 </option>
               ))}
@@ -116,18 +114,30 @@ function SidebarNavContent() {
         )}
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[#64748b] text-xs font-medium uppercase tracking-wider mb-1">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.path)}
                     tooltip={item.label}
+                    className={cn(
+                      'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
+                      isActive(item.path)
+                        ? 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8] shadow-[inset_3px_0_0_#38bdf8]'
+                        : 'text-[#cbd5e1] hover:bg-[rgba(148,163,184,0.08)]',
+                      '[&>svg]:transition-colors [&>svg]:duration-200',
+                      isActive(item.path)
+                        ? '[&>svg]:text-[#38bdf8]'
+                        : '[&>svg]:text-[#64748b] hover:[&>svg]:text-[#94a3b8]'
+                    )}
                   >
                     <Link to={item.path}>
                       <item.icon className="h-4 w-4" />
@@ -140,18 +150,21 @@ function SidebarNavContent() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* Section Divider */}
+        <div className="mx-2 my-3 border-t border-[rgba(148,163,184,0.08)]" />
+
         {/* Tools */}
         <SidebarGroup>
           <Collapsible open={toolsOpen} onOpenChange={setToolsOpen}>
             <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="cursor-pointer hover:bg-sidebar-accent rounded-md transition-colors">
+              <SidebarGroupLabel className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-[rgba(148,163,184,0.08)] text-[#64748b]">
                 <div className="flex items-center gap-2 w-full">
                   <Wrench className="h-4 w-4" />
-                  {!collapsed && <span>Tools</span>}
+                  {!collapsed && <span className="text-xs font-medium uppercase tracking-wider">Tools</span>}
                   {!collapsed && (
                     <ChevronDown
                       className={cn(
-                        'ml-auto h-4 w-4 transition-transform',
+                        'ml-auto h-4 w-4 transition-transform duration-200',
                         toolsOpen && 'rotate-180'
                       )}
                     />
@@ -161,13 +174,23 @@ function SidebarNavContent() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <SidebarGroupContent>
-                <SidebarMenu>
+                <SidebarMenu className="space-y-1 mt-1">
                   {toolsItems.map((item) => (
                     <SidebarMenuItem key={item.path}>
                       <SidebarMenuButton
                         asChild
                         isActive={isActive(item.path)}
                         tooltip={item.label}
+                        className={cn(
+                          'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
+                          isActive(item.path)
+                            ? 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8] shadow-[inset_3px_0_0_#38bdf8]'
+                            : 'text-[#cbd5e1] hover:bg-[rgba(148,163,184,0.08)]',
+                          '[&>svg]:transition-colors [&>svg]:duration-200',
+                          isActive(item.path)
+                            ? '[&>svg]:text-[#38bdf8]'
+                            : '[&>svg]:text-[#64748b] hover:[&>svg]:text-[#94a3b8]'
+                        )}
                       >
                         <Link to={item.path}>
                           <item.icon className="h-4 w-4" />
@@ -185,13 +208,11 @@ function SidebarNavContent() {
     </>
   );
 }
-
 function TopHeader() {
   const { client } = useClient();
   const { user, profile, loading } = useAuth();
   const [profileSheetOpen, setProfileSheetOpen] = useState(false);
 
-  const isNasrTheme = client?.subdomain === 'nasr';
   const firstName =
     profile?.first_name ||
     user?.user_metadata?.first_name ||
@@ -201,44 +222,29 @@ function TopHeader() {
   return (
     <>
       <header
-        className={cn(
-          'sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b px-4 md:px-6',
-          isNasrTheme
-            ? 'bg-[#0B0B0D]/95 backdrop-blur-xl border-[#1A1A1A]'
-            : 'bg-background/95 backdrop-blur-xl border-border'
-        )}
+        className="sticky top-0 z-40 flex h-16 items-center justify-between gap-4 border-b px-4 md:px-6 bg-[#0a0e1a]/95 backdrop-blur-xl border-[rgba(148,163,184,0.08)]"
       >
         {/* Left: Sidebar trigger for mobile */}
         <div className="flex items-center gap-3">
-          <SidebarTrigger className="md:hidden" />
-          <XPNavIndicator isNasrTheme={isNasrTheme} />
+          <SidebarTrigger className="md:hidden text-[#cbd5e1] hover:text-[#38bdf8] hover:bg-[rgba(56,189,248,0.12)]" />
+          <XPNavIndicator isNasrTheme={true} />
         </div>
 
         {/* Right: Profile button */}
         <Button
           variant="ghost"
-          className="flex items-center gap-3 h-auto py-2 px-3 rounded-full border border-transparent transition-all hover:bg-primary/5 hover:border-primary/20"
+          className="flex items-center gap-3 h-auto py-2 px-3 rounded-full border border-transparent transition-all duration-200 hover:bg-[rgba(148,163,184,0.08)] hover:border-[rgba(148,163,184,0.12)]"
           onClick={() => setProfileSheetOpen(true)}
         >
           <div
-            className={cn(
-              'w-9 h-9 rounded-full flex items-center justify-center font-semibold text-base transition-all',
-              isNasrTheme
-                ? 'bg-gradient-to-br from-primary to-primary/80 text-[#0B0B0D] ring-2 ring-primary/30'
-                : 'bg-gradient-to-br from-primary to-primary/80 text-white ring-2 ring-primary/30'
-            )}
+            className="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-base transition-all bg-gradient-to-br from-[#38bdf8] to-[#0ea5e9] text-[#020617] ring-2 ring-[#38bdf8]/30"
           >
             {firstName.charAt(0).toUpperCase()}
           </div>
-          <span
-            className={cn(
-              'hidden sm:inline text-sm font-medium',
-              isNasrTheme ? 'text-[#E0E0E0]' : 'text-foreground'
-            )}
-          >
+          <span className="hidden sm:inline text-sm font-medium text-[#e2e8f0]">
             {firstName}
           </span>
-          <User className="h-4 w-4 text-muted-foreground" />
+          <User className="h-4 w-4 text-[#64748b]" />
         </Button>
       </header>
 
@@ -271,26 +277,26 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className={cn('min-h-screen flex w-full', isNasrTheme && 'bg-[#0B0B0D]')}>
+      <div className="min-h-screen flex w-full bg-[#0a0e1a]">
         <Sidebar
           collapsible="icon"
-          className={cn(
-            isNasrTheme
-              ? 'bg-[#0B0B0D] border-r border-[#1A1A1A]'
-              : 'bg-sidebar border-r border-sidebar-border'
-          )}
+          variant="floating"
+          className="m-3 rounded-[18px] shadow-[0_10px_40px_rgba(0,0,0,0.35)] border-0"
+          style={{
+            background: 'linear-gradient(180deg, #0f172a 0%, #020617 100%)',
+          }}
         >
           <SidebarNavContent />
         </Sidebar>
 
-        <SidebarInset className="flex flex-col">
+        <SidebarInset className="flex flex-col bg-[#0a0e1a]">
           <TopHeader />
 
           <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
             <div className="max-w-[1440px] mx-auto">{children}</div>
           </main>
 
-          <TradingDisclaimer isNasrTheme={isNasrTheme} />
+          <TradingDisclaimer isNasrTheme={true} />
         </SidebarInset>
       </div>
     </SidebarProvider>
