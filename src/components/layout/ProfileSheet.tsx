@@ -21,9 +21,11 @@ import { useAuth } from '@/lib/AuthContext';
 import { useClient } from '@/lib/clientContext';
 import { useGamification } from '@/hooks/useGamification';
 import { useCoachTips } from '@/hooks/useCoachTips';
+import { useClientAdmin } from '@/hooks/useClientAdmin';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { RoadmapDialog } from '@/components/RoadmapDialog';
+import { AdminTools } from '@/components/profile/AdminTools';
 import { AnimatePresence } from 'framer-motion';
 import {
   Loader2,
@@ -38,6 +40,7 @@ import {
   Trophy,
   Target,
   Lightbulb,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -52,6 +55,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
   const { client } = useClient();
   const { xp, level, levelName, streakDays, videosCompleted, currentLevelXp, nextLevelXp } = useGamification();
   const { hasSeen, dismissTip, tipsEnabled, setTipsEnabled } = useCoachTips();
+  const { isAdmin, loading: adminLoading, userRow } = useClientAdmin();
 
   const isNasrTheme = client?.subdomain === 'nasr';
 
@@ -254,7 +258,7 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
         </SheetHeader>
 
         <Tabs defaultValue="profile" className="mt-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className={cn("grid w-full", isAdmin ? "grid-cols-5" : "grid-cols-4")}>
             <TabsTrigger value="profile" className="text-xs">
               <User className="h-4 w-4" />
             </TabsTrigger>
@@ -267,6 +271,11 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
             <TabsTrigger value="settings" className="text-xs">
               <Settings className="h-4 w-4" />
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="admin" className="text-xs">
+                <Shield className="h-4 w-4" />
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* Profile Tab */}
@@ -527,6 +536,17 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
               Logout
             </Button>
           </TabsContent>
+
+          {/* Admin Tab - Only visible for client admins */}
+          {isAdmin && userRow && (
+            <TabsContent value="admin" className="space-y-4 mt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold">Admin Tools</h3>
+              </div>
+              <AdminTools userId={userRow.id} clientId={userRow.client_id} />
+            </TabsContent>
+          )}
         </Tabs>
 
         <RoadmapDialog open={roadmapOpen} onOpenChange={setRoadmapOpen} />
