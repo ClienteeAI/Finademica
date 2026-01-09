@@ -14,20 +14,24 @@ const Index = () => {
   const [quizOpen, setQuizOpen] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
-  // Check if we should show signup-only mode (no landing page)
+  // Check if we should show signup-only mode (no landing page) - only run once
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const signupParam = urlParams.get('signup');
     
     if (signupParam === '1' || client?.skip_landing_page) {
       setSignupOnly(true);
-      setSignupOpen(true);
+      // Only open signup if quiz isn't already open
+      if (!quizOpen) {
+        setSignupOpen(true);
+      }
     }
-  }, [client]);
+  }, [client, quizOpen]);
 
   const handleSignupComplete = (data: SignupUserData) => {
     setUserData(data);
-    setQuizOpen(true);
+    setSignupOpen(false); // Close signup form first
+    setQuizOpen(true);    // Then open quiz
   };
 
   // If signup-only mode, render just the signup form with a minimal dark background
