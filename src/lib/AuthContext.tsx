@@ -22,6 +22,7 @@ interface AuthContextType {
     signup_token: string;
     first_name: string;
     last_name: string;
+    nickname: string;
     phone: string;
   }) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -94,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signup_token: string;
       first_name: string;
       last_name: string;
+      nickname: string;
       phone: string;
     }
   ) => {
@@ -108,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           signup_token: metadata.signup_token,
           first_name: metadata.first_name,
           last_name: metadata.last_name,
+          nickname: metadata.nickname,
           phone: metadata.phone,
         },
       },
