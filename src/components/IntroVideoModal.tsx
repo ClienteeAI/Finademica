@@ -16,8 +16,8 @@ interface IntroVideoModalProps {
 }
 
 const INTRO_VIDEOS = [
-  { id: "intro-video-1", url: "https://www.youtube.com/embed/1ny_F4BUyv8", title: "NASR Academy Intro 1" },
-  { id: "intro-video-2", url: "https://www.youtube.com/embed/Ta-nuMY02co", title: "NASR Academy Intro 2" },
+  { id: "intro-video-1", url: "https://www.youtube.com/embed/1ny_F4BUyv8", title: "NASR Lector Intro 1" },
+  { id: "intro-video-2", url: "https://www.youtube.com/embed/Ta-nuMY02co", title: "NASR Lector Intro 2" },
 ];
 
 export const IntroVideoModal = ({ isOpen, onClose }: IntroVideoModalProps) => {
