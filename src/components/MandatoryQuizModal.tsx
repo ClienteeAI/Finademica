@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
@@ -17,16 +16,28 @@ interface MandatoryQuizModalProps {
 }
 
 interface QuizAnswers {
+  main_concern: string;
   experience: string;
-  markets: string[];
   goal: string;
-  expectation: string;
-  problem: string;
+  risk_tolerance: string;
+  time_available: string;
 }
 
 const questions = [
   {
     id: 1,
+    key: "main_concern",
+    title: "What's your MAIN CONCERN with trading?",
+    type: "single",
+    options: [
+      { value: "losing-money", label: "😰 Losing money / Risk management" },
+      { value: "understanding", label: "🤔 Not understanding how it works" },
+      { value: "time", label: "⏰ Not having enough time" },
+      { value: "decisions", label: "🎯 Making bad decisions / Psychology" }
+    ]
+  },
+  {
+    id: 2,
     key: "experience",
     title: "What's your trading experience level?",
     type: "single",
@@ -35,18 +46,6 @@ const questions = [
       { value: "researched", label: "📚 I've researched but never traded" },
       { value: "few-trades", label: "📈 I've made a few trades" },
       { value: "regular", label: "💼 I trade regularly" }
-    ]
-  },
-  {
-    id: 2,
-    key: "markets",
-    title: "What markets interest you?",
-    type: "multiple",
-    options: [
-      { value: "stocks", label: "📊 Stocks" },
-      { value: "forex", label: "💱 Forex" },
-      { value: "crypto", label: "₿ Cryptocurrency" },
-      { value: "commodities", label: "🛢️ Commodities" }
     ]
   },
   {
@@ -63,27 +62,26 @@ const questions = [
   },
   {
     id: 4,
-    key: "expectation",
-    title: "What do you expect from this course?",
+    key: "risk_tolerance",
+    title: "What's your risk tolerance?",
     type: "single",
     options: [
-      { value: "learn-basics", label: "📖 Learn the basics of trading" },
-      { value: "improve-skills", label: "🎯 Improve my existing skills" },
-      { value: "develop-strategy", label: "📈 Develop a consistent strategy" },
-      { value: "become-profitable", label: "💎 Become consistently profitable" }
+      { value: "conservative", label: "🛡️ Conservative (low risk, steady returns)" },
+      { value: "moderate", label: "⚖️ Moderate (balanced risk/reward)" },
+      { value: "aggressive", label: "🚀 Aggressive (higher risk for higher returns)" },
+      { value: "very-aggressive", label: "🔥 Very aggressive (maximum growth potential)" }
     ]
   },
   {
     id: 5,
-    key: "problem",
-    title: "What's your BIGGEST problem with trading?",
+    key: "time_available",
+    title: "How much time do you have available for learning each week?",
     type: "single",
     options: [
-      { value: "losing-money", label: "😰 Losing money / Risk management" },
-      { value: "understanding", label: "🤔 Not understanding how it works" },
-      { value: "time", label: "⏰ Not having enough time" },
-      { value: "decisions", label: "🎯 Making bad decisions / Psychology" },
-      { value: "capital", label: "💸 Don't have enough capital to start" }
+      { value: "1-2-hours", label: "⏰ 1-2 hours per week" },
+      { value: "3-5-hours", label: "📅 3-5 hours per week" },
+      { value: "5-10-hours", label: "📚 5-10 hours per week" },
+      { value: "10-plus-hours", label: "🎯 10+ hours per week (full commitment)" }
     ]
   }
 ];
@@ -95,11 +93,11 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<QuizAnswers>({
+    main_concern: "",
     experience: "",
-    markets: [],
     goal: "",
-    expectation: "",
-    problem: ""
+    risk_tolerance: "",
+    time_available: ""
   });
 
   const question = questions[currentQuestion];
@@ -107,16 +105,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
 
   const handleSingleChoice = (value: string) => {
     const key = question.key as keyof QuizAnswers;
-    if (key !== "markets") {
-      setAnswers({ ...answers, [key]: value });
-    }
-  };
-
-  const handleMultipleChoice = (value: string, checked: boolean) => {
-    const newMarkets = checked
-      ? [...answers.markets, value]
-      : answers.markets.filter(m => m !== value);
-    setAnswers({ ...answers, markets: newMarkets });
+    setAnswers({ ...answers, [key]: value });
   };
 
   const getCurrentAnswer = () => {
@@ -126,9 +115,6 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
 
   const canProceed = () => {
     const answer = getCurrentAnswer();
-    if (Array.isArray(answer)) {
-      return answer.length > 0;
-    }
     return answer !== "";
   };
 
@@ -210,11 +196,11 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           email: userData.email,
           first_name: userData.firstName,
           last_name: userData.lastName,
+          main_concern: answers.main_concern,
           experience_level: answers.experience,
-          markets_interested: answers.markets,
           primary_goal: answers.goal,
-          expectation: answers.expectation,
-          main_concern: answers.problem,
+          risk_tolerance: answers.risk_tolerance,
+          time_available: answers.time_available,
           client_id: client?.id,
           client_name: client?.company_name,
           source: "lovable_quiz"
@@ -301,37 +287,20 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
             {question.title}
           </h2>
 
-          {question.type === "single" ? (
-            <RadioGroup
-              value={getCurrentAnswer() as string}
-              onValueChange={handleSingleChoice}
-              className="space-y-3"
-            >
-              {question.options.map((option) => (
-                <div key={option.value} className="flex items-center space-x-3 bg-background/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer">
-                  <RadioGroupItem value={option.value} id={option.value} />
-                  <Label htmlFor={option.value} className="text-base cursor-pointer flex-1">
-                    {option.label}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
-          ) : (
-            <div className="space-y-3">
-              {question.options.map((option) => (
-                <div key={option.value} className="flex items-center space-x-3 bg-background/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                  <Checkbox
-                    id={option.value}
-                    checked={answers.markets.includes(option.value)}
-                    onCheckedChange={(checked) => handleMultipleChoice(option.value, checked as boolean)}
-                  />
-                  <Label htmlFor={option.value} className="text-base cursor-pointer flex-1">
-                    {option.label}
-                  </Label>
-                </div>
-              ))}
-            </div>
-          )}
+          <RadioGroup
+            value={getCurrentAnswer()}
+            onValueChange={handleSingleChoice}
+            className="space-y-3"
+          >
+            {question.options.map((option) => (
+              <div key={option.value} className="flex items-center space-x-3 bg-background/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer">
+                <RadioGroupItem value={option.value} id={option.value} />
+                <Label htmlFor={option.value} className="text-base cursor-pointer flex-1">
+                  {option.label}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
         </div>
 
         <div className="flex justify-between p-6 pt-0 border-t border-border">
