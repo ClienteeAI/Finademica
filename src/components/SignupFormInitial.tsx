@@ -7,6 +7,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ONBOARDING_WEBHOOK_URL } from "@/lib/onboardingWebhook";
 
 export interface SignupUserData {
   firstName: string;
@@ -25,7 +26,7 @@ interface SignupFormInitialProps {
 
 const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormInitialProps) => {
   const { client } = useClient();
-  const { signUp } = useAuth();
+  const { signUp, signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
@@ -97,22 +98,29 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
       // 2. Send signup webhook (optional, non-blocking)
       try {
         const webhookPayload = {
+          event: "signup_form_submitted",
+          timestamp: new Date().toISOString(),
           first_name: formData.firstName,
           last_name: formData.lastName,
+          nickname: formData.nickname,
           email: formData.email,
           phone: formData.phone,
+          client_id: client.id,
+          client_subdomain: client.subdomain,
+          client_name: client.company_name,
           source: "lovable_signup"
         };
 
-        await fetch('https://clientee.app.n8n.cloud/webhook/f9b5acc5-f4a9-4a0b-8956-37e174289f51', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        await fetch(ONBOARDING_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(webhookPayload),
         });
         console.log("Signup webhook sent successfully");
       } catch (webhookErr) {
         console.warn("Webhook failed, continuing:", webhookErr);
       }
+
 
       // 3. Create user with Supabase Auth using signup_token (NOT client_id)
       const { error: signUpError } = await signUp(
