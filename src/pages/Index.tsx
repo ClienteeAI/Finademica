@@ -11,7 +11,7 @@ const Index = () => {
   const { client } = useClient();
   const [signupOnly, setSignupOnly] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
-  const [quizOpen, setQuizOpen] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(true); // TESTING: Show quiz directly
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
   // Check if we should show signup-only mode (no landing page) - only run once
