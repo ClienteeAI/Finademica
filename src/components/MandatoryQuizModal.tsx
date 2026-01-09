@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ONBOARDING_WEBHOOK_URL } from "@/lib/onboardingWebhook";
 import type { SignupUserData } from "./SignupFormInitial";
 
 interface MandatoryQuizModalProps {
@@ -148,7 +149,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           source: "lovable_quiz"
         };
 
-        const response = await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
+        const response = await fetch(ONBOARDING_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(testPayload),
@@ -169,10 +170,37 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        setWebhookError("Session expired. Please sign up again.");
+        // If the user isn't logged in (e.g., email confirmation required), still send the quiz to webhook.
+        try {
+          const quizPayload = {
+            email: userData.email,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            phone: userData.phone,
+            main_concern: answers.main_concern,
+            experience_level: answers.experience,
+            primary_goal: answers.goal,
+            risk_tolerance: answers.risk_tolerance,
+            time_available: answers.time_available,
+            client_id: client?.id,
+            client_name: client?.company_name,
+            source: "lovable_quiz_no_session",
+          };
+
+          await fetch(ONBOARDING_WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(quizPayload),
+          });
+        } catch (webhookErr) {
+          console.warn("Quiz webhook failed (no session):", webhookErr);
+        }
+
+        navigate("/login");
         setIsSubmitting(false);
         return;
       }
+
 
       // 1. Update existing user with quiz answers (use auth_user_id, NOT legacy userId)
       const { error: updateError } = await supabase
@@ -231,7 +259,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           source: "lovable_quiz"
         };
 
-        await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
+        await fetch(ONBOARDING_WEBHOOK_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(quizPayload),
