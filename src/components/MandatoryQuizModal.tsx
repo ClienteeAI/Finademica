@@ -24,6 +24,8 @@ interface QuizAnswers {
   time_available: string;
 }
 
+type ModalState = "quiz" | "email-confirmation";
+
 const questions = [
   {
     id: 1,
@@ -90,6 +92,7 @@ const questions = [
 const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
   const navigate = useNavigate();
   const { client } = useClient();
+  const [modalState, setModalState] = useState<ModalState>("quiz");
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
@@ -196,7 +199,8 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           console.warn("Quiz webhook failed (no session):", webhookErr);
         }
 
-        navigate("/login");
+        // Show email confirmation screen instead of redirecting
+        setModalState("email-confirmation");
         setIsSubmitting(false);
         return;
       }
@@ -297,6 +301,65 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
       setIsSubmitting(false);
     }
   };
+
+  // Email confirmation screen
+  if (modalState === "email-confirmation") {
+    return (
+      <Dialog open={open} onOpenChange={() => {}}>
+        <DialogContent
+          className="max-w-md bg-card/95 backdrop-blur-lg border-border p-8 text-center"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          hideCloseButton
+        >
+          <div className="flex flex-col items-center gap-6">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                Check Your Email
+              </h2>
+              <p className="text-muted-foreground mb-4">
+                We've sent a confirmation link to:
+              </p>
+              <p className="text-primary font-medium text-lg mb-4">
+                {userData?.email}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Please click the link in your email to activate your account and start learning.
+              </p>
+            </div>
+
+            <Button
+              onClick={() => navigate("/login")}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground w-full"
+            >
+              Go to Login
+            </Button>
+            
+            <p className="text-xs text-muted-foreground">
+              Didn't receive the email? Check your spam folder.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   // BLOCKING: No close button, no escape, no background click
   return (
