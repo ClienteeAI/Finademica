@@ -145,7 +145,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       : 'font-playfair bg-gradient-to-r from-aqua to-aqua-deep bg-clip-text text-transparent'
                     }
                   `}>
-                    {isNasrTheme ? 'NASR Academy' : client?.company_name}
+                    {isNasrTheme ? 'NASR Lector' : client?.company_name}
                   </span>
                 )}
               </Link>

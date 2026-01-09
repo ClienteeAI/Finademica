@@ -88,7 +88,7 @@ function SidebarNavContent() {
                 'font-playfair text-[#e2e8f0] group-hover:text-[#38bdf8]'
               )}
             >
-              {collapsed ? (isNasrTheme ? 'N' : client?.company_name?.[0] || 'L') : (isNasrTheme ? 'NASR Academy' : client?.company_name)}
+              {collapsed ? (isNasrTheme ? 'N' : client?.company_name?.[0] || 'L') : (isNasrTheme ? 'NASR Lector' : client?.company_name)}
             </span>
           )}
         </Link>
