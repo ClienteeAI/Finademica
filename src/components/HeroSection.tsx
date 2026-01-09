@@ -1,125 +1,93 @@
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, LogIn } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
-import SignupFormInitial, { SignupUserData } from "./SignupFormInitial";
-import MandatoryQuizModal from "./MandatoryQuizModal";
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onGetStarted: () => void;
+}
+
+const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
   const { client } = useClient();
-  const [signupOpen, setSignupOpen] = useState(false);
-  const [quizOpen, setQuizOpen] = useState(false);
-  const [userData, setUserData] = useState<SignupUserData | null>(null);
   const navigate = useNavigate();
 
-  // Auto-open signup when ?signup=1 is present OR skip_landing_page is true
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const signupParam = urlParams.get('signup');
-    
-    if (signupParam === '1' || client?.skip_landing_page) {
-      setSignupOpen(true);
-    }
-  }, [client]);
-
-  const handleSignupComplete = (data: SignupUserData) => {
-    setUserData(data);
-    setQuizOpen(true); // Open mandatory quiz after signup
-  };
-
   return (
-    <>
-      <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-20 overflow-hidden">
-        {/* Login button - positioned absolutely in top right */}
-        <div className="absolute top-8 right-8 z-20">
-          <Button 
-            variant="outline"
-            onClick={() => {
-              console.log('LOGIN_CLICK');
-              navigate('/login');
-            }}
-            className="gap-2"
-          >
-            <LogIn size={18} />
-            Login
-          </Button>
-        </div>
-        {/* Video background */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+    <section className="relative min-h-[90vh] flex items-center justify-center px-4 py-20 overflow-hidden">
+      {/* Login button - positioned absolutely in top right */}
+      <div className="absolute top-8 right-8 z-20">
+        <Button 
+          variant="outline"
+          onClick={() => {
+            console.log('LOGIN_CLICK');
+            navigate('/login');
+          }}
+          className="gap-2"
         >
-          <source src="/hero-background.mp4" type="video/mp4" />
-        </video>
-        
-        {/* Dark overlay for better text readability */}
-        <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
-        
-        <div className="container max-w-5xl mx-auto text-center space-y-8 relative z-10">
-          <div className="animate-fade-in">
-            <div className="inline-block mb-4">
-              <span className="text-sm font-semibold text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
-                🚀 AI-Powered Trading Education
-              </span>
-            </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6">
-              {client?.company_tagline || "Your Personalized Path to Trading Success"}
-            </h1>
-            
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              Welcome to <span className="text-foreground font-semibold">{client?.company_name}</span>.
-              Answer 5 questions. Get AI-powered video training, custom roadmap, 
-              and professional tools - all <span className="text-foreground font-semibold">free</span>.
-            </p>
-            
-            <div className="pt-4">
-              <Button 
-                size="lg" 
-                onClick={() => setSignupOpen(true)}
-                data-quiz-trigger
-                className="bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold px-12 py-7 text-lg rounded-xl shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
-              >
-                Get Started Free
-                <ArrowRight className="ml-2 h-6 w-6" />
-              </Button>
-            </div>
+          <LogIn size={18} />
+          Login
+        </Button>
+      </div>
+      {/* Video background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src="/hero-background.mp4" type="video/mp4" />
+      </video>
+      
+      {/* Dark overlay for better text readability */}
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-[2px]" />
+      
+      <div className="container max-w-5xl mx-auto text-center space-y-8 relative z-10">
+        <div className="animate-fade-in">
+          <div className="inline-block mb-4">
+            <span className="text-sm font-semibold text-primary bg-primary/10 px-4 py-2 rounded-full border border-primary/20">
+              🚀 AI-Powered Trading Education
+            </span>
+          </div>
+          
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6">
+            {client?.company_tagline || "Your Personalized Path to Trading Success"}
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8">
+            Welcome to <span className="text-foreground font-semibold">{client?.company_name}</span>.
+            Answer 5 questions. Get AI-powered video training, custom roadmap, 
+            and professional tools - all <span className="text-foreground font-semibold">free</span>.
+          </p>
+          
+          <div className="pt-4">
+            <Button 
+              size="lg" 
+              onClick={onGetStarted}
+              data-quiz-trigger
+              className="bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold px-12 py-7 text-lg rounded-xl shadow-2xl hover:shadow-primary/50 transition-all duration-300 hover:scale-105"
+            >
+              Get Started Free
+              <ArrowRight className="ml-2 h-6 w-6" />
+            </Button>
+          </div>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-muted-foreground">
-              <span className="flex items-center gap-2">
-                ✓ No Credit Card Required
-              </span>
-              <span className="hidden md:inline text-border">•</span>
-              <span className="flex items-center gap-2">
-                ✓ 2,000+ Active Learners
-              </span>
-              <span className="hidden md:inline text-border">•</span>
-              <span className="flex items-center gap-2">
-                ✓ Powered by AI
-              </span>
-            </div>
+          {/* Trust indicators */}
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-muted-foreground">
+            <span className="flex items-center gap-2">
+              ✓ No Credit Card Required
+            </span>
+            <span className="hidden md:inline text-border">•</span>
+            <span className="flex items-center gap-2">
+              ✓ 2,000+ Active Learners
+            </span>
+            <span className="hidden md:inline text-border">•</span>
+            <span className="flex items-center gap-2">
+              ✓ Powered by AI
+            </span>
           </div>
         </div>
-      </section>
-      
-      {/* Step 1: Signup Form */}
-      <SignupFormInitial 
-        open={signupOpen} 
-        onOpenChange={setSignupOpen} 
-        onSignupComplete={handleSignupComplete}
-      />
-      
-      {/* Step 2: Mandatory Quiz (only opens after signup) */}
-      <MandatoryQuizModal 
-        open={quizOpen} 
-        userData={userData}
-      />
-    </>
+      </div>
+    </section>
   );
 };
 

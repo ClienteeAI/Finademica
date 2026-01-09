@@ -58,13 +58,23 @@ const Index = () => {
   // Normal landing page mode
   return (
     <main className="min-h-screen bg-background">
-      <HeroSection />
+      <HeroSection onGetStarted={() => setSignupOpen(true)} />
       <BenefitsSection />
       <HowItWorks />
-      <CTASection onGetStarted={() => {
-        const btn = document.querySelector('[data-quiz-trigger]') as HTMLButtonElement;
-        if (btn) btn.click();
-      }} />
+      <CTASection onGetStarted={() => setSignupOpen(true)} />
+      
+      {/* Signup Form Modal */}
+      <SignupFormInitial 
+        open={signupOpen} 
+        onOpenChange={setSignupOpen}
+        onSignupComplete={handleSignupComplete}
+      />
+      
+      {/* Quiz Modal (after signup) */}
+      <MandatoryQuizModal 
+        open={quizOpen} 
+        userData={userData}
+      />
     </main>
   );
 };
