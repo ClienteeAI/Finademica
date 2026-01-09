@@ -20,6 +20,9 @@ interface AuthContextType {
   loading: boolean;
   signUp: (email: string, password: string, metadata: {
     signup_token: string;
+    first_name: string;
+    last_name: string;
+    phone: string;
   }) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -89,6 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     metadata: {
       signup_token: string;
+      first_name: string;
+      last_name: string;
+      phone: string;
     }
   ) => {
     const redirectUrl = `${window.location.origin}/`;
@@ -98,7 +104,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { signup_token: metadata.signup_token },
+        data: { 
+          signup_token: metadata.signup_token,
+          first_name: metadata.first_name,
+          last_name: metadata.last_name,
+          phone: metadata.phone,
+        },
       },
     });
 
