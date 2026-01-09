@@ -25,23 +25,25 @@ function Login() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    console.log('[Login] Form submitted, email:', email);
     setLoading(true);
     setError('');
     setShake(false);
 
     try {
-      console.log('Attempting sign in for:', email);
-      const { error: signInError } = await signIn(email, password);
+      console.log('[Login] Calling signIn...');
+      const result = await signIn(email, password);
+      console.log('[Login] signIn result:', result);
 
-      if (signInError) {
-        console.error('Sign in error:', signInError);
+      if (result.error) {
+        console.error('[Login] Sign in error:', result.error);
         let errorMessage = 'Invalid email or password';
-        if (signInError.message.includes('Invalid login credentials')) {
+        if (result.error.message?.includes('Invalid login credentials')) {
           errorMessage = 'Invalid email or password';
-        } else if (signInError.message.includes('Email not confirmed')) {
+        } else if (result.error.message?.includes('Email not confirmed')) {
           errorMessage = 'Please confirm your email before signing in';
         } else {
-          errorMessage = signInError.message;
+          errorMessage = result.error.message || 'Sign in failed';
         }
         setError(errorMessage);
         setLoading(false);
@@ -50,7 +52,7 @@ function Login() {
         return;
       }
 
-      console.log('Sign in successful');
+      console.log('[Login] Sign in successful, redirecting...');
 
       // Show success state
       setSuccess(true);
@@ -62,6 +64,7 @@ function Login() {
       }, 500);
       
     } catch (err) {
+      console.error('[Login] Caught exception:', err);
       setError('Something went wrong. Please try again.');
       setLoading(false);
       setShake(true);
