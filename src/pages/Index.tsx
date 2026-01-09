@@ -1,20 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useClient } from "@/lib/clientContext";
 import HeroSection from "@/components/HeroSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import HowItWorks from "@/components/HowItWorks";
 import CTASection from "@/components/CTASection";
+import SignupFormInitial, { SignupUserData } from "@/components/SignupFormInitial";
+import MandatoryQuizModal from "@/components/MandatoryQuizModal";
 
 const Index = () => {
+  const { client } = useClient();
+  const [signupOnly, setSignupOnly] = useState(false);
+  const [signupOpen, setSignupOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [userData, setUserData] = useState<SignupUserData | null>(null);
 
+  // Check if we should show signup-only mode (no landing page)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const signupParam = urlParams.get('signup');
+    
+    if (signupParam === '1' || client?.skip_landing_page) {
+      setSignupOnly(true);
+      setSignupOpen(true);
+    }
+  }, [client]);
+
+  const handleSignupComplete = (data: SignupUserData) => {
+    setUserData(data);
+    setQuizOpen(true);
+  };
+
+  // If signup-only mode, render just the signup form with a minimal dark background
+  if (signupOnly) {
+    return (
+      <main className="min-h-screen bg-[#0A0E1A] flex items-center justify-center">
+        <SignupFormInitial 
+          open={signupOpen} 
+          onOpenChange={(open) => {
+            // Don't allow closing when in signup-only mode
+            if (!open && !quizOpen) {
+              // User tried to close - keep it open
+              setSignupOpen(true);
+            } else {
+              setSignupOpen(open);
+            }
+          }} 
+          onSignupComplete={handleSignupComplete}
+        />
+        <MandatoryQuizModal 
+          open={quizOpen} 
+          userData={userData}
+        />
+      </main>
+    );
+  }
+
+  // Normal landing page mode
   return (
     <main className="min-h-screen bg-background">
       <HeroSection />
       <BenefitsSection />
       <HowItWorks />
       <CTASection onGetStarted={() => {
-        // Trigger quiz modal (will be passed down through HeroSection)
         const btn = document.querySelector('[data-quiz-trigger]') as HTMLButtonElement;
         if (btn) btn.click();
       }} />
