@@ -113,7 +113,12 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
       const { error: signUpError } = await signUp(
         formData.email,
         formData.password,
-        { signup_token }
+        { 
+          signup_token,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          phone: formData.phone,
+        }
       );
 
       if (signUpError) {
