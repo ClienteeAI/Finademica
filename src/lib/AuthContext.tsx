@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       phone: string;
     }
   ) => {
-    const redirectUrl = `${window.location.origin}/`;
+    const redirectUrl = `${window.location.origin}/auth/callback`;
 
     const { error } = await supabase.auth.signUp({
       email,

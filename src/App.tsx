@@ -9,6 +9,7 @@ import { AIMentor } from "@/components/AIMentor";
 import { XPGainToastProvider } from "@/components/XPGainToast";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
+import AuthCallback from "./pages/AuthCallback";
 import Dashboard from "./pages/Dashboard";
 import MyVideos from "./pages/MyVideos";
 import VideoPlayer from "./pages/VideoPlayer";
@@ -44,6 +45,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/home" element={<Feed />} />
             <Route path="/feed" element={<Feed />} />
             <Route path="/dashboard" element={<Dashboard />} />
