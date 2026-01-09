@@ -131,13 +131,38 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
   };
 
   const handleSubmit = async () => {
-    if (!userData) {
-      setWebhookError("User data not found. Please refresh and try again.");
-      return;
-    }
-
     setIsSubmitting(true);
     setWebhookError(null);
+
+    // TESTING MODE: If no userData, just send to webhook and skip DB operations
+    if (!userData) {
+      try {
+        const testPayload = {
+          main_concern: answers.main_concern,
+          experience_level: answers.experience,
+          primary_goal: answers.goal,
+          risk_tolerance: answers.risk_tolerance,
+          time_available: answers.time_available,
+          client_id: client?.id,
+          client_name: client?.company_name,
+          source: "lovable_quiz_test"
+        };
+
+        const response = await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(testPayload),
+        });
+        console.log("Test quiz webhook sent:", response.ok);
+        setIsSubmitting(false);
+        return;
+      } catch (err) {
+        console.error("Test webhook error:", err);
+        setWebhookError("Failed to send test data");
+        setIsSubmitting(false);
+        return;
+      }
+    }
 
     try {
       // Get current auth user
