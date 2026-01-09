@@ -145,15 +145,15 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           time_available: answers.time_available,
           client_id: client?.id,
           client_name: client?.company_name,
-          source: "lovable_quiz_test"
+          source: "lovable_quiz"
         };
 
-        const response = await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+        const response = await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(testPayload),
         });
-        console.log("Test quiz webhook sent:", response.ok);
+        console.log("Quiz webhook sent:", response.ok);
         setIsSubmitting(false);
         return;
       } catch (err) {
@@ -231,7 +231,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           source: "lovable_quiz"
         };
 
-        await fetch('https://clientee.app.n8n.cloud/webhook-test/0436515b-5645-4361-b278-c6273f0d5efb', {
+        await fetch('https://clientee.app.n8n.cloud/webhook/0436515b-5645-4361-b278-c6273f0d5efb', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(quizPayload),
