@@ -14,19 +14,17 @@ const Index = () => {
   const [quizOpen, setQuizOpen] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
-  // Check if we should show signup-only mode (no landing page) - only run once
+  // Check if we should show signup-only mode (no landing page) - only run ONCE on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const signupParam = urlParams.get('signup');
     
     if (signupParam === '1' || client?.skip_landing_page) {
       setSignupOnly(true);
-      // Only open signup if quiz isn't already open
-      if (!quizOpen) {
-        setSignupOpen(true);
-      }
+      setSignupOpen(true);
     }
-  }, [client, quizOpen]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [client?.skip_landing_page]); // Only depend on client config, not quizOpen
 
   const handleSignupComplete = (data: SignupUserData) => {
     setUserData(data);
