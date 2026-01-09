@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface SignupUserData {
   firstName: string;
   lastName: string;
+  nickname: string;
   email: string;
   phone: string;
   password: string;
@@ -31,6 +32,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
   const [formData, setFormData] = useState<SignupUserData>({
     firstName: "",
     lastName: "",
+    nickname: "",
     email: "",
     phone: "",
     password: ""
@@ -52,6 +54,9 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
     
     if (!formData.firstName.trim()) newErrors.firstName = "First name is required";
     if (!formData.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!formData.nickname.trim()) newErrors.nickname = "Nickname is required";
+    else if (formData.nickname.trim().length < 3) newErrors.nickname = "Nickname must be at least 3 characters";
+    else if (formData.nickname.trim().length > 20) newErrors.nickname = "Nickname must be 20 characters or less";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
@@ -117,6 +122,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           signup_token,
           first_name: formData.firstName,
           last_name: formData.lastName,
+          nickname: formData.nickname,
           phone: formData.phone,
         }
       );
@@ -193,6 +199,19 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
               />
               {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nickname">Nickname (displayed publicly)</Label>
+            <Input
+              id="nickname"
+              placeholder="TraderJohn"
+              value={formData.nickname}
+              onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
+              className={errors.nickname ? "border-destructive" : ""}
+              disabled={isSubmitting}
+            />
+            {errors.nickname && <p className="text-xs text-destructive">{errors.nickname}</p>}
           </div>
 
           <div className="space-y-2">
