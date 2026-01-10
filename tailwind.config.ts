@@ -14,12 +14,13 @@ export default {
     },
     extend: {
       fontFamily: {
-        'serif': ['Playfair Display', 'Georgia', 'serif'],
-        'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+        'serif': ['var(--font-serif, Playfair Display)', 'Georgia', 'serif'],
+        'sans': ['var(--font-sans, Inter)', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
         'playfair': ['Playfair Display', 'Georgia', 'serif'],
         'inter': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
       },
       colors: {
+        // Core semantic colors - using raw CSS variables to support HSL and OKLCH
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -64,7 +65,18 @@ export default {
         "border-subtle": "hsl(var(--border-subtle))",
         "border-hover": "hsl(var(--border-hover))",
         "border-glass": "hsl(var(--border-glass))",
-        // Luminous Ice specific colors
+        // Sidebar colors
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+        // Luminous Ice specific colors (fallback/legacy)
         aqua: {
           DEFAULT: "#4DE2E8",
           light: "#A7E9FF",
@@ -84,10 +96,10 @@ export default {
           DEFAULT: "#B5A7FF",
           light: "#D4CBFF",
         },
-        // Nasr Trade Gold theme colors
+        // Gold theme colors (fallback/legacy)
         gold: {
-          DEFAULT: "#D4AF37",
-          light: "#F2C94C",
+          DEFAULT: "hsl(var(--gold, 43 69% 53%))",
+          light: "hsl(var(--gold-light, 45 85% 62%))",
           dark: "#B8962E",
           glow: "rgba(212, 175, 55, 0.12)",
         },

@@ -2,6 +2,19 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '@/integrations/supabase/client';
 import type { Json } from '@/integrations/supabase/types';
 
+// Theme configuration types for dynamic theming from Supabase
+interface ThemeConfig {
+  light?: Record<string, string>;
+  dark?: Record<string, string>;
+  fonts?: {
+    sans?: string;
+    serif?: string;
+    mono?: string;
+  };
+  radius?: string;
+  shadows?: Record<string, string>;
+}
+
 interface Client {
   id: string;
   company_name: string;
@@ -15,6 +28,7 @@ interface Client {
   require_quiz?: boolean | null;
   signup_config?: Json | null;
   onboarding_config?: Json | null;
+  theme_config?: ThemeConfig | null;
 }
 
 interface ClientContextType {
@@ -30,11 +44,161 @@ interface ClientProviderProps {
   children: ReactNode;
 }
 
+// Helper to load Google Fonts dynamically
+function loadGoogleFont(fontFamily: string | undefined) {
+  if (!fontFamily) return;
+  
+  const fontName = fontFamily.split(',')[0].trim().replace(/['"]/g, '');
+  
+  // Skip system fonts
+  if (fontName.startsWith('ui-') || fontName === 'system-ui' || fontName === 'sans-serif' || fontName === 'serif') {
+    return;
+  }
+  
+  const existingLink = document.querySelector(`link[href*="${encodeURIComponent(fontName.replace(/ /g, '+'))}"]`);
+  
+  if (!existingLink) {
+    const link = document.createElement('link');
+    link.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, '+')}:wght@400;500;600;700&display=swap`;
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+  }
+}
+
+// Main function to apply theme from Supabase theme_config
+function applyClientTheme(client: Client) {
+  const root = document.documentElement;
+  const themeConfig = client.theme_config as ThemeConfig | null;
+  
+  // If no theme_config, fall back to legacy primary/secondary colors
+  if (!themeConfig) {
+    // Legacy support: apply raw hex values
+    if (client.primary_color) {
+      root.style.setProperty('--client-primary', client.primary_color);
+      const primaryHSL = hexToHSL(client.primary_color);
+      root.style.setProperty('--primary', primaryHSL);
+      root.style.setProperty('--ring', primaryHSL);
+    }
+    if (client.secondary_color) {
+      root.style.setProperty('--client-secondary', client.secondary_color);
+      const secondaryHSL = hexToHSL(client.secondary_color);
+      root.style.setProperty('--accent', secondaryHSL);
+    }
+    return;
+  }
+
+  // Detect dark mode via .dark class on <html>
+  const isDark = root.classList.contains('dark');
+  const mode = isDark ? 'dark' : 'light';
+  const vars = themeConfig[mode] || themeConfig.light;
+
+  // Apply all color variables from theme_config
+  if (vars) {
+    Object.entries(vars).forEach(([key, value]) => {
+      root.style.setProperty(`--${key}`, String(value));
+    });
+  }
+
+  // Apply font variables
+  if (themeConfig.fonts) {
+    if (themeConfig.fonts.sans) {
+      root.style.setProperty('--font-sans', themeConfig.fonts.sans);
+      loadGoogleFont(themeConfig.fonts.sans);
+    }
+    if (themeConfig.fonts.serif) {
+      root.style.setProperty('--font-serif', themeConfig.fonts.serif);
+      loadGoogleFont(themeConfig.fonts.serif);
+    }
+    if (themeConfig.fonts.mono) {
+      root.style.setProperty('--font-mono', themeConfig.fonts.mono);
+    }
+  }
+
+  // Apply radius
+  if (themeConfig.radius) {
+    root.style.setProperty('--radius', String(themeConfig.radius));
+  }
+
+  // Apply shadow variables
+  if (themeConfig.shadows) {
+    Object.entries(themeConfig.shadows).forEach(([key, value]) => {
+      const varName = key === 'DEFAULT' ? '--shadow' : `--shadow-${key}`;
+      root.style.setProperty(varName, String(value));
+    });
+  }
+
+  // Apply body background based on theme
+  if (vars?.background) {
+    // For dark themes, apply dark gradient
+    const bgLightness = parseFloat(vars.background.split(' ')[2] || '50');
+    if (bgLightness < 20) {
+      // Dark theme - apply dark gradient
+      document.body.style.background = 'linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%)';
+    } else {
+      // Light theme - apply light gradient
+      document.body.style.background = 'linear-gradient(145deg, #F6F9FB 0%, #EDF2F7 50%, #F6F9FB 100%)';
+    }
+    document.body.style.backgroundAttachment = 'fixed';
+  }
+}
+
+// Legacy helper for hex to HSL conversion (for clients without theme_config)
+function hexToHSL(hex: string): string {
+  hex = hex.replace(/^#/, '');
+  
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+  
+  return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+}
+
 export function ClientProvider({ children }: ClientProviderProps) {
   const [client, setClient] = useState<Client | null>(null);
-  const [allClients, setAllClients] = useState<Client[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [allClients, setAllClients] = useState<any[]>([]);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Watch for dark mode changes and reapply theme
+  useEffect(() => {
+    if (!client) return;
+
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          applyClientTheme(client);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, { attributes: true });
+
+    return () => observer.disconnect();
+  }, [client]);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,8 +257,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
       const hostname = window.location.hostname;
       const domainMatchedClient = data?.find(c => c.custom_domain === hostname);
       if (domainMatchedClient) {
-        setClient(domainMatchedClient);
-        applyClientTheme(domainMatchedClient);
+        setClient(domainMatchedClient as Client);
+        applyClientTheme(domainMatchedClient as Client);
         localStorage.setItem('client_id', domainMatchedClient.id);
         setLoading(false);
         return;
@@ -105,8 +269,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
       if (savedClient) {
         const selectedClient = data?.find(c => c.subdomain === savedClient);
         if (selectedClient) {
-          setClient(selectedClient);
-          applyClientTheme(selectedClient);
+          setClient(selectedClient as Client);
+          applyClientTheme(selectedClient as Client);
           localStorage.setItem('client_id', selectedClient.id);
           setLoading(false);
           return;
@@ -116,8 +280,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
       // PRIORITY 3: Default to first client
       const firstClient = data?.[0];
       if (firstClient) {
-        setClient(firstClient);
-        applyClientTheme(firstClient);
+        setClient(firstClient as Client);
+        applyClientTheme(firstClient as Client);
         localStorage.setItem('client_id', firstClient.id);
       }
     } else {
@@ -136,8 +300,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
           .single();
 
         if (data) {
-          setClient(data);
-          applyClientTheme(data);
+          setClient(data as Client);
+          applyClientTheme(data as Client);
           localStorage.setItem('client_id', data.id);
           setLoading(false);
           return;
@@ -155,8 +319,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
         .maybeSingle();
       
       if (customDomainClient) {
-        setClient(customDomainClient);
-        applyClientTheme(customDomainClient);
+        setClient(customDomainClient as Client);
+        applyClientTheme(customDomainClient as Client);
         localStorage.setItem('client_id', customDomainClient.id);
         setLoading(false);
         return;
@@ -178,8 +342,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
             .single();
 
           if (data) {
-            setClient(data);
-            applyClientTheme(data);
+            setClient(data as Client);
+            applyClientTheme(data as Client);
             localStorage.setItem('client_id', data.id);
             setLoading(false);
             return;
@@ -196,8 +360,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
         .single();
 
       if (fallbackClient) {
-        setClient(fallbackClient);
-        applyClientTheme(fallbackClient);
+        setClient(fallbackClient as Client);
+        applyClientTheme(fallbackClient as Client);
         localStorage.setItem('client_id', fallbackClient.id);
       } else {
         console.error('Client not found: nallio (fallback)');
@@ -210,84 +374,13 @@ export function ClientProvider({ children }: ClientProviderProps) {
   function switchClient(subdomain: string) {
     const newClient = allClients.find(c => c.subdomain === subdomain);
     if (newClient) {
-      setClient(newClient);
-      applyClientTheme(newClient);
+      setClient(newClient as Client);
+      applyClientTheme(newClient as Client);
       localStorage.setItem('admin_selected_client', subdomain);
       localStorage.setItem('client_id', newClient.id);
       
       // Reload page to apply changes everywhere
       window.location.reload();
-    }
-  }
-
-  function hexToHSL(hex: string): string {
-    // Remove # if present
-    hex = hex.replace(/^#/, '');
-    
-    // Parse hex to RGB
-    const r = parseInt(hex.substring(0, 2), 16) / 255;
-    const g = parseInt(hex.substring(2, 4), 16) / 255;
-    const b = parseInt(hex.substring(4, 6), 16) / 255;
-    
-    const max = Math.max(r, g, b);
-    const min = Math.min(r, g, b);
-    let h = 0;
-    let s = 0;
-    const l = (max + min) / 2;
-    
-    if (max !== min) {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      
-      switch (max) {
-        case r:
-          h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-          break;
-        case g:
-          h = ((b - r) / d + 2) / 6;
-          break;
-        case b:
-          h = ((r - g) / d + 4) / 6;
-          break;
-      }
-    }
-    
-    // Return as "H S% L%" format for CSS variables
-    return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-  }
-
-  function applyClientTheme(client: Client) {
-    const root = document.documentElement;
-    
-    // Apply raw hex values for legacy usage
-    root.style.setProperty('--client-primary', client.primary_color);
-    root.style.setProperty('--client-secondary', client.secondary_color);
-    
-    // Convert and apply HSL values to semantic design tokens
-    if (client.primary_color) {
-      const primaryHSL = hexToHSL(client.primary_color);
-      root.style.setProperty('--primary', primaryHSL);
-      root.style.setProperty('--ring', primaryHSL);
-      root.style.setProperty('--success', primaryHSL);
-      root.style.setProperty('--success-from', primaryHSL);
-      root.style.setProperty('--premium-from', primaryHSL);
-      root.style.setProperty('--border-hover', primaryHSL);
-    }
-    
-    if (client.secondary_color) {
-      const secondaryHSL = hexToHSL(client.secondary_color);
-      root.style.setProperty('--accent', secondaryHSL);
-      root.style.setProperty('--success-to', secondaryHSL);
-      root.style.setProperty('--premium-to', secondaryHSL);
-    }
-    
-    // Apply theme class for Nasr Trade (dark gold theme)
-    if (client.subdomain === 'nasr') {
-      root.classList.add('theme-nasr');
-      document.body.classList.add('theme-nasr');
-    } else {
-      root.classList.remove('theme-nasr');
-      document.body.classList.remove('theme-nasr');
     }
   }
 

@@ -104,90 +104,17 @@
   }
 
   /* ============================================
-     NASR TRADE THEME: PREMIUM GOLD (Dark Luxury)
-     Applied via .theme-nasr class on html/body
+     THEME VARIABLES ARE NOW LOADED DYNAMICALLY
+     FROM SUPABASE theme_config COLUMN.
+     
+     The applyClientTheme() function in clientContext.tsx
+     sets all CSS variables at runtime based on:
+     - client.theme_config.light or .dark object
+     - Fonts, radius, and shadows from theme_config
+     
+     No hardcoded theme blocks are needed here.
+     The :root defaults above serve as fallbacks.
   ============================================ */
-  .theme-nasr {
-    /* Deep black to navy gradient base */
-    --background: 220 30% 2%;
-    --foreground: 0 0% 96%;
-
-    /* Dark charcoal panels */
-    --card: 220 25% 6%;
-    --card-foreground: 0 0% 96%;
-
-    --popover: 220 25% 6%;
-    --popover-foreground: 0 0% 96%;
-
-    /* Primary: Premium Gold */
-    --primary: 43 69% 53%;
-    --primary-foreground: 0 0% 0%;
-
-    /* Secondary: Dark charcoal */
-    --secondary: 220 20% 10%;
-    --secondary-foreground: 0 0% 79%;
-
-    /* Muted elements - darker */
-    --muted: 220 20% 12%;
-    --muted-foreground: 0 0% 85%;
-
-    /* Accent: Soft gold */
-    --accent: 45 70% 55%;
-    --accent-foreground: 0 0% 0%;
-
-    /* Danger - keeping similar */
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 0% 98%;
-
-    /* Borders - subtle white with low opacity effect */
-    --border: 220 15% 15%;
-    --input: 220 20% 10%;
-    --ring: 43 69% 53%;
-
-    --radius: 0.75rem;
-
-    /* Success: Gold */
-    --success: 43 69% 53%;
-    --success-from: 45 85% 62%;
-    --success-to: 43 69% 53%;
-    
-    /* Premium gradient: Gold */
-    --premium-from: 45 85% 62%;
-    --premium-to: 43 69% 53%;
-    
-    /* Info, warning stay similar */
-    --info: 43 69% 53%;
-    --warning: 38 80% 55%;
-    --error: 0 72% 50%;
-    
-    /* Text hierarchy - off-white to muted (improved contrast) */
-    --text-primary: 0 0% 96%;
-    --text-secondary: 0 0% 88%;
-    --text-tertiary: 0 0% 68%;
-    
-    /* Borders */
-    --border-subtle: 220 15% 15%;
-    --border-hover: 43 69% 53%;
-    --border-glass: 43 69% 20%;
-
-    /* Purple becomes gold-ish */
-    --purple: 43 50% 45%;
-
-    /* Gold accent colors */
-    --gold: 43 69% 53%;
-    --gold-light: 45 85% 62%;
-    --gold-glow: 43 69% 53%;
-
-    /* Sidebar - Dark theme */
-    --sidebar-background: 220 25% 6%;
-    --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 43 69% 53%;
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 220 20% 12%;
-    --sidebar-accent-foreground: 0 0% 85%;
-    --sidebar-border: 220 15% 15%;
-    --sidebar-ring: 43 69% 53%;
-  }
 }
 
 @layer base {
