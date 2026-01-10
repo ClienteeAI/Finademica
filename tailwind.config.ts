@@ -98,9 +98,9 @@ export default {
         },
         // Gold theme colors (fallback/legacy)
         gold: {
-          DEFAULT: "hsl(var(--gold, 43 69% 53%))",
-          light: "hsl(var(--gold-light, 45 85% 62%))",
-          dark: "#B8962E",
+          DEFAULT: "rgb(var(--gold-rgb, 212 175 55) / <alpha-value>)",
+          light: "rgb(var(--gold-light-rgb, 244 217 140) / <alpha-value>)",
+          dark: "rgb(178 150 46 / <alpha-value>)",
           glow: "rgba(212, 175, 55, 0.12)",
         },
         nasr: {

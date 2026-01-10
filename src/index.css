@@ -87,7 +87,9 @@
     /* Lavender Ice for secondary tags */
     --purple: 255 55% 83%;
 
-    /* Gold accent (used in Nasr theme) */
+    /* Gold accent (RGB format for Tailwind v4 opacity support) */
+    --gold-rgb: 212 175 55;
+    --gold-light-rgb: 244 217 140;
     --gold: 43 69% 53%;
     --gold-light: 45 85% 62%;
     --gold-glow: 43 69% 53%;
