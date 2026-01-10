@@ -769,7 +769,8 @@
   }
 
   .theme-nasr .filter-pill-inactive:hover {
-    @apply border-gold/40 text-white/90;
+    @apply text-white/90;
+    border-color: rgba(212, 175, 55, 0.4);
   }
 
   /* Better search input styling */
@@ -790,7 +791,8 @@
   }
 
   .theme-nasr .search-input:focus {
-    @apply border-gold ring-gold/20;
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
   }
 
   .theme-nasr .search-input::placeholder {
