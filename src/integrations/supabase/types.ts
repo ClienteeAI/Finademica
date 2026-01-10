@@ -129,6 +129,30 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_books: {
+        Row: {
+          brand_key: string
+          id: string
+          theme_config: Json
+          tokens_css: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_key: string
+          id?: string
+          theme_config?: Json
+          tokens_css?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_key?: string
+          id?: string
+          theme_config?: Json
+          tokens_css?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_reserved_nicknames: {
         Row: {
           client_id: string
@@ -197,6 +221,7 @@ export type Database = {
       clients: {
         Row: {
           active: boolean | null
+          brand_key: string | null
           company_name: string
           company_tagline: string | null
           created_at: string | null
@@ -218,10 +243,13 @@ export type Database = {
           signup_config: Json | null
           skip_landing_page: boolean | null
           subdomain: string
+          theme_config: Json | null
+          theme_override: Json | null
           updated_at: string | null
         }
         Insert: {
           active?: boolean | null
+          brand_key?: string | null
           company_name: string
           company_tagline?: string | null
           created_at?: string | null
@@ -243,10 +271,13 @@ export type Database = {
           signup_config?: Json | null
           skip_landing_page?: boolean | null
           subdomain: string
+          theme_config?: Json | null
+          theme_override?: Json | null
           updated_at?: string | null
         }
         Update: {
           active?: boolean | null
+          brand_key?: string | null
           company_name?: string
           company_tagline?: string | null
           created_at?: string | null
@@ -268,6 +299,8 @@ export type Database = {
           signup_config?: Json | null
           skip_landing_page?: boolean | null
           subdomain?: string
+          theme_config?: Json | null
+          theme_override?: Json | null
           updated_at?: string | null
         }
         Relationships: []
