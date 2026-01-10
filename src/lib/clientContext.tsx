@@ -70,8 +70,15 @@ function applyClientTheme(client: Client) {
   const root = document.documentElement;
   const themeConfig = client.theme_config as ThemeConfig | null;
   
+  console.log('[Theme] Applying theme for client:', client.subdomain, 'theme_config:', themeConfig ? 'present' : 'missing');
+  
+  // Clear previous theme classes
+  root.classList.remove('theme-nasr');
+  document.body.classList.remove('theme-nasr');
+  
   // If no theme_config, fall back to legacy primary/secondary colors
   if (!themeConfig) {
+    console.log('[Theme] No theme_config, using legacy colors');
     // Legacy support: apply raw hex values
     if (client.primary_color) {
       root.style.setProperty('--client-primary', client.primary_color);
@@ -91,6 +98,8 @@ function applyClientTheme(client: Client) {
   const isDark = root.classList.contains('dark');
   const mode = isDark ? 'dark' : 'light';
   const vars = themeConfig[mode] || themeConfig.light;
+  
+  console.log('[Theme] Mode:', mode, 'Variables count:', vars ? Object.keys(vars).length : 0);
 
   // Apply all color variables from theme_config
   if (vars) {
@@ -127,19 +136,26 @@ function applyClientTheme(client: Client) {
     });
   }
 
-  // Apply body background based on theme
-  if (vars?.background) {
-    // For dark themes, apply dark gradient
-    const bgLightness = parseFloat(vars.background.split(' ')[2] || '50');
-    if (bgLightness < 20) {
-      // Dark theme - apply dark gradient
-      document.body.style.background = 'linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%)';
-    } else {
-      // Light theme - apply light gradient
-      document.body.style.background = 'linear-gradient(145deg, #F6F9FB 0%, #EDF2F7 50%, #F6F9FB 100%)';
-    }
-    document.body.style.backgroundAttachment = 'fixed';
+  // Detect if this is a dark-based theme by checking background lightness
+  // HSL format: "H S% L%" - we check the L (lightness) value
+  const bgValue = vars?.background || '';
+  const bgLightness = parseFloat(bgValue.split(' ')[2]?.replace('%', '') || '50');
+  const isDarkTheme = bgLightness < 20;
+  
+  console.log('[Theme] Background:', bgValue, 'Lightness:', bgLightness, 'isDarkTheme:', isDarkTheme);
+
+  // Apply theme class for CSS utility overrides (e.g., .theme-nasr .premium-card)
+  // This is needed for clients with dark themes that have special styling
+  if (isDarkTheme) {
+    root.classList.add('theme-nasr');
+    document.body.classList.add('theme-nasr');
+    // Dark theme - apply dark gradient background
+    document.body.style.background = 'linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%)';
+  } else {
+    // Light theme - apply light gradient background
+    document.body.style.background = 'linear-gradient(145deg, #F6F9FB 0%, #EDF2F7 50%, #F6F9FB 100%)';
   }
+  document.body.style.backgroundAttachment = 'fixed';
 }
 
 // Legacy helper for hex to HSL conversion (for clients without theme_config)
