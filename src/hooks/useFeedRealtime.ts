@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -26,25 +26,37 @@ export function useFeedRealtime({
 }: UseFeedRealtimeOptions) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const subscribedRef = useRef(false);
+  
+  // Store callbacks in refs to avoid re-creating debounced functions
+  const onPostChangeRef = useRef(onPostChange);
+  const onLikeChangeRef = useRef(onLikeChange);
+  const onCommentChangeRef = useRef(onCommentChange);
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onPostChangeRef.current = onPostChange;
+    onLikeChangeRef.current = onLikeChange;
+    onCommentChangeRef.current = onCommentChange;
+  }, [onPostChange, onLikeChange, onCommentChange]);
 
-  // Debounced callbacks to prevent spam
-  const debouncedPostChange = useCallback(
-    debounce(() => onPostChange?.(), 400),
-    [onPostChange]
+  // Create stable debounced functions that read from refs
+  const debouncedPostChange = useMemo(
+    () => debounce(() => onPostChangeRef.current?.(), 400),
+    []
   );
-  const debouncedLikeChange = useCallback(
-    debounce((postId: string) => {
-      onLikeChange?.(postId);
-      onPostChange?.(); // Also refresh posts for like_count
+  const debouncedLikeChange = useMemo(
+    () => debounce((postId: string) => {
+      onLikeChangeRef.current?.(postId);
+      onPostChangeRef.current?.();
     }, 400),
-    [onLikeChange, onPostChange]
+    []
   );
-  const debouncedCommentChange = useCallback(
-    debounce((postId: string) => {
-      onCommentChange?.(postId);
-      onPostChange?.(); // Also refresh posts for comment_count
+  const debouncedCommentChange = useMemo(
+    () => debounce((postId: string) => {
+      onCommentChangeRef.current?.(postId);
+      onPostChangeRef.current?.();
     }, 400),
-    [onCommentChange, onPostChange]
+    []
   );
 
   const setupSubscription = useCallback(() => {
