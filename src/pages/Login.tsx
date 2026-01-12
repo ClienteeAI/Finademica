@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useClient } from '@/lib/clientContext';
 import { useAuth } from '@/lib/AuthContext';
 import { Eye, EyeOff, Mail, Lock, AlertTriangle, Check } from 'lucide-react';
+import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ function Login() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const [shake, setShake] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { client } = useClient();
   const { signIn, user } = useAuth();
@@ -189,6 +191,17 @@ function Login() {
               </div>
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="flex justify-end animate-fade-in" style={{ animationDelay: '450ms' }}>
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-white/60 hover:text-success transition-colors"
+              >
+                Forgot password?
+              </button>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -250,6 +263,13 @@ function Login() {
           </div>
         </div>
       )}
+
+      {/* Forgot Password Modal */}
+      <ForgotPasswordModal
+        open={showForgotPassword}
+        onOpenChange={setShowForgotPassword}
+        defaultEmail={email}
+      />
 
     </div>
   );

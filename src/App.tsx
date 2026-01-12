@@ -22,6 +22,7 @@ import Quiz from "./pages/Quiz";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Feed from "./pages/Feed";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/home" element={<Feed />} />
             <Route path="/feed" element={<Feed />} />
