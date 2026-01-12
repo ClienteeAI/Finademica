@@ -284,15 +284,15 @@ const Dashboard = () => {
         )}
 
         {/* Welcome Section */}
-        <div className="space-y-8 animate-slide-up">
-          <div className="space-y-4">
+        <div className="space-y-6 md:space-y-8 animate-slide-up">
+          <div className="space-y-3 md:space-y-4">
             <h1 className={cn(
-              "text-5xl md:text-6xl font-bold tracking-tight",
+              "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
               themeColors.heading
             )}>
               Welcome back, {userData.firstName}!
             </h1>
-            <p className={cn("text-lg", themeColors.subtext)}>
+            <p className={cn("text-base md:text-lg", themeColors.subtext)}>
               Let's continue your trading journey
             </p>
           </div>
@@ -335,24 +335,24 @@ const Dashboard = () => {
         <UserProgressCard />
 
         {/* Quick Stats - Only showing Videos Watched (real data) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 max-w-2xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 max-w-2xl">
           <Card
-            className="p-8 space-y-5 group cursor-pointer"
+            className="p-5 md:p-8 space-y-4 md:space-y-5 group cursor-pointer"
             style={{
               animationDelay: `0.2s`,
               animationFillMode: "backwards",
             }}
           >
             <div className="flex items-center justify-between">
-              <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <Video className="w-6 h-6 text-success" />
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <Video className="w-5 h-5 md:w-6 md:h-6 text-success" />
               </div>
             </div>
-            <div className="space-y-2">
-              <p className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
+            <div className="space-y-1 md:space-y-2">
+              <p className="text-xs md:text-sm uppercase tracking-widest text-muted-foreground font-semibold">
                 Videos Watched
               </p>
-              <p className="text-4xl font-semibold text-foreground font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
+              <p className="text-2xl md:text-4xl font-semibold text-foreground font-mono tracking-tight group-hover:scale-105 transition-transform duration-300">
                 {completedVideoIds.size} / {freeVideos.length || 0}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -407,25 +407,25 @@ const Dashboard = () => {
         )}
 
         {/* Personalized Video Playlist */}
-        <div className="space-y-8">
-          <div className="space-y-3">
-            <h2 className="text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-3">
-              <span className="text-3xl">🎥</span>
+        <div className="space-y-5 md:space-y-8">
+          <div className="space-y-2 md:space-y-3">
+            <h2 className="text-2xl md:text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-2 md:gap-3">
+              <span className="text-xl md:text-3xl">🎥</span>
               Start Learning
             </h2>
-            <p className="text-lg text-[#6B7280]">
+            <p className="text-base md:text-lg text-[#6B7280]">
               Your personalized videos - watch these first
             </p>
           </div>
 
           {videosLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {[1, 2].map((i) => (
                 <Card key={i} className="overflow-hidden">
                   <div className="aspect-video bg-muted animate-pulse" />
-                  <div className="p-8 space-y-4">
-                    <div className="h-6 bg-muted rounded animate-pulse w-1/3" />
-                    <div className="h-6 bg-muted rounded animate-pulse w-2/3" />
+                  <div className="p-4 md:p-8 space-y-3 md:space-y-4">
+                    <div className="h-5 md:h-6 bg-muted rounded animate-pulse w-1/3" />
+                    <div className="h-5 md:h-6 bg-muted rounded animate-pulse w-2/3" />
                   </div>
                 </Card>
               ))}
@@ -434,7 +434,7 @@ const Dashboard = () => {
             <div className="space-y-6">
               {/* Show only first 2 free videos */}
               {freeVideos.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   {freeVideos.slice(0, 2).map((rec, index) => {
                     if (!rec.video) return null;
                     const video = rec.video;
