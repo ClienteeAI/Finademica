@@ -57,10 +57,10 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
       <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50 sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-foreground">
-            איפוס סיסמה
+            Reset Password
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            הזן את כתובת האימייל שלך ונשלח לך קישור לאיפוס הסיסמה.
+            Enter your email address and we'll send you a password reset link.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,20 +70,20 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
               <CheckCircle className="w-8 h-8 text-success" />
             </div>
             <div className="text-center">
-              <p className="text-foreground font-medium">הקישור נשלח!</p>
+              <p className="text-foreground font-medium">Link Sent!</p>
               <p className="text-muted-foreground text-sm mt-1">
-                בדוק את תיבת הדואר שלך ולחץ על הקישור לאיפוס הסיסמה.
+                Check your inbox and click the link to reset your password.
               </p>
             </div>
             <Button onClick={handleClose} className="mt-2">
-              סגור
+              Close
             </Button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="reset-email" className="text-foreground">
-                אימייל
+                Email
               </Label>
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -115,7 +115,7 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
                 className="flex-1"
                 disabled={loading}
               >
-                ביטול
+                Cancel
               </Button>
               <Button
                 type="submit"
@@ -124,11 +124,11 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                    שולח...
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Sending...
                   </>
                 ) : (
-                  'שלח קישור'
+                  'Send Link'
                 )}
               </Button>
             </div>
