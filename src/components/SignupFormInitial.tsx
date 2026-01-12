@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,6 +26,7 @@ interface SignupFormInitialProps {
 }
 
 const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormInitialProps) => {
+  const navigate = useNavigate();
   const { client } = useClient();
   const { signUp, signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
@@ -306,6 +308,23 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           <p className="text-xs text-center text-muted-foreground">
             🔒 Your data is secure. We never share your information.
           </p>
+
+          {/* Sign in link */}
+          <div className="text-center pt-2">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenChange(false);
+                  navigate('/login');
+                }}
+                className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
+              >
+                Sign in
+              </button>
+            </p>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
