@@ -235,28 +235,28 @@ export default function Feed() {
 
   return (
     <SidebarLayout>
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Community Feed</h1>
-          <p className="text-muted-foreground text-sm">
-            Share updates and connect with your community
+      <div className="max-w-2xl mx-auto space-y-4 md:space-y-6 px-0">
+        {/* Header - more compact on mobile */}
+        <div className="space-y-0.5">
+          <h1 className="text-xl md:text-2xl font-bold text-foreground">Community Feed</h1>
+          <p className="text-muted-foreground text-xs md:text-sm">
+            Share updates with your community
           </p>
         </div>
 
         {/* Composer */}
         <FeedComposer onPostCreated={handlePostCreated} composerRef={composerRef} />
 
-        {/* Feed Tabs */}
+        {/* Feed Tabs - adjusted for mobile */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <div className="flex items-center justify-between">
-            <TabsList>
-              <TabsTrigger value="community" className="gap-2">
-                <Users className="h-4 w-4" />
+          <div className="flex items-center justify-between gap-2">
+            <TabsList className="h-9 md:h-10">
+              <TabsTrigger value="community" className="gap-1.5 md:gap-2 text-xs md:text-sm px-2.5 md:px-3">
+                <Users className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 Community
               </TabsTrigger>
-              <TabsTrigger value="my-posts" className="gap-2">
-                <User className="h-4 w-4" />
+              <TabsTrigger value="my-posts" className="gap-1.5 md:gap-2 text-xs md:text-sm px-2.5 md:px-3">
+                <User className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 My Posts
               </TabsTrigger>
             </TabsList>
@@ -271,17 +271,17 @@ export default function Feed() {
                   fetchMyPosts();
                 }
               }}
-              className="h-8 w-8"
+              className="h-8 w-8 md:h-9 md:w-9"
             >
               <RefreshCw className="h-4 w-4" />
             </Button>
           </div>
 
-          <TabsContent value="community" className="mt-4">
+          <TabsContent value="community" className="mt-3 md:mt-4">
             {renderPosts(communityPosts, loadingCommunity, false)}
           </TabsContent>
 
-          <TabsContent value="my-posts" className="mt-4">
+          <TabsContent value="my-posts" className="mt-3 md:mt-4">
             {renderPosts(myPosts, loadingMyPosts, true)}
           </TabsContent>
         </Tabs>

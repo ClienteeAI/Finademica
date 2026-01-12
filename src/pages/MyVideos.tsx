@@ -293,8 +293,8 @@ const MyVideos = () => {
         )}
         onClick={() => handleVideoClick(video)}
       >
-        {/* Thumbnail */}
-        <div className="relative aspect-video overflow-hidden bg-muted">
+        {/* Thumbnail - slightly shorter aspect ratio on mobile */}
+        <div className="relative aspect-[16/10] md:aspect-video overflow-hidden bg-muted">
           <img
             src={thumbnail}
             alt={video.title}
@@ -307,88 +307,74 @@ const MyVideos = () => {
           {/* Overlay */}
           {isLocked ? (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <div className="w-14 h-14 rounded-full bg-muted/90 flex items-center justify-center">
-                <Lock className="h-6 w-6 text-muted-foreground" />
+              <div className="w-11 h-11 md:w-14 md:h-14 rounded-full bg-muted/90 flex items-center justify-center">
+                <Lock className="h-5 w-5 md:h-6 md:w-6 text-muted-foreground" />
               </div>
             </div>
           ) : (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-              <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center">
-                <Play className="h-6 w-6 text-primary-foreground ml-1" />
+              <div className="w-11 h-11 md:w-14 md:h-14 rounded-full bg-primary/90 flex items-center justify-center">
+                <Play className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground ml-0.5" />
               </div>
             </div>
           )}
 
           {/* Duration badge */}
-          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-            <Clock className="h-3 w-3" />
+          <div className="absolute bottom-1.5 right-1.5 md:bottom-2 md:right-2 bg-black/70 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded flex items-center gap-1">
+            <Clock className="h-2.5 w-2.5 md:h-3 md:w-3" />
             {formatDuration(video.duration_seconds)}
           </div>
 
-          {/* Mandatory badge */}
-          {video.is_mandatory && (
-            <div className="absolute top-2 left-2">
-              <Badge className="bg-amber-500/90 text-white border-0">
+          {/* Top-left badges - combine status badges */}
+          <div className="absolute top-1.5 left-1.5 md:top-2 md:left-2 flex gap-1">
+            {video.is_mandatory && !isLocked && (
+              <Badge className="bg-amber-500/90 text-white border-0 text-[10px] md:text-xs px-1.5 md:px-2 py-0">
                 Required
               </Badge>
-            </div>
-          )}
-
-          {/* Locked badge */}
-          {isLocked && (
-            <div className="absolute top-2 left-2">
-              <Badge variant="secondary" className="bg-muted/90 text-muted-foreground border-0">
-                <Lock className="h-3 w-3 mr-1" />
+            )}
+            {isLocked && (
+              <Badge variant="secondary" className="bg-muted/90 text-muted-foreground border-0 text-[10px] md:text-xs px-1.5 md:px-2 py-0">
+                <Lock className="h-2.5 w-2.5 md:h-3 md:w-3 mr-0.5 md:mr-1" />
                 Locked
               </Badge>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Completed badge */}
+          {/* Completed badge - top right */}
           {isCompleted && !isLocked && (
-            <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-500/90 text-white text-xs font-semibold">
-              <CheckCircle className="w-3 h-3" />
+            <div className="absolute top-1.5 right-1.5 md:top-2 md:right-2 flex items-center gap-1 px-1.5 md:px-2 py-0.5 md:py-1 rounded-full bg-emerald-500/90 text-white text-[10px] md:text-xs font-semibold">
+              <CheckCircle className="w-2.5 h-2.5 md:w-3 md:h-3" />
               Done
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-3 md:p-4 space-y-2">
-          {video.category && (
-            <Badge
-              className={cn(
-                "text-white text-xs",
-                isLocked ? "bg-gray-500" : categoryColors[video.category] || "bg-gray-500"
-              )}
-            >
-              {video.category}
-            </Badge>
-          )}
+        {/* Content - more compact on mobile */}
+        <div className="p-2.5 md:p-4 space-y-1.5 md:space-y-2">
           <h3 className={cn(
-            "font-semibold line-clamp-2 transition-colors text-sm md:text-base",
+            "font-semibold line-clamp-2 transition-colors text-[13px] md:text-base leading-tight",
             isLocked ? "text-muted-foreground" : "text-foreground group-hover:text-primary"
           )}>
             {video.title}
           </h3>
-          {video.description && (
-            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
-              {video.description}
-            </p>
-          )}
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="capitalize">{video.asset_type}</span>
-              <span>•</span>
-              <span>Level {video.level}</span>
+          
+          {/* Meta row with action button */}
+          <div className="flex items-center justify-between gap-2 pt-1">
+            <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-muted-foreground">
+              {video.category && (
+                <>
+                  <span className="truncate max-w-[80px]">{video.category}</span>
+                  <span>•</span>
+                </>
+              )}
+              <span>Lv.{video.level}</span>
             </div>
             {isLocked ? (
-              <Button size="sm" variant="secondary" className="bg-muted text-muted-foreground">
-                <Lock className="h-3 w-3 mr-1" />
+              <Button size="sm" variant="secondary" className="bg-muted text-muted-foreground h-7 md:h-8 text-xs px-2.5 md:px-3">
                 Unlock
               </Button>
             ) : (
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
+              <Button size="sm" className="bg-primary hover:bg-primary/90 h-7 md:h-8 text-xs px-2.5 md:px-3">
                 {isCompleted ? "Rewatch" : "Watch"}
               </Button>
             )}
