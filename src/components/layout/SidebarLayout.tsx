@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
@@ -260,19 +260,20 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
   const isNasrTheme = client?.subdomain === 'nasr';
 
-  // Show loading state while auth is being checked
-  if (loading) {
+  // Redirect to login if not authenticated (after loading completes)
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [loading, user, navigate]);
+
+  // Show loading state while auth is being checked OR while redirecting
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
-  }
-
-  // Redirect to login if not authenticated
-  if (!user) {
-    navigate('/login');
-    return null;
   }
 
   return (
