@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -130,12 +130,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       import('@/lib/crmWebhook').then(({ sendUserLoginEvent }) => {
         sendUserLoginEvent("password").catch(console.error);
       }).catch(console.error);
+
+      // Auto-detect user's client for mobile app support
+      if (data.user) {
+        try {
+          const profile = await fetchProfile(data.user.id);
+          if (profile?.client_id) {
+            const { data: userClient } = await supabase
+              .from('clients')
+              .select('subdomain')
+              .eq('id', profile.client_id)
+              .single();
+
+            if (userClient?.subdomain) {
+              const currentSavedClient = localStorage.getItem('user_client_subdomain');
+              // Only reload if client changed
+              if (currentSavedClient !== userClient.subdomain) {
+                console.log('[Auth] Switching to user client:', userClient.subdomain);
+                localStorage.setItem('user_client_subdomain', userClient.subdomain);
+                window.location.reload();
+              }
+            }
+          }
+        } catch (err) {
+          console.error('[Auth] Error detecting user client:', err);
+        }
+      }
     }
 
     return { error: error as Error | null };
   };
 
   const signOut = async () => {
+    // Clear saved user client preference (for mobile app users)
+    localStorage.removeItem('user_client_subdomain');
+    
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);

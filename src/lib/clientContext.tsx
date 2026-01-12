@@ -390,7 +390,27 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
 
-      // Fallback to 'nallio' for testing / preview environments
+      // PRIORITY 4: Check saved user client from localStorage (for mobile app users)
+      const savedUserClient = localStorage.getItem('user_client_subdomain');
+      if (savedUserClient) {
+        const { data: userClientData } = await supabase
+          .from('clients')
+          .select('*')
+          .eq('subdomain', savedUserClient)
+          .eq('active', true)
+          .maybeSingle();
+
+        if (userClientData) {
+          console.log('[ClientProvider] Using saved user client:', savedUserClient);
+          setClient(userClientData as Client);
+          applyClientTheme(userClientData as Client);
+          localStorage.setItem('client_id', userClientData.id);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // PRIORITY 5: Fallback to 'nallio' for testing / preview environments
       const { data: fallbackClient } = await supabase
         .from('clients')
         .select('*')
