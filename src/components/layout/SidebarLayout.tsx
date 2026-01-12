@@ -265,7 +265,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
     if (!loading && !user) {
       navigate('/login');
     }
-  }, [loading, user, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, user]);
 
   // Show loading state while auth is being checked OR while redirecting
   if (loading || !user) {
