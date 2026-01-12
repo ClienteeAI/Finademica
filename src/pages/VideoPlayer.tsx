@@ -147,22 +147,22 @@ const VideoPlayer = () => {
 
   return (
     <SidebarLayout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 md:space-y-6 animate-fade-in">
         {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate("/videos")}
-          className="gap-2"
+          className="gap-2 h-11 px-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Videos
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Main Video Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Video Player */}
-            <div className="relative aspect-video bg-card rounded-xl border border-border overflow-hidden">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
+            {/* Video Player - 16:9 responsive */}
+            <div className="relative aspect-video bg-card rounded-xl border border-border overflow-hidden w-full">
               {embedUrl ? (
                 <iframe
                   src={embedUrl}
@@ -175,8 +175,8 @@ const VideoPlayer = () => {
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center bg-card">
                   <div className="text-center space-y-4">
-                    <Play className="h-16 w-16 text-muted-foreground mx-auto" />
-                    <p className="text-muted-foreground">Video unavailable</p>
+                    <Play className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground mx-auto" />
+                    <p className="text-muted-foreground text-sm md:text-base">Video unavailable</p>
                   </div>
                 </div>
               )}
@@ -188,13 +188,13 @@ const VideoPlayer = () => {
             </p>
 
             {/* Video Info */}
-            <div className="space-y-4">
-              <div className="flex items-start justify-between gap-4">
+            <div className="space-y-3 md:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 md:gap-4">
                 <div className="space-y-2 flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground leading-tight">
                     {video.title}
                   </h1>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Badge className={`${categoryColors[video.category || ""] || "bg-gray-500"} text-white`}>
                       {video.category || "Uncategorized"}
                     </Badge>
@@ -203,22 +203,22 @@ const VideoPlayer = () => {
                 </div>
               </div>
 
-              <p className="text-muted-foreground">{video.description || "No description available."}</p>
+              <p className="text-sm md:text-base text-muted-foreground">{video.description || "No description available."}</p>
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - becomes bottom section on mobile */}
           <div className="space-y-4">
             {/* Progress Card */}
-            <Card className="p-4 space-y-4">
+            <Card className="p-4 space-y-3 md:space-y-4">
               <div>
-                <h3 className="font-semibold text-foreground mb-2">Your Progress</h3>
+                <h3 className="font-semibold text-foreground mb-2 text-sm md:text-base">Your Progress</h3>
                 <Progress value={0} className="h-2" />
-                <p className="text-sm text-muted-foreground mt-2">0% watched</p>
+                <p className="text-xs md:text-sm text-muted-foreground mt-2">0% watched</p>
               </div>
               
               <Button 
-                className="w-full gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400" 
+                className="w-full gap-2 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 h-11 text-sm md:text-base" 
                 onClick={handleVideoEnd}
                 disabled={isCompleting}
               >
@@ -238,7 +238,7 @@ const VideoPlayer = () => {
             {/* Next Video */}
             {nextVideo && (
               <Card className="p-4 space-y-3">
-                <h3 className="font-semibold text-foreground">Up Next</h3>
+                <h3 className="font-semibold text-foreground text-sm md:text-base">Up Next</h3>
                 <div
                   className="space-y-2 cursor-pointer group"
                   onClick={() => navigate(`/video/${nextVideo.id}`)}
@@ -252,11 +252,11 @@ const VideoPlayer = () => {
                       />
                     ) : (
                       <div className="flex items-center justify-center h-full">
-                        <Play className="h-8 w-8 text-muted-foreground" />
+                        <Play className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
                       </div>
                     )}
                   </div>
-                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  <p className="text-sm font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2">
                     {nextVideo.title}
                   </p>
                   <p className="text-xs text-muted-foreground">

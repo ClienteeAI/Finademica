@@ -160,38 +160,38 @@ export function GamificationSection() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {/* Section Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 md:gap-3">
         <div className={cn(
-          "w-10 h-10 rounded-xl flex items-center justify-center border",
+          "w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center border",
           isNasrTheme 
             ? "bg-gradient-to-br from-gold/20 to-gold-light/20 border-gold/30" 
             : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 border-[#4DE2E8]/30"
         )}>
-          <Sparkles className={cn("w-5 h-5", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
+          <Sparkles className={cn("w-4 h-4 md:w-5 md:h-5", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-foreground tracking-tight">Trader Progress</h2>
-          <p className="text-sm text-muted-foreground">Your trading RPG journey</p>
+          <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Trader Progress</h2>
+          <p className="text-xs md:text-sm text-muted-foreground">Your trading RPG journey</p>
         </div>
       </div>
 
-      {/* Main Grid - showing only wired features for v1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Main Grid - single column on mobile, responsive */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
         {/* Level & XP Card */}
-        <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
+        <Card className="p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
+            <h3 className="text-xs md:text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               Your Trader Level
             </h3>
             <div className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center border",
+              "w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center border",
               isNasrTheme 
                 ? "bg-gradient-to-br from-gold/20 to-gold-light/20 border-gold/30" 
                 : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 border-[#4DE2E8]/30"
             )}>
-              <Target className={cn("w-4 h-4", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
+              <Target className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
             </div>
           </div>
 
@@ -205,12 +205,12 @@ export function GamificationSection() {
             ) : (
               <>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-foreground font-mono">
+                  <span className="text-2xl md:text-4xl font-bold text-foreground font-mono">
                     Level {level}
                   </span>
                 </div>
-                <p className={cn("text-lg font-medium", isNasrTheme ? "text-gold" : "text-[#4DE2E8]")}>{levelName}</p>
-                <p className="text-sm text-muted-foreground font-mono">
+                <p className={cn("text-base md:text-lg font-medium", isNasrTheme ? "text-gold" : "text-[#4DE2E8]")}>{levelName}</p>
+                <p className="text-xs md:text-sm text-muted-foreground font-mono">
                   {xp} / {nextLevelXp} XP to next level
                 </p>
               </>
@@ -247,7 +247,7 @@ export function GamificationSection() {
         </Card>
 
         {/* Avatar Card */}
-        <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden">
+        <Card className="p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden">
           <div className={cn(
             "absolute inset-0 pointer-events-none",
             isNasrTheme 
@@ -256,7 +256,7 @@ export function GamificationSection() {
           )} />
           
           <div className="flex items-center justify-between relative">
-            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
+            <h3 className="text-xs md:text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               AI Trading Avatar
             </h3>
             {isLoading ? (
@@ -316,9 +316,9 @@ export function GamificationSection() {
         </Card>
 
         {/* Skill Tree Card */}
-        <Card className="p-6 space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
+        <Card className="p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold">
+            <h3 className="text-xs md:text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               Your Skill Tree
             </h3>
           </div>

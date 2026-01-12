@@ -19,6 +19,7 @@ import { useAuth } from '@/lib/AuthContext';
 import XPNavIndicator from '@/components/XPNavIndicator';
 import TradingDisclaimer from '@/components/TradingDisclaimer';
 import { ProfileSheet } from '@/components/layout/ProfileSheet';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import {
   SidebarProvider,
   Sidebar,
@@ -280,10 +281,11 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full bg-[#0C0E13]">
+        {/* Desktop Sidebar - hidden on mobile */}
         <Sidebar
           collapsible="icon"
           variant="floating"
-          className="rounded-[18px] shadow-[0_10px_50px_rgba(0,0,0,0.5)] border border-[#3a4150]/30"
+          className="hidden md:flex rounded-[18px] shadow-[0_10px_50px_rgba(0,0,0,0.5)] border border-[#3a4150]/30"
           style={{
             background: '#2A303A',
           }}
@@ -294,12 +296,16 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         <SidebarInset className="flex flex-col bg-[#0C0E13]">
           <TopHeader />
 
-          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
+          {/* Main content with mobile bottom padding */}
+          <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8 mobile-content-padding">
             <div className="max-w-[1440px] mx-auto">{children}</div>
           </main>
 
           <TradingDisclaimer isNasrTheme={true} />
         </SidebarInset>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav />
       </div>
     </SidebarProvider>
   );

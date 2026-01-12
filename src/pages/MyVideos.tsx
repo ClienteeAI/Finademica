@@ -354,7 +354,7 @@ const MyVideos = () => {
         </div>
 
         {/* Content */}
-        <div className="p-4 space-y-2">
+        <div className="p-3 md:p-4 space-y-2">
           {video.category && (
             <Badge
               className={cn(
@@ -366,13 +366,13 @@ const MyVideos = () => {
             </Badge>
           )}
           <h3 className={cn(
-            "font-semibold line-clamp-2 transition-colors",
+            "font-semibold line-clamp-2 transition-colors text-sm md:text-base",
             isLocked ? "text-muted-foreground" : "text-foreground group-hover:text-primary"
           )}>
             {video.title}
           </h3>
           {video.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2">
+            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2">
               {video.description}
             </p>
           )}
@@ -402,27 +402,27 @@ const MyVideos = () => {
 
   return (
     <SidebarLayout>
-      <div className="space-y-8 animate-fade-in">
+      <div className="space-y-6 md:space-y-8 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 md:mb-2">
             My Video Library
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground">
             {playableVideos.length} playable • {lockedVideos.length} locked
           </p>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col gap-4">
-          <div className="flex gap-3">
+        <div className="flex flex-col gap-3 md:gap-4">
+          <div className="flex gap-2 md:gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search videos..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-11 bg-card border-2 border-border focus:border-primary placeholder:text-muted-foreground/70"
+                className="pl-10 h-11 md:h-11 bg-card border-2 border-border focus:border-primary placeholder:text-muted-foreground/70 text-base"
               />
             </div>
 
@@ -477,17 +477,17 @@ const MyVideos = () => {
 
         {/* Loading State */}
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
                 className="bg-card rounded-xl overflow-hidden border border-border"
               >
                 <Skeleton className="aspect-video w-full" />
-                <div className="p-4 space-y-3">
-                  <Skeleton className="h-5 w-3/4" />
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-8 w-24" />
+                <div className="p-3 md:p-4 space-y-2 md:space-y-3">
+                  <Skeleton className="h-4 md:h-5 w-3/4" />
+                  <Skeleton className="h-3 md:h-4 w-1/2" />
+                  <Skeleton className="h-8 md:h-8 w-20 md:w-24" />
                 </div>
               </div>
             ))}
@@ -501,17 +501,17 @@ const MyVideos = () => {
               <Play className="h-5 w-5 text-primary" />
               Your Videos ({filteredPlayable.length})
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {displayedPlayable.map((video) => (
                 <VideoCard key={video.id} video={video} />
               ))}
             </div>
             {hasMorePlayable && (
-              <div className="flex justify-center pt-4">
+              <div className="flex justify-center pt-2 md:pt-4">
                 <Button
                   variant="outline"
                   onClick={handleShowMorePlayable}
-                  className="gap-2"
+                  className="gap-2 h-11 px-6 text-sm md:text-base w-full sm:w-auto"
                 >
                   Show More
                   <ChevronDown className="h-4 w-4" />
