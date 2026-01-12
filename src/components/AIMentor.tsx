@@ -258,12 +258,13 @@ export function AIMentor() {
 
   return (
     <>
-      {/* Floating Button */}
+      {/* Floating Button - positioned above bottom nav on mobile */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "fixed bottom-6 right-6 z-[9999]",
-          "w-[60px] h-[60px] rounded-full",
+          "fixed z-[9999]",
+          "bottom-[calc(76px+env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6",
+          "w-[52px] h-[52px] md:w-[60px] md:h-[60px] rounded-full",
           "bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6]",
           "flex items-center justify-center",
           "border-2 border-[#4DE2E8]/60",
@@ -276,9 +277,9 @@ export function AIMentor() {
         aria-label="Open AI Mentor"
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
         ) : (
-          <MessageCircle className="w-6 h-6 text-white" />
+          <MessageCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
         )}
       </button>
 

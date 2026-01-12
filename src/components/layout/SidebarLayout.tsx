@@ -223,29 +223,29 @@ function TopHeader() {
   return (
     <>
       <header
-        className="sticky top-0 z-40 flex h-14 items-center justify-between gap-4 px-4 md:px-6 bg-transparent"
+        className="sticky top-0 z-40 flex h-12 md:h-14 items-center justify-between gap-3 px-4 md:px-6 bg-transparent"
       >
         {/* Left: Sidebar trigger for mobile */}
-        <div className="flex items-center gap-3">
-          <SidebarTrigger className="md:hidden text-[#cbd5e1] hover:text-[#38bdf8] hover:bg-[rgba(56,189,248,0.12)]" />
+        <div className="flex items-center gap-2 md:gap-3">
+          <SidebarTrigger className="md:hidden text-[#cbd5e1] hover:text-[#38bdf8] hover:bg-[rgba(56,189,248,0.12)] h-9 w-9" />
           <XPNavIndicator isNasrTheme={true} />
         </div>
 
-        {/* Right: Profile button */}
+        {/* Right: Profile button - more compact on mobile */}
         <Button
           variant="ghost"
-          className="flex items-center gap-2 h-auto py-1.5 px-3 rounded-full bg-[#1e293b]/80 backdrop-blur-sm border border-[#334155]/50 shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#334155]/80 hover:border-[#475569]/50"
+          className="flex items-center gap-1.5 md:gap-2 h-auto py-1 md:py-1.5 px-2 md:px-3 rounded-full bg-[#1e293b]/80 backdrop-blur-sm border border-[#334155]/50 shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#334155]/80 hover:border-[#475569]/50"
           onClick={() => setProfileSheetOpen(true)}
         >
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] text-white ring-2 ring-[#0ea5e9]/30"
+            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-semibold text-xs md:text-sm transition-all bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] text-white ring-2 ring-[#0ea5e9]/30"
           >
             {firstName.charAt(0).toUpperCase()}
           </div>
           <span className="hidden sm:inline text-sm font-medium text-[#e2e8f0]">
             {firstName}
           </span>
-          <User className="h-4 w-4 text-[#94a3b8]" />
+          <User className="h-4 w-4 text-[#94a3b8] hidden sm:block" />
         </Button>
       </header>
 

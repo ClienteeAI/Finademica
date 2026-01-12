@@ -249,49 +249,49 @@ const Quiz = () => {
 
   return (
     <SidebarLayout>
-      <div className="space-y-6 max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className={`text-3xl font-bold ${isNasrTheme ? "font-playfair text-nasr-text" : "text-foreground"}`}>
+      <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto">
+        {/* Header - more compact on mobile */}
+        <div className="text-center space-y-1 md:space-y-2">
+          <h1 className={`text-2xl md:text-3xl font-bold ${isNasrTheme ? "font-playfair text-nasr-text" : "text-foreground"}`}>
             Unlock More Videos
           </h1>
-          <p className={`text-lg ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
-            Complete this quiz to personalize your learning path and unlock additional content
+          <p className={`text-sm md:text-lg ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+            Complete this quiz to unlock additional content
           </p>
         </div>
 
         {/* Main Content */}
         <Card className={`${isNasrTheme ? "bg-nasr-panel border-gold/20" : "bg-card border-border"}`}>
-          <CardHeader className="pb-4">
+          <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6">
             <div className="flex items-center justify-between">
-              <CardTitle className={`text-xl ${isNasrTheme ? "text-nasr-text font-playfair" : "text-foreground"}`}>
+              <CardTitle className={`text-lg md:text-xl ${isNasrTheme ? "text-nasr-text font-playfair" : "text-foreground"}`}>
                 {step === "intro" && "Ready to Start?"}
                 {step === "select-module" && "Choose Your Module"}
                 {step === "loading" && "Loading Quiz..."}
                 {step === "quiz" && `${selectedModule?.charAt(0).toUpperCase()}${selectedModule?.slice(1)} Quiz`}
               </CardTitle>
-              <Trophy className={`h-6 w-6 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+              <Trophy className={`h-5 w-5 md:h-6 md:w-6 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 md:space-y-6 px-4 md:px-6 pb-5 md:pb-6">
             {/* Step: Intro */}
             {step === "intro" && (
-              <div className="text-center py-12 space-y-6">
-                <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${isNasrTheme ? "bg-gold/20" : "bg-primary/20"}`}>
-                  <Play className={`h-10 w-10 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+              <div className="text-center py-8 md:py-12 space-y-4 md:space-y-6">
+                <div className={`mx-auto w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center ${isNasrTheme ? "bg-gold/20" : "bg-primary/20"}`}>
+                  <Play className={`h-8 w-8 md:h-10 md:w-10 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
                 </div>
-                <div className="space-y-2">
-                  <h3 className={`text-xl font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
-                    Start Your Personalized Quiz
+                <div className="space-y-1.5 md:space-y-2">
+                  <h3 className={`text-lg md:text-xl font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                    Start Your Quiz
                   </h3>
-                  <p className={`max-w-md mx-auto ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
-                    Answer a few questions to unlock videos tailored to your trading experience and goals.
+                  <p className={`text-sm md:text-base max-w-md mx-auto px-4 ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+                    Answer a few questions to unlock videos tailored to your goals.
                   </p>
                 </div>
                 <Button
                   onClick={handleAttemptQuiz}
                   size="lg"
-                  className={`px-8 ${isNasrTheme ? "bg-gold hover:bg-gold-dark text-nasr-bg" : ""}`}
+                  className={`px-6 md:px-8 h-12 md:h-11 text-base ${isNasrTheme ? "bg-gold hover:bg-gold-dark text-nasr-bg" : ""}`}
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Attempt Quiz
@@ -301,32 +301,32 @@ const Quiz = () => {
 
             {/* Step: Select Module */}
             {step === "select-module" && (
-              <div className="space-y-6">
-                <p className={`text-center ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
-                  Select a module to take the quiz for:
+              <div className="space-y-4 md:space-y-6">
+                <p className={`text-center text-sm md:text-base ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+                  Select a module:
                 </p>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-3 md:gap-6">
                   {moduleOptions.map((option) => (
                     <Button
                       key={option.id}
                       onClick={() => handleModuleSelect(option.id)}
                       variant="outline"
-                      className={`h-36 md:h-44 flex flex-col items-center justify-center gap-4 transition-all border-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] ${
+                      className={`h-28 md:h-36 lg:h-44 flex flex-col items-center justify-center gap-2 md:gap-4 transition-all border-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] ${
                         isNasrTheme
                           ? "border-gold/40 text-nasr-text hover:bg-gold/20 hover:border-gold bg-nasr-bg/50"
                           : "border-primary/30 hover:bg-primary/10 hover:border-primary bg-card"
                       }`}
                     >
-                      <span className={`${isNasrTheme ? "text-gold" : "text-primary"}`}>{option.icon}</span>
-                      <span className="font-bold text-xl md:text-2xl">{option.label}</span>
+                      <span className={`${isNasrTheme ? "text-gold" : "text-primary"} [&>svg]:h-8 [&>svg]:w-8 md:[&>svg]:h-10 md:[&>svg]:w-10`}>{option.icon}</span>
+                      <span className="font-bold text-base md:text-xl lg:text-2xl">{option.label}</span>
                     </Button>
                   ))}
                 </div>
-                <div className="text-center pt-4">
+                <div className="text-center pt-2 md:pt-4">
                   <Button
                     onClick={handleReset}
                     variant="ghost"
-                    className={isNasrTheme ? "text-nasr-text-muted hover:text-nasr-text" : ""}
+                    className={`h-11 ${isNasrTheme ? "text-nasr-text-muted hover:text-nasr-text" : ""}`}
                   >
                     Back
                   </Button>

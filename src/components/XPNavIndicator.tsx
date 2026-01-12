@@ -44,10 +44,10 @@ const XPNavIndicator = ({ isNasrTheme = false }: XPNavIndicatorProps) => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="flex items-center gap-2 cursor-default px-3 py-1.5 rounded-full bg-[#1e293b]/80 backdrop-blur-sm border border-[#334155]/50 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+          <div className="flex items-center gap-1.5 md:gap-2 cursor-default px-2 md:px-3 py-1 md:py-1.5 rounded-full bg-[#1e293b]/80 backdrop-blur-sm border border-[#334155]/50 shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
             {/* Level Badge - Compact circular */}
             <div className={cn(
-              "relative flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs",
+              "relative flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-full font-bold text-[10px] md:text-xs",
               isNasrTheme 
                 ? "bg-[#0f172a] text-gold ring-2 ring-gold/50" 
                 : "bg-[#0f172a] text-aqua ring-2 ring-aqua/40"
@@ -55,9 +55,9 @@ const XPNavIndicator = ({ isNasrTheme = false }: XPNavIndicatorProps) => {
               {level}
             </div>
 
-            {/* Compact XP Bar */}
+            {/* Compact XP Bar - hidden on very small screens */}
             <div className={cn(
-              "w-14 h-[5px] rounded-full overflow-hidden",
+              "hidden xs:block w-10 md:w-14 h-1 md:h-[5px] rounded-full overflow-hidden",
               isNasrTheme ? "bg-[#0f172a]" : "bg-[#0f172a]"
             )}>
               <div
@@ -71,17 +71,17 @@ const XPNavIndicator = ({ isNasrTheme = false }: XPNavIndicatorProps) => {
               />
             </div>
             
-            {/* XP Count - compact */}
+            {/* XP Count - compact on mobile */}
             <span className={cn(
-              "text-[10px] font-medium tabular-nums",
+              "text-[9px] md:text-[10px] font-medium tabular-nums whitespace-nowrap",
               isNasrTheme ? "text-[#94a3b8]" : "text-[#94a3b8]"
             )}>
-              {xp.toLocaleString()} XP
+              {xp >= 1000 ? `${(xp / 1000).toFixed(1)}k` : xp} XP
             </span>
 
-            {/* Streak indicator - inline */}
+            {/* Streak indicator - inline, hidden on very small screens */}
             {streakDays > 0 && (
-              <div className="flex items-center gap-0.5">
+              <div className="hidden sm:flex items-center gap-0.5">
                 <Flame className="w-3 h-3 text-amber-500" />
                 <span className="text-[10px] font-semibold text-amber-500">{streakDays}</span>
               </div>

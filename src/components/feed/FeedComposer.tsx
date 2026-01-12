@@ -197,12 +197,12 @@ export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) 
       </AnimatePresence>
 
       <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
-        <CardContent className="pt-4 space-y-4">
-        <div className="flex gap-3">
+        <CardContent className="pt-3 md:pt-4 pb-3 space-y-3 md:space-y-4">
+        <div className="flex gap-2.5 md:gap-3">
           {/* User Avatar */}
           <div
             className={cn(
-              'w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0',
+              'w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-base md:text-lg flex-shrink-0',
               avatar?.bg || 'bg-muted'
             )}
           >
@@ -210,10 +210,10 @@ export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) 
           </div>
           
           {/* Input Area */}
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 min-w-0">
             {/* Nickname */}
             {userProfile?.nickname && (
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-xs md:text-sm font-medium text-foreground block mb-1">
                 {userProfile.nickname}
               </span>
             )}
@@ -222,34 +222,31 @@ export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) 
               ref={textareaRef}
               value={content}
               onChange={handleContentChange}
-              placeholder="Share an update with your community..."
+              placeholder="Share an update..."
               maxLength={FEED_CONFIG.MAX_POST_LENGTH}
               rows={2}
-              className="resize-none min-h-[60px] border-0 bg-transparent p-0 focus-visible:ring-0 text-base placeholder:text-muted-foreground/60"
+              className="resize-none min-h-[52px] md:min-h-[60px] border-0 bg-transparent p-0 focus-visible:ring-0 text-[15px] md:text-base placeholder:text-muted-foreground/60 leading-relaxed"
             />
           </div>
         </div>
         
-        {/* Footer */}
-        <div className="flex items-center justify-between gap-4 pt-2 border-t border-border/50">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary/60" />
-            <span className="text-xs text-muted-foreground">
-              {content.length}/{FEED_CONFIG.MAX_POST_LENGTH}
-            </span>
-          </div>
+        {/* Footer - simplified on mobile */}
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/50">
+          <span className="text-[11px] md:text-xs text-muted-foreground tabular-nums">
+            {content.length}/{FEED_CONFIG.MAX_POST_LENGTH}
+          </span>
           
           <Button
             onClick={handleSubmit}
             disabled={loading || !canSubmit}
             size="sm"
-            className="gap-2"
+            className="gap-1.5 h-9 px-4 text-sm"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
-                <Send className="h-4 w-4" />
+                <Send className="h-3.5 w-3.5" />
                 Post
               </>
             )}
