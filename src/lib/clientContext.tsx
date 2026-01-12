@@ -200,18 +200,41 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const [loading, setLoading] = useState(true);
 
   // Watch for dark mode changes and reapply theme
+  // Use a flag to prevent infinite loops when applyClientTheme modifies classes
   useEffect(() => {
     if (!client) return;
 
+    let isApplyingTheme = false;
+
     const observer = new MutationObserver((mutations) => {
+      // Skip if we're currently applying theme (prevents infinite loop)
+      if (isApplyingTheme) return;
+      
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
-          applyClientTheme(client);
+          // Check if the change is a dark mode toggle (not our own theme class changes)
+          const target = mutation.target as HTMLElement;
+          const hasDarkClass = target.classList.contains('dark');
+          const previouslyHadDark = (mutation.oldValue || '').includes('dark');
+          
+          // Only reapply if dark mode actually changed
+          if (hasDarkClass !== previouslyHadDark) {
+            isApplyingTheme = true;
+            applyClientTheme(client);
+            // Reset flag after a microtask to allow DOM to settle
+            queueMicrotask(() => {
+              isApplyingTheme = false;
+            });
+          }
         }
       });
     });
 
-    observer.observe(document.documentElement, { attributes: true });
+    observer.observe(document.documentElement, { 
+      attributes: true, 
+      attributeOldValue: true,
+      attributeFilter: ['class']
+    });
 
     return () => observer.disconnect();
   }, [client]);
