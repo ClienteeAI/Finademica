@@ -38,10 +38,10 @@ export default function ResetPassword() {
 
   const validatePassword = () => {
     if (password.length < 6) {
-      return 'הסיסמה חייבת להכיל לפחות 6 תווים';
+      return 'Password must be at least 6 characters';
     }
     if (password !== confirmPassword) {
-      return 'הסיסמאות אינן תואמות';
+      return 'Passwords do not match';
     }
     return null;
   };
@@ -89,12 +89,12 @@ export default function ResetPassword() {
             <div className="w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-8 h-8 text-destructive" />
             </div>
-            <h1 className="text-xl font-bold text-foreground mb-2">קישור לא תקף</h1>
+            <h1 className="text-xl font-bold text-foreground mb-2">Invalid Link</h1>
             <p className="text-muted-foreground mb-6">
-              הקישור לאיפוס הסיסמה אינו תקף או שפג תוקפו. אנא בקש קישור חדש.
+              The password reset link is invalid or has expired. Please request a new link.
             </p>
             <Button onClick={() => navigate('/login')}>
-              חזור לדף ההתחברות
+              Back to Login
             </Button>
           </div>
         </div>
@@ -129,9 +129,9 @@ export default function ResetPassword() {
                 <CheckCircle className="w-8 h-8 text-success" />
               </div>
               <div className="text-center">
-                <h2 className="text-xl font-bold text-foreground">הסיסמה עודכנה!</h2>
+                <h2 className="text-xl font-bold text-foreground">Password Updated!</h2>
                 <p className="text-muted-foreground text-sm mt-2">
-                  מעביר אותך לדף ההתחברות...
+                  Redirecting you to login...
                 </p>
               </div>
             </div>
@@ -139,17 +139,17 @@ export default function ResetPassword() {
             <>
               <div className="text-center mb-6">
                 <h1 className="text-2xl font-bold text-foreground mb-2">
-                  הגדרת סיסמה חדשה
+                  Set New Password
                 </h1>
                 <p className="text-muted-foreground text-sm">
-                  הזן את הסיסמה החדשה שלך
+                  Enter your new password
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="password" className="text-foreground">
-                    סיסמה חדשה
+                    New Password
                   </Label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -176,7 +176,7 @@ export default function ResetPassword() {
 
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword" className="text-foreground">
-                    אימות סיסמה
+                    Confirm Password
                   </Label>
                   <div className="relative">
                     <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -215,20 +215,20 @@ export default function ResetPassword() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                      מעדכן...
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Updating...
                     </>
                   ) : (
-                    'עדכן סיסמה'
+                    'Update Password'
                   )}
                 </Button>
                 
                 {password && confirmPassword && password !== confirmPassword && (
-                  <p className="text-sm text-destructive text-center">הסיסמאות אינן תואמות</p>
+                  <p className="text-sm text-destructive text-center">Passwords do not match</p>
                 )}
                 
                 {password && password.length > 0 && password.length < 6 && (
-                  <p className="text-sm text-muted-foreground text-center">הסיסמה חייבת להכיל לפחות 6 תווים</p>
+                  <p className="text-sm text-muted-foreground text-center">Password must be at least 6 characters</p>
                 )}
               </form>
             </>
