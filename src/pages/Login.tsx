@@ -78,7 +78,7 @@ function Login() {
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
       
       {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0E1A] via-[#0A0E1A] to-black">
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0E1A] via-[#0A0E1A] to-black pointer-events-none">
         {/* Gradient Orbs */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-success/15 rounded-full blur-[100px] animate-pulse-subtle" 
              style={{ animationDuration: '20s' }} />
@@ -101,7 +101,7 @@ function Login() {
 
       {/* Login Card */}
       <div 
-        className="relative w-full max-w-[480px] animate-fade-in"
+        className="relative w-full max-w-[480px] animate-fade-in z-10"
         style={{ perspective: '1000px' }}
       >
         <div 
