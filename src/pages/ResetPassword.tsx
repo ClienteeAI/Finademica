@@ -211,7 +211,7 @@ export default function ResetPassword() {
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={loading || !password || !confirmPassword}
+                  disabled={loading || password.length < 6 || confirmPassword.length < 6 || password !== confirmPassword}
                 >
                   {loading ? (
                     <>
@@ -222,6 +222,14 @@ export default function ResetPassword() {
                     'עדכן סיסמה'
                   )}
                 </Button>
+                
+                {password && confirmPassword && password !== confirmPassword && (
+                  <p className="text-sm text-destructive text-center">הסיסמאות אינן תואמות</p>
+                )}
+                
+                {password && password.length > 0 && password.length < 6 && (
+                  <p className="text-sm text-muted-foreground text-center">הסיסמה חייבת להכיל לפחות 6 תווים</p>
+                )}
               </form>
             </>
           )}
