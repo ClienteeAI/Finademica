@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, Trash2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, Trash2, Scale, ChevronRight } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -184,6 +184,64 @@ const Settings = () => {
             >
               Change Password
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Legal */}
+        <Card className={`${
+          isNasrTheme 
+            ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
+            : 'glass-card border-ice/50'
+        }`}>
+          <CardHeader>
+            <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
+              <Scale className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+              Legal
+            </CardTitle>
+            <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+              View legal documents and policies
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Link to="/legal/privacy-policy">
+              <Button
+                variant="outline"
+                className={`w-full justify-between ${
+                  isNasrTheme 
+                    ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
+                    : 'border-ice text-ocean hover:bg-aqua/10'
+                }`}
+              >
+                Privacy Policy
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/legal/terms-of-use">
+              <Button
+                variant="outline"
+                className={`w-full justify-between ${
+                  isNasrTheme 
+                    ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
+                    : 'border-ice text-ocean hover:bg-aqua/10'
+                }`}
+              >
+                Terms of Use
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/legal/risk-disclosure">
+              <Button
+                variant="outline"
+                className={`w-full justify-between ${
+                  isNasrTheme 
+                    ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
+                    : 'border-ice text-ocean hover:bg-aqua/10'
+                }`}
+              >
+                Risk Disclosure
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 

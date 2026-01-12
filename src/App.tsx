@@ -24,6 +24,9 @@ import Settings from "./pages/Settings";
 import Feed from "./pages/Feed";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
+import TermsOfUse from "./pages/legal/TermsOfUse";
+import RiskDisclosure from "./pages/legal/RiskDisclosure";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +65,9 @@ const App = () => (
             <Route path="/quiz" element={<Quiz />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/legal/terms-of-use" element={<TermsOfUse />} />
+            <Route path="/legal/risk-disclosure" element={<RiskDisclosure />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
