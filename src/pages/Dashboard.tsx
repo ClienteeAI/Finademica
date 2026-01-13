@@ -73,16 +73,16 @@ const Dashboard = () => {
   // Theme detection
   const isNasrTheme = client?.subdomain === 'nasr';
   
-  // Theme-aware color classes
+  // Theme-aware color classes - use semantic tokens for proper contrast
   const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
-    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
-    primaryBg: isNasrTheme ? 'bg-gold' : 'bg-aqua',
-    cardBorder: isNasrTheme ? 'border-gold/20' : 'border-ice',
-    accentGlow: isNasrTheme ? 'shadow-gold' : 'shadow-aqua',
-    progressBar: isNasrTheme ? 'from-gold-light to-gold' : 'from-aqua to-aqua-light',
-    badge: isNasrTheme ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-aqua/10 border-aqua/30 text-aqua',
+    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-foreground',
+    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground',
+    primary: isNasrTheme ? 'text-gold' : 'text-primary',
+    primaryBg: isNasrTheme ? 'bg-gold' : 'bg-primary',
+    cardBorder: isNasrTheme ? 'border-gold/20' : 'border-border',
+    accentGlow: isNasrTheme ? 'shadow-gold' : 'shadow-primary/20',
+    progressBar: isNasrTheme ? 'from-gold-light to-gold' : 'from-primary to-primary/80',
+    badge: isNasrTheme ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-primary/10 border-primary/30 text-primary',
   };
 
   // Derive userData from profile
@@ -276,9 +276,9 @@ const Dashboard = () => {
       <div className="space-y-12 relative z-10">
         {/* Admin Preview Banner */}
         {isAdminMode && (
-          <div className="bg-[#B5A7FF]/15 border border-[#B5A7FF]/50 px-6 py-3 rounded-xl backdrop-blur-sm animate-slide-down">
-            <p className="text-sm font-medium text-[#1D3557]">
-              🔧 <strong>Admin Preview Mode</strong> - You're viewing as: <span className="text-[#6B5B95]">{client?.company_name}</span>
+          <div className="bg-purple-500/15 border border-purple-500/50 px-6 py-3 rounded-xl backdrop-blur-sm animate-slide-down">
+            <p className="text-sm font-medium text-foreground">
+              🔧 <strong>Admin Preview Mode</strong> - You're viewing as: <span className="text-primary">{client?.company_name}</span>
             </p>
           </div>
         )}
@@ -369,20 +369,20 @@ const Dashboard = () => {
           <Collapsible open={profileOpen} onOpenChange={setProfileOpen}>
             <Card className="overflow-hidden">
               <CollapsibleTrigger asChild>
-                <button className="w-full p-6 flex items-center justify-between hover:bg-white/30 transition-colors duration-200 cursor-pointer">
-                  <h2 className="text-xl font-semibold text-[#1D3557] flex items-center gap-3">
+                <button className="w-full p-6 flex items-center justify-between hover:bg-muted/30 transition-colors duration-200 cursor-pointer">
+                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-3">
                     <span className="text-2xl">📋</span>
                     Your Trading Profile
                   </h2>
                   {profileOpen ? (
-                    <ChevronUp className="h-5 w-5 text-[#6B7280] transition-transform duration-200" />
+                    <ChevronUp className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
                   ) : (
-                    <ChevronDown className="h-5 w-5 text-[#6B7280] transition-transform duration-200" />
+                    <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200" />
                   )}
                 </button>
               </CollapsibleTrigger>
               <CollapsibleContent>
-                <div className="px-8 pb-8 pt-2 border-t border-[#D4E0EC] space-y-5">
+                <div className="px-8 pb-8 pt-2 border-t border-border space-y-5">
                   <div className="grid gap-5 mt-6">
                     {[
                       { label: "Experience", value: getQuizLabel(quizAnswers.experience, "experience") },
@@ -392,10 +392,10 @@ const Dashboard = () => {
                       { label: "Time Available", value: getQuizLabel(quizAnswers.timeCommitment, "timeCommitment") },
                     ].map((item) => (
                       <div key={item.label} className="flex flex-col sm:flex-row sm:items-center gap-2">
-                        <span className="text-sm uppercase tracking-wider text-[#6B7280] font-semibold min-w-[160px]">
+                        <span className="text-sm uppercase tracking-wider text-muted-foreground font-semibold min-w-[160px]">
                           {item.label}
                         </span>
-                        <span className="text-base text-[#1D3557] font-medium">{item.value}</span>
+                        <span className="text-base text-foreground font-medium">{item.value}</span>
                       </div>
                     ))}
                   </div>
@@ -409,11 +409,11 @@ const Dashboard = () => {
         {/* Personalized Video Playlist */}
         <div className="space-y-5 md:space-y-8">
           <div className="space-y-2 md:space-y-3">
-            <h2 className="text-2xl md:text-4xl font-bold text-[#1D3557] tracking-tight flex items-center gap-2 md:gap-3">
+            <h2 className="text-2xl md:text-4xl font-bold text-foreground tracking-tight flex items-center gap-2 md:gap-3">
               <span className="text-xl md:text-3xl">🎥</span>
               Start Learning
             </h2>
-            <p className="text-base md:text-lg text-[#6B7280]">
+            <p className="text-base md:text-lg text-muted-foreground">
               Your personalized videos - watch these first
             </p>
           </div>
@@ -450,7 +450,7 @@ const Dashboard = () => {
                         }}
                       >
                         {/* Thumbnail */}
-                        <div className="relative aspect-video bg-gradient-to-br from-[#EDF2F7] to-[#D4E0EC] overflow-hidden">
+                        <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
                           {video.thumbnail_url ? (
                             <img 
                               src={video.thumbnail_url} 
@@ -459,10 +459,10 @@ const Dashboard = () => {
                             />
                           ) : (
                             <>
-                              <div className="absolute inset-0 bg-[#4DE2E8]/5 group-hover:bg-[#4DE2E8]/10 transition-colors duration-500" />
+                              <div className="absolute inset-0 bg-primary/5 group-hover:bg-primary/10 transition-colors duration-500" />
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-16 h-16 rounded-full bg-[#4DE2E8]/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-[#4DE2E8]/30 transition-all duration-300">
-                                  <Play className="w-8 h-8 text-[#2FB3C6] ml-1" fill="currentColor" />
+                                <div className="w-16 h-16 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/30 transition-all duration-300">
+                                  <Play className="w-8 h-8 text-primary ml-1" fill="currentColor" />
                                 </div>
                               </div>
                             </>
@@ -480,32 +480,32 @@ const Dashboard = () => {
                         <div className="p-8 space-y-4">
                           <div className="flex items-center gap-3 flex-wrap">
                             <Badge variant={categoryVariantMap[video.category || ""] || "info"}>{video.category || "Uncategorized"}</Badge>
-                            <span className="text-sm text-[#6B7280] font-mono flex items-center gap-1.5">
+                            <span className="text-sm text-muted-foreground font-mono flex items-center gap-1.5">
                               <Clock className="w-3.5 h-3.5" />
                               {formatDuration(video.duration_seconds)}
                             </span>
                           </div>
 
-                          <h3 className="text-xl font-semibold text-[#1D3557] group-hover:text-[#4DE2E8] transition-colors duration-200 line-clamp-2">
+                          <h3 className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-200 line-clamp-2">
                             {video.title}
                           </h3>
 
                           {rec.reason && (
-                            <p className="text-sm text-[#6B7280] italic">
+                            <p className="text-sm text-muted-foreground italic">
                               {rec.reason}
                             </p>
                           )}
 
                           <div className="space-y-3">
-                            <div className="h-1.5 bg-[#D4E0EC]/50 rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-gradient-to-r from-[#4DE2E8] to-[#A7E9FF] transition-all duration-1000"
+                                className="h-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-1000"
                                 style={{ width: isCompleted ? "100%" : "0%" }}
                               />
                             </div>
 
                             <div className="flex items-center justify-between">
-                              <span className="text-sm text-[#6B7280]">
+                              <span className="text-sm text-muted-foreground">
                                 {isCompleted ? "Completed" : "Not Started"}
                               </span>
                               <Button size="sm" variant={isCompleted ? "outline" : "primary"} className="group-hover:scale-105 transition-transform">
@@ -534,7 +534,7 @@ const Dashboard = () => {
               {/* Empty state */}
               {freeVideos.length === 0 && (
                 <Card className="p-12 text-center">
-                  <p className="text-[#6B7280]">No personalized videos available yet. Complete the quiz to get recommendations.</p>
+                  <p className="text-muted-foreground">No personalized videos available yet. Complete the quiz to get recommendations.</p>
                 </Card>
               )}
             </div>
