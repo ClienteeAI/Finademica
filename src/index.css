@@ -750,9 +750,23 @@
   }
 
   /* ============================================
-     MOBILE-FIRST UTILITIES
-     Optimized for thumb-friendly navigation
+     MOBILE READABILITY SYSTEM
+     Enhanced contrast, safe areas, and glass cards
   ============================================ */
+
+  /* ===========================================
+     SAFE AREA UTILITIES
+  =========================================== */
+  
+  /* Safe area padding for top (status bar/notch) */
+  .safe-area-top {
+    padding-top: max(env(safe-area-inset-top, 0px), 20px);
+  }
+
+  /* Extra top padding for screen headers (below status bar) */
+  .screen-header-spacing {
+    padding-top: max(calc(env(safe-area-inset-top, 0px) + 12px), 32px);
+  }
   
   /* Safe area padding for bottom nav */
   .safe-area-bottom {
@@ -765,6 +779,177 @@
       padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
     }
   }
+
+  /* ===========================================
+     GLASS CARD SYSTEM - Readable on any background
+  =========================================== */
+  
+  /* Light glass card - high opacity for readability */
+  .glass-card-light {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 224, 236, 0.8);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-radius: 16px;
+  }
+
+  .glass-card-light:hover {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 2px 6px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
+  /* Dark glass card - for dark theme/backgrounds */
+  .glass-card-dark {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(71, 85, 105, 0.5);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      0 1px 4px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+  }
+
+  .glass-card-dark:hover {
+    border-color: rgba(100, 116, 139, 0.6);
+    box-shadow: 
+      0 8px 36px rgba(0, 0, 0, 0.35),
+      0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Solid card - full opacity, maximum readability */
+  .glass-card-solid {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+  }
+
+  /* Theme overrides for nasr/dark theme */
+  .theme-nasr .glass-card-light,
+  .dark .glass-card-light {
+    background: rgba(26, 31, 46, 0.92);
+    border-color: rgba(71, 85, 105, 0.5);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .theme-nasr .glass-card-light:hover,
+  .dark .glass-card-light:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+
+  /* ===========================================
+     TEXT CONTRAST UTILITIES
+  =========================================== */
+
+  /* High contrast text for dark backgrounds */
+  .text-high-contrast {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Medium contrast for secondary text on dark backgrounds */
+  .text-medium-contrast {
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Subtle text that's still readable */
+  .text-subtle-contrast {
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  /* Card text - ensure dark text on light cards */
+  .card-text-primary {
+    color: hsl(220 25% 10%);
+  }
+
+  .card-text-secondary {
+    color: hsl(220 9% 40%);
+  }
+
+  .card-text-muted {
+    color: hsl(220 9% 55%);
+  }
+
+  /* Theme-aware card text */
+  .theme-nasr .card-text-primary,
+  .dark .card-text-primary {
+    color: hsl(210 40% 96%);
+  }
+
+  .theme-nasr .card-text-secondary,
+  .dark .card-text-secondary {
+    color: hsl(215 20% 75%);
+  }
+
+  .theme-nasr .card-text-muted,
+  .dark .card-text-muted {
+    color: hsl(215 16% 60%);
+  }
+
+  /* ===========================================
+     PROGRESS BAR ENHANCEMENTS
+  =========================================== */
+
+  /* High contrast progress bar track */
+  .progress-track-contrast {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .theme-nasr .progress-track-contrast,
+  .dark .progress-track-contrast {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+
+  /* Glowing progress bar fill */
+  .progress-fill-glow {
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(195 100% 70%));
+    box-shadow: 0 0 12px rgba(77, 226, 232, 0.5);
+  }
+
+  /* ===========================================
+     BACKGROUND OVERLAY UTILITIES
+  =========================================== */
+
+  /* Screen overlay for video/image backgrounds */
+  .screen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.45) 30%,
+      rgba(0, 0, 0, 0.55) 100%
+    );
+  }
+
+  /* Stronger overlay for text-heavy areas */
+  .screen-overlay-strong {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.7) 0%,
+      rgba(0, 0, 0, 0.55) 30%,
+      rgba(0, 0, 0, 0.65) 100%
+    );
+  }
+
+  /* ===========================================
+     MOBILE TYPOGRAPHY & SPACING
+  =========================================== */
   
   /* Mobile typography scale */
   @media (max-width: 767px) {
@@ -850,10 +1035,9 @@
     gap: 0.75rem;
   }
 
-  /* ============================================
+  /* ===========================================
      BUTTON & PILL ACTIVE STATES
-     Clear distinction between active/inactive
-  ============================================ */
+  =========================================== */
   .filter-pill-active {
     @apply bg-primary text-primary-foreground border-primary shadow-md;
   }
@@ -876,7 +1060,9 @@
     border-color: rgba(212, 175, 55, 0.4);
   }
 
-  /* Better search input styling */
+  /* ===========================================
+     SEARCH INPUT STYLING
+  =========================================== */
   .search-input {
     @apply bg-card border-2 border-border transition-all duration-200;
   }
@@ -900,5 +1086,29 @@
 
   .theme-nasr .search-input::placeholder {
     @apply text-white/50;
+  }
+
+  /* ===========================================
+     LOCKED/DISABLED CARD STATES
+  =========================================== */
+  .locked-card {
+    background: rgba(30, 41, 59, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(100, 116, 139, 0.3);
+    opacity: 0.75;
+  }
+
+  .locked-card:hover {
+    opacity: 0.85;
+    border-color: rgba(100, 116, 139, 0.5);
+  }
+
+  .locked-card .locked-overlay {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Locked text should still be readable */
+  .locked-card .locked-text {
+    color: rgba(255, 255, 255, 0.7);
   }
 }

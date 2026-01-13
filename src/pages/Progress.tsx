@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import SidebarLayout from "@/components/layout/SidebarLayout";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Trophy, Video, Target, Zap } from "lucide-react";
@@ -90,7 +89,7 @@ const Progress = () => {
 
   return (
     <SidebarLayout>
-      {/* Nasr Trade Academy Video Background */}
+      {/* Video Background with proper overlay */}
       {isNasrTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
           <video
@@ -98,30 +97,31 @@ const Progress = () => {
             loop
             muted
             playsInline
-            className="absolute w-full h-full object-cover opacity-30"
+            className="absolute w-full h-full object-cover opacity-25"
           >
             <source src="/nasr-progress-background.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+          {/* Enhanced overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/50 to-black/70" />
         </div>
       )}
       
       <div className="max-w-5xl mx-auto space-y-8 animate-fade-in relative z-10">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground">Your Progress</h1>
-          <p className="text-muted-foreground">Track your learning journey</p>
+        {/* Header - with proper spacing below safe area */}
+        <div className="text-center space-y-2 pt-2">
+          <h1 className="text-3xl md:text-4xl font-bold text-high-contrast">Your Progress</h1>
+          <p className="text-medium-contrast">Track your learning journey</p>
         </div>
 
         {/* Level & XP Summary - Two small cards side by side */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Level Card */}
-          <Card className="p-5 bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl border border-gray-700/50">
+          {/* Level Card - improved glass styling */}
+          <div className="glass-card-dark p-5">
             {isPageLoading ? (
               <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-4 w-20 bg-white/10" />
+                <Skeleton className="h-8 w-32 bg-white/10" />
+                <Skeleton className="h-3 w-24 bg-white/10" />
               </div>
             ) : (
               <div className="flex items-center gap-4">
@@ -135,15 +135,15 @@ const Progress = () => {
                 </div>
               </div>
             )}
-          </Card>
+          </div>
 
-          {/* XP Card */}
-          <Card className="p-5 bg-gradient-to-br from-gray-900/80 to-gray-800/80 backdrop-blur-xl border border-gray-700/50">
+          {/* XP Card - improved glass styling */}
+          <div className="glass-card-dark p-5">
             {isPageLoading ? (
               <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-8 w-32" />
-                <Skeleton className="h-2 w-full mt-2" />
+                <Skeleton className="h-4 w-20 bg-white/10" />
+                <Skeleton className="h-8 w-32 bg-white/10" />
+                <Skeleton className="h-2 w-full mt-2 bg-white/10" />
               </div>
             ) : (
               <div className="space-y-3">
@@ -159,70 +159,70 @@ const Progress = () => {
                 <XPProgressBar />
               </div>
             )}
-          </Card>
+          </div>
         </div>
 
-        {/* Videos & Completion Summary - Two small cards side by side */}
+        {/* Videos & Completion Summary - improved glass styling */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Videos Watched Card */}
-          <Card className="p-5 text-center">
+          <div className="glass-card-dark p-5 text-center">
             {isPageLoading ? (
-              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl bg-white/10" />
             ) : (
               <>
-                <Video className="h-8 w-8 mx-auto text-primary mb-2" />
-                <p className="text-3xl font-bold text-foreground">{videoStats.videosWatched}</p>
-                <p className="text-sm text-muted-foreground">Videos Completed</p>
+                <Video className="h-8 w-8 mx-auto text-cyan-400 mb-2" />
+                <p className="text-3xl font-bold text-white">{videoStats.videosWatched}</p>
+                <p className="text-sm text-gray-400">Videos Completed</p>
                 {videoStats.totalVideos > 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     out of {videoStats.totalVideos} available
                   </p>
                 )}
               </>
             )}
-          </Card>
+          </div>
 
           {/* Completion Rate Card */}
-          <Card className="p-5 text-center">
+          <div className="glass-card-dark p-5 text-center">
             {isPageLoading ? (
-              <Skeleton className="h-20 rounded-xl" />
+              <Skeleton className="h-20 rounded-xl bg-white/10" />
             ) : (
               <>
-                <Trophy className="h-8 w-8 mx-auto text-primary mb-2" />
-                <p className="text-3xl font-bold text-foreground">{videoStats.completionRate}%</p>
-                <p className="text-sm text-muted-foreground">Completion Rate</p>
+                <Trophy className="h-8 w-8 mx-auto text-amber-400 mb-2" />
+                <p className="text-3xl font-bold text-white">{videoStats.completionRate}%</p>
+                <p className="text-sm text-gray-400">Completion Rate</p>
                 {videoStats.videosWatched === 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     Watch your first video to start
                   </p>
                 )}
               </>
             )}
-          </Card>
+          </div>
         </div>
 
         {/* Learning Streak - With celebration animations */}
-        <Card className="p-0 overflow-hidden">
+        <div className="glass-card-dark p-0 overflow-hidden rounded-2xl">
           <StreakCelebration streakDays={streakDays} isNasrTheme={isNasrTheme} />
-        </Card>
+        </div>
 
         {/* Achievements - Only completed achievements */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Trophy className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+              <Trophy className="h-6 w-6 text-amber-400" />
               Achievements
             </h2>
           </div>
 
           {achievementsLoading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-40 rounded-xl" />
+                <Skeleton key={i} className="h-40 rounded-xl bg-white/10" />
               ))}
             </div>
           ) : completedAchievements.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {completedAchievements.map((achievement) => (
                 <AchievementCard
                   key={achievement.id}
@@ -232,40 +232,42 @@ const Progress = () => {
               ))}
             </div>
           ) : (
-            <Card className="p-8 text-center">
-              <Trophy className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No achievements yet. Keep learning!</p>
-            </Card>
+            <div className="glass-card-dark p-8 text-center rounded-2xl">
+              <Trophy className="h-12 w-12 mx-auto text-gray-500 mb-3" />
+              <p className="text-gray-400">No achievements yet. Keep learning!</p>
+            </div>
           )}
         </div>
 
-        {/* Watch History - Simplified */}
+        {/* Continue Learning Section */}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Video className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Video className="h-5 w-5 text-cyan-400" />
             Continue Learning
           </h2>
-          <Card className="p-6 text-center">
+          <div className="glass-card-dark p-6 text-center rounded-2xl">
             {videoStats.videosWatched === 0 ? (
               <>
-                <p className="text-muted-foreground mb-4">Start watching videos to track your progress</p>
+                <p className="text-gray-400 mb-4">Start watching videos to track your progress</p>
                 <Link to="/videos">
-                  <Button className="bg-gradient-to-r from-cyan-500 to-blue-500">
+                  <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
                     Browse Videos
                   </Button>
                 </Link>
               </>
             ) : (
               <>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-gray-400 mb-4">
                   You've completed {videoStats.videosWatched} video{videoStats.videosWatched !== 1 ? 's' : ''}
                 </p>
                 <Link to="/videos">
-                  <Button variant="outline">Continue Learning</Button>
+                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800">
+                    Continue Learning
+                  </Button>
                 </Link>
               </>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </SidebarLayout>
