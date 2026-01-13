@@ -18,6 +18,15 @@ function Login() {
   const { client } = useClient();
   const { signIn, user } = useAuth();
 
+  // Handle ?signup=1 parameter - redirect to signup flow
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signup') === '1') {
+      navigate('/landing?signup=1', { replace: true });
+      return;
+    }
+  }, [navigate]);
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
