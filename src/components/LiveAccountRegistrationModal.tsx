@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, CalendarIcon, Eye, EyeOff, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { HIDE_TRADING_CTAS } from '@/lib/featureFlags';
 
 interface LiveAccountRegistrationModalProps {
   open: boolean;
@@ -460,6 +461,11 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
       setIsSubmitting(false);
     }
   };
+
+  // Hide entire modal when trading CTAs are disabled for App Store compliance
+  if (HIDE_TRADING_CTAS) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

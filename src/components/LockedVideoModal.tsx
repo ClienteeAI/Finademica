@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
+import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
 
 interface LockedVideoModalProps {
   isOpen: boolean;
@@ -36,17 +37,22 @@ export const LockedVideoModal = ({ isOpen, onClose, videoTitle }: LockedVideoMod
           
           <div className="bg-muted/50 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">
-              Available with live trading account
+              {HIDE_TRADING_CTAS 
+                ? "Complete quizzes to unlock more videos"
+                : "Available with live trading account"
+              }
             </p>
           </div>
           
           <div className="flex flex-col gap-3">
-            <Button 
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
-              onClick={() => window.open('https://nasrtrade.com', '_blank')}
-            >
-              Open Live Account
-            </Button>
+            {!HIDE_TRADING_CTAS && (
+              <Button 
+                className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
+                onClick={() => window.open('https://nasrtrade.com', '_blank')}
+              >
+                Open Live Account
+              </Button>
+            )}
             <Button 
               variant="outline" 
               className="w-full"

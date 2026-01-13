@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
 import { SaveAnalysisToDiaryModal } from "@/components/SaveAnalysisToDiaryModal";
+import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
+
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
@@ -188,34 +190,36 @@ const StockAnalyzer = () => {
                   {/* Analysis Results */}
                   <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
                   
-                  {/* Prominent Trade CTA Banner */}
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 p-8 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
-                    {/* Animated background glow */}
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_50%)]" />
-                    <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" />
-                    <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-                    
-                    <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="text-center md:text-left">
-                        <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                          Ready to Trade {analyzedSymbol}?
-                        </h3>
-                        <p className="text-white/80 text-lg">
-                          Open a position now with our trusted trading platform
-                        </p>
-                      </div>
+                  {/* Prominent Trade CTA Banner - Hidden for App Store compliance */}
+                  {!HIDE_TRADING_CTAS && (
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 p-8 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
+                      {/* Animated background glow */}
+                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_50%)]" />
+                      <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" />
+                      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
                       
-                      <button
-                        onClick={() => setShowRegistrationModal(true)}
-                        className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-bold text-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.3)] hover:scale-105 transition-all duration-300"
-                      >
-                        <TrendingUp className="w-6 h-6 group-hover:animate-pulse" />
-                        Trade {analyzedSymbol} Now
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
-                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full" />
-                      </button>
+                      <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="text-center md:text-left">
+                          <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                            Ready to Trade {analyzedSymbol}?
+                          </h3>
+                          <p className="text-white/80 text-lg">
+                            Open a position now with our trusted trading platform
+                          </p>
+                        </div>
+                        
+                        <button
+                          onClick={() => setShowRegistrationModal(true)}
+                          className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-bold text-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.3)] hover:scale-105 transition-all duration-300"
+                        >
+                          <TrendingUp className="w-6 h-6 group-hover:animate-pulse" />
+                          Trade {analyzedSymbol} Now
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Save to Diary Button */}
                   <div className="flex justify-center">

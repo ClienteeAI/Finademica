@@ -16,6 +16,7 @@ import { useAchievements } from "@/hooks/useAchievements";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGamification } from "@/hooks/useGamification";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
 
 interface VideoStep {
   id: string;
@@ -324,7 +325,7 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                         <div className="text-center p-3">
                           <Lock className="w-6 h-6 text-gray-400 mx-auto mb-1" />
                           <p className="text-xs text-gray-400">
-                            {location.requiresLiveAccount 
+                            {location.requiresLiveAccount && !HIDE_TRADING_CTAS
                               ? "Unlock with Live Account" 
                               : `Complete ${locations[index + 1]?.name || 'previous phase'} to unlock`
                             }
@@ -408,7 +409,7 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                         </Button>
                       )}
 
-                      {isLocked && location.requiresLiveAccount && (
+                      {isLocked && location.requiresLiveAccount && !HIDE_TRADING_CTAS && (
                         <Button 
                           size="sm"
                           className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-semibold z-20 relative"

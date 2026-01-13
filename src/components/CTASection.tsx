@@ -1,11 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
 
 interface CTASectionProps {
   onGetStarted: () => void;
 }
 
 const CTASection = ({ onGetStarted }: CTASectionProps) => {
+  // Hide the entire CTA section when trading CTAs are disabled
+  if (HIDE_TRADING_CTAS) {
+    return null;
+  }
+
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       {/* Gradient background */}

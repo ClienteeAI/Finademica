@@ -1,7 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Check, Rocket } from "lucide-react";
+import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
 
 export const ConversionBanner = () => {
+  // Hide the entire banner when trading CTAs are disabled
+  if (HIDE_TRADING_CTAS) {
+    return null;
+  }
+
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-700 p-5 sm:p-8 md:p-12">
       {/* Background pattern overlay */}
