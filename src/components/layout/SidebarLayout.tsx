@@ -86,7 +86,7 @@ function SidebarNavContent() {
             <span
               className={cn(
                 'text-lg font-medium tracking-tight transition-all duration-300',
-                'font-playfair text-[#e2e8f0] group-hover:text-[#38bdf8]'
+                'font-playfair text-sidebar-foreground group-hover:text-primary'
               )}
             >
               {collapsed ? (isNasrTheme ? 'N' : client?.company_name?.[0] || 'L') : (isNasrTheme ? 'NASR Lector' : client?.company_name)}
@@ -96,17 +96,17 @@ function SidebarNavContent() {
 
         {/* Admin Mode Client Switcher - hidden on mobile */}
         {isAdminMode && !collapsed && (
-          <div className="mt-3 pt-3 border-t border-[rgba(148,163,184,0.08)] hidden md:block">
-            <span className="px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide bg-[#38bdf8]/20 text-[#38bdf8]">
+          <div className="mt-3 pt-3 border-t border-sidebar-border hidden md:block">
+            <span className="px-2 py-1 text-[10px] font-bold rounded-full uppercase tracking-wide bg-primary/20 text-primary">
               ADMIN
             </span>
             <select
               value={client?.subdomain}
               onChange={(e) => switchClient(e.target.value)}
-              className="mt-2 w-full px-3 py-2 bg-[rgba(255,255,255,0.04)] border border-[rgba(148,163,184,0.12)] rounded-lg text-sm font-medium cursor-pointer transition-all hover:border-[#38bdf8]/40 text-[#cbd5e1]"
+              className="mt-2 w-full px-3 py-2 bg-sidebar-accent/10 border border-sidebar-border rounded-lg text-sm font-medium cursor-pointer transition-all hover:border-primary/40 text-sidebar-foreground"
             >
               {allClients.map((c) => (
-                <option key={c.id} value={c.subdomain} className="bg-[#0f172a]">
+                <option key={c.id} value={c.subdomain} className="bg-sidebar">
                   {c.company_name}
                 </option>
               ))}
@@ -118,7 +118,7 @@ function SidebarNavContent() {
       <SidebarContent className="px-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[#64748b] text-xs font-medium uppercase tracking-wider mb-1">
+          <SidebarGroupLabel className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -132,12 +132,12 @@ function SidebarNavContent() {
                     className={cn(
                       'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                       isActive(item.path)
-                        ? 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8] shadow-[inset_3px_0_0_#38bdf8]'
-                        : 'text-[#cbd5e1] hover:bg-[rgba(148,163,184,0.08)]',
+                        ? 'bg-primary/12 text-primary shadow-[inset_3px_0_0] shadow-primary'
+                        : 'text-sidebar-foreground hover:bg-sidebar-accent/20',
                       '[&>svg]:transition-colors [&>svg]:duration-200',
                       isActive(item.path)
-                        ? '[&>svg]:text-[#38bdf8]'
-                        : '[&>svg]:text-[#64748b] hover:[&>svg]:text-[#94a3b8]'
+                        ? '[&>svg]:text-primary'
+                        : '[&>svg]:text-muted-foreground hover:[&>svg]:text-sidebar-foreground'
                     )}
                   >
                     <Link to={item.path}>
@@ -152,13 +152,13 @@ function SidebarNavContent() {
         </SidebarGroup>
 
         {/* Section Divider */}
-        <div className="mx-2 my-3 border-t border-[rgba(148,163,184,0.08)]" />
+        <div className="mx-2 my-3 border-t border-sidebar-border" />
 
         {/* Tools */}
         <SidebarGroup>
           <Collapsible open={toolsOpen} onOpenChange={setToolsOpen}>
             <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-[rgba(148,163,184,0.08)] text-[#64748b]">
+              <SidebarGroupLabel className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20 text-muted-foreground">
                 <div className="flex items-center gap-2 w-full">
                   <Wrench className="h-4 w-4" />
                   {!collapsed && <span className="text-xs font-medium uppercase tracking-wider">Tools</span>}
@@ -185,12 +185,12 @@ function SidebarNavContent() {
                         className={cn(
                           'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                           isActive(item.path)
-                            ? 'bg-[rgba(56,189,248,0.12)] text-[#38bdf8] shadow-[inset_3px_0_0_#38bdf8]'
-                            : 'text-[#cbd5e1] hover:bg-[rgba(148,163,184,0.08)]',
+                            ? 'bg-primary/12 text-primary shadow-[inset_3px_0_0] shadow-primary'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent/20',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
-                            ? '[&>svg]:text-[#38bdf8]'
-                            : '[&>svg]:text-[#64748b] hover:[&>svg]:text-[#94a3b8]'
+                            ? '[&>svg]:text-primary'
+                            : '[&>svg]:text-muted-foreground hover:[&>svg]:text-sidebar-foreground'
                         )}
                       >
                         <Link to={item.path}>
@@ -232,25 +232,25 @@ function TopHeader() {
       >
         {/* Left: Sidebar trigger for mobile */}
         <div className="flex items-center gap-2 md:gap-3">
-          <SidebarTrigger className="md:hidden text-[#cbd5e1] hover:text-[#38bdf8] hover:bg-[rgba(56,189,248,0.12)] h-9 w-9" />
+          <SidebarTrigger className="md:hidden text-foreground hover:text-primary hover:bg-primary/12 h-9 w-9" />
           <XPNavIndicator isNasrTheme={true} />
         </div>
 
         {/* Right: Profile button - more compact on mobile */}
         <Button
           variant="ghost"
-          className="flex items-center gap-1.5 md:gap-2 h-auto py-1 md:py-1.5 px-2 md:px-3 rounded-full bg-[#1e293b]/80 backdrop-blur-sm border border-[#334155]/50 shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 hover:bg-[#334155]/80 hover:border-[#475569]/50"
+          className="flex items-center gap-1.5 md:gap-2 h-auto py-1 md:py-1.5 px-2 md:px-3 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-md transition-all duration-200 hover:bg-accent/80 hover:border-accent"
           onClick={() => setProfileSheetOpen(true)}
         >
           <div
-            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-semibold text-xs md:text-sm transition-all bg-gradient-to-br from-[#0ea5e9] to-[#0284c7] text-white ring-2 ring-[#0ea5e9]/30"
+            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-semibold text-xs md:text-sm transition-all bg-gradient-to-br from-primary to-primary/80 text-primary-foreground ring-2 ring-primary/30"
           >
             {firstName.charAt(0).toUpperCase()}
           </div>
-          <span className="hidden sm:inline text-sm font-medium text-[#e2e8f0]">
+          <span className="hidden sm:inline text-sm font-medium text-foreground">
             {firstName}
           </span>
-          <User className="h-4 w-4 text-[#94a3b8] hidden sm:block" />
+          <User className="h-4 w-4 text-muted-foreground hidden sm:block" />
         </Button>
       </header>
 
@@ -285,20 +285,17 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen flex w-full bg-[#0C0E13]">
+      <div className="min-h-screen flex w-full bg-background">
         {/* Desktop Sidebar - hidden on mobile */}
         <Sidebar
           collapsible="icon"
           variant="floating"
-          className="hidden md:flex rounded-[18px] shadow-[0_10px_50px_rgba(0,0,0,0.5)] border border-[#3a4150]/30"
-          style={{
-            background: '#2A303A',
-          }}
+          className="hidden md:flex rounded-[18px] shadow-lg border border-sidebar-border bg-sidebar"
         >
           <SidebarNavContent />
         </Sidebar>
 
-        <SidebarInset className="flex flex-col bg-[#0C0E13]">
+        <SidebarInset className="flex flex-col bg-background">
           <TopHeader />
 
           {/* Main content with mobile bottom padding */}
