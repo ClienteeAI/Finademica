@@ -137,12 +137,24 @@ function applyClientTheme(client: Client) {
   }
 
   // Detect if this is a dark-based theme by checking background lightness
-  // HSL format: "H S% L%" - we check the L (lightness) value
+  // Support both HSL format: "H S% L%" and OKLCH format: "oklch(L C H)"
   const bgValue = vars?.background || '';
-  const bgLightness = parseFloat(bgValue.split(' ')[2]?.replace('%', '') || '50');
-  const isDarkTheme = bgLightness < 20;
+  let isDarkTheme = false;
   
-  console.log('[Theme] Background:', bgValue, 'Lightness:', bgLightness, 'isDarkTheme:', isDarkTheme);
+  if (bgValue.startsWith('oklch(')) {
+    // OKLCH format: oklch(0.2204 0.0198 275.8439) - L is first value (0-1 scale)
+    const oklchMatch = bgValue.match(/oklch\(\s*([\d.]+)/);
+    if (oklchMatch) {
+      const lightness = parseFloat(oklchMatch[1]);
+      isDarkTheme = lightness < 0.4; // OKLCH lightness: 0-1 scale, <0.4 is dark
+    }
+  } else {
+    // HSL format: "H S% L%" - check L (lightness) percentage
+    const bgLightness = parseFloat(bgValue.split(' ')[2]?.replace('%', '') || '50');
+    isDarkTheme = bgLightness < 20;
+  }
+  
+  console.log('[Theme] Background:', bgValue, 'isDarkTheme:', isDarkTheme);
 
   // Apply theme class for CSS utility overrides (e.g., .theme-nasr .premium-card)
   // This is needed for clients with dark themes that have special styling
