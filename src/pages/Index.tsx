@@ -19,7 +19,11 @@ const Index = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const signupParam = urlParams.get('signup');
     
-    if (signupParam === '1' || client?.skip_landing_page) {
+    // Show signup if ?signup=1 param OR client is configured to skip landing page
+    if (signupParam === '1') {
+      setSignupOnly(true);
+      setSignupOpen(true);
+    } else if (client?.skip_landing_page) {
       setSignupOnly(true);
       setSignupOpen(true);
     }
