@@ -368,7 +368,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
       onOpenChange={() => {}} // Prevent closing
     >
       <DialogContent 
-        className="max-w-3xl bg-card/95 backdrop-blur-lg border-border p-0"
+        className="max-w-3xl bg-background border-border p-0 text-foreground"
         onPointerDownOutside={(e) => e.preventDefault()} // Block background clicks
         onEscapeKeyDown={(e) => e.preventDefault()} // Block escape key
         hideCloseButton // Custom prop to hide X button
@@ -409,9 +409,9 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
             className="space-y-3"
           >
             {question.options.map((option) => (
-              <div key={option.value} className="flex items-center space-x-3 bg-background/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer">
-                <RadioGroupItem value={option.value} id={option.value} />
-                <Label htmlFor={option.value} className="text-base cursor-pointer flex-1">
+              <div key={option.value} className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer">
+                <RadioGroupItem value={option.value} id={option.value} className="border-foreground/50 text-primary" />
+                <Label htmlFor={option.value} className="text-base text-foreground cursor-pointer flex-1">
                   {option.label}
                 </Label>
               </div>
