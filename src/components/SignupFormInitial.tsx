@@ -167,7 +167,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-card/95 backdrop-blur-lg border-border">
+      <DialogContent className="max-w-md bg-background border-border text-foreground">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center text-foreground">
             Create Your Free Account
@@ -186,25 +186,25 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName" className="text-foreground">First Name</Label>
               <Input
                 id="firstName"
                 placeholder="John"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className={errors.firstName ? "border-destructive" : ""}
+                className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.firstName ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
               {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
               <Input
                 id="lastName"
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className={errors.lastName ? "border-destructive" : ""}
+                className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.lastName ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
               {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
@@ -212,48 +212,48 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nickname">Nickname (displayed publicly)</Label>
+            <Label htmlFor="nickname" className="text-foreground">Nickname (displayed publicly)</Label>
             <Input
               id="nickname"
               placeholder="TraderJohn"
               value={formData.nickname}
               onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-              className={errors.nickname ? "border-destructive" : ""}
+              className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.nickname ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.nickname && <p className="text-xs text-destructive">{errors.nickname}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email" className="text-foreground">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="john@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={errors.email ? "border-destructive" : ""}
+              className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.email ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number (with country prefix)</Label>
+            <Label htmlFor="phone" className="text-foreground">Phone Number (with country prefix)</Label>
             <Input
               id="phone"
               type="tel"
               placeholder="+420 123 456 789"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className={errors.phone ? "border-destructive" : ""}
+              className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.phone ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-foreground">Password</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -261,7 +261,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="Create a secure password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={errors.password ? "border-destructive pr-10" : "pr-10"}
+                className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.password ? "border-destructive pr-10" : "pr-10"}`}
                 disabled={isSubmitting}
               />
               <button
