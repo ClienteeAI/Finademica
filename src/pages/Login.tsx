@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClient } from '@/lib/clientContext';
 import { useAuth } from '@/lib/AuthContext';
-import { Eye, EyeOff, Mail, Lock, AlertTriangle, Check } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
+import { Button } from '@/components/ui/button';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -84,75 +85,55 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4">
-      
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A0E1A] via-[#0A0E1A] to-black pointer-events-none">
-        {/* Gradient Orbs */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-success/15 rounded-full blur-[100px] animate-pulse-subtle" 
-             style={{ animationDuration: '20s' }} />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-sky-500/15 rounded-full blur-[100px] animate-pulse-subtle" 
-             style={{ animationDuration: '25s', animationDelay: '5s' }} />
-        
-        {/* Grid Overlay */}
-        <div className="absolute inset-0" 
-             style={{ 
-               backgroundImage: 'linear-gradient(rgba(30, 41, 59, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(30, 41, 59, 0.5) 1px, transparent 1px)',
-               backgroundSize: '60px 60px'
-             }} />
-        
-        {/* Noise Texture */}
-        <div className="absolute inset-0 opacity-[0.02]" 
-             style={{ 
-               backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 400 400\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' /%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' /%3E%3C/svg%3E")',
-             }} />
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+      {/* Background effects - using semantic tokens */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-success/10 rounded-full blur-3xl" />
       </div>
 
       {/* Login Card */}
-      <div 
-        className="relative w-full max-w-[480px] animate-fade-in z-10"
-        style={{ perspective: '1000px' }}
-      >
-        <div 
-          className={`
-            relative bg-[#121827]/40 backdrop-blur-[40px] backdrop-saturate-[180%]
-            border border-white/10 rounded-[32px] p-6 sm:p-10 md:p-16
-            shadow-[0_20px_60px_rgba(0,0,0,0.3),0_0_0_1px_rgba(255,255,255,0.05)_inset]
-            transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]
-            hover:-translate-y-1 hover:shadow-[0_24px_80px_rgba(0,0,0,0.4),0_0_0_1px_rgba(255,255,255,0.08)_inset]
-          `}
-        >
-          
+      <div className="relative w-full max-w-md z-10">
+        {/* Logo */}
+        {client?.logo_url && (
+          <div className="flex justify-center mb-8">
+            <img 
+              src={client.logo_url} 
+              alt={client.company_name || 'Logo'} 
+              className="h-12 object-contain"
+            />
+          </div>
+        )}
+
+        <div className="bg-card/90 backdrop-blur-xl rounded-2xl p-8 border border-border/50 shadow-xl">
           {/* Header */}
-          <div className="text-center mb-12 space-y-3">
-            <h1 className="text-[36px] font-bold text-white tracking-tight animate-slide-down"
-                style={{ animationDelay: '100ms', letterSpacing: '-0.02em' }}>
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-foreground mb-2">
               Welcome Back
             </h1>
-            <p className="text-base text-white/60 animate-slide-down"
-               style={{ animationDelay: '200ms' }}>
+            <p className="text-muted-foreground">
               Sign in to {client?.company_name || 'your trading academy'}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className={`mb-6 p-4 bg-red-500/10 border border-red-500/50 rounded-xl text-red-400 text-sm flex items-start gap-3 animate-slide-down ${shake ? 'animate-shake' : ''}`}>
+            <div className={`mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-xl text-destructive text-sm flex items-start gap-3 ${shake ? 'animate-shake' : ''}`}>
               <AlertTriangle size={18} className="flex-shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5">
             
             {/* Email Input */}
-            <div className="animate-fade-in" style={{ animationDelay: '300ms' }}>
-              <label className="block text-[13px] font-semibold uppercase tracking-wider text-white/70 mb-3">
-                EMAIL ADDRESS
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Email Address
               </label>
-              <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 transition-colors group-focus-within:text-success" />
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   type="email"
                   value={email}
@@ -160,40 +141,36 @@ function Login() {
                   placeholder="you@company.com"
                   required
                   autoFocus
-                  className="w-full h-14 pl-14 pr-5 bg-[#1E293B]/60 border-[1.5px] border-[#334155]/80 rounded-2xl
-                           text-white text-[15px] font-medium placeholder-white/30
-                           transition-all duration-300 ease-out
-                           focus:border-success focus:bg-[#1E293B]/80 focus:outline-none
-                           focus:shadow-[0_0_0_4px_rgba(0,208,132,0.1),0_8px_24px_rgba(0,208,132,0.15)]
-                           focus:-translate-y-0.5"
+                  className="w-full h-12 pl-12 pr-4 bg-muted/50 border border-input rounded-xl
+                           text-foreground placeholder:text-muted-foreground
+                           transition-all duration-200
+                           focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
               </div>
             </div>
 
             {/* Password Input */}
-            <div className="animate-fade-in" style={{ animationDelay: '400ms' }}>
-              <label className="block text-[13px] font-semibold uppercase tracking-wider text-white/70 mb-3">
-                PASSWORD
+            <div>
+              <label className="block text-sm font-medium text-foreground mb-2">
+                Password
               </label>
-              <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 transition-colors group-focus-within:text-success" />
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full h-14 pl-14 pr-14 bg-[#1E293B]/60 border-[1.5px] border-[#334155]/80 rounded-2xl
-                           text-white text-[15px] font-medium placeholder-white/30
-                           transition-all duration-300 ease-out
-                           focus:border-success focus:bg-[#1E293B]/80 focus:outline-none
-                           focus:shadow-[0_0_0_4px_rgba(0,208,132,0.1),0_8px_24px_rgba(0,208,132,0.15)]
-                           focus:-translate-y-0.5"
+                  className="w-full h-12 pl-12 pr-12 bg-muted/50 border border-input rounded-xl
+                           text-foreground placeholder:text-muted-foreground
+                           transition-all duration-200
+                           focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-all hover:scale-110"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -201,74 +178,49 @@ function Login() {
             </div>
 
             {/* Forgot Password Link */}
-            <div className="flex justify-end animate-fade-in" style={{ animationDelay: '450ms' }}>
+            <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
-                className="text-sm text-white/60 hover:text-success transition-colors"
+                className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 Forgot password?
               </button>
             </div>
 
             {/* Submit Button */}
-            <button
+            <Button
               type="submit"
               disabled={loading || success}
-              className={`
-                relative w-full h-14 rounded-2xl font-semibold text-base text-white
-                bg-gradient-to-r from-success to-[#10B981]
-                shadow-[0_4px_12px_rgba(0,208,132,0.3)]
-                transition-all duration-300 ease-out
-                hover:-translate-y-0.5 hover:scale-[1.01] hover:shadow-[0_12px_32px_rgba(0,208,132,0.4)]
-                active:scale-[0.98] active:duration-100
-                disabled:opacity-80 disabled:cursor-not-allowed disabled:transform-none
-                overflow-hidden group
-                animate-fade-in
-              `}
-              style={{ animationDelay: '500ms' }}
+              className="w-full h-12 text-base font-semibold"
             >
-              {/* Button Shine Effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[800ms]" />
-              
-              {/* Button Content */}
-              <span className="relative z-10 flex items-center justify-center gap-2">
-                {loading && (
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                )}
-                {success && <Check size={20} className="animate-scale-in" />}
-                {success ? 'Success!' : loading ? 'Signing in...' : 'Sign In'}
-              </span>
-            </button>
-
+              {loading && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
+              {success && <Check size={20} className="mr-2" />}
+              {success ? 'Success!' : loading ? 'Signing in...' : 'Sign In'}
+            </Button>
           </form>
 
           {/* Signup Link */}
-          <div className="mt-8 text-center animate-fade-in" style={{ animationDelay: '600ms' }}>
-            <p className="text-sm text-white/60">
+          <div className="mt-6 text-center">
+            <p className="text-sm text-muted-foreground">
               Don't have an account?{' '}
               <button
                 onClick={() => navigate('/landing?signup=1')}
-                className="text-success hover:text-success/80 hover:underline font-medium transition-colors"
+                className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
               >
                 Sign up
               </button>
             </p>
           </div>
-
-
         </div>
       </div>
 
       {/* Loading Overlay */}
       {loading && (
-        <div className="fixed inset-0 bg-[#0A0E1A]/80 backdrop-blur-xl z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <div className="w-10 h-10 mx-auto border-4 border-success/30 border-t-success rounded-full animate-spin" />
-            <p className="text-white/80 text-sm font-medium">Preparing your dashboard...</p>
+            <Loader2 className="w-10 h-10 mx-auto animate-spin text-primary" />
+            <p className="text-foreground text-sm font-medium">Preparing your dashboard...</p>
           </div>
         </div>
       )}
@@ -279,7 +231,6 @@ function Login() {
         onOpenChange={setShowForgotPassword}
         defaultEmail={email}
       />
-
     </div>
   );
 }
