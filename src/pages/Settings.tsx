@@ -281,25 +281,27 @@ const Settings = () => {
                   Delete Account
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className={isNasrTheme ? 'bg-nasr-panel border-gold/20' : 'bg-white border-ice'}>
+              <AlertDialogContent className={isNasrTheme ? 'bg-nasr-panel border-gold/20' : 'bg-card border-border'}>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
-                    Are you sure?
+                  <AlertDialogTitle className={isNasrTheme ? 'text-nasr-text' : 'text-foreground'}>
+                    Delete Your Account?
                   </AlertDialogTitle>
-                  <AlertDialogDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
-                    This action cannot be undone. This will permanently delete your account and remove all your data.
+                  <AlertDialogDescription className={`space-y-3 ${isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground'}`}>
+                    <p>
+                      If you're sure you want to delete your account, please send an email to:
+                    </p>
+                    <p className={`font-semibold ${isNasrTheme ? 'text-gold' : 'text-primary'}`}>
+                      support@nallio.io
+                    </p>
+                    <p className="text-sm">
+                      Please note: We have up to 30 days to process your deletion request. All your data will be permanently removed.
+                    </p>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className={isNasrTheme ? 'border-gold/20 text-nasr-text' : 'border-ice text-ocean'}>
-                    Cancel
+                  <AlertDialogCancel className={isNasrTheme ? 'border-gold/20 text-nasr-text' : 'border-border text-foreground'}>
+                    Close
                   </AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Delete Account
-                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
