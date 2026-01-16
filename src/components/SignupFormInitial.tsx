@@ -9,6 +9,7 @@ import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { ONBOARDING_WEBHOOK_URL } from "@/lib/onboardingWebhook";
+import CountryCodeSelect from "@/components/CountryCodeSelect";
 
 export interface SignupUserData {
   firstName: string;
@@ -32,6 +33,8 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [webhookError, setWebhookError] = useState<string | null>(null);
+  const [countryCode, setCountryCode] = useState("+420"); // Default to Czech Republic
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [formData, setFormData] = useState<SignupUserData>({
     firstName: "",
     lastName: "",
@@ -62,8 +65,8 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
     else if (formData.nickname.trim().length > 20) newErrors.nickname = "Nickname must be 20 characters or less";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
-    if (!isPasswordValid) newErrors.password = "Password does not meet requirements";
+    if (!phoneNumber.trim()) newErrors.phone = "Phone number is required";
+    else if (phoneNumber.trim().length < 6) newErrors.phone = "Please enter a valid phone number";
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -106,7 +109,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           last_name: formData.lastName,
           nickname: formData.nickname,
           email: formData.email,
-          phone: formData.phone,
+          phone: `${countryCode} ${phoneNumber}`,
           client_id: client.id,
           client_subdomain: client.subdomain,
           client_name: client.company_name,
@@ -133,7 +136,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           first_name: formData.firstName,
           last_name: formData.lastName,
           nickname: formData.nickname,
-          phone: formData.phone,
+          phone: `${countryCode} ${phoneNumber}`,
         }
       );
 
@@ -150,11 +153,17 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
       console.log('User created with Supabase Auth');
       
+      // Create combined user data with full phone number
+      const completeUserData: SignupUserData = {
+        ...formData,
+        phone: `${countryCode} ${phoneNumber}`
+      };
+      
       // Store user data temporarily for quiz
-      localStorage.setItem('pendingSignupData', JSON.stringify(formData));
+      localStorage.setItem('pendingSignupData', JSON.stringify(completeUserData));
       
       // Trigger quiz modal (do NOT redirect, do NOT unlock content)
-      onSignupComplete(formData);
+      onSignupComplete(completeUserData);
       onOpenChange(false);
 
     } catch (error) {
@@ -239,16 +248,24 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-foreground">Phone Number (with country prefix)</Label>
-            <Input
-              id="phone"
-              type="tel"
-              placeholder="+420 123 456 789"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.phone ? "border-destructive" : ""}`}
-              disabled={isSubmitting}
-            />
+            <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+            <div className="flex gap-2">
+              <CountryCodeSelect
+                value={countryCode}
+                onChange={setCountryCode}
+                disabled={isSubmitting}
+                hasError={!!errors.phone}
+              />
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="123 456 789"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className={`flex-1 bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.phone ? "border-destructive" : ""}`}
+                disabled={isSubmitting}
+              />
+            </div>
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
           </div>
 
