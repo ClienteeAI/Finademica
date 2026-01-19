@@ -10,16 +10,37 @@ declare global {
 
 /**
  * Meta (Facebook) Pixel - Only loads for NASR client
+ * Works on both nasr subdomain and trade.nasrlector.com custom domain
  */
 const MetaPixel = () => {
   const { client } = useClient();
 
   useEffect(() => {
-    // Only load for NASR client
-    if (client?.subdomain !== 'nasr') return;
+    // Wait for client to load
+    if (!client) {
+      console.log('[MetaPixel] Waiting for client to load...');
+      return;
+    }
+
+    // Check if this is NASR client (by subdomain OR custom domain)
+    const isNasrClient = client.subdomain === 'nasr' || 
+                         client.custom_domain?.includes('nasrlector');
+    
+    console.log('[MetaPixel] Client loaded:', client.subdomain, 'custom_domain:', client.custom_domain, 'isNasr:', isNasrClient);
+
+    if (!isNasrClient) {
+      console.log('[MetaPixel] Not NASR client, skipping pixel');
+      return;
+    }
 
     // Prevent duplicate initialization
-    if (window.fbq) return;
+    if (window.fbq) {
+      console.log('[MetaPixel] Already initialized, tracking PageView');
+      window.fbq('track', 'PageView');
+      return;
+    }
+
+    console.log('[MetaPixel] Initializing Meta Pixel for NASR...');
 
     // Initialize fbq
     const fbq = function(...args: unknown[]) {
@@ -49,6 +70,8 @@ const MetaPixel = () => {
     // Initialize pixel with NASR's ID and track PageView
     window.fbq('init', '1385265819744408');
     window.fbq('track', 'PageView');
+    
+    console.log('[MetaPixel] Pixel initialized and PageView tracked');
 
     // Add noscript fallback image
     const noscriptImg = document.createElement('img');
@@ -64,7 +87,7 @@ const MetaPixel = () => {
         noscriptImg.parentNode.removeChild(noscriptImg);
       }
     };
-  }, [client?.subdomain]);
+  }, [client]);
 
   return null;
 };
