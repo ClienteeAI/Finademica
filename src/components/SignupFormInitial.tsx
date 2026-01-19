@@ -201,7 +201,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="John"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.firstName ? "border-destructive" : ""}`}
+                className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.firstName ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
               {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
@@ -213,7 +213,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.lastName ? "border-destructive" : ""}`}
+                className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.lastName ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
               {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
@@ -227,7 +227,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
               placeholder="TraderJohn"
               value={formData.nickname}
               onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-              className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.nickname ? "border-destructive" : ""}`}
+              className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.nickname ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.nickname && <p className="text-xs text-destructive">{errors.nickname}</p>}
@@ -241,7 +241,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
               placeholder="john@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.email ? "border-destructive" : ""}`}
+              className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.email ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
@@ -262,7 +262,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="123 456 789"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className={`flex-1 bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.phone ? "border-destructive" : ""}`}
+                className={`flex-1 bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.phone ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
             </div>
@@ -278,7 +278,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="Create a secure password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={`bg-muted/50 text-foreground placeholder:text-muted-foreground border-input ${errors.password ? "border-destructive pr-10" : "pr-10"}`}
+                className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.password ? "border-destructive pr-10" : "pr-10"}`}
                 disabled={isSubmitting}
               />
               <button
