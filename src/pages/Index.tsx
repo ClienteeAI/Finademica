@@ -6,6 +6,7 @@ import HowItWorks from "@/components/HowItWorks";
 import CTASection from "@/components/CTASection";
 import SignupFormInitial, { SignupUserData } from "@/components/SignupFormInitial";
 import MandatoryQuizModal from "@/components/MandatoryQuizModal";
+import MetaPixel from "@/components/MetaPixel";
 
 const Index = () => {
   const { client } = useClient();
@@ -39,7 +40,9 @@ const Index = () => {
   // If signup-only mode, render just the signup form
   if (signupOnly) {
     return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
+      <>
+        <MetaPixel />
+        <main className="min-h-screen bg-background flex items-center justify-center">
         <SignupFormInitial 
           open={signupOpen} 
           onOpenChange={(open) => {
@@ -57,7 +60,8 @@ const Index = () => {
           open={quizOpen} 
           userData={userData}
         />
-      </main>
+        </main>
+      </>
     );
   }
 
