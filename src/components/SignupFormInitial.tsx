@@ -310,7 +310,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+            className="w-full h-12 text-base font-semibold"
           >
             {isSubmitting ? (
               <>
