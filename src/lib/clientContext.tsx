@@ -402,9 +402,9 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
 
-      // PRIORITY 4: Check saved user client from localStorage (for mobile app users)
+      // PRIORITY 4: Saved client override ONLY for preview/local (avoid wrong branding on real domains)
       const savedUserClient = localStorage.getItem('user_client_subdomain');
-      if (savedUserClient) {
+      if (savedUserClient && (isLocalhostOrIp || isLovablePreview)) {
         const { data: userClientData } = await supabase
           .from('clients')
           .select('*')
