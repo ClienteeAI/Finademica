@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { Eye, EyeOff, Mail, Lock, AlertTriangle, Check, Loader2 } from 'lucide-react';
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
 import { Button } from '@/components/ui/button';
+import MetaPixel from '@/components/MetaPixel';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -85,7 +86,9 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+    <>
+      <MetaPixel />
+      <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       {/* Background effects - using semantic tokens */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
@@ -225,13 +228,14 @@ function Login() {
         </div>
       )}
 
-      {/* Forgot Password Modal */}
-      <ForgotPasswordModal
-        open={showForgotPassword}
-        onOpenChange={setShowForgotPassword}
-        defaultEmail={email}
-      />
-    </div>
+        {/* Forgot Password Modal */}
+        <ForgotPasswordModal
+          open={showForgotPassword}
+          onOpenChange={setShowForgotPassword}
+          defaultEmail={email}
+        />
+      </div>
+    </>
   );
 }
 
