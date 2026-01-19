@@ -36,10 +36,10 @@ const Index = () => {
     setQuizOpen(true);    // Then open quiz
   };
 
-  // If signup-only mode, render just the signup form with a minimal dark background
+  // If signup-only mode, render just the signup form
   if (signupOnly) {
     return (
-      <main className="min-h-screen bg-[#0A0E1A] flex items-center justify-center">
+      <main className="min-h-screen bg-background flex items-center justify-center">
         <SignupFormInitial 
           open={signupOpen} 
           onOpenChange={(open) => {
