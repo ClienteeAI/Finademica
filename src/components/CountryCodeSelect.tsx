@@ -92,7 +92,7 @@ const CountryCodeSelect = ({ value, onChange, disabled, className, hasError }: C
       disabled={disabled}
     >
       <SelectTrigger 
-        className={`w-[110px] bg-muted/50 text-foreground border-input ${hasError ? "border-destructive" : ""} ${className || ""}`}
+        className={`w-[110px] bg-card text-foreground border-border ${hasError ? "border-destructive" : ""} ${className || ""}`}
       >
         <SelectValue>
           {selectedCountry && (

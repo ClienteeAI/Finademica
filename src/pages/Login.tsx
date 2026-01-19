@@ -141,7 +141,7 @@ function Login() {
                   placeholder="you@company.com"
                   required
                   autoFocus
-                  className="w-full h-12 pl-12 pr-4 bg-muted/50 border border-input rounded-xl
+                  className="w-full h-12 pl-12 pr-4 bg-card border border-border rounded-xl
                            text-foreground placeholder:text-muted-foreground
                            transition-all duration-200
                            focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -162,7 +162,7 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full h-12 pl-12 pr-12 bg-muted/50 border border-input rounded-xl
+                  className="w-full h-12 pl-12 pr-12 bg-card border border-border rounded-xl
                            text-foreground placeholder:text-muted-foreground
                            transition-all duration-200
                            focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
