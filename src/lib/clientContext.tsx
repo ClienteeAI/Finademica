@@ -408,9 +408,15 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
 
-      // PRIORITY 4: Saved client override ONLY for preview/local (avoid wrong branding on real domains)
+      // PRIORITY 4: Saved client override ONLY for localhost
+      // (Preview domains should stay deterministic; otherwise you can get “stuck” on another client)
       const savedUserClient = localStorage.getItem('user_client_subdomain');
-      if (savedUserClient && (isLocalhostOrIp || isLovablePreview)) {
+
+      if (savedUserClient && isLovablePreview) {
+        localStorage.removeItem('user_client_subdomain');
+      }
+
+      if (savedUserClient && isLocalhostOrIp) {
         const { data: userClientData } = await supabase
           .from('clients')
           .select('*')
