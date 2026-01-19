@@ -72,9 +72,11 @@ function applyClientTheme(client: Client) {
   
   console.log('[Theme] Applying theme for client:', client.subdomain, 'theme_config:', themeConfig ? 'present' : 'missing');
   
-  // Clear previous theme classes
+  // Clear previous theme classes and inline styles
   root.classList.remove('theme-nasr');
   document.body.classList.remove('theme-nasr');
+  document.body.style.background = '';
+  document.body.style.backgroundAttachment = '';
   
   // If no theme_config, fall back to legacy primary/secondary colors
   if (!themeConfig) {
@@ -359,7 +361,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         }
       }
 
-      // PRIORITY 2: Custom domain lookup FIRST (for white-label domains like trade.nasrlector.com)
+      // PRIORITY 2: Custom domain lookup FIRST (for white-label domains like trade.nallio.io)
       // Use trimmed and lowercased hostname for robust matching
       const trimmedHostname = hostname.trim().toLowerCase();
       const { data: customDomainClient } = await supabase
@@ -370,6 +372,10 @@ export function ClientProvider({ children }: ClientProviderProps) {
         .maybeSingle();
       
       if (customDomainClient) {
+        console.log('[ClientProvider] Matched custom domain:', trimmedHostname, '-> client:', customDomainClient.subdomain);
+        // Clear any stale localStorage overrides when on a custom domain
+        localStorage.removeItem('user_client_subdomain');
+        localStorage.removeItem('admin_selected_client');
         setClient(customDomainClient as Client);
         applyClientTheme(customDomainClient as Client);
         localStorage.setItem('client_id', customDomainClient.id);
