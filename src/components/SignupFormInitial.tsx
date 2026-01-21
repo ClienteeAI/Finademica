@@ -176,12 +176,12 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-background border-border text-foreground">
+      <DialogContent className="max-w-md bg-[#1a1f2e] border-[#2a3142] text-white">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-foreground">
+          <DialogTitle className="text-2xl font-bold text-center text-white">
             Create Your Free Account
           </DialogTitle>
-          <p className="text-center text-muted-foreground mt-2">
+          <p className="text-center text-gray-400 mt-2">
             Join {client?.company_name || "our trading academy"} today
           </p>
         </DialogHeader>
@@ -195,25 +195,25 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-foreground">First Name</Label>
+              <Label htmlFor="firstName" className="text-white">First Name</Label>
               <Input
                 id="firstName"
                 placeholder="John"
                 value={formData.firstName}
                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.firstName ? "border-destructive" : ""}`}
+                className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.firstName ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
               {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-foreground">Last Name</Label>
+              <Label htmlFor="lastName" className="text-white">Last Name</Label>
               <Input
                 id="lastName"
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.lastName ? "border-destructive" : ""}`}
+                className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.lastName ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
               {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
@@ -221,40 +221,41 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="nickname" className="text-foreground">Nickname (displayed publicly)</Label>
+            <Label htmlFor="nickname" className="text-white">Nickname (displayed publicly)</Label>
             <Input
               id="nickname"
               placeholder="TraderJohn"
               value={formData.nickname}
               onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-              className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.nickname ? "border-destructive" : ""}`}
+              className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.nickname ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.nickname && <p className="text-xs text-destructive">{errors.nickname}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-foreground">Email</Label>
+            <Label htmlFor="email" className="text-white">Email</Label>
             <Input
               id="email"
               type="email"
               placeholder="john@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.email ? "border-destructive" : ""}`}
+              className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.email ? "border-destructive" : ""}`}
               disabled={isSubmitting}
             />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-foreground">Phone Number</Label>
+            <Label htmlFor="phone" className="text-white">Phone Number</Label>
             <div className="flex gap-2">
               <CountryCodeSelect
                 value={countryCode}
                 onChange={setCountryCode}
                 disabled={isSubmitting}
                 hasError={!!errors.phone}
+                className="bg-[#2a3142] border-[#3a4152]"
               />
               <Input
                 id="phone"
@@ -262,7 +263,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="123 456 789"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className={`flex-1 bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.phone ? "border-destructive" : ""}`}
+                className={`flex-1 bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.phone ? "border-destructive" : ""}`}
                 disabled={isSubmitting}
               />
             </div>
@@ -270,7 +271,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-foreground">Password</Label>
+            <Label htmlFor="password" className="text-white">Password</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -278,13 +279,13 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="Create a secure password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={`bg-card text-foreground placeholder:text-muted-foreground border-border ${errors.password ? "border-destructive pr-10" : "pr-10"}`}
+                className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.password ? "border-destructive pr-10" : "pr-10"}`}
                 disabled={isSubmitting}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -292,15 +293,15 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
             
             {/* Password requirements */}
             <div className="space-y-1 text-xs">
-              <div className={`flex items-center gap-1 ${passwordValidation.hasLength ? "text-green-500" : "text-muted-foreground"}`}>
+              <div className={`flex items-center gap-1 ${passwordValidation.hasLength ? "text-green-500" : "text-gray-500"}`}>
                 <span className="w-3">✓</span>
                 <span>At least 8 characters</span>
               </div>
-              <div className={`flex items-center gap-1 ${passwordValidation.hasUppercase ? "text-green-500" : "text-muted-foreground"}`}>
+              <div className={`flex items-center gap-1 ${passwordValidation.hasUppercase ? "text-green-500" : "text-gray-500"}`}>
                 <span className="w-3">✓</span>
                 <span>One uppercase letter</span>
               </div>
-              <div className={`flex items-center gap-1 ${passwordValidation.hasNumber ? "text-green-500" : "text-muted-foreground"}`}>
+              <div className={`flex items-center gap-1 ${passwordValidation.hasNumber ? "text-green-500" : "text-gray-500"}`}>
                 <span className="w-3">✓</span>
                 <span>One number</span>
               </div>
@@ -322,13 +323,13 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
             )}
           </Button>
 
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-xs text-center text-gray-400">
             🔒 Your data is secure. We never share your information.
           </p>
 
           {/* Sign in link */}
           <div className="text-center pt-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-400">
               Already have an account?{' '}
               <button
                 type="button"
@@ -336,7 +337,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                   onOpenChange(false);
                   navigate('/login');
                 }}
-                className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
+                className="text-white hover:text-gray-300 hover:underline font-medium transition-colors"
               >
                 Sign in
               </button>

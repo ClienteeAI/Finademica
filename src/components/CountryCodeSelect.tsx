@@ -92,7 +92,7 @@ const CountryCodeSelect = ({ value, onChange, disabled, className, hasError }: C
       disabled={disabled}
     >
       <SelectTrigger 
-        className={`w-[110px] bg-card text-foreground border-border ${hasError ? "border-destructive" : ""} ${className || ""}`}
+        className={`w-[110px] bg-[#2a3142] text-white border-[#3a4152] ${hasError ? "border-destructive" : ""} ${className || ""}`}
       >
         <SelectValue>
           {selectedCountry && (
@@ -103,17 +103,17 @@ const CountryCodeSelect = ({ value, onChange, disabled, className, hasError }: C
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="bg-background border-border max-h-[300px]">
+      <SelectContent className="bg-[#1a1f2e] border-[#2a3142] max-h-[300px]">
         {countries.map((country) => (
           <SelectItem 
             key={country.code} 
             value={country.code}
-            className="text-foreground hover:bg-muted focus:bg-muted"
+            className="text-white hover:bg-[#2a3142] focus:bg-[#2a3142]"
           >
             <span className="flex items-center gap-2">
               <span className="text-base">{country.flag}</span>
               <span className="text-sm truncate">{country.name}</span>
-              <span className="text-muted-foreground text-xs ml-auto">{country.dial}</span>
+              <span className="text-gray-400 text-xs ml-auto">{country.dial}</span>
             </span>
           </SelectItem>
         ))}
