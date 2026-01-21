@@ -307,13 +307,13 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
     return (
       <Dialog open={open} onOpenChange={() => {}}>
         <DialogContent
-          className="max-w-md bg-card/95 backdrop-blur-lg border-border p-8 text-center"
+          className="max-w-md bg-[#1a1f2e] backdrop-blur-lg border-[#2a3142] p-8 text-center"
           onPointerDownOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
           hideCloseButton
         >
           <div className="flex flex-col items-center gap-6">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-8 w-8 text-primary"
@@ -331,16 +331,16 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
             </div>
             
             <div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">
+              <h2 className="text-2xl font-bold text-white mb-2">
                 Check Your Email
               </h2>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-gray-400 mb-4">
                 We've sent a confirmation link to:
               </p>
               <p className="text-primary font-medium text-lg mb-4">
                 {userData?.email}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-400">
                 Please click the link in your email to activate your account and start learning.
               </p>
             </div>
@@ -352,7 +352,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
               Go to Login
             </Button>
             
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-gray-500">
               Didn't receive the email? Check your spam folder.
             </p>
           </div>
@@ -368,14 +368,14 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
       onOpenChange={() => {}} // Prevent closing
     >
       <DialogContent 
-        className="max-w-3xl bg-background border-border p-0 text-foreground"
+        className="max-w-3xl bg-[#1a1f2e] border-[#2a3142] p-0 text-white"
         onPointerDownOutside={(e) => e.preventDefault()} // Block background clicks
         onEscapeKeyDown={(e) => e.preventDefault()} // Block escape key
         hideCloseButton // Custom prop to hide X button
       >
         <div className="p-6 pb-0">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-muted-foreground">
+            <span className="text-sm font-medium text-gray-400">
               Question {currentQuestion + 1} of {questions.length}
             </span>
             <span className="text-sm font-medium text-primary">
@@ -387,11 +387,11 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
 
         <div className="p-8 animate-fade-in">
           {webhookError && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-lg mb-4">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg mb-4">
               {webhookError}
               <Button 
                 variant="link" 
-                className="text-destructive underline ml-2 p-0 h-auto"
+                className="text-red-400 underline ml-2 p-0 h-auto"
                 onClick={() => setWebhookError(null)}
               >
                 Retry
@@ -399,7 +399,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
             </div>
           )}
 
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-8">
             {question.title}
           </h2>
 
@@ -409,9 +409,9 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
             className="space-y-3"
           >
             {question.options.map((option) => (
-              <div key={option.value} className="flex items-center space-x-3 bg-muted/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer">
-                <RadioGroupItem value={option.value} id={option.value} className="border-foreground/50 text-primary" />
-                <Label htmlFor={option.value} className="text-base text-foreground cursor-pointer flex-1">
+              <div key={option.value} className="flex items-center space-x-3 bg-[#2a3142] p-4 rounded-lg border border-[#3a4152] hover:border-primary/50 transition-colors cursor-pointer">
+                <RadioGroupItem value={option.value} id={option.value} className="border-gray-500 text-primary" />
+                <Label htmlFor={option.value} className="text-base text-white cursor-pointer flex-1">
                   {option.label}
                 </Label>
               </div>
@@ -419,11 +419,12 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
           </RadioGroup>
         </div>
 
-        <div className="flex justify-between p-6 pt-0 border-t border-border">
+        <div className="flex justify-between p-6 pt-0 border-t border-[#2a3142]">
           <Button 
             variant="ghost" 
             onClick={handleBack} 
             disabled={currentQuestion === 0 || isSubmitting}
+            className="text-gray-400 hover:text-white hover:bg-[#2a3142]"
           >
             Back
           </Button>
@@ -432,7 +433,7 @@ const MandatoryQuizModal = ({ open, userData }: MandatoryQuizModalProps) => {
             <Button 
               onClick={handleSubmit} 
               disabled={!canProceed() || isSubmitting} 
-              className="bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold px-8"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8"
             >
               {isSubmitting ? (
                 <>
