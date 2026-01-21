@@ -52,13 +52,16 @@ const Index = () => {
           <SignupFormInitial 
             open={signupOpen} 
             onOpenChange={(open) => {
-              // Don't allow closing when in signup-only mode
-              if (!open && !quizOpen) {
-                // User tried to close - keep it open
-                setSignupOpen(true);
-              } else {
-                setSignupOpen(open);
+              // Don't allow closing when in signup-only mode *unless* we are transitioning to the quiz.
+              // (Fixes the issue where the quiz opens behind the signup modal overlay.)
+              if (!open) {
+                const hasPendingSignupData = !!localStorage.getItem('pendingSignupData');
+                if (!quizOpen && !hasPendingSignupData) {
+                  setSignupOpen(true);
+                  return;
+                }
               }
+              setSignupOpen(open);
             }} 
             onSignupComplete={handleSignupComplete}
           />
