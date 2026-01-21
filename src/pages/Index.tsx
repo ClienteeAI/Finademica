@@ -37,29 +37,35 @@ const Index = () => {
     setQuizOpen(true);    // Then open quiz
   };
 
-  // If signup-only mode, render just the signup form
+  // If signup-only mode, render just the signup form with premium dark styling
   if (signupOnly) {
     return (
       <>
         <MetaPixel />
-        <main className="min-h-screen bg-background flex items-center justify-center">
-        <SignupFormInitial 
-          open={signupOpen} 
-          onOpenChange={(open) => {
-            // Don't allow closing when in signup-only mode
-            if (!open && !quizOpen) {
-              // User tried to close - keep it open
-              setSignupOpen(true);
-            } else {
-              setSignupOpen(open);
-            }
-          }} 
-          onSignupComplete={handleSignupComplete}
-        />
-        <MandatoryQuizModal 
-          open={quizOpen} 
-          userData={userData}
-        />
+        <main className="min-h-screen bg-[#0f1419] flex items-center justify-center p-4 relative overflow-hidden">
+          {/* Background blur effects - matching login page */}
+          <div className="fixed inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
+          </div>
+          
+          <SignupFormInitial 
+            open={signupOpen} 
+            onOpenChange={(open) => {
+              // Don't allow closing when in signup-only mode
+              if (!open && !quizOpen) {
+                // User tried to close - keep it open
+                setSignupOpen(true);
+              } else {
+                setSignupOpen(open);
+              }
+            }} 
+            onSignupComplete={handleSignupComplete}
+          />
+          <MandatoryQuizModal 
+            open={quizOpen} 
+            userData={userData}
+          />
         </main>
       </>
     );
