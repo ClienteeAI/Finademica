@@ -48,15 +48,15 @@ const TickPipInfoContent = () => (
   <div className="space-y-4">
     <div className="space-y-3">
       <div>
-        <h4 className="font-semibold text-sm text-white">Tick</h4>
-        <p className="text-sm mt-1 text-slate-400">
+        <h4 className="font-semibold text-sm text-foreground">Tick</h4>
+        <p className="text-sm mt-1 text-muted-foreground">
           A tick is the smallest price step for the instrument (from broker specs).
           "1 Tick Movement" shows how much your P/L changes when price moves by 1 tick, for your current lot size.
         </p>
       </div>
       <div>
-        <h4 className="font-semibold text-sm text-white">Pip</h4>
-        <p className="text-sm mt-1 text-slate-400">
+        <h4 className="font-semibold text-sm text-foreground">Pip</h4>
+        <p className="text-sm mt-1 text-muted-foreground">
           A pip is a standard Forex unit. For most pairs: 1 pip = 0.0001.
           On 5-digit pricing, 1 pip = 10 ticks.
           "1 Pip Movement" shows how much your P/L changes when price moves by 1 pip, for your current lot size.
@@ -66,10 +66,10 @@ const TickPipInfoContent = () => (
 
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem value="learn-more" className="border-none">
-        <AccordionTrigger className="text-sm py-2 hover:no-underline text-yellow-400">
+        <AccordionTrigger className="text-sm py-2 hover:no-underline text-primary">
           Learn more
         </AccordionTrigger>
-        <AccordionContent className="text-sm text-slate-400">
+        <AccordionContent className="text-sm text-muted-foreground">
           On instruments with 5-digit pricing (like EURUSD at 1.08525), the last digit represents a "point" or "pipette". 
           In this case, 1 pip = 10 ticks. For indices and commodities, the relationship between pips and ticks varies by instrument. 
           The calculator uses broker-specific tick values to ensure accurate calculations.
@@ -85,8 +85,8 @@ const InfoTooltip = () => {
   const [open, setOpen] = useState(false);
 
   const triggerButton = (
-    <button className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 bg-slate-800/60 border border-slate-700 hover:border-yellow-500/50 hover:shadow-[0_0_8px_rgba(234,179,8,0.3)]">
-      <Info className="w-3.5 h-3.5 text-yellow-500/70" />
+    <button className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 bg-muted border border-border hover:border-primary/50 hover:shadow-[0_0_8px] hover:shadow-primary/30">
+      <Info className="w-3.5 h-3.5 text-primary/70" />
     </button>
   );
 
@@ -94,13 +94,13 @@ const InfoTooltip = () => {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
         <button onClick={() => setOpen(true)}>{triggerButton}</button>
-        <DrawerContent className="bg-slate-900 border-slate-700">
+        <DrawerContent className="bg-card border-border">
           <DrawerHeader className="relative">
-            <DrawerTitle className="text-lg font-semibold text-white">
+            <DrawerTitle className="text-lg font-semibold text-foreground">
               Tick vs Pip
             </DrawerTitle>
             <DrawerClose asChild>
-              <button className="absolute right-4 top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-slate-800 text-slate-400">
+              <button className="absolute right-4 top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-muted text-muted-foreground">
                 <X className="w-4 h-4" />
               </button>
             </DrawerClose>
@@ -116,13 +116,13 @@ const InfoTooltip = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0 backdrop-blur-xl bg-slate-900/95 border-slate-700" align="end">
+      <PopoverContent className="w-80 p-0 backdrop-blur-xl bg-card/95 border-border" align="end">
         <div className="p-4">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-white">Tick vs Pip</h3>
+            <h3 className="font-semibold text-foreground">Tick vs Pip</h3>
             <button 
               onClick={() => setOpen(false)}
-              className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:bg-slate-800 text-slate-400"
+              className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:bg-muted text-muted-foreground"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -397,8 +397,8 @@ const Calculator = () => {
       className={cn(
         "flex-1 py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-300",
         active 
-          ? "bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-slate-900 shadow-lg shadow-yellow-500/30"
-          : "bg-slate-800/50 text-slate-400 hover:text-white hover:bg-slate-700/50"
+          ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+          : "bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted"
       )}
     >
       {children}
@@ -407,16 +407,16 @@ const Calculator = () => {
 
   // Risk color helper
   const getRiskColor = (riskUsd: number, balance: number | null) => {
-    if (!balance) return "text-white";
+    if (!balance) return "text-foreground";
     const riskPercent = (riskUsd / balance) * 100;
-    if (riskPercent <= 1) return "text-green-400";
-    if (riskPercent <= 2) return "text-yellow-400";
-    return "text-red-400";
+    if (riskPercent <= 1) return "text-green-500";
+    if (riskPercent <= 2) return "text-yellow-500";
+    return "text-red-500";
   };
 
   return (
     <SidebarLayout>
-      {/* Premium Background */}
+      {/* Background - uses semantic bg-background */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         {isNasrTheme ? (
           <>
@@ -429,64 +429,60 @@ const Calculator = () => {
             >
               <source src="/nasr-background.mp4" type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/85 to-background" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900" />
+          <div className="absolute inset-0 bg-background" />
         )}
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.015]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }} />
       </div>
 
       <div className="relative z-10 max-w-[1400px] mx-auto space-y-8 px-4 md:px-6">
         {/* Header */}
         <div className="text-center space-y-4 pt-4 animate-fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-500/20 mb-4 animate-pulse">
-            <CalcIcon className="w-8 h-8 text-yellow-400" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-4">
+            <CalcIcon className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">
             Position Size Calculator
           </h1>
-          <p className="text-slate-400 text-lg max-w-xl mx-auto">
+          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
             Calculate optimal lot size based on your risk parameters
           </p>
         </div>
 
         {/* Explanation Section */}
-        <div className="backdrop-blur-xl bg-gradient-to-br from-yellow-500/5 to-amber-500/5 border border-yellow-500/20 rounded-2xl p-6 animate-fade-in" style={{ animationDelay: '0.05s' }}>
+        <div className="backdrop-blur-xl bg-primary/5 border border-primary/20 rounded-2xl p-6 animate-fade-in" style={{ animationDelay: '0.05s' }}>
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-              <Info className="w-5 h-5 text-yellow-400" />
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Info className="w-5 h-5 text-primary" />
             </div>
             <div className="space-y-4">
-              <p className="text-slate-300 leading-relaxed">
+              <p className="text-foreground/80 leading-relaxed">
                 This tool tells you how big your trade should be so you don't risk too much money.
               </p>
               
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">You enter:</h4>
-                  <ul className="text-slate-400 text-sm space-y-1.5">
+                  <h4 className="text-sm font-semibold text-primary uppercase tracking-wider">You enter:</h4>
+                  <ul className="text-muted-foreground text-sm space-y-1.5">
                     <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       How much money you have
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       How much you are willing to lose on one trade
                     </li>
                     <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary/60" />
                       Entry price and stop loss
                     </li>
                   </ul>
                 </div>
                 
                 <div className="space-y-2">
-                  <h4 className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">The calculator then:</h4>
-                  <ul className="text-slate-400 text-sm space-y-1.5">
+                  <h4 className="text-sm font-semibold text-primary uppercase tracking-wider">The calculator then:</h4>
+                  <ul className="text-muted-foreground text-sm space-y-1.5">
                     <li className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
                       Calculates the correct lot size
@@ -503,9 +499,9 @@ const Calculator = () => {
                 </div>
               </div>
               
-              <div className="pt-2 border-t border-white/5">
-                <p className="text-sm text-slate-500 italic">
-                  <span className="text-yellow-500 font-medium not-italic">Why it matters:</span> Good traders don't guess position size. They control risk first — profit comes after.
+              <div className="pt-2 border-t border-border/50">
+                <p className="text-sm text-muted-foreground italic">
+                  <span className="text-primary font-medium not-italic">Why it matters:</span> Good traders don't guess position size. They control risk first — profit comes after.
                 </p>
               </div>
             </div>
@@ -513,10 +509,10 @@ const Calculator = () => {
         </div>
 
         {/* Trade Parameters Card */}
-        <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl shadow-2xl shadow-blue-500/10 p-6 md:p-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-          <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-yellow-400" />
+        <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl shadow-xl p-6 md:p-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+          <h2 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Activity className="w-5 h-5 text-primary" />
             </div>
             Trade Parameters
           </h2>
@@ -524,18 +520,18 @@ const Calculator = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Symbol */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Symbol *</Label>
+              <Label className="text-muted-foreground text-sm font-medium">Symbol *</Label>
               <Input
                 value={symbol}
                 onChange={(e) => setSymbol(e.target.value)}
                 placeholder="e.g., EURUSD, XAUUSD, US30"
                 className={cn(
-                  "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all",
-                  errors.symbol && "border-red-500"
+                  "h-12 bg-muted/50 border-border rounded-xl text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all",
+                  errors.symbol && "border-destructive"
                 )}
               />
               {errors.symbol && (
-                <p className="text-sm text-red-400 flex items-center gap-1">
+                <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.symbol}
                 </p>
               )}
@@ -543,8 +539,8 @@ const Calculator = () => {
 
             {/* Side Toggle */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Side *</Label>
-              <div className="flex gap-2 p-1.5 rounded-xl bg-slate-800/30 border border-slate-700/50">
+              <Label className="text-muted-foreground text-sm font-medium">Side *</Label>
+              <div className="flex gap-2 p-1.5 rounded-xl bg-muted/30 border border-border/50">
                 <ToggleButton active={side === "long"} onClick={() => setSide("long")}>
                   <span className="flex items-center justify-center gap-2">
                     <TrendingUp className="w-4 h-4" /> Long
@@ -560,7 +556,7 @@ const Calculator = () => {
 
             {/* Entry Price */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Entry Price *</Label>
+              <Label className="text-muted-foreground text-sm font-medium">Entry Price *</Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -569,14 +565,14 @@ const Calculator = () => {
                   onChange={(e) => setEntryPrice(e.target.value)}
                   placeholder="0.00"
                   className={cn(
-                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
-                    errors.entry_price && "border-red-500"
+                    "h-12 bg-muted/50 border-border rounded-xl text-foreground font-mono placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all pl-10",
+                    errors.entry_price && "border-destructive"
                   )}
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
               </div>
               {errors.entry_price && (
-                <p className="text-sm text-red-400 flex items-center gap-1">
+                <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.entry_price}
                 </p>
               )}
@@ -584,7 +580,7 @@ const Calculator = () => {
 
             {/* Stop Loss Price */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Stop Loss Price *</Label>
+              <Label className="text-muted-foreground text-sm font-medium">Stop Loss Price *</Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -593,14 +589,14 @@ const Calculator = () => {
                   onChange={(e) => setStopLossPrice(e.target.value)}
                   placeholder="0.00"
                   className={cn(
-                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
-                    errors.stop_loss_price && "border-red-500"
+                    "h-12 bg-muted/50 border-border rounded-xl text-foreground font-mono placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all pl-10",
+                    errors.stop_loss_price && "border-destructive"
                   )}
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
               </div>
               {errors.stop_loss_price && (
-                <p className="text-sm text-red-400 flex items-center gap-1">
+                <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.stop_loss_price}
                 </p>
               )}
@@ -608,7 +604,7 @@ const Calculator = () => {
 
             {/* Take Profit (Optional) */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Take Profit Price (Optional)</Label>
+              <Label className="text-muted-foreground text-sm font-medium">Take Profit Price (Optional)</Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -617,14 +613,14 @@ const Calculator = () => {
                   onChange={(e) => setTakeProfitPrice(e.target.value)}
                   placeholder="0.00"
                   className={cn(
-                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
-                    errors.take_profit_price && "border-red-500"
+                    "h-12 bg-muted/50 border-border rounded-xl text-foreground font-mono placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all pl-10",
+                    errors.take_profit_price && "border-destructive"
                   )}
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
               </div>
               {errors.take_profit_price && (
-                <p className="text-sm text-red-400 flex items-center gap-1">
+                <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.take_profit_price}
                 </p>
               )}
@@ -632,7 +628,7 @@ const Calculator = () => {
 
             {/* Account Balance */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Account Balance (USD) *</Label>
+              <Label className="text-muted-foreground text-sm font-medium">Account Balance (USD) *</Label>
               <div className="relative">
                 <Input
                   type="number"
@@ -641,14 +637,14 @@ const Calculator = () => {
                   onChange={(e) => setAccountBalance(e.target.value)}
                   placeholder="10000"
                   className={cn(
-                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
-                    errors.account_balance && "border-red-500"
+                    "h-12 bg-muted/50 border-border rounded-xl text-foreground font-mono placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all pl-10",
+                    errors.account_balance && "border-destructive"
                   )}
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
               </div>
               {errors.account_balance && (
-                <p className="text-sm text-red-400 flex items-center gap-1">
+                <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.account_balance}
                 </p>
               )}
@@ -656,8 +652,8 @@ const Calculator = () => {
 
             {/* Risk Type Toggle */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">Risk Type *</Label>
-              <div className="flex gap-2 p-1.5 rounded-xl bg-slate-800/30 border border-slate-700/50">
+              <Label className="text-muted-foreground text-sm font-medium">Risk Type *</Label>
+              <div className="flex gap-2 p-1.5 rounded-xl bg-muted/30 border border-border/50">
                 <ToggleButton active={riskType === "percent"} onClick={() => setRiskType("percent")}>
                   Percent %
                 </ToggleButton>
@@ -669,7 +665,7 @@ const Calculator = () => {
 
             {/* Risk Value */}
             <div className="space-y-2">
-              <Label className="text-slate-400 text-sm font-medium">
+              <Label className="text-muted-foreground text-sm font-medium">
                 Risk Value ({riskType === "percent" ? "%" : "USD"}) *
               </Label>
               <div className="relative">
@@ -680,20 +676,20 @@ const Calculator = () => {
                   onChange={(e) => setRiskValue(e.target.value)}
                   placeholder={riskType === "percent" ? "1" : "100"}
                   className={cn(
-                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all pl-10",
-                    errors.risk_value && "border-red-500"
+                    "h-12 bg-muted/50 border-border rounded-xl text-foreground font-mono placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all pl-10",
+                    errors.risk_value && "border-destructive"
                   )}
                 />
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {riskType === "percent" ? "%" : "$"}
                 </span>
               </div>
               {errors.risk_value && (
-                <p className="text-sm text-red-400 flex items-center gap-1">
+                <p className="text-sm text-destructive flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" /> {errors.risk_value}
                 </p>
               )}
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 {riskType === "percent" 
                   ? "Percentage of account balance to risk" 
                   : "Fixed USD amount to risk"}
@@ -702,11 +698,11 @@ const Calculator = () => {
           </div>
 
           {/* Lots Override Section */}
-          <div className="mt-6 p-5 rounded-xl bg-slate-800/30 border border-slate-700/50 space-y-4">
+          <div className="mt-6 p-5 rounded-xl bg-muted/30 border border-border/50 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-slate-300 font-medium">Override Lot Size</Label>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <Label className="text-foreground/80 font-medium">Override Lot Size</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
                   Manually specify lot size instead of calculated
                 </p>
               </div>
@@ -724,12 +720,12 @@ const Calculator = () => {
                   onChange={(e) => setLotsRequested(e.target.value)}
                   placeholder="0.10"
                   className={cn(
-                    "h-12 bg-slate-800/50 border-slate-700 rounded-xl text-white font-mono placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 transition-all",
-                    errors.lots_requested && "border-red-500"
+                    "h-12 bg-muted/50 border-border rounded-xl text-foreground font-mono placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all",
+                    errors.lots_requested && "border-destructive"
                   )}
                 />
                 {errors.lots_requested && (
-                  <p className="text-sm text-red-400 flex items-center gap-1">
+                  <p className="text-sm text-destructive flex items-center gap-1">
                     <AlertTriangle className="w-3 h-3" /> {errors.lots_requested}
                   </p>
                 )}
@@ -739,7 +735,7 @@ const Calculator = () => {
 
           {/* Notes Section */}
           <div className="mt-6 space-y-2">
-            <Label className="text-slate-400 text-sm font-medium flex items-center gap-2">
+            <Label className="text-muted-foreground text-sm font-medium flex items-center gap-2">
               <FileText className="w-4 h-4" /> Notes (optional)
             </Label>
             <textarea
@@ -748,16 +744,16 @@ const Calculator = () => {
               placeholder="Why this trade? Setup? Emotions?"
               rows={3}
               maxLength={500}
-              className="w-full px-4 py-3 rounded-xl text-base resize-none bg-slate-800/50 border border-slate-700 text-white placeholder:text-slate-500 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-500/20 focus:outline-none transition-all"
+              className="w-full px-4 py-3 rounded-xl text-base resize-none bg-muted/50 border border-border text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all"
             />
-            <p className="text-xs text-slate-500 text-right">{notes.length}/500</p>
+            <p className="text-xs text-muted-foreground text-right">{notes.length}/500</p>
           </div>
 
           {/* Calculate Button */}
           <Button
             onClick={handleCalculate}
             disabled={isLoading}
-            className="w-full h-14 mt-6 text-lg font-semibold rounded-xl bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-slate-900 hover:brightness-110 shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-yellow-500/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full h-14 mt-6 text-lg font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isLoading ? (
               <>
@@ -774,8 +770,8 @@ const Calculator = () => {
 
           {/* General Error */}
           {errors.general && (
-            <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 animate-fade-in">
-              <p className="text-sm text-red-400 flex items-center gap-2">
+            <div className="mt-4 p-4 rounded-xl bg-destructive/10 border border-destructive/30 animate-fade-in">
+              <p className="text-sm text-destructive flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4" /> {errors.general}
               </p>
             </div>
@@ -788,29 +784,29 @@ const Calculator = () => {
             {/* Primary Results - 2 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Recommended Lots Card */}
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-500 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-500/20">
-                    <Target className="w-8 h-8 text-yellow-400" />
+                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-primary/10 border border-primary/20">
+                    <Target className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400 mb-2">
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
                     Recommended Lots
                   </p>
-                  <p className="text-5xl md:text-6xl font-bold font-mono bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
+                  <p className="text-5xl md:text-6xl font-bold font-mono text-primary drop-shadow-[0_0_20px] drop-shadow-primary/50">
                     {(result.recommended_lots ?? result.lots_calculated)?.toFixed(2) ?? "—"}
                   </p>
                 </div>
               </div>
 
               {/* Actual Risk Card */}
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-yellow-500/20 transition-all duration-500 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-gradient-to-br from-yellow-400/20 to-amber-500/10 border border-yellow-500/20">
-                    <DollarSign className="w-8 h-8 text-yellow-400" />
+                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-primary/10 border border-primary/20">
+                    <DollarSign className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-xs uppercase tracking-widest text-slate-400 mb-2">
+                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
                     Actual Risk
                   </p>
                   <p className={cn(
@@ -825,52 +821,52 @@ const Calculator = () => {
 
             {/* Additional Details - 3 Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-5 group hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Ticks to Stop Loss</p>
-                <p className="text-2xl font-semibold text-white font-mono">
+              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-xl p-5 group hover:bg-card hover:-translate-y-1 transition-all duration-300">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ticks to Stop Loss</p>
+                <p className="text-2xl font-semibold text-foreground font-mono">
                   {result.ticks_to_sl?.toFixed(2) ?? "—"}
                 </p>
               </div>
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-5 group hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Risk per 1 Lot (USD)</p>
-                <p className="text-2xl font-semibold text-white font-mono">
+              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-xl p-5 group hover:bg-card hover:-translate-y-1 transition-all duration-300">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Risk per 1 Lot (USD)</p>
+                <p className="text-2xl font-semibold text-foreground font-mono">
                   ${result.risk_per_1lot_usd?.toFixed(2) ?? "—"}
                 </p>
               </div>
-              <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-xl p-5 group hover:bg-white/10 hover:-translate-y-1 transition-all duration-300">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Calculated Lots (raw)</p>
-                <p className="text-2xl font-semibold text-white font-mono">
+              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-xl p-5 group hover:bg-card hover:-translate-y-1 transition-all duration-300">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Calculated Lots (raw)</p>
+                <p className="text-2xl font-semibold text-foreground font-mono">
                   {result.lots_calculated?.toFixed(4) ?? "—"}
                 </p>
               </div>
             </div>
 
             {/* Position Sensitivity Section */}
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8 space-y-6">
+            <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl p-6 md:p-8 space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400/20 to-amber-500/10 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-yellow-400" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Position Sensitivity</h3>
-                  <p className="text-sm text-slate-500">Understand how price movement affects your P/L</p>
+                  <h3 className="text-lg font-semibold text-foreground">Position Sensitivity</h3>
+                  <p className="text-sm text-muted-foreground">Understand how price movement affects your P/L</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* 1 Tick Movement */}
-                <div className="p-5 rounded-xl bg-gradient-to-r from-amber-500/10 to-transparent border-l-4 border-amber-500 group hover:from-amber-500/15 transition-all">
+                <div className="p-5 rounded-xl bg-primary/5 border-l-4 border-primary group hover:bg-primary/10 transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">📊</span>
                       <div>
-                        <p className="text-sm font-medium text-slate-300">1 Tick Movement</p>
-                        <p className="text-xs text-slate-500">↑↓ Per tick change</p>
+                        <p className="text-sm font-medium text-foreground/80">1 Tick Movement</p>
+                        <p className="text-xs text-muted-foreground">↑↓ Per tick change</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <InfoTooltip />
-                      <span className="text-2xl font-bold font-mono text-amber-400">
+                      <span className="text-2xl font-bold font-mono text-primary">
                         {result.tick_value_position_usd != null 
                           ? `$${result.tick_value_position_usd.toFixed(2)}` 
                           : '—'}
@@ -880,18 +876,18 @@ const Calculator = () => {
                 </div>
 
                 {/* 1 Pip Movement */}
-                <div className="p-5 rounded-xl bg-gradient-to-r from-yellow-500/10 to-transparent border-l-4 border-yellow-400 group hover:from-yellow-500/15 transition-all">
+                <div className="p-5 rounded-xl bg-primary/5 border-l-4 border-primary group hover:bg-primary/10 transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">📈</span>
                       <div>
-                        <p className="text-sm font-medium text-slate-300">1 Pip Movement</p>
-                        <p className="text-xs text-slate-500">↑↓ Per pip change</p>
+                        <p className="text-sm font-medium text-foreground/80">1 Pip Movement</p>
+                        <p className="text-xs text-muted-foreground">↑↓ Per pip change</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <InfoTooltip />
-                      <span className="text-2xl font-bold font-mono bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent">
+                      <span className="text-2xl font-bold font-mono text-primary">
                         {result.pip_value_position_usd != null 
                           ? `$${result.pip_value_position_usd.toFixed(2)}` 
                           : '—'}
@@ -902,20 +898,20 @@ const Calculator = () => {
               </div>
 
               {/* Micro-detail footer */}
-              <p className="text-xs text-center text-slate-500 pt-4 border-t border-slate-700/50">
-                Calculated for <span className="font-mono font-semibold text-slate-400">{result.lots_final?.toFixed(2)}</span> lots on <span className="font-mono font-semibold text-slate-400">{result.symbol || symbol.toUpperCase()}</span>
+              <p className="text-xs text-center text-muted-foreground pt-4 border-t border-border/50">
+                Calculated for <span className="font-mono font-semibold text-foreground/80">{result.lots_final?.toFixed(2)}</span> lots on <span className="font-mono font-semibold text-foreground/80">{result.symbol || symbol.toUpperCase()}</span>
               </p>
             </div>
 
             {/* Warnings */}
             {result.warnings && result.warnings.length > 0 && (
               <div className="p-5 rounded-xl bg-yellow-500/10 border border-yellow-500/30 animate-fade-in">
-                <h3 className="text-sm font-semibold text-yellow-400 mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-yellow-600 dark:text-yellow-400 mb-3 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4" /> Warnings
                 </h3>
                 <ul className="space-y-1.5">
                   {result.warnings.map((warning, index) => (
-                    <li key={index} className="text-sm text-yellow-300/80">
+                    <li key={index} className="text-sm text-yellow-600/80 dark:text-yellow-300/80">
                       • {warning}
                     </li>
                   ))}
@@ -927,7 +923,7 @@ const Calculator = () => {
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button
                 onClick={() => setSaveDiaryOpen(true)}
-                className="flex-1 h-14 text-lg font-semibold rounded-xl bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 text-slate-900 hover:brightness-110 shadow-lg shadow-yellow-500/30 transition-all duration-300 hover:scale-[1.02]"
+                className="flex-1 h-14 text-lg font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
               >
                 <Save className="w-5 h-5 mr-2" />
                 Save to Diary
@@ -935,7 +931,7 @@ const Calculator = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate('/diary')}
-                className="flex-1 h-14 text-lg font-semibold rounded-xl border-2 border-yellow-500/50 text-yellow-400 bg-transparent hover:bg-yellow-500/10 hover:border-yellow-500 transition-all duration-300"
+                className="flex-1 h-14 text-lg font-semibold rounded-xl border-2 border-primary/50 text-primary bg-transparent hover:bg-primary/10 hover:border-primary transition-all duration-300"
               >
                 <BookOpen className="w-5 h-5 mr-2" />
                 View Diary
@@ -945,11 +941,11 @@ const Calculator = () => {
             {/* Live Trading CTA */}
             <div className="relative overflow-hidden rounded-2xl mt-6">
               {/* Animated gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600 animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
               
               {/* Glowing effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-400 opacity-30 blur-xl animate-pulse" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-400 opacity-30 blur-xl" />
               
               <div className="relative p-6 md:p-8">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
@@ -983,13 +979,13 @@ const Calculator = () => {
         {/* Empty State */}
         {!result && !isLoading && (
           <div className="text-center py-16 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <div className="w-24 h-24 rounded-3xl mx-auto mb-6 flex items-center justify-center bg-slate-800/50 border border-slate-700/50">
-              <CalcIcon className="w-12 h-12 text-slate-600" />
+            <div className="w-24 h-24 rounded-3xl mx-auto mb-6 flex items-center justify-center bg-muted/50 border border-border/50">
+              <CalcIcon className="w-12 h-12 text-muted-foreground" />
             </div>
-            <p className="text-xl font-medium text-slate-400">
+            <p className="text-xl font-medium text-muted-foreground">
               Enter your trade parameters
             </p>
-            <p className="text-slate-500 mt-2">
+            <p className="text-muted-foreground/70 mt-2">
               Results will appear here after calculation
             </p>
           </div>
