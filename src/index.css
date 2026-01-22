@@ -153,7 +153,13 @@
     min-height: -webkit-fill-available;
   }
 
-  /* Nasr theme body background */
+  /* Dark mode body background (via next-themes .dark class) */
+  .dark body,
+  body.dark {
+    background: linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%);
+  }
+
+  /* Nasr theme body background (same as dark, but with gold accents in other CSS) */
   .theme-nasr body,
   body.theme-nasr {
     background: linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%);
@@ -173,7 +179,16 @@
     z-index: 0;
   }
 
-  /* Nasr theme: Gold particles background effect */
+  /* Dark mode: subtle blue particles (for non-NASR dark themes) */
+  .dark body::before,
+  body.dark::before {
+    background-image:
+      radial-gradient(circle at 10% 10%, rgba(77, 150, 232, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 90% 20%, rgba(100, 100, 255, 0.04) 0%, transparent 45%),
+      radial-gradient(circle at 50% 90%, rgba(77, 180, 255, 0.03) 0%, transparent 50%);
+  }
+
+  /* Nasr theme: Gold particles background effect (overrides .dark) */
   .theme-nasr body::before,
   body.theme-nasr::before {
     background-image:
@@ -226,10 +241,36 @@
   }
 
   /* ============================================
-     NASR THEME UTILITIES (Dark Luxury)
+     DARK THEME UTILITIES (Non-NASR dark mode)
   ============================================ */
   
-  /* Nasr Premium Cards - Dark with neutral border (gold on hover only) */
+  /* Dark mode Premium Cards - generic dark styling */
+  .dark .premium-card {
+    background: rgba(11, 15, 22, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                0 0 1px rgba(100, 150, 255, 0.2);
+  }
+
+  .dark .premium-card::before {
+    background: linear-gradient(
+      to bottom,
+      rgba(100, 150, 255, 0.06),
+      transparent 45%
+    );
+  }
+
+  .dark .premium-card:hover {
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5),
+                0 0 30px rgba(100, 150, 255, 0.1);
+    border-color: rgba(100, 150, 255, 0.3);
+  }
+
+  /* ============================================
+     NASR THEME UTILITIES (Dark Luxury with Gold)
+  ============================================ */
+  
+  /* Nasr Premium Cards - Dark with gold accents (overrides .dark) */
   .theme-nasr .premium-card {
     background: rgba(11, 15, 22, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -301,6 +342,13 @@
     position: relative;
   }
 
+  /* Dark mode glass nav */
+  .dark .glass-nav {
+    background: rgba(11, 15, 22, 0.95);
+    border-bottom: 1px solid rgba(100, 150, 255, 0.12);
+  }
+
+  /* NASR glass nav (gold accent) */
   .theme-nasr .glass-nav {
     background: rgba(11, 15, 22, 0.95);
     border-bottom: 1px solid rgba(212, 175, 55, 0.15);
