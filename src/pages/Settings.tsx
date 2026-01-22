@@ -24,23 +24,20 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// Appearance Section with Theme Toggle
-function AppearanceSection({ isNasrTheme }: { isNasrTheme: boolean }) {
+// Appearance Section with Theme Toggle - uses semantic tokens
+function AppearanceSection() {
   const { theme, setTheme } = useTheme();
+  const { client } = useClient();
   const isDark = theme === 'dark';
 
   return (
-    <Card className={`${
-      isNasrTheme 
-        ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
-        : 'glass-card border-ice/50'
-    }`}>
+    <Card className="bg-card border-border shadow-md">
       <CardHeader>
-        <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-          <Palette className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+        <CardTitle className="flex items-center gap-2 text-card-foreground">
+          <Palette className="h-5 w-5 text-primary" />
           Appearance
         </CardTitle>
-        <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+        <CardDescription className="text-muted-foreground">
           Customize how the app looks
         </CardDescription>
       </CardHeader>
@@ -48,41 +45,35 @@ function AppearanceSection({ isNasrTheme }: { isNasrTheme: boolean }) {
         {/* Theme Toggle */}
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
+            <Label className="flex items-center gap-2 text-card-foreground">
               {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               Theme Mode
             </Label>
-            <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+            <p className="text-sm text-muted-foreground">
               Switch between light and dark mode
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Sun className={`h-4 w-4 ${!isDark ? (isNasrTheme ? 'text-gold' : 'text-primary') : 'text-muted-foreground'}`} />
+            <Sun className={`h-4 w-4 ${!isDark ? 'text-primary' : 'text-muted-foreground'}`} />
             <Switch
               checked={isDark}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              className={isNasrTheme ? 'data-[state=checked]:bg-gold' : 'data-[state=checked]:bg-aqua'}
+              className="data-[state=checked]:bg-primary"
             />
-            <Moon className={`h-4 w-4 ${isDark ? (isNasrTheme ? 'text-gold' : 'text-primary') : 'text-muted-foreground'}`} />
+            <Moon className={`h-4 w-4 ${isDark ? 'text-primary' : 'text-muted-foreground'}`} />
           </div>
         </div>
 
         {/* Brand Badge */}
         <div className="flex items-center justify-between pt-2 border-t border-border/50">
           <div className="space-y-0.5">
-            <Label className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
-              Brand
-            </Label>
-            <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+            <Label className="text-card-foreground">Brand</Label>
+            <p className="text-sm text-muted-foreground">
               Your organization's brand theme
             </p>
           </div>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            isNasrTheme 
-              ? 'bg-gold/20 text-gold' 
-              : 'bg-aqua/20 text-aqua'
-          }`}>
-            {isNasrTheme ? 'NASR Gold' : 'Nallio'}
+          <span className="px-3 py-1 rounded-full text-sm font-medium bg-primary/20 text-primary">
+            {client?.company_name || 'Default'}
           </span>
         </div>
       </CardContent>
@@ -94,7 +85,6 @@ const Settings = () => {
   const { signOut, user } = useAuth();
   const { client } = useClient();
   const navigate = useNavigate();
-  const isNasrTheme = client?.subdomain === 'nasr';
   
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
@@ -151,108 +141,86 @@ const Settings = () => {
       <div className="max-w-3xl mx-auto space-y-8">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className={`text-4xl font-bold ${
-            isNasrTheme 
-              ? 'bg-gradient-to-r from-gold-light to-gold bg-clip-text text-transparent' 
-              : 'bg-gradient-to-r from-aqua to-aqua-deep bg-clip-text text-transparent'
-          }`}>
+          <h1 className="text-4xl font-bold text-primary">
             Settings
           </h1>
-          <p className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+          <p className="text-muted-foreground">
             Manage your account settings and preferences
           </p>
         </div>
 
         {/* Notifications */}
-        <Card className={`${
-          isNasrTheme 
-            ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
-            : 'glass-card border-ice/50'
-        }`}>
+        <Card className="bg-card border-border shadow-md">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-              <Bell className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+            <CardTitle className="flex items-center gap-2 text-card-foreground">
+              <Bell className="h-5 w-5 text-primary" />
               Notifications
             </CardTitle>
-            <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+            <CardDescription className="text-muted-foreground">
               Choose what notifications you want to receive
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
-                  Email Notifications
-                </Label>
-                <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+                <Label className="text-card-foreground">Email Notifications</Label>
+                <p className="text-sm text-muted-foreground">
                   Receive email updates about your progress
                 </p>
               </div>
               <Switch
                 checked={emailNotifications}
                 onCheckedChange={setEmailNotifications}
-                className={isNasrTheme ? 'data-[state=checked]:bg-gold' : 'data-[state=checked]:bg-aqua'}
+                className="data-[state=checked]:bg-primary"
               />
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
-                  Push Notifications
-                </Label>
-                <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+                <Label className="text-card-foreground">Push Notifications</Label>
+                <p className="text-sm text-muted-foreground">
                   Get push notifications for new content
                 </p>
               </div>
               <Switch
                 checked={pushNotifications}
                 onCheckedChange={setPushNotifications}
-                className={isNasrTheme ? 'data-[state=checked]:bg-gold' : 'data-[state=checked]:bg-aqua'}
+                className="data-[state=checked]:bg-primary"
               />
             </div>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
-                  Marketing Emails
-                </Label>
-                <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+                <Label className="text-card-foreground">Marketing Emails</Label>
+                <p className="text-sm text-muted-foreground">
                   Receive promotional offers and updates
                 </p>
               </div>
               <Switch
                 checked={marketingEmails}
                 onCheckedChange={setMarketingEmails}
-                className={isNasrTheme ? 'data-[state=checked]:bg-gold' : 'data-[state=checked]:bg-aqua'}
+                className="data-[state=checked]:bg-primary"
               />
             </div>
           </CardContent>
         </Card>
 
         {/* Appearance */}
-        <AppearanceSection isNasrTheme={isNasrTheme} />
+        <AppearanceSection />
 
         {/* Security */}
-        <Card className={`${
-          isNasrTheme 
-            ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
-            : 'glass-card border-ice/50'
-        }`}>
+        <Card className="bg-card border-border shadow-md">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-              <Shield className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+            <CardTitle className="flex items-center gap-2 text-card-foreground">
+              <Shield className="h-5 w-5 text-primary" />
               Security
             </CardTitle>
-            <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+            <CardDescription className="text-muted-foreground">
               Manage your account security
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
               variant="outline"
-              className={`w-full justify-start ${
-                isNasrTheme 
-                  ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
-                  : 'border-ice text-ocean hover:bg-aqua/10'
-              }`}
+              className="w-full justify-start border-border text-foreground hover:bg-accent"
               onClick={() => toast.info("Password reset email will be sent to your email address.")}
             >
               Change Password
@@ -261,17 +229,13 @@ const Settings = () => {
         </Card>
 
         {/* Legal */}
-        <Card className={`${
-          isNasrTheme 
-            ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
-            : 'glass-card border-ice/50'
-        }`}>
+        <Card className="bg-card border-border shadow-md">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-              <Scale className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+            <CardTitle className="flex items-center gap-2 text-card-foreground">
+              <Scale className="h-5 w-5 text-primary" />
               Legal
             </CardTitle>
-            <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+            <CardDescription className="text-muted-foreground">
               View legal documents and policies
             </CardDescription>
           </CardHeader>
@@ -279,11 +243,7 @@ const Settings = () => {
             <Link to="/legal/privacy-policy">
               <Button
                 variant="outline"
-                className={`w-full justify-between ${
-                  isNasrTheme 
-                    ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
-                    : 'border-ice text-ocean hover:bg-aqua/10'
-                }`}
+                className="w-full justify-between border-border text-foreground hover:bg-accent"
               >
                 Privacy Policy
                 <ChevronRight className="h-4 w-4" />
@@ -292,11 +252,7 @@ const Settings = () => {
             <Link to="/legal/terms-of-use">
               <Button
                 variant="outline"
-                className={`w-full justify-between ${
-                  isNasrTheme 
-                    ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
-                    : 'border-ice text-ocean hover:bg-aqua/10'
-                }`}
+                className="w-full justify-between border-border text-foreground hover:bg-accent"
               >
                 Terms of Use
                 <ChevronRight className="h-4 w-4" />
@@ -305,11 +261,7 @@ const Settings = () => {
             <Link to="/legal/risk-disclosure">
               <Button
                 variant="outline"
-                className={`w-full justify-between ${
-                  isNasrTheme 
-                    ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
-                    : 'border-ice text-ocean hover:bg-aqua/10'
-                }`}
+                className="w-full justify-between border-border text-foreground hover:bg-accent"
               >
                 Risk Disclosure
                 <ChevronRight className="h-4 w-4" />
@@ -319,25 +271,17 @@ const Settings = () => {
         </Card>
 
         {/* Account Actions */}
-        <Card className={`${
-          isNasrTheme 
-            ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
-            : 'glass-card border-ice/50'
-        }`}>
+        <Card className="bg-card border-border shadow-md">
           <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-              <SettingsIcon className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+            <CardTitle className="flex items-center gap-2 text-card-foreground">
+              <SettingsIcon className="h-5 w-5 text-primary" />
               Account Actions
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <Button
               variant="outline"
-              className={`w-full justify-start ${
-                isNasrTheme 
-                  ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
-                  : 'border-ice text-ocean hover:bg-aqua/10'
-              }`}
+              className="w-full justify-start border-border text-foreground hover:bg-accent"
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -357,55 +301,53 @@ const Settings = () => {
                   Delete Account
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className={isNasrTheme ? 'bg-nasr-panel border-gold/20' : 'bg-card border-border'}>
+              <AlertDialogContent className="bg-card border-border">
                 {deleteStep === 'confirm' ? (
                   <>
                     <AlertDialogHeader>
-                      <AlertDialogTitle className={`text-xl ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>
+                      <AlertDialogTitle className="text-xl text-card-foreground">
                         Are you sure you want to leave?
                       </AlertDialogTitle>
                       <AlertDialogDescription asChild>
-                        <div className={`space-y-4 ${isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground'}`}>
+                        <div className="space-y-4 text-muted-foreground">
                           <p className="text-base">
                             We'd hate to see you go! Here's what you'll lose:
                           </p>
                           
                           <div className="space-y-3">
                             <div className="flex items-start gap-3">
-                              <Trophy className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+                              <Trophy className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
                               <div>
-                                <p className={`font-medium ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>Your Progress & Achievements</p>
+                                <p className="font-medium text-card-foreground">Your Progress & Achievements</p>
                                 <p className="text-sm">All your learning progress, XP, and earned badges will be permanently deleted.</p>
                               </div>
                             </div>
                             
                             <div className="flex items-start gap-3">
-                              <TrendingUp className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+                              <TrendingUp className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
                               <div>
-                                <p className={`font-medium ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>Your Trading Diary</p>
+                                <p className="font-medium text-card-foreground">Your Trading Diary</p>
                                 <p className="text-sm">All your trade records, notes, and analysis history will be erased.</p>
                               </div>
                             </div>
                             
                             <div className="flex items-start gap-3">
-                              <Heart className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+                              <Heart className="h-5 w-5 mt-0.5 flex-shrink-0 text-primary" />
                               <div>
-                                <p className={`font-medium ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>Community & Support</p>
+                                <p className="font-medium text-card-foreground">Community & Support</p>
                                 <p className="text-sm">Access to exclusive content, community features, and personalized guidance.</p>
                               </div>
                             </div>
                           </div>
                           
-                          <p className={`text-sm italic ${isNasrTheme ? 'text-gold/80' : 'text-primary/80'}`}>
+                          <p className="text-sm italic text-primary/80">
                             If something isn't working for you, we'd love to hear about it! Contact us at support@nallio.io
                           </p>
                         </div>
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                      <AlertDialogCancel 
-                        className={`flex-1 ${isNasrTheme ? 'bg-gold text-nasr-bg hover:bg-gold/90 border-0' : 'bg-primary text-primary-foreground hover:bg-primary/90 border-0'}`}
-                      >
+                      <AlertDialogCancel className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 border-0">
                         I'll Stay!
                       </AlertDialogCancel>
                       <Button
@@ -413,47 +355,35 @@ const Settings = () => {
                         className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
                         onClick={() => setDeleteStep('final')}
                       >
-                        Continue with Deletion
+                        Continue to Delete
                       </Button>
                     </AlertDialogFooter>
                   </>
                 ) : (
                   <>
                     <AlertDialogHeader>
-                      <AlertDialogTitle className={`text-xl ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>
+                      <AlertDialogTitle className="text-xl text-destructive">
                         Final Confirmation
                       </AlertDialogTitle>
-                      <AlertDialogDescription asChild>
-                        <div className={`space-y-4 ${isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground'}`}>
-                          <p>
-                            This action is <span className="text-destructive font-semibold">permanent and cannot be undone</span>. 
-                            All your data will be immediately deleted.
-                          </p>
-                          <div className="space-y-2">
-                            <Label className={isNasrTheme ? 'text-nasr-text' : 'text-foreground'}>
-                              Type <span className="font-mono font-bold">DELETE</span> to confirm:
-                            </Label>
-                            <Input
-                              value={deleteConfirmText}
-                              onChange={(e) => setDeleteConfirmText(e.target.value)}
-                              placeholder="Type DELETE here"
-                              className={isNasrTheme 
-                                ? 'bg-nasr-bg border-gold/20 text-nasr-text' 
-                                : 'bg-background border-border'
-                              }
-                            />
-                          </div>
-                        </div>
+                      <AlertDialogDescription className="text-muted-foreground">
+                        This action cannot be undone. To confirm, please type <strong className="text-foreground">DELETE</strong> below.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
+                    <div className="py-4">
+                      <Input
+                        value={deleteConfirmText}
+                        onChange={(e) => setDeleteConfirmText(e.target.value)}
+                        placeholder="Type DELETE to confirm"
+                        className="bg-background border-border text-foreground"
+                      />
+                    </div>
                     <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                      <Button
-                        variant="outline"
-                        className={`flex-1 ${isNasrTheme ? 'border-gold/20 text-nasr-text' : 'border-border text-foreground'}`}
-                        onClick={() => setDeleteStep('confirm')}
+                      <AlertDialogCancel 
+                        className="flex-1 border-border text-foreground"
+                        onClick={resetDeleteDialog}
                       >
-                        Go Back
-                      </Button>
+                        Cancel
+                      </AlertDialogCancel>
                       <Button
                         variant="destructive"
                         className="flex-1"
