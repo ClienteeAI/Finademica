@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import { useAuth } from "@/lib/AuthContext";
 import { useClient } from "@/lib/clientContext";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, Trash2, Scale, ChevronRight, Heart, Trophy, TrendingUp } from "lucide-react";
+import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, Trash2, Scale, ChevronRight, Heart, Trophy, TrendingUp, Moon, Sun } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -22,6 +23,72 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+// Appearance Section with Theme Toggle
+function AppearanceSection({ isNasrTheme }: { isNasrTheme: boolean }) {
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
+
+  return (
+    <Card className={`${
+      isNasrTheme 
+        ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
+        : 'glass-card border-ice/50'
+    }`}>
+      <CardHeader>
+        <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
+          <Palette className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+          Appearance
+        </CardTitle>
+        <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
+          Customize how the app looks
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Theme Toggle */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
+              {isDark ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              Theme Mode
+            </Label>
+            <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+              Switch between light and dark mode
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Sun className={`h-4 w-4 ${!isDark ? (isNasrTheme ? 'text-gold' : 'text-primary') : 'text-muted-foreground'}`} />
+            <Switch
+              checked={isDark}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+              className={isNasrTheme ? 'data-[state=checked]:bg-gold' : 'data-[state=checked]:bg-aqua'}
+            />
+            <Moon className={`h-4 w-4 ${isDark ? (isNasrTheme ? 'text-gold' : 'text-primary') : 'text-muted-foreground'}`} />
+          </div>
+        </div>
+
+        {/* Brand Badge */}
+        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+          <div className="space-y-0.5">
+            <Label className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
+              Brand
+            </Label>
+            <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
+              Your organization's brand theme
+            </p>
+          </div>
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            isNasrTheme 
+              ? 'bg-gold/20 text-gold' 
+              : 'bg-aqua/20 text-aqua'
+          }`}>
+            {isNasrTheme ? 'NASR Gold' : 'Nallio'}
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 const Settings = () => {
   const { signOut, user } = useAuth();
@@ -161,40 +228,7 @@ const Settings = () => {
         </Card>
 
         {/* Appearance */}
-        <Card className={`${
-          isNasrTheme 
-            ? 'bg-nasr-panel/80 border-gold/20 shadow-nasr-card' 
-            : 'glass-card border-ice/50'
-        }`}>
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isNasrTheme ? 'text-nasr-text' : 'text-ocean'}`}>
-              <Palette className={`h-5 w-5 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
-              Appearance
-            </CardTitle>
-            <CardDescription className={isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}>
-              Customize how the app looks
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label className={isNasrTheme ? 'text-nasr-text' : 'text-ocean'}>
-                  Current Theme
-                </Label>
-                <p className={`text-sm ${isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'}`}>
-                  Theme is set by your organization
-                </p>
-              </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                isNasrTheme 
-                  ? 'bg-gold/20 text-gold' 
-                  : 'bg-aqua/20 text-aqua'
-              }`}>
-                {isNasrTheme ? 'Nasr Gold' : 'Luminous Ice'}
-              </span>
-            </div>
-          </CardContent>
-        </Card>
+        <AppearanceSection isNasrTheme={isNasrTheme} />
 
         {/* Security */}
         <Card className={`${

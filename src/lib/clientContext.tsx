@@ -66,11 +66,12 @@ function loadGoogleFont(fontFamily: string | undefined) {
 }
 
 // Main function to apply theme from Supabase theme_config
-function applyClientTheme(client: Client) {
+// Now accepts mode parameter from next-themes instead of detecting from .dark class
+function applyClientTheme(client: Client, mode: 'light' | 'dark' = 'dark') {
   const root = document.documentElement;
   const themeConfig = client.theme_config as ThemeConfig | null;
   
-  console.log('[Theme] Applying theme for client:', client.subdomain, 'theme_config:', themeConfig ? 'present' : 'missing');
+  console.log('[Theme] Applying theme for client:', client.subdomain, 'mode:', mode, 'theme_config:', themeConfig ? 'present' : 'missing');
   
   // Clear previous theme classes and inline styles
   root.classList.remove('theme-nasr');
@@ -96,10 +97,8 @@ function applyClientTheme(client: Client) {
     return;
   }
 
-  // Detect dark mode via .dark class on <html>
-  const isDark = root.classList.contains('dark');
-  const mode = isDark ? 'dark' : 'light';
-  const vars = themeConfig[mode] || themeConfig.light;
+  // Use the mode passed in (from next-themes) to select variables
+  const vars = themeConfig[mode] || themeConfig.light || themeConfig.dark;
   
   console.log('[Theme] Mode:', mode, 'Variables count:', vars ? Object.keys(vars).length : 0);
 
@@ -138,38 +137,29 @@ function applyClientTheme(client: Client) {
     });
   }
 
-  // Detect if this is a dark-based theme by checking background lightness
-  // Support both HSL format: "H S% L%" and OKLCH format: "oklch(L C H)"
-  const bgValue = vars?.background || '';
-  let isDarkTheme = false;
+  // Only apply .theme-nasr class for the NASR client specifically (not all dark themes)
+  // This preserves NASR-specific brand styling (gold accents, serif fonts, etc.)
+  const isNasrClient = client.subdomain === 'nasr';
   
-  if (bgValue.startsWith('oklch(')) {
-    // OKLCH format: oklch(0.2204 0.0198 275.8439) - L is first value (0-1 scale)
-    const oklchMatch = bgValue.match(/oklch\(\s*([\d.]+)/);
-    if (oklchMatch) {
-      const lightness = parseFloat(oklchMatch[1]);
-      isDarkTheme = lightness < 0.4; // OKLCH lightness: 0-1 scale, <0.4 is dark
-    }
-  } else {
-    // HSL format: "H S% L%" - check L (lightness) percentage
-    const bgLightness = parseFloat(bgValue.split(' ')[2]?.replace('%', '') || '50');
-    isDarkTheme = bgLightness < 20;
-  }
-  
-  console.log('[Theme] Background:', bgValue, 'isDarkTheme:', isDarkTheme);
-
-  // Apply theme class for CSS utility overrides (e.g., .theme-nasr .premium-card)
-  // This is needed for clients with dark themes that have special styling
-  if (isDarkTheme) {
+  if (isNasrClient) {
     root.classList.add('theme-nasr');
     document.body.classList.add('theme-nasr');
-    // Dark theme - apply dark gradient background
+  }
+  
+  // Apply appropriate background gradient based on mode
+  if (mode === 'dark') {
     document.body.style.background = 'linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%)';
   } else {
-    // Light theme - apply light gradient background
     document.body.style.background = 'linear-gradient(145deg, #F6F9FB 0%, #EDF2F7 50%, #F6F9FB 100%)';
   }
   document.body.style.backgroundAttachment = 'fixed';
+  
+  console.log('[Theme] Applied - isNasrClient:', isNasrClient, 'mode:', mode);
+}
+
+// Helper to get current theme mode from DOM (set by next-themes)
+function getCurrentThemeMode(): 'light' | 'dark' {
+  return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
 }
 
 // Legacy helper for hex to HSL conversion (for clients without theme_config)
@@ -213,7 +203,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Watch for dark mode changes and reapply theme
+  // Watch for dark mode changes from next-themes and reapply theme
   // Use a flag to prevent infinite loops when applyClientTheme modifies classes
   useEffect(() => {
     if (!client) return;
@@ -234,7 +224,8 @@ export function ClientProvider({ children }: ClientProviderProps) {
           // Only reapply if dark mode actually changed
           if (hasDarkClass !== previouslyHadDark) {
             isApplyingTheme = true;
-            applyClientTheme(client);
+            const newMode = hasDarkClass ? 'dark' : 'light';
+            applyClientTheme(client, newMode);
             // Reset flag after a microtask to allow DOM to settle
             queueMicrotask(() => {
               isApplyingTheme = false;
@@ -311,7 +302,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
       const domainMatchedClient = data?.find(c => c.custom_domain === hostname);
       if (domainMatchedClient) {
         setClient(domainMatchedClient as Client);
-        applyClientTheme(domainMatchedClient as Client);
+        applyClientTheme(domainMatchedClient as Client, getCurrentThemeMode());
         localStorage.setItem('client_id', domainMatchedClient.id);
         setLoading(false);
         return;
@@ -323,7 +314,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         const selectedClient = data?.find(c => c.subdomain === savedClient);
         if (selectedClient) {
           setClient(selectedClient as Client);
-          applyClientTheme(selectedClient as Client);
+          applyClientTheme(selectedClient as Client, getCurrentThemeMode());
           localStorage.setItem('client_id', selectedClient.id);
           setLoading(false);
           return;
@@ -334,7 +325,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
       const firstClient = data?.[0];
       if (firstClient) {
         setClient(firstClient as Client);
-        applyClientTheme(firstClient as Client);
+        applyClientTheme(firstClient as Client, getCurrentThemeMode());
         localStorage.setItem('client_id', firstClient.id);
       }
     } else {
@@ -354,7 +345,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
 
         if (data) {
           setClient(data as Client);
-          applyClientTheme(data as Client);
+          applyClientTheme(data as Client, getCurrentThemeMode());
           localStorage.setItem('client_id', data.id);
           setLoading(false);
           return;
@@ -377,7 +368,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         localStorage.removeItem('user_client_subdomain');
         localStorage.removeItem('admin_selected_client');
         setClient(customDomainClient as Client);
-        applyClientTheme(customDomainClient as Client);
+        applyClientTheme(customDomainClient as Client, getCurrentThemeMode());
         localStorage.setItem('client_id', customDomainClient.id);
         setLoading(false);
         return;
@@ -400,7 +391,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
 
           if (data) {
             setClient(data as Client);
-            applyClientTheme(data as Client);
+            applyClientTheme(data as Client, getCurrentThemeMode());
             localStorage.setItem('client_id', data.id);
             setLoading(false);
             return;
@@ -427,7 +418,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
         if (userClientData) {
           console.log('[ClientProvider] Using saved user client:', savedUserClient);
           setClient(userClientData as Client);
-          applyClientTheme(userClientData as Client);
+          applyClientTheme(userClientData as Client, getCurrentThemeMode());
           localStorage.setItem('client_id', userClientData.id);
           setLoading(false);
           return;
@@ -444,7 +435,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
 
       if (fallbackClient) {
         setClient(fallbackClient as Client);
-        applyClientTheme(fallbackClient as Client);
+        applyClientTheme(fallbackClient as Client, getCurrentThemeMode());
         localStorage.setItem('client_id', fallbackClient.id);
       } else {
         console.error('Client not found: nallio (fallback)');
@@ -458,7 +449,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
     const newClient = allClients.find(c => c.subdomain === subdomain);
     if (newClient) {
       setClient(newClient as Client);
-      applyClientTheme(newClient as Client);
+      applyClientTheme(newClient as Client, getCurrentThemeMode());
       localStorage.setItem('admin_selected_client', subdomain);
       localStorage.setItem('client_id', newClient.id);
       
