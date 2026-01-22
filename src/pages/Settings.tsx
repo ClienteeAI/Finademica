@@ -2,11 +2,13 @@ import { useState } from "react";
 import SidebarLayout from "@/components/layout/SidebarLayout";
 import { useAuth } from "@/lib/AuthContext";
 import { useClient } from "@/lib/clientContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, Trash2, Scale, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Settings as SettingsIcon, Bell, Shield, Palette, LogOut, Trash2, Scale, ChevronRight, Heart, Trophy, TrendingUp } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -22,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const Settings = () => {
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
   const { client } = useClient();
   const navigate = useNavigate();
   const isNasrTheme = client?.subdomain === 'nasr';
@@ -30,14 +32,51 @@ const Settings = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(false);
   const [marketingEmails, setMarketingEmails] = useState(false);
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteStep, setDeleteStep] = useState<'confirm' | 'final'>('confirm');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
     navigate("/");
   };
 
-  const handleDeleteAccount = () => {
-    toast.info("Account deletion requires contacting support.");
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    
+    setIsDeleting(true);
+    try {
+      // Delete user data from users table
+      if (user?.id) {
+        const { error: deleteError } = await supabase
+          .from('users')
+          .delete()
+          .eq('auth_user_id', user.id);
+        
+        if (deleteError) {
+          console.error('Error deleting user data:', deleteError);
+          throw deleteError;
+        }
+      }
+      
+      // Sign out and redirect
+      await signOut();
+      toast.success("Your account has been deleted. We're sorry to see you go.");
+      navigate("/");
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      toast.error("Failed to delete account. Please try again or contact support.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const resetDeleteDialog = () => {
+    setDeleteStep('confirm');
+    setDeleteConfirmText('');
+    setDeleteDialogOpen(false);
   };
 
   return (
@@ -271,7 +310,10 @@ const Settings = () => {
               Sign Out
             </Button>
 
-            <AlertDialog>
+            <AlertDialog open={deleteDialogOpen} onOpenChange={(open) => {
+              if (!open) resetDeleteDialog();
+              else setDeleteDialogOpen(true);
+            }}>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="outline"
@@ -282,27 +324,113 @@ const Settings = () => {
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className={isNasrTheme ? 'bg-nasr-panel border-gold/20' : 'bg-card border-border'}>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className={isNasrTheme ? 'text-nasr-text' : 'text-foreground'}>
-                    Delete Your Account?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className={`space-y-3 ${isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground'}`}>
-                    <p>
-                      If you're sure you want to delete your account, please send an email to:
-                    </p>
-                    <p className={`font-semibold ${isNasrTheme ? 'text-gold' : 'text-primary'}`}>
-                      support@nallio.io
-                    </p>
-                    <p className="text-sm">
-                      Please note: We have up to 30 days to process your deletion request. All your data will be permanently removed.
-                    </p>
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className={isNasrTheme ? 'border-gold/20 text-nasr-text' : 'border-border text-foreground'}>
-                    Close
-                  </AlertDialogCancel>
-                </AlertDialogFooter>
+                {deleteStep === 'confirm' ? (
+                  <>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className={`text-xl ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>
+                        Are you sure you want to leave?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription asChild>
+                        <div className={`space-y-4 ${isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground'}`}>
+                          <p className="text-base">
+                            We'd hate to see you go! Here's what you'll lose:
+                          </p>
+                          
+                          <div className="space-y-3">
+                            <div className="flex items-start gap-3">
+                              <Trophy className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+                              <div>
+                                <p className={`font-medium ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>Your Progress & Achievements</p>
+                                <p className="text-sm">All your learning progress, XP, and earned badges will be permanently deleted.</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-start gap-3">
+                              <TrendingUp className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+                              <div>
+                                <p className={`font-medium ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>Your Trading Diary</p>
+                                <p className="text-sm">All your trade records, notes, and analysis history will be erased.</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-start gap-3">
+                              <Heart className={`h-5 w-5 mt-0.5 flex-shrink-0 ${isNasrTheme ? 'text-gold' : 'text-aqua'}`} />
+                              <div>
+                                <p className={`font-medium ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>Community & Support</p>
+                                <p className="text-sm">Access to exclusive content, community features, and personalized guidance.</p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <p className={`text-sm italic ${isNasrTheme ? 'text-gold/80' : 'text-primary/80'}`}>
+                            If something isn't working for you, we'd love to hear about it! Contact us at support@nallio.io
+                          </p>
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                      <AlertDialogCancel 
+                        className={`flex-1 ${isNasrTheme ? 'bg-gold text-nasr-bg hover:bg-gold/90 border-0' : 'bg-primary text-primary-foreground hover:bg-primary/90 border-0'}`}
+                      >
+                        I'll Stay!
+                      </AlertDialogCancel>
+                      <Button
+                        variant="outline"
+                        className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteStep('final')}
+                      >
+                        Continue with Deletion
+                      </Button>
+                    </AlertDialogFooter>
+                  </>
+                ) : (
+                  <>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className={`text-xl ${isNasrTheme ? 'text-nasr-text' : 'text-foreground'}`}>
+                        Final Confirmation
+                      </AlertDialogTitle>
+                      <AlertDialogDescription asChild>
+                        <div className={`space-y-4 ${isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground'}`}>
+                          <p>
+                            This action is <span className="text-destructive font-semibold">permanent and cannot be undone</span>. 
+                            All your data will be immediately deleted.
+                          </p>
+                          <div className="space-y-2">
+                            <Label className={isNasrTheme ? 'text-nasr-text' : 'text-foreground'}>
+                              Type <span className="font-mono font-bold">DELETE</span> to confirm:
+                            </Label>
+                            <Input
+                              value={deleteConfirmText}
+                              onChange={(e) => setDeleteConfirmText(e.target.value)}
+                              placeholder="Type DELETE here"
+                              className={isNasrTheme 
+                                ? 'bg-nasr-bg border-gold/20 text-nasr-text' 
+                                : 'bg-background border-border'
+                              }
+                            />
+                          </div>
+                        </div>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                      <Button
+                        variant="outline"
+                        className={`flex-1 ${isNasrTheme ? 'border-gold/20 text-nasr-text' : 'border-border text-foreground'}`}
+                        onClick={() => setDeleteStep('confirm')}
+                      >
+                        Go Back
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                      >
+                        {isDeleting ? 'Deleting...' : 'Delete My Account'}
+                      </Button>
+                    </AlertDialogFooter>
+                  </>
+                )}
               </AlertDialogContent>
             </AlertDialog>
           </CardContent>
