@@ -18,91 +18,91 @@
     --client-primary: #4DE2E8;
     --client-secondary: #D4E0EC;
 
-    /* Luminous Ice Color System */
-    --background: 205 33% 98%;
-    --foreground: 217 91% 10%;
+    /* Luminous Ice Color System - Complete color functions for OKLCH/HSL compatibility */
+    --background: hsl(205 33% 98%);
+    --foreground: hsl(217 91% 10%);
 
     /* Glass card surfaces - Arctic */
-    --card: 210 33% 97%;
-    --card-foreground: 217 91% 10%;
+    --card: hsl(210 33% 97%);
+    --card-foreground: hsl(217 91% 10%);
 
-    --popover: 210 33% 97%;
-    --popover-foreground: 217 91% 10%;
+    --popover: hsl(210 33% 97%);
+    --popover-foreground: hsl(217 91% 10%);
 
     /* Primary: Luminous Aqua */
-    --primary: 181 75% 60%;
-    --primary-foreground: 0 0% 98%;
+    --primary: hsl(181 75% 60%);
+    --primary-foreground: hsl(0 0% 98%);
 
     /* Secondary surfaces - Cloud Mist */
-    --secondary: 214 32% 94%;
-    --secondary-foreground: 220 9% 46%;
+    --secondary: hsl(214 32% 94%);
+    --secondary-foreground: hsl(220 9% 46%);
 
     /* Muted elements */
-    --muted: 210 25% 96%;
-    --muted-foreground: 220 9% 46%;
+    --muted: hsl(210 25% 96%);
+    --muted-foreground: hsl(220 9% 46%);
 
     /* Accent: Neon Cyan */
-    --accent: 195 100% 83%;
-    --accent-foreground: 217 91% 22%;
+    --accent: hsl(195 100% 83%);
+    --accent-foreground: hsl(217 91% 22%);
 
     /* Danger */
-    --destructive: 0 72% 71%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: hsl(0 72% 71%);
+    --destructive-foreground: hsl(0 0% 98%);
 
     /* Borders and inputs - Icy Slate */
-    --border: 210 30% 88%;
-    --input: 210 25% 96%;
-    --ring: 181 75% 60%;
+    --border: hsl(210 30% 88%);
+    --input: hsl(210 25% 96%);
+    --ring: hsl(181 75% 60%);
 
     --radius: 1.375rem;
 
     /* Success: Luminous Aqua */
-    --success: 181 75% 60%;
-    --success-from: 181 75% 60%;
-    --success-to: 195 100% 83%;
+    --success: hsl(181 75% 60%);
+    --success-from: hsl(181 75% 60%);
+    --success-to: hsl(195 100% 83%);
     
     /* Premium gradient: Aqua to Cyan */
-    --premium-from: 181 75% 60%;
-    --premium-to: 181 60% 55%;
+    --premium-from: hsl(181 75% 60%);
+    --premium-to: hsl(181 60% 55%);
     
     /* Danger gradient */
-    --danger-from: 0 72% 71%;
-    --danger-to: 15 70% 65%;
+    --danger-from: hsl(0 72% 71%);
+    --danger-to: hsl(15 70% 65%);
     
     /* Info: Deep Ocean Blue */
-    --info: 212 61% 23%;
-    --warning: 38 80% 55%;
-    --error: 0 72% 71%;
+    --info: hsl(212 61% 23%);
+    --warning: hsl(38 80% 55%);
+    --error: hsl(0 72% 71%);
     
     /* Text hierarchy - Deep Ocean to Cool Graphite */
-    --text-primary: 220 25% 9%;
-    --text-secondary: 220 9% 46%;
-    --text-tertiary: 220 13% 69%;
+    --text-primary: hsl(220 25% 9%);
+    --text-secondary: hsl(220 9% 46%);
+    --text-tertiary: hsl(220 13% 69%);
     
     /* Borders with transparency */
-    --border-subtle: 210 30% 88%;
-    --border-hover: 181 75% 60%;
-    --border-glass: 210 30% 90%;
+    --border-subtle: hsl(210 30% 88%);
+    --border-hover: hsl(181 75% 60%);
+    --border-glass: hsl(210 30% 90%);
 
     /* Lavender Ice for secondary tags */
-    --purple: 255 55% 83%;
+    --purple: hsl(255 55% 83%);
 
     /* Gold accent (RGB format for Tailwind v4 opacity support) */
     --gold-rgb: 212 175 55;
     --gold-light-rgb: 244 217 140;
-    --gold: 43 69% 53%;
-    --gold-light: 45 85% 62%;
-    --gold-glow: 43 69% 53%;
+    --gold: hsl(43 69% 53%);
+    --gold-light: hsl(45 85% 62%);
+    --gold-glow: hsl(43 69% 53%);
 
     /* Sidebar */
-    --sidebar-background: 210 33% 97%;
-    --sidebar-foreground: 217 91% 10%;
-    --sidebar-primary: 181 75% 60%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 210 25% 96%;
-    --sidebar-accent-foreground: 220 9% 46%;
-    --sidebar-border: 210 30% 88%;
-    --sidebar-ring: 181 75% 60%;
+    --sidebar: hsl(210 33% 97%);
+    --sidebar-foreground: hsl(217 91% 10%);
+    --sidebar-primary: hsl(181 75% 60%);
+    --sidebar-primary-foreground: hsl(0 0% 98%);
+    --sidebar-accent: hsl(210 25% 96%);
+    --sidebar-accent-foreground: hsl(220 9% 46%);
+    --sidebar-border: hsl(210 30% 88%);
+    --sidebar-ring: hsl(181 75% 60%);
   }
 
   /* ============================================
