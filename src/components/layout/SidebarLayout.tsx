@@ -121,7 +121,7 @@ function SidebarNavContent() {
         <SidebarGroup>
           <SidebarGroupLabel className={cn(
             "text-xs font-medium uppercase tracking-wider mb-1",
-            isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70"
+            isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70"
           )}>
             Navigation
           </SidebarGroupLabel>
@@ -138,13 +138,13 @@ function SidebarNavContent() {
                           isActive(item.path)
                             ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
                             : isNasrTheme 
-                              ? 'text-white/90 hover:bg-white/10 hover:text-white'
+                              ? '!text-white hover:bg-white/10'
                               : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
                             ? '[&>svg]:text-primary'
                             : isNasrTheme
-                              ? '[&>svg]:text-white/70 hover:[&>svg]:text-white'
+                              ? '[&>svg]:!text-white/80 hover:[&>svg]:!text-white'
                               : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
                         )}
                       >
@@ -168,16 +168,16 @@ function SidebarNavContent() {
             <CollapsibleTrigger asChild>
               <SidebarGroupLabel className={cn(
                 "cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20",
-                isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70"
+                isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70"
               )}>
                 <div className="flex items-center gap-2 w-full">
-                  <Wrench className={cn("h-4 w-4", isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70")} />
+                  <Wrench className={cn("h-4 w-4", isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70")} />
                   {!collapsed && <span className="text-xs font-medium uppercase tracking-wider">Tools</span>}
                   {!collapsed && (
                     <ChevronDown
                       className={cn(
                         'ml-auto h-4 w-4 transition-transform duration-200',
-                        isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70",
+                        isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70",
                         toolsOpen && 'rotate-180'
                       )}
                     />
@@ -199,13 +199,13 @@ function SidebarNavContent() {
                           isActive(item.path)
                             ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
                             : isNasrTheme 
-                              ? 'text-white/90 hover:bg-white/10 hover:text-white'
+                              ? '!text-white hover:bg-white/10'
                               : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
                             ? '[&>svg]:text-primary'
                             : isNasrTheme
-                              ? '[&>svg]:text-white/70 hover:[&>svg]:text-white'
+                              ? '[&>svg]:!text-white/80 hover:[&>svg]:!text-white'
                               : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
                         )}
                       >
