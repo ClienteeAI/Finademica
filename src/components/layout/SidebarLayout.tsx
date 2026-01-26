@@ -290,9 +290,19 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         <Sidebar
           collapsible="icon"
           variant="floating"
-          className="hidden md:flex rounded-[18px] shadow-lg border border-sidebar-border bg-sidebar"
+          className={cn(
+            "hidden md:flex rounded-[18px] shadow-lg border border-sidebar-border",
+            isNasrTheme ? "bg-[hsl(222,47%,11%)]" : "bg-sidebar"
+          )}
         >
           <SidebarNavContent />
+          
+          {/* Disclaimer - visible for all clients */}
+          <div className="mt-auto p-4 pt-2 border-t border-sidebar-border">
+            <p className="text-[10px] leading-relaxed text-muted-foreground/70">
+              All content in this app is free and unlocked through learning progress. No purchases are required.
+            </p>
+          </div>
         </Sidebar>
 
         <SidebarInset className="flex flex-col bg-background">
