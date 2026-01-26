@@ -86,7 +86,8 @@ function SidebarNavContent() {
             <span
               className={cn(
                 'text-lg font-medium tracking-tight transition-all duration-300',
-                'font-playfair text-sidebar-foreground group-hover:text-primary'
+                'font-playfair group-hover:text-primary',
+                isNasrTheme ? 'text-white' : 'text-sidebar-foreground'
               )}
             >
               {collapsed ? (isNasrTheme ? 'N' : client?.company_name?.[0] || 'L') : (isNasrTheme ? 'NASR Lector' : client?.company_name)}
@@ -118,7 +119,10 @@ function SidebarNavContent() {
       <SidebarContent className="px-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs font-medium uppercase tracking-wider mb-1">
+          <SidebarGroupLabel className={cn(
+            "text-xs font-medium uppercase tracking-wider mb-1",
+            isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70"
+          )}>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -133,11 +137,15 @@ function SidebarNavContent() {
                           'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                           isActive(item.path)
                             ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
+                            : isNasrTheme 
+                              ? 'text-white/90 hover:bg-white/10 hover:text-white'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
                             ? '[&>svg]:text-primary'
-                            : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
+                            : isNasrTheme
+                              ? '[&>svg]:text-white/70 hover:[&>svg]:text-white'
+                              : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
                         )}
                       >
                     <Link to={item.path}>
@@ -158,14 +166,18 @@ function SidebarNavContent() {
         <SidebarGroup>
           <Collapsible open={toolsOpen} onOpenChange={setToolsOpen}>
             <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20 text-sidebar-foreground/70">
+              <SidebarGroupLabel className={cn(
+                "cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20",
+                isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70"
+              )}>
                 <div className="flex items-center gap-2 w-full">
-                  <Wrench className="h-4 w-4 text-sidebar-foreground/70" />
+                  <Wrench className={cn("h-4 w-4", isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70")} />
                   {!collapsed && <span className="text-xs font-medium uppercase tracking-wider">Tools</span>}
                   {!collapsed && (
                     <ChevronDown
                       className={cn(
-                        'ml-auto h-4 w-4 transition-transform duration-200 text-sidebar-foreground/70',
+                        'ml-auto h-4 w-4 transition-transform duration-200',
+                        isNasrTheme ? "text-white/60" : "text-sidebar-foreground/70",
                         toolsOpen && 'rotate-180'
                       )}
                     />
@@ -186,11 +198,15 @@ function SidebarNavContent() {
                           'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                           isActive(item.path)
                             ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
+                            : isNasrTheme 
+                              ? 'text-white/90 hover:bg-white/10 hover:text-white'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
                             ? '[&>svg]:text-primary'
-                            : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
+                            : isNasrTheme
+                              ? '[&>svg]:text-white/70 hover:[&>svg]:text-white'
+                              : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
                         )}
                       >
                         <Link to={item.path}>
