@@ -119,10 +119,10 @@ function SidebarNavContent() {
       <SidebarContent className="px-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className={cn(
-            "text-xs font-medium uppercase tracking-wider mb-1",
-            isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70"
-          )}>
+          <SidebarGroupLabel 
+            className="text-xs font-medium uppercase tracking-wider mb-1"
+            style={isNasrTheme ? { color: 'rgba(255, 255, 255, 0.7)' } : undefined}
+          >
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -136,20 +136,20 @@ function SidebarNavContent() {
                         className={cn(
                           'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                           isActive(item.path)
-                            ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
-                            : isNasrTheme 
-                              ? '!text-white hover:bg-white/10'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
-                          '[&>svg]:transition-colors [&>svg]:duration-200',
-                          isActive(item.path)
-                            ? '[&>svg]:text-primary'
-                            : isNasrTheme
-                              ? '[&>svg]:!text-white/80 hover:[&>svg]:!text-white'
-                              : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
+                            ? 'bg-primary/15 font-medium shadow-[inset_3px_0_0] shadow-primary'
+                            : 'hover:bg-white/10',
+                          '[&>svg]:transition-colors [&>svg]:duration-200'
                         )}
+                        style={
+                          isNasrTheme && !isActive(item.path)
+                            ? { color: 'rgba(255, 255, 255, 0.95)' }
+                            : isActive(item.path)
+                              ? { color: 'hsl(var(--primary))' }
+                              : undefined
+                        }
                       >
-                    <Link to={item.path}>
-                      <item.icon className="h-4 w-4" />
+                    <Link to={item.path} style={isNasrTheme && !isActive(item.path) ? { color: 'inherit' } : undefined}>
+                      <item.icon className="h-4 w-4" style={isNasrTheme && !isActive(item.path) ? { color: 'rgba(255, 255, 255, 0.85)' } : undefined} />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -166,20 +166,20 @@ function SidebarNavContent() {
         <SidebarGroup>
           <Collapsible open={toolsOpen} onOpenChange={setToolsOpen}>
             <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className={cn(
-                "cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20",
-                isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70"
-              )}>
+              <SidebarGroupLabel 
+                className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20"
+                style={isNasrTheme ? { color: 'rgba(255, 255, 255, 0.7)' } : undefined}
+              >
                 <div className="flex items-center gap-2 w-full">
-                  <Wrench className={cn("h-4 w-4", isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70")} />
+                  <Wrench className="h-4 w-4" style={isNasrTheme ? { color: 'rgba(255, 255, 255, 0.7)' } : undefined} />
                   {!collapsed && <span className="text-xs font-medium uppercase tracking-wider">Tools</span>}
                   {!collapsed && (
                     <ChevronDown
                       className={cn(
                         'ml-auto h-4 w-4 transition-transform duration-200',
-                        isNasrTheme ? "!text-white/70" : "text-sidebar-foreground/70",
                         toolsOpen && 'rotate-180'
                       )}
+                      style={isNasrTheme ? { color: 'rgba(255, 255, 255, 0.7)' } : undefined}
                     />
                   )}
                 </div>
@@ -197,20 +197,20 @@ function SidebarNavContent() {
                         className={cn(
                           'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                           isActive(item.path)
-                            ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
-                            : isNasrTheme 
-                              ? '!text-white hover:bg-white/10'
-                              : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
-                          '[&>svg]:transition-colors [&>svg]:duration-200',
-                          isActive(item.path)
-                            ? '[&>svg]:text-primary'
-                            : isNasrTheme
-                              ? '[&>svg]:!text-white/80 hover:[&>svg]:!text-white'
-                              : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
+                            ? 'bg-primary/15 font-medium shadow-[inset_3px_0_0] shadow-primary'
+                            : 'hover:bg-white/10',
+                          '[&>svg]:transition-colors [&>svg]:duration-200'
                         )}
+                        style={
+                          isNasrTheme && !isActive(item.path)
+                            ? { color: 'rgba(255, 255, 255, 0.95)' }
+                            : isActive(item.path)
+                              ? { color: 'hsl(var(--primary))' }
+                              : undefined
+                        }
                       >
-                        <Link to={item.path}>
-                          <item.icon className="h-4 w-4" />
+                        <Link to={item.path} style={isNasrTheme && !isActive(item.path) ? { color: 'inherit' } : undefined}>
+                          <item.icon className="h-4 w-4" style={isNasrTheme && !isActive(item.path) ? { color: 'rgba(255, 255, 255, 0.85)' } : undefined} />
                           <span>{item.label}</span>
                         </Link>
                       </SidebarMenuButton>
