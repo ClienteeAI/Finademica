@@ -8,7 +8,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useClient } from "@/lib/clientContext";
 import { useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ONBOARDING_WEBHOOK_URL } from "@/lib/onboardingWebhook";
+import { SIGNUP_WEBHOOK_URL } from "@/lib/onboardingWebhook";
 import CountryCodeSelect from "@/components/CountryCodeSelect";
 
 export interface SignupUserData {
@@ -116,7 +116,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           source: "lovable_signup"
         };
 
-        await fetch(ONBOARDING_WEBHOOK_URL, {
+        await fetch(SIGNUP_WEBHOOK_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(webhookPayload),
