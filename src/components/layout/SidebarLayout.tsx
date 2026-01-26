@@ -205,6 +205,13 @@ function SidebarNavContent() {
             </CollapsibleContent>
           </Collapsible>
         </SidebarGroup>
+
+        {/* Bottom disclaimer - always visible */}
+        <div className="mt-auto px-4 pb-4">
+          <p className="text-[10px] leading-tight text-muted-foreground/60">
+            All content in this app is free and unlocked through learning progress. No purchases are required.
+          </p>
+        </div>
       </SidebarContent>
     </>
   );
