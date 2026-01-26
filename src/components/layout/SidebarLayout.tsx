@@ -118,28 +118,28 @@ function SidebarNavContent() {
       <SidebarContent className="px-2">
         {/* Main Navigation */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground text-xs font-medium uppercase tracking-wider mb-1">
+          <SidebarGroupLabel className="text-sidebar-foreground/70 text-xs font-medium uppercase tracking-wider mb-1">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.path)}
-                    tooltip={item.label}
-                    className={cn(
-                      'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
-                      isActive(item.path)
-                        ? 'bg-primary/12 text-primary shadow-[inset_3px_0_0] shadow-primary'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent/20',
-                      '[&>svg]:transition-colors [&>svg]:duration-200',
-                      isActive(item.path)
-                        ? '[&>svg]:text-primary'
-                        : '[&>svg]:text-muted-foreground hover:[&>svg]:text-sidebar-foreground'
-                    )}
-                  >
+                    <SidebarMenuButton
+                        asChild
+                        isActive={isActive(item.path)}
+                        tooltip={item.label}
+                        className={cn(
+                          'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
+                          isActive(item.path)
+                            ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
+                          '[&>svg]:transition-colors [&>svg]:duration-200',
+                          isActive(item.path)
+                            ? '[&>svg]:text-primary'
+                            : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
+                        )}
+                      >
                     <Link to={item.path}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
@@ -158,14 +158,14 @@ function SidebarNavContent() {
         <SidebarGroup>
           <Collapsible open={toolsOpen} onOpenChange={setToolsOpen}>
             <CollapsibleTrigger asChild>
-              <SidebarGroupLabel className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20 text-muted-foreground">
+              <SidebarGroupLabel className="cursor-pointer rounded-[10px] px-3 py-2 transition-all duration-200 hover:bg-sidebar-accent/20 text-sidebar-foreground/70">
                 <div className="flex items-center gap-2 w-full">
-                  <Wrench className="h-4 w-4" />
+                  <Wrench className="h-4 w-4 text-sidebar-foreground/70" />
                   {!collapsed && <span className="text-xs font-medium uppercase tracking-wider">Tools</span>}
                   {!collapsed && (
                     <ChevronDown
                       className={cn(
-                        'ml-auto h-4 w-4 transition-transform duration-200',
+                        'ml-auto h-4 w-4 transition-transform duration-200 text-sidebar-foreground/70',
                         toolsOpen && 'rotate-180'
                       )}
                     />
@@ -185,12 +185,12 @@ function SidebarNavContent() {
                         className={cn(
                           'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
                           isActive(item.path)
-                            ? 'bg-primary/12 text-primary shadow-[inset_3px_0_0] shadow-primary'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent/20',
+                            ? 'bg-primary/15 text-primary font-medium shadow-[inset_3px_0_0] shadow-primary'
+                            : 'text-sidebar-foreground hover:bg-sidebar-accent/30 hover:text-sidebar-foreground',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
                             ? '[&>svg]:text-primary'
-                            : '[&>svg]:text-muted-foreground hover:[&>svg]:text-sidebar-foreground'
+                            : '[&>svg]:text-sidebar-foreground/80 hover:[&>svg]:text-sidebar-foreground'
                         )}
                       >
                         <Link to={item.path}>
