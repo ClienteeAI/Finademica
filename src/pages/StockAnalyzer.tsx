@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
 import { SaveAnalysisToDiaryModal } from "@/components/SaveAnalysisToDiaryModal";
-import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
+import { shouldHideTradingCTAs } from "@/lib/featureFlags";
 
 const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
 
@@ -190,8 +190,8 @@ const StockAnalyzer = () => {
                   {/* Analysis Results */}
                   <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
                   
-                  {/* Prominent Trade CTA Banner - Hidden for App Store compliance */}
-                  {!HIDE_TRADING_CTAS && (
+                  {/* Prominent Trade CTA Banner - Only shown for NASR client */}
+                  {!shouldHideTradingCTAs(client?.subdomain) && (
                     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 p-8 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
                       {/* Animated background glow */}
                       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_50%)]" />

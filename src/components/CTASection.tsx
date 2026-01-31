@@ -1,14 +1,17 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
+import { shouldHideTradingCTAs } from "@/lib/featureFlags";
+import { useClient } from "@/lib/clientContext";
 
 interface CTASectionProps {
   onGetStarted: () => void;
 }
 
 const CTASection = ({ onGetStarted }: CTASectionProps) => {
-  // Hide the entire CTA section when trading CTAs are disabled
-  if (HIDE_TRADING_CTAS) {
+  const { client } = useClient();
+  
+  // Hide the entire CTA section when trading CTAs are disabled (non-NASR clients)
+  if (shouldHideTradingCTAs(client?.subdomain)) {
     return null;
   }
 
