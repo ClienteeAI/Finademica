@@ -6,7 +6,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
-import { HIDE_TRADING_CTAS } from "@/lib/featureFlags";
+import { shouldHideTradingCTAs } from "@/lib/featureFlags";
+import { useClient } from "@/lib/clientContext";
 
 interface LockedVideoModalProps {
   isOpen: boolean;
@@ -15,6 +16,8 @@ interface LockedVideoModalProps {
 }
 
 export const LockedVideoModal = ({ isOpen, onClose, videoTitle }: LockedVideoModalProps) => {
+  const { client } = useClient();
+  const hideCTAs = shouldHideTradingCTAs(client?.subdomain);
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -37,7 +40,7 @@ export const LockedVideoModal = ({ isOpen, onClose, videoTitle }: LockedVideoMod
           
           <div className="bg-muted/50 rounded-xl p-4">
             <p className="text-sm text-muted-foreground">
-              {HIDE_TRADING_CTAS 
+              {hideCTAs 
                 ? "Complete quizzes to unlock more videos"
                 : "Available with live trading account"
               }
@@ -45,7 +48,7 @@ export const LockedVideoModal = ({ isOpen, onClose, videoTitle }: LockedVideoMod
           </div>
           
           <div className="flex flex-col gap-3">
-            {!HIDE_TRADING_CTAS && (
+            {!hideCTAs && (
               <Button 
                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
                 onClick={() => window.open('https://nasrtrade.com', '_blank')}

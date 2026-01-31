@@ -13,7 +13,8 @@ import { toast } from 'sonner';
 import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, CalendarIcon, Eye, EyeOff, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { HIDE_TRADING_CTAS } from '@/lib/featureFlags';
+import { shouldHideTradingCTAs } from '@/lib/featureFlags';
+import { useClient } from '@/lib/clientContext';
 
 interface LiveAccountRegistrationModalProps {
   open: boolean;
@@ -462,8 +463,10 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
     }
   };
 
-  // Hide entire modal when trading CTAs are disabled for App Store compliance
-  if (HIDE_TRADING_CTAS) {
+  const { client } = useClient();
+  
+  // Hide entire modal when trading CTAs are disabled for App Store compliance (non-NASR clients)
+  if (shouldHideTradingCTAs(client?.subdomain)) {
     return null;
   }
 
