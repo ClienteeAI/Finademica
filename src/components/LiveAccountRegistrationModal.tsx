@@ -536,7 +536,7 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
                       {birthdayDate ? format(birthdayDate, "PPP") : <span>Pick your birthday</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 bg-card border border-border shadow-xl z-[100]" align="start">
                     <Calendar
                       mode="single"
                       selected={birthdayDate}
@@ -545,7 +545,7 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
                         date > new Date() || date < new Date("1900-01-01")
                       }
                       initialFocus
-                      className={cn("p-3 pointer-events-auto")}
+                      className={cn("p-3 pointer-events-auto bg-card text-foreground")}
                       captionLayout="dropdown-buttons"
                       fromYear={1920}
                       toYear={new Date().getFullYear()}
