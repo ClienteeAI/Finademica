@@ -51,7 +51,7 @@ export const LockedVideoModal = ({ isOpen, onClose, videoTitle }: LockedVideoMod
             {!hideCTAs && (
               <Button 
                 className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
-                onClick={() => window.open('https://nasrtrade.com', '_blank')}
+                onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
               >
                 Open Live Account
               </Button>

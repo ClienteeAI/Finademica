@@ -11,7 +11,7 @@ import StockChat from "@/components/StockChat";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
-import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
+
 import { SaveAnalysisToDiaryModal } from "@/components/SaveAnalysisToDiaryModal";
 import { shouldHideTradingCTAs } from "@/lib/featureFlags";
 
@@ -41,7 +41,7 @@ const StockAnalyzer = () => {
   const [analysisData, setAnalysisData] = useState<unknown>(null);
   const [analyzedSymbol, setAnalyzedSymbol] = useState<string | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
-  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  
   const [showDiaryModal, setShowDiaryModal] = useState(false);
 
   const handleAnalyze = async () => {
@@ -209,7 +209,7 @@ const StockAnalyzer = () => {
                         </div>
                         
                         <button
-                          onClick={() => setShowRegistrationModal(true)}
+                          onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
                           className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-bold text-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.3)] hover:scale-105 transition-all duration-300"
                         >
                           <TrendingUp className="w-6 h-6 group-hover:animate-pulse" />
@@ -314,12 +314,6 @@ const StockAnalyzer = () => {
           </div>
         </div>
       </div>
-      
-      {/* Live Account Registration Modal */}
-      <LiveAccountRegistrationModal
-        open={showRegistrationModal}
-        onOpenChange={setShowRegistrationModal}
-      />
 
       {/* Save to Diary Modal */}
       <SaveAnalysisToDiaryModal

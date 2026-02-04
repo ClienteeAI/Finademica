@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EditTradeModal } from "@/components/EditTradeModal";
 import { DeleteTradeDialog } from "@/components/DeleteTradeDialog";
 import { AddTradeModal } from "@/components/AddTradeModal";
-import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
+
 import { useAuth } from "@/lib/AuthContext";
 
 interface DiaryEntry {
@@ -61,7 +61,7 @@ const TradingDiary = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
+  
   const [tradeToEdit, setTradeToEdit] = useState<DiaryEntry | null>(null);
   const [tradeToDelete, setTradeToDelete] = useState<{ id: string; symbol: string } | null>(null);
 
@@ -257,7 +257,7 @@ const TradingDiary = () => {
               </div>
             </div>
             <Button
-              onClick={() => setRegistrationModalOpen(true)}
+              onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
               size="lg"
               className="h-12 px-6 text-base font-bold bg-white text-emerald-600 hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-xl whitespace-nowrap"
             >
@@ -453,7 +453,7 @@ const TradingDiary = () => {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setRegistrationModalOpen(true);
+                                  window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank');
                                 }}
                                 className={cn(
                                   "h-7 px-3 text-xs font-semibold rounded-lg",
@@ -566,7 +566,7 @@ const TradingDiary = () => {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setRegistrationModalOpen(true);
+                            window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank');
                           }}
                           className={cn(
                             "h-8 px-3 text-xs font-semibold",
@@ -834,11 +834,6 @@ const TradingDiary = () => {
         isNasrTheme={isNasrTheme}
       />
 
-      {/* Live Account Registration Modal */}
-      <LiveAccountRegistrationModal
-        open={registrationModalOpen}
-        onOpenChange={setRegistrationModalOpen}
-      />
     </SidebarLayout>
   );
 };

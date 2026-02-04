@@ -13,7 +13,7 @@ import { useClient } from "@/lib/clientContext";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { SaveToDiaryModal } from "@/components/SaveToDiaryModal";
-import { LiveAccountRegistrationModal } from "@/components/LiveAccountRegistrationModal";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendCalculatorUsedEvent } from "@/lib/crmWebhook";
@@ -161,7 +161,7 @@ const Calculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [errors, setErrors] = useState<FormErrors>({});
   const [saveDiaryOpen, setSaveDiaryOpen] = useState(false);
-  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
+  
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -963,7 +963,7 @@ const Calculator = () => {
                     </div>
                   </div>
                   <Button
-                    onClick={() => setRegistrationModalOpen(true)}
+                    onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
                     size="lg"
                     className="h-14 px-8 text-lg font-bold bg-white text-emerald-600 hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 rounded-xl whitespace-nowrap"
                   >
@@ -1011,10 +1011,6 @@ const Calculator = () => {
         isNasrTheme={isNasrTheme}
       />
 
-      <LiveAccountRegistrationModal
-        open={registrationModalOpen}
-        onOpenChange={setRegistrationModalOpen}
-      />
     </SidebarLayout>
   );
 };
