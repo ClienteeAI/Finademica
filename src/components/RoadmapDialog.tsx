@@ -413,7 +413,7 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                         <Button 
                           size="sm"
                           className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-semibold z-20 relative"
-                          onClick={() => window.open('https://nasrtrade.com', '_blank')}
+                          onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
                         >
                           Open Live Account
                           <ChevronRight className="w-4 h-4 ml-1" />
