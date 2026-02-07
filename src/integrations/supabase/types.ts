@@ -1121,6 +1121,7 @@ export type Database = {
       }
       psych_arena_results: {
         Row: {
+          call_summary: string | null
           coachability: number | null
           confidence_calibration: string | null
           created_at: string | null
@@ -1133,21 +1134,31 @@ export type Database = {
           flag_high_revenge_trading_risk: boolean | null
           flag_panic_exit_risk: boolean | null
           flag_rule_breaking_risk: boolean | null
+          flags: Json | null
+          high_dropout_risk: boolean | null
+          high_revenge_trading_risk: boolean | null
           id: string
+          impulsive: boolean | null
           last_name: string | null
           locus_of_control: string | null
           next_simulation_recommendation: string | null
+          panic_exit_risk: boolean | null
           phone: string | null
           pressure_response: string | null
           pressure_tolerance: number | null
+          recommended_training: string | null
+          report_json: Json | null
+          rule_breaking_risk: boolean | null
           self_talk_style: string | null
           top3_priorities: Json | null
+          user_facing_message: Json | null
           user_id: string
           user_message_brutal: string | null
           user_message_direct: string | null
           user_message_neutral: string | null
         }
         Insert: {
+          call_summary?: string | null
           coachability?: number | null
           confidence_calibration?: string | null
           created_at?: string | null
@@ -1160,21 +1171,31 @@ export type Database = {
           flag_high_revenge_trading_risk?: boolean | null
           flag_panic_exit_risk?: boolean | null
           flag_rule_breaking_risk?: boolean | null
+          flags?: Json | null
+          high_dropout_risk?: boolean | null
+          high_revenge_trading_risk?: boolean | null
           id?: string
+          impulsive?: boolean | null
           last_name?: string | null
           locus_of_control?: string | null
           next_simulation_recommendation?: string | null
+          panic_exit_risk?: boolean | null
           phone?: string | null
           pressure_response?: string | null
           pressure_tolerance?: number | null
+          recommended_training?: string | null
+          report_json?: Json | null
+          rule_breaking_risk?: boolean | null
           self_talk_style?: string | null
           top3_priorities?: Json | null
+          user_facing_message?: Json | null
           user_id: string
           user_message_brutal?: string | null
           user_message_direct?: string | null
           user_message_neutral?: string | null
         }
         Update: {
+          call_summary?: string | null
           coachability?: number | null
           confidence_calibration?: string | null
           created_at?: string | null
@@ -1187,15 +1208,24 @@ export type Database = {
           flag_high_revenge_trading_risk?: boolean | null
           flag_panic_exit_risk?: boolean | null
           flag_rule_breaking_risk?: boolean | null
+          flags?: Json | null
+          high_dropout_risk?: boolean | null
+          high_revenge_trading_risk?: boolean | null
           id?: string
+          impulsive?: boolean | null
           last_name?: string | null
           locus_of_control?: string | null
           next_simulation_recommendation?: string | null
+          panic_exit_risk?: boolean | null
           phone?: string | null
           pressure_response?: string | null
           pressure_tolerance?: number | null
+          recommended_training?: string | null
+          report_json?: Json | null
+          rule_breaking_risk?: boolean | null
           self_talk_style?: string | null
           top3_priorities?: Json | null
+          user_facing_message?: Json | null
           user_id?: string
           user_message_brutal?: string | null
           user_message_direct?: string | null
