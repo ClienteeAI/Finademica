@@ -18,6 +18,7 @@ const mainNavItems = [
 ];
 
 const moreItems = [
+  { path: '/arena', label: 'Arena' },
   { path: '/analyzer', label: 'Stock Analyzer' },
   { path: '/calculator', label: 'Calculator' },
   { path: '/diary', label: 'Trading Diary' },
