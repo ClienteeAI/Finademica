@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,6 +25,7 @@ export default function GladiatorCallModal({
   onOpenChange,
 }: GladiatorCallModalProps) {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const { status, isSpeaking, transcript, start, stop, volumeLevel } =
     useVapiCall();
   const [hasStarted, setHasStarted] = useState(false);
@@ -35,6 +37,17 @@ export default function GladiatorCallModal({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [transcript]);
+
+  // Navigate to results when call ends
+  useEffect(() => {
+    if (status === "ended" && hasStarted) {
+      const timer = setTimeout(() => {
+        onOpenChange(false);
+        navigate("/arena/results");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [status, hasStarted, navigate, onOpenChange]);
 
   // Reset on close
   useEffect(() => {
