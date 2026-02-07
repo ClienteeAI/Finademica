@@ -1,5 +1,6 @@
 import victorHaleImg from "@/assets/gladiator-victor-hale.jpg";
 import marcusStoneImg from "@/assets/gladiator-marcus-stone.jpg";
+import ninaGravesImg from "@/assets/gladiator-nina-graves.jpg";
 
 export interface Gladiator {
   id: string;
@@ -33,5 +34,16 @@ export const gladiators: Gladiator[] = [
     assistantId: "94c3d1e7-b974-40ae-a17b-b322bfee89a4",
     firstMessage:
       "Hi this is Marcus Stone. This is a simulated trading psychology scenario. Assume your last trade was profitable. OK?",
+  },
+  {
+    id: "nina-graves",
+    name: "Nina Graves",
+    title: "The Fear Amplifier",
+    description:
+      "A calm, fear-amplifying market voice that sounds unsettlingly reasonable. She amplifies uncertainty, raises plausible negative scenarios, and pressures you toward premature exits — testing whether you can follow your rules under fear.",
+    imageUrl: ninaGravesImg,
+    assistantId: "70198700-ebbf-494f-ae8d-075b1cd670dd",
+    firstMessage:
+      "Hi my name is Nina Graves. This is a simulation. You are in a losing trade. It's getting worse",
   },
 ];
