@@ -13,6 +13,7 @@ import {
   Loader2,
   Wrench,
   ChevronDown,
+  Swords,
 } from 'lucide-react';
 import { useClient } from '@/lib/clientContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -51,6 +52,7 @@ const mainNavItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/videos', label: 'My Videos', icon: Video },
   { path: '/quiz', label: 'Quiz', icon: HelpCircle },
+  { path: '/arena', label: 'Arena', icon: Swords },
 ];
 
 // Tools are grouped in collapsible

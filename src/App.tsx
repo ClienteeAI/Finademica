@@ -23,6 +23,7 @@ import Quiz from "./pages/Quiz";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Feed from "./pages/Feed";
+import Arena from "./pages/Arena";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import PrivacyPolicy from "./pages/legal/PrivacyPolicy";
@@ -72,6 +73,7 @@ const App = () => (
               <Route path="/diary" element={<TradingDiary />} />
               <Route path="/trading-diary" element={<TradingDiary />} />
               <Route path="/quiz" element={<Quiz />} />
+              <Route path="/arena" element={<Arena />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
