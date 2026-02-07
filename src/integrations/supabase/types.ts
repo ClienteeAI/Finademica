@@ -1121,13 +1121,20 @@ export type Database = {
       }
       psych_arena_results: {
         Row: {
+          bullet_timeline: Json | null
           call_summary: string | null
+          call_summary_one_line: string | null
+          call_summary_short: string | null
           coachability: number | null
+          cognitive_distortions: Json | null
           confidence_calibration: string | null
           created_at: string | null
+          decision_speed: number | null
           decision_style: string | null
+          dominant_response_pattern: string | null
           drills: Json | null
           email: string | null
+          emotional_control: number | null
           emotional_regulation: string | null
           first_name: string | null
           flag_high_dropout_risk: boolean | null
@@ -1146,10 +1153,15 @@ export type Database = {
           phone: string | null
           pressure_response: string | null
           pressure_tolerance: number | null
+          protective_behaviors: Json | null
           recommended_training: string | null
           report_json: Json | null
+          risk_behaviors: Json | null
           rule_breaking_risk: boolean | null
+          rule_integrity: number | null
+          scores: Json | null
           self_talk_style: string | null
+          stress_breakpoint: Json | null
           top3_priorities: Json | null
           user_facing_message: Json | null
           user_id: string
@@ -1158,13 +1170,20 @@ export type Database = {
           user_message_neutral: string | null
         }
         Insert: {
+          bullet_timeline?: Json | null
           call_summary?: string | null
+          call_summary_one_line?: string | null
+          call_summary_short?: string | null
           coachability?: number | null
+          cognitive_distortions?: Json | null
           confidence_calibration?: string | null
           created_at?: string | null
+          decision_speed?: number | null
           decision_style?: string | null
+          dominant_response_pattern?: string | null
           drills?: Json | null
           email?: string | null
+          emotional_control?: number | null
           emotional_regulation?: string | null
           first_name?: string | null
           flag_high_dropout_risk?: boolean | null
@@ -1183,10 +1202,15 @@ export type Database = {
           phone?: string | null
           pressure_response?: string | null
           pressure_tolerance?: number | null
+          protective_behaviors?: Json | null
           recommended_training?: string | null
           report_json?: Json | null
+          risk_behaviors?: Json | null
           rule_breaking_risk?: boolean | null
+          rule_integrity?: number | null
+          scores?: Json | null
           self_talk_style?: string | null
+          stress_breakpoint?: Json | null
           top3_priorities?: Json | null
           user_facing_message?: Json | null
           user_id: string
@@ -1195,13 +1219,20 @@ export type Database = {
           user_message_neutral?: string | null
         }
         Update: {
+          bullet_timeline?: Json | null
           call_summary?: string | null
+          call_summary_one_line?: string | null
+          call_summary_short?: string | null
           coachability?: number | null
+          cognitive_distortions?: Json | null
           confidence_calibration?: string | null
           created_at?: string | null
+          decision_speed?: number | null
           decision_style?: string | null
+          dominant_response_pattern?: string | null
           drills?: Json | null
           email?: string | null
+          emotional_control?: number | null
           emotional_regulation?: string | null
           first_name?: string | null
           flag_high_dropout_risk?: boolean | null
@@ -1220,10 +1251,15 @@ export type Database = {
           phone?: string | null
           pressure_response?: string | null
           pressure_tolerance?: number | null
+          protective_behaviors?: Json | null
           recommended_training?: string | null
           report_json?: Json | null
+          risk_behaviors?: Json | null
           rule_breaking_risk?: boolean | null
+          rule_integrity?: number | null
+          scores?: Json | null
           self_talk_style?: string | null
+          stress_breakpoint?: Json | null
           top3_priorities?: Json | null
           user_facing_message?: Json | null
           user_id?: string
