@@ -1119,6 +1119,90 @@ export type Database = {
         }
         Relationships: []
       }
+      psych_arena_results: {
+        Row: {
+          coachability: number | null
+          confidence_calibration: string | null
+          created_at: string | null
+          decision_style: string | null
+          drills: Json | null
+          email: string | null
+          emotional_regulation: string | null
+          first_name: string | null
+          flag_high_dropout_risk: boolean | null
+          flag_high_revenge_trading_risk: boolean | null
+          flag_panic_exit_risk: boolean | null
+          flag_rule_breaking_risk: boolean | null
+          id: string
+          last_name: string | null
+          locus_of_control: string | null
+          next_simulation_recommendation: string | null
+          phone: string | null
+          pressure_response: string | null
+          pressure_tolerance: number | null
+          self_talk_style: string | null
+          top3_priorities: Json | null
+          user_id: string
+          user_message_brutal: string | null
+          user_message_direct: string | null
+          user_message_neutral: string | null
+        }
+        Insert: {
+          coachability?: number | null
+          confidence_calibration?: string | null
+          created_at?: string | null
+          decision_style?: string | null
+          drills?: Json | null
+          email?: string | null
+          emotional_regulation?: string | null
+          first_name?: string | null
+          flag_high_dropout_risk?: boolean | null
+          flag_high_revenge_trading_risk?: boolean | null
+          flag_panic_exit_risk?: boolean | null
+          flag_rule_breaking_risk?: boolean | null
+          id?: string
+          last_name?: string | null
+          locus_of_control?: string | null
+          next_simulation_recommendation?: string | null
+          phone?: string | null
+          pressure_response?: string | null
+          pressure_tolerance?: number | null
+          self_talk_style?: string | null
+          top3_priorities?: Json | null
+          user_id: string
+          user_message_brutal?: string | null
+          user_message_direct?: string | null
+          user_message_neutral?: string | null
+        }
+        Update: {
+          coachability?: number | null
+          confidence_calibration?: string | null
+          created_at?: string | null
+          decision_style?: string | null
+          drills?: Json | null
+          email?: string | null
+          emotional_regulation?: string | null
+          first_name?: string | null
+          flag_high_dropout_risk?: boolean | null
+          flag_high_revenge_trading_risk?: boolean | null
+          flag_panic_exit_risk?: boolean | null
+          flag_rule_breaking_risk?: boolean | null
+          id?: string
+          last_name?: string | null
+          locus_of_control?: string | null
+          next_simulation_recommendation?: string | null
+          phone?: string | null
+          pressure_response?: string | null
+          pressure_tolerance?: number | null
+          self_talk_style?: string | null
+          top3_priorities?: Json | null
+          user_id?: string
+          user_message_brutal?: string | null
+          user_message_direct?: string | null
+          user_message_neutral?: string | null
+        }
+        Relationships: []
+      }
       quiz_answers: {
         Row: {
           created_at: string | null
