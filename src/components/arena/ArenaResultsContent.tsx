@@ -1,18 +1,19 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Swords, ShieldAlert, Brain, Target, MessageSquare, ListOrdered, Dumbbell, ArrowRight } from "lucide-react";
+import { Swords, ShieldAlert, Brain, Target, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { ArenaResult } from "@/pages/ArenaResults";
+import ArenaUnlockGate from "./ArenaUnlockGate";
+import ArenaFullEvaluation from "./ArenaFullEvaluation";
+
+/* ── Shared helpers (preview only) ──────────────────────── */
 
 function SectionCard({ children, className }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={cn("premium-card p-4 md:p-5", className)}>
-      {children}
-    </div>
-  );
+  return <div className={cn("premium-card p-4 md:p-5", className)}>{children}</div>;
 }
 
 function SectionTitle({ icon: Icon, children }: { icon: React.ElementType; children: React.ReactNode }) {
@@ -65,23 +66,11 @@ function RiskBadge({ label, flagged }: { label: string; flagged: boolean | null 
   );
 }
 
-function FeedbackCard({ tone, message }: { tone: string; message: string | null }) {
-  if (!message) return null;
-  const toneStyles: Record<string, string> = {
-    Neutral: "border-border/60",
-    Direct: "border-warning/40",
-    Brutal: "border-destructive/40",
-  };
-  return (
-    <div className={cn("rounded-xl border p-3.5 bg-card/60 backdrop-blur-sm", toneStyles[tone] || "border-border/60")}>
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1.5 block">{tone}</span>
-      <p className="text-sm leading-relaxed text-foreground">{message}</p>
-    </div>
-  );
-}
+/* ── Main Component ─────────────────────────────────────── */
 
 export default function ArenaResultsContent({ result }: { result: ArenaResult }) {
   const navigate = useNavigate();
+  const [unlocked, setUnlocked] = useState(false);
 
   return (
     <div className="space-y-4 max-w-2xl mx-auto pb-8">
@@ -101,6 +90,8 @@ export default function ArenaResultsContent({ result }: { result: ArenaResult })
           </div>
         </div>
       </motion.div>
+
+      {/* ═══ PREVIEW SECTION (always visible) ═══ */}
 
       {/* Summary Card */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
@@ -136,71 +127,12 @@ export default function ArenaResultsContent({ result }: { result: ArenaResult })
         </SectionCard>
       </motion.div>
 
-      {/* Feedback Messages */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <SectionCard>
-          <SectionTitle icon={MessageSquare}>Key Feedback</SectionTitle>
-          <div className="space-y-3">
-            <FeedbackCard tone="Neutral" message={result.user_message_neutral} />
-            <FeedbackCard tone="Direct" message={result.user_message_direct} />
-            <FeedbackCard tone="Brutal" message={result.user_message_brutal} />
-          </div>
-        </SectionCard>
-      </motion.div>
+      {/* ═══ GATE / FULL EVALUATION ═══ */}
 
-      {/* Training Priorities */}
-      {result.top3_priorities && result.top3_priorities.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <SectionCard>
-            <SectionTitle icon={ListOrdered}>Training Priorities</SectionTitle>
-            <ol className="space-y-2">
-              {result.top3_priorities.map((p, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center">
-                    {i + 1}
-                  </span>
-                  <span className="text-sm text-foreground leading-relaxed pt-0.5">{typeof p === 'string' ? p : JSON.stringify(p)}</span>
-                </li>
-              ))}
-            </ol>
-          </SectionCard>
-        </motion.div>
-      )}
-
-      {/* Recommended Drills */}
-      {result.drills && result.drills.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <SectionCard>
-            <SectionTitle icon={Dumbbell}>Recommended Drills</SectionTitle>
-            <div className="space-y-4">
-              {result.drills.map((drill, i) => (
-                <div key={i} className="rounded-lg border border-border/50 p-3 bg-muted/30">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <h3 className="text-sm font-semibold text-foreground">{drill.name || `Drill ${i + 1}`}</h3>
-                    {drill.duration && (
-                      <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                        {drill.duration}
-                      </span>
-                    )}
-                  </div>
-                  {drill.goal && (
-                    <p className="text-xs text-muted-foreground mb-2">{drill.goal}</p>
-                  )}
-                  {drill.steps && drill.steps.length > 0 && (
-                    <ul className="space-y-1 ml-1">
-                      {drill.steps.map((step, j) => (
-                        <li key={j} className="text-xs text-foreground/80 flex items-start gap-2">
-                          <span className="text-primary mt-0.5">•</span>
-                          <span>{step}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
-            </div>
-          </SectionCard>
-        </motion.div>
+      {!unlocked ? (
+        <ArenaUnlockGate onUnlock={() => setUnlocked(true)} />
+      ) : (
+        <ArenaFullEvaluation result={result} />
       )}
 
       {/* CTA */}
