@@ -38,12 +38,13 @@ export default function GladiatorCallModal({
     }
   }, [transcript]);
 
-  // Navigate to results when call ends
+  // Navigate to results when call ends, passing timestamp so results page knows to poll
   useEffect(() => {
     if (status === "ended" && hasStarted) {
+      const callEndedAt = new Date().toISOString();
       const timer = setTimeout(() => {
         onOpenChange(false);
-        navigate("/arena/results");
+        navigate("/arena/results", { state: { callEndedAt } });
       }, 2000);
       return () => clearTimeout(timer);
     }
