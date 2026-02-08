@@ -2,6 +2,7 @@ import victorHaleImg from "@/assets/gladiator-victor-hale.jpg";
 import marcusStoneImg from "@/assets/gladiator-marcus-stone.jpg";
 import ninaGravesImg from "@/assets/gladiator-nina-graves.jpg";
 import ryanWolfeImg from "@/assets/gladiator-ryan-wolfe.jpg";
+import eliasMooreImg from "@/assets/gladiator-elias-moore.jpg";
 
 export interface Gladiator {
   id: string;
@@ -57,5 +58,16 @@ export const gladiators: Gladiator[] = [
     assistantId: "fac520a3-5eca-4721-a4a4-bfd8f9b7ec78",
     firstMessage:
       "Hey there, Ryan Wolfe here. This is a simulation. You just took a loss. Are you ready to start?",
+  },
+  {
+    id: "elias-moore",
+    name: "Elias Moore",
+    title: "The Silent Observer",
+    description:
+      "A calm, neutral presence who speaks very little. He doesn't pressure, seduce, or judge — he mirrors your own words back to you, exposing internal narratives, contradictions, and unconscious motives. The discomfort comes from self-exposure, not stress.",
+    imageUrl: eliasMooreImg,
+    assistantId: "5517787d-2cdd-4f55-963e-c3e99de62ca1",
+    firstMessage:
+      "Hey there, Elias Moore here. This is a simulation. There is no pressure here.",
   },
 ];
