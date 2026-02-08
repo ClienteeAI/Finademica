@@ -1,6 +1,7 @@
 import victorHaleImg from "@/assets/gladiator-victor-hale.jpg";
 import marcusStoneImg from "@/assets/gladiator-marcus-stone.jpg";
 import ninaGravesImg from "@/assets/gladiator-nina-graves.jpg";
+import ryanWolfeImg from "@/assets/gladiator-ryan-wolfe.jpg";
 
 export interface Gladiator {
   id: string;
@@ -45,5 +46,16 @@ export const gladiators: Gladiator[] = [
     assistantId: "70198700-ebbf-494f-ae8d-075b1cd670dd",
     firstMessage:
       "Hi my name is Nina Graves. This is a simulation. You are in a losing trade. It's getting worse",
+  },
+  {
+    id: "ryan-wolfe",
+    name: "Ryan Wolfe",
+    title: "The Revenge Dealer",
+    description:
+      "A persuasive, opportunistic market voice that appears after a loss. He doesn't threaten — he offers relief. Expect normalization of impulsive behavior, risk escalation, and seductive 'one trade fixes it' thinking.",
+    imageUrl: ryanWolfeImg,
+    assistantId: "fac520a3-5eca-4721-a4a4-bfd8f9b7ec78",
+    firstMessage:
+      "Hey there, Ryan Wolfe here. This is a simulation. You just took a loss. Are you ready to start?",
   },
 ];
