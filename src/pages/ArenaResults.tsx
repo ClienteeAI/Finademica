@@ -68,8 +68,10 @@ export interface ArenaResult {
   scores: Record<string, unknown> | null;
   flags: Record<string, unknown> | null;
   user_facing_message: Record<string, unknown> | null;
+  report_json: Record<string, unknown> | null;
   // Meta
   created_at: string | null;
+  user_id: string;
 }
 
 const POLL_INTERVAL = 4000;
@@ -108,6 +110,7 @@ export default function ArenaResults() {
       scores: data.scores && typeof data.scores === 'object' && !Array.isArray(data.scores) ? data.scores as Record<string, unknown> : null,
       flags: data.flags && typeof data.flags === 'object' && !Array.isArray(data.flags) ? data.flags as Record<string, unknown> : null,
       user_facing_message: data.user_facing_message && typeof data.user_facing_message === 'object' && !Array.isArray(data.user_facing_message) ? data.user_facing_message as Record<string, unknown> : null,
+      report_json: data.report_json && typeof data.report_json === 'object' && !Array.isArray(data.report_json) ? data.report_json as Record<string, unknown> : null,
     } as ArenaResult;
   }, [user]);
 
