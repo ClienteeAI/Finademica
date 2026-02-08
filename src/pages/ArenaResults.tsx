@@ -17,6 +17,8 @@ export interface Drill {
 
 export interface ArenaResult {
   id: string;
+  first_name: string | null;
+  last_name: string | null;
   pressure_response: string | null;
   decision_style: string | null;
   confidence_calibration: string | null;

@@ -92,7 +92,11 @@ export default function ArenaResultsContent({ result }: { result: ArenaResult })
             <Swords className="w-4.5 h-4.5 text-destructive" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-foreground">Psychological Arena Result</h1>
+            <h1 className="text-xl font-bold text-foreground">
+              {result.first_name
+                ? `${result.first_name}'s Arena Result`
+                : "Psychological Arena Result"}
+            </h1>
             <p className="text-xs text-muted-foreground">Your behavior under pressure</p>
           </div>
         </div>
