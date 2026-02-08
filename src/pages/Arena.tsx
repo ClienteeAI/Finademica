@@ -56,14 +56,15 @@ export default function Arena() {
           </motion.div>
 
           {/* Gladiator Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
             {gladiators.map((gladiator, i) => (
-              <GladiatorCard
-                key={gladiator.id}
-                gladiator={gladiator}
-                index={i}
-                onSelect={handleSelectGladiator}
-              />
+              <div key={gladiator.id} className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)]">
+                <GladiatorCard
+                  gladiator={gladiator}
+                  index={i}
+                  onSelect={handleSelectGladiator}
+                />
+              </div>
             ))}
           </div>
         </div>
