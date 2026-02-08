@@ -10,6 +10,10 @@ import {
   Eye,
   Compass,
   FileText,
+  BarChart3,
+  Flag,
+  UserCheck,
+  ClipboardList,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -85,6 +89,38 @@ function JsonListSection({ items }: { items: unknown[] | null }) {
   );
 }
 
+function JsonObjectSection({ data, title, icon }: { data: Record<string, unknown> | null; title: string; icon: React.ElementType }) {
+  if (!data || Object.keys(data).length === 0) return null;
+  return (
+    <SectionCard>
+      <SectionTitle icon={icon}>{title}</SectionTitle>
+      {Object.entries(data).map(([key, value]) => {
+        if (value === null || value === undefined) return null;
+        const displayValue = typeof value === "object" ? JSON.stringify(value) : String(value);
+        return <StatRow key={key} label={key.replace(/_/g, " ")} value={displayValue} />;
+      })}
+    </SectionCard>
+  );
+}
+
+function RiskBadge({ label, flagged }: { label: string; flagged: boolean | null }) {
+  if (flagged === null || flagged === undefined) return null;
+  const isRisk = flagged === true;
+  return (
+    <Badge
+      variant={isRisk ? "destructive" : "default"}
+      className={cn(
+        "text-[11px] px-3 py-1.5",
+        isRisk
+          ? "border-destructive/50 bg-destructive/15 text-destructive"
+          : "border-primary/50 bg-primary/10 text-primary"
+      )}
+    >
+      {isRisk ? "⚠" : "✓"} {label}
+    </Badge>
+  );
+}
+
 /* ── Main Component ─────────────────────────────────────── */
 
 export default function ArenaFullEvaluation({ result }: { result: ArenaResult }) {
@@ -93,6 +129,11 @@ export default function ArenaFullEvaluation({ result }: { result: ArenaResult })
     delay += 0.05;
     return delay;
   };
+
+  const hasAnyRiskFlag =
+    result.flag_high_dropout_risk || result.impulsive ||
+    result.panic_exit_risk || result.high_revenge_trading_risk ||
+    result.rule_breaking_risk || result.high_dropout_risk;
 
   return (
     <div className="space-y-4">
@@ -148,6 +189,27 @@ export default function ArenaFullEvaluation({ result }: { result: ArenaResult })
               {result.rule_integrity !== null && <ScoreBar label="Rule Integrity" value={result.rule_integrity} />}
             </div>
           </SectionCard>
+        </motion.div>
+      )}
+
+      {/* User Facing Message (JSON) */}
+      {result.user_facing_message && Object.keys(result.user_facing_message).length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: nextDelay() }}>
+          <JsonObjectSection data={result.user_facing_message} title="Personalized Message" icon={UserCheck} />
+        </motion.div>
+      )}
+
+      {/* Scores Object (JSON) */}
+      {result.scores && Object.keys(result.scores).length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: nextDelay() }}>
+          <JsonObjectSection data={result.scores} title="All Scores" icon={BarChart3} />
+        </motion.div>
+      )}
+
+      {/* Flags Object (JSON) */}
+      {result.flags && Object.keys(result.flags).length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: nextDelay() }}>
+          <JsonObjectSection data={result.flags} title="All Flags" icon={Flag} />
         </motion.div>
       )}
 
@@ -279,24 +341,26 @@ export default function ArenaFullEvaluation({ result }: { result: ArenaResult })
         </motion.div>
       )}
 
-      {/* Additional Flags */}
-      {(result.flag_high_dropout_risk || result.impulsive) && (
+      {/* All Risk Flags (both flag_ prefixed and direct) */}
+      {hasAnyRiskFlag && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: nextDelay() }}>
           <SectionCard>
             <SectionTitle icon={AlertTriangle}>Additional Risk Indicators</SectionTitle>
             <div className="flex flex-wrap gap-2">
-              {result.flag_high_dropout_risk && (
-                <Badge variant="destructive" className="text-[11px] px-3 py-1.5 border-destructive/50 bg-destructive/15 text-destructive">
-                  ⚠ High Dropout Risk
-                </Badge>
-              )}
-              {result.impulsive && (
-                <Badge variant="destructive" className="text-[11px] px-3 py-1.5 border-destructive/50 bg-destructive/15 text-destructive">
-                  ⚠ Impulsive Behavior
-                </Badge>
-              )}
+              <RiskBadge label="High Dropout Risk" flagged={result.flag_high_dropout_risk ?? result.high_dropout_risk} />
+              <RiskBadge label="Impulsive Behavior" flagged={result.impulsive} />
+              <RiskBadge label="Panic Exit Risk" flagged={result.panic_exit_risk} />
+              <RiskBadge label="Revenge Trading Risk" flagged={result.high_revenge_trading_risk} />
+              <RiskBadge label="Rule Breaking Risk" flagged={result.rule_breaking_risk} />
             </div>
           </SectionCard>
+        </motion.div>
+      )}
+
+      {/* Report JSON (full raw data) */}
+      {result.report_json && Object.keys(result.report_json).length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: nextDelay() }}>
+          <JsonObjectSection data={result.report_json} title="Full Report Data" icon={ClipboardList} />
         </motion.div>
       )}
     </div>
