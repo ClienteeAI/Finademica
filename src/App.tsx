@@ -35,8 +35,8 @@ const queryClient = new QueryClient();
 
 const ConditionalAIMentor = () => {
   const location = useLocation();
-  // Hide AI Mentor on the Stock Analyzer page (has its own chat)
-  if (location.pathname === "/analyzer") return null;
+  const hiddenPaths = ["/", "/login", "/landing", "/reset-password", "/analyzer"];
+  if (hiddenPaths.includes(location.pathname)) return null;
   return <AIMentor />;
 };
 
