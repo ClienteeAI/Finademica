@@ -167,8 +167,13 @@ export default function GladiatorCallModal({
                   Ready to begin?
                 </p>
                 <p className="text-sm text-muted-foreground max-w-xs mt-1">
-                  {gladiator.name} will start the conversation. Make sure your
-                  microphone is ready.
+                  {gladiator.name} will start the conversation.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 mt-1">
+                <Mic className="w-4 h-4 text-primary flex-shrink-0" />
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">Enable your microphone</span> — the session requires audio input.
                 </p>
               </div>
             </div>

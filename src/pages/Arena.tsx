@@ -4,7 +4,7 @@ import ArenaDisclaimer from "@/components/arena/ArenaDisclaimer";
 import GladiatorCard from "@/components/arena/GladiatorCard";
 import GladiatorCallModal from "@/components/arena/GladiatorCallModal";
 import { gladiators, type Gladiator } from "@/components/arena/gladiators";
-import { Swords } from "lucide-react";
+import { Swords, Mic } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ARENA_ACCEPTED_KEY = "arena_disclaimer_accepted";
@@ -53,6 +53,22 @@ export default function Arena() {
                 </p>
               </div>
             </div>
+          </motion.div>
+
+          {/* Microphone reminder */}
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3"
+          >
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Mic className="w-4 h-4 text-primary" />
+            </div>
+            <p className="text-sm text-muted-foreground">
+              <span className="font-semibold text-foreground">Microphone required.</span>{" "}
+              Make sure your mic is enabled and your browser has permission before starting a session.
+            </p>
           </motion.div>
 
           {/* Gladiator Grid */}
