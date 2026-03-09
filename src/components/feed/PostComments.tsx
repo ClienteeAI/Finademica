@@ -197,7 +197,7 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
               .maybeSingle(),
           ]);
 
-          fetch('https://clientee.app.n8n.cloud/webhook-test/feed-commennts', {
+          fetch('https://n8n.srv1474318.hstgr.cloud/webhook/feed-commennts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
