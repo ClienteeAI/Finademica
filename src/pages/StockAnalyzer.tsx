@@ -15,7 +15,7 @@ import { useLogEvent } from "@/hooks/useLogEvent";
 import { SaveAnalysisToDiaryModal } from "@/components/SaveAnalysisToDiaryModal";
 import { shouldHideTradingCTAs } from "@/lib/featureFlags";
 
-const WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/e08c02aa-77d1-458b-9a86-d19f16b04cbb";
+const WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/live-chat-analyser";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
 
