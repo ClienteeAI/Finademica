@@ -67,7 +67,7 @@ const moduleOptions: { id: Module; label: string; icon: React.ReactNode }[] = [
   { id: "commodities", label: "Commodities", icon: <Package className="h-10 w-10" /> },
 ];
 
-const SUBMIT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/quiz/submit";
+const SUBMIT_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/quiz/submit";
 
 const Quiz = () => {
   const { user, profile } = useAuth();
