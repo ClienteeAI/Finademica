@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Send, Loader2, MessageSquare, Bot, User } from "lucide-react";
 import { sendMentorMessageSentEvent } from "@/lib/crmWebhook";
 
-const CHAT_WEBHOOK_URL = "https://clientee.app.n8n.cloud/webhook/2f5da978-0085-4212-bf66-277f85e2022f";
+const CHAT_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/AI-mentor";
 
 interface Message {
   id: string;
