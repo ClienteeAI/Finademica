@@ -174,7 +174,7 @@ export function AIMentor() {
       
       // Send to n8n webhook
       const response = await fetch(
-        "https://clientee.app.n8n.cloud/webhook/81b2df02-b127-41cf-9e40-f846b4a2bd47",
+        "https://n8n.srv1474318.hstgr.cloud/webhook/AI-mentor",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -192,7 +192,13 @@ export function AIMentor() {
         throw new Error(`Webhook error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const text = await response.text();
+      let data: unknown;
+      try {
+        data = text ? JSON.parse(text) : { message: "Response received" };
+      } catch {
+        data = { message: text || "Response received" };
+      }
       
       // Log the full webhook response for debugging
       console.log("=== MENTOR WEBHOOK RESPONSE ===");
@@ -203,12 +209,17 @@ export function AIMentor() {
       console.log("===============================");
       
       // Extract assistant reply from response
-      const assistantContent =
-        data?.reply || data?.message || data?.content || data?.text || data?.output ||
-        (Array.isArray(data) && data[0]?.message) ||
-        (Array.isArray(data) && data[0]?.content) ||
-        (Array.isArray(data) && data[0]?.text) ||
-        (typeof data === "string" ? data : "I couldn't generate a response.");
+      let assistantContent = "I couldn't generate a response.";
+      if (typeof data === "string") {
+        assistantContent = data;
+      } else if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        assistantContent =
+          (obj.reply as string) || (obj.message as string) || (obj.content as string) || 
+          (obj.text as string) || (obj.output as string) ||
+          (Array.isArray(data) && (data[0]?.message || data[0]?.content || data[0]?.text)) ||
+          JSON.stringify(data, null, 2);
+      }
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
