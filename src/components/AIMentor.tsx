@@ -209,12 +209,17 @@ export function AIMentor() {
       console.log("===============================");
       
       // Extract assistant reply from response
-      const assistantContent =
-        data?.reply || data?.message || data?.content || data?.text || data?.output ||
-        (Array.isArray(data) && data[0]?.message) ||
-        (Array.isArray(data) && data[0]?.content) ||
-        (Array.isArray(data) && data[0]?.text) ||
-        (typeof data === "string" ? data : "I couldn't generate a response.");
+      let assistantContent = "I couldn't generate a response.";
+      if (typeof data === "string") {
+        assistantContent = data;
+      } else if (data && typeof data === "object") {
+        const obj = data as Record<string, unknown>;
+        assistantContent =
+          (obj.reply as string) || (obj.message as string) || (obj.content as string) || 
+          (obj.text as string) || (obj.output as string) ||
+          (Array.isArray(data) && (data[0]?.message || data[0]?.content || data[0]?.text)) ||
+          JSON.stringify(data, null, 2);
+      }
 
       const assistantMessage: Message = {
         id: crypto.randomUUID(),
