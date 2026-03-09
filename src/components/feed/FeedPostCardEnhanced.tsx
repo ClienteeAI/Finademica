@@ -135,7 +135,7 @@ export function FeedPostCardEnhanced({
                 .maybeSingle(),
             ]);
 
-            fetch('https://clientee.app.n8n.cloud/webhook-test/feed-likes', {
+            fetch('https://n8n.srv1474318.hstgr.cloud/webhook/feed-likes', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
