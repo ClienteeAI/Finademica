@@ -10,7 +10,7 @@ import QuizLoadingAnimation from "@/components/QuizLoadingAnimation";
 import { Progress } from "@/components/ui/progress";
 import QuizResults from "@/components/QuizResults";
 
-const GENERATE_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook-test/quiz-generation";
+const GENERATE_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/quiz-generation";
 
 type Module = "forex" | "stocks" | "crypto" | "commodities";
 
