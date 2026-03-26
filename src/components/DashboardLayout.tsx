@@ -53,7 +53,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     { path: "/dashboard", label: "Dashboard" },
     { path: "/videos", label: "My Videos" },
     { path: "/feed", label: "Feed" },
-    { path: "/quiz", label: "Quiz" },
   ];
 
   // Tools dropdown items
