@@ -14,7 +14,7 @@ const mainNavItems = [
   { path: '/feed', label: 'Home', icon: Users },
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/videos', label: 'Videos', icon: Video },
-  { path: '/quiz', label: 'Quiz', icon: HelpCircle },
+  
 ];
 
 const moreItems = [
