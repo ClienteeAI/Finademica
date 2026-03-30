@@ -51,7 +51,7 @@ const mainNavItems = [
   { path: '/feed', label: 'Home', icon: Users },
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/videos', label: 'My Videos', icon: Video },
-  { path: '/quiz', label: 'Quiz', icon: HelpCircle },
+  
   { path: '/arena', label: 'Arena', icon: Swords },
 ];
 
