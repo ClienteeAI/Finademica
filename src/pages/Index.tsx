@@ -101,14 +101,14 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
-      <HeroSection onGetStarted={() => setSignupOpen(true)} />
+      <HeroSection onGetStarted={() => { setSignupOpen(true); setSignupInProgress(true); }} />
       <BenefitsSection />
       <HowItWorks />
-      <CTASection onGetStarted={() => setSignupOpen(true)} />
+      <CTASection onGetStarted={() => { setSignupOpen(true); setSignupInProgress(true); }} />
       
       <SignupFormInitial 
         open={signupOpen} 
-        onOpenChange={setSignupOpen}
+        onOpenChange={(open) => { setSignupOpen(open); if (!open) setSignupInProgress(false); }}
         onSignupComplete={handleSignupComplete}
       />
       
