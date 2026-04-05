@@ -10,6 +10,21 @@ import SignupFormInitial, { SignupUserData } from "@/components/SignupFormInitia
 import OnboardingQuiz from "@/components/OnboardingQuiz";
 import MetaPixel from "@/components/MetaPixel";
 
+const getPendingSignupData = (): SignupUserData | null => {
+  const storedData = localStorage.getItem("pendingSignupData");
+
+  if (!storedData) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedData) as SignupUserData;
+  } catch {
+    localStorage.removeItem("pendingSignupData");
+    return null;
+  }
+};
+
 const Index = () => {
   const { client } = useClient();
   const { user } = useAuth();
@@ -22,13 +37,21 @@ const Index = () => {
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const signupParam = urlParams.get('signup');
-    
-    if (signupParam === '1') {
+    const signupParam = urlParams.get("signup");
+    const pendingSignupData = getPendingSignupData();
+
+    if (signupParam === "1") {
       setSignupOnly(true);
-      setSignupOpen(true);
     } else if (client?.skip_landing_page) {
       setSignupOnly(true);
+    }
+
+    if (pendingSignupData) {
+      setUserData(pendingSignupData);
+      setShowQuiz(true);
+      setSignupOpen(false);
+      setSignupInProgress(true);
+    } else if (signupParam === "1" || client?.skip_landing_page) {
       setSignupOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -38,18 +61,21 @@ const Index = () => {
     setUserData(data);
     setSignupOpen(false);
     setShowQuiz(true);
-    setSignupInProgress(false);
+    setSignupInProgress(true);
   };
 
   const handleQuizComplete = () => {
     setShowQuiz(false);
     localStorage.removeItem('pendingSignupData');
+    setSignupInProgress(false);
     navigate('/dashboard');
   };
 
   // If user is already logged in and not in signup/quiz flow, redirect
   useEffect(() => {
-    if (user && !showQuiz && !signupOpen && !signupInProgress) {
+    const hasPendingSignupData = !!localStorage.getItem("pendingSignupData");
+
+    if (user && !showQuiz && !signupOpen && !signupInProgress && !hasPendingSignupData) {
       navigate('/dashboard');
     }
   }, [user, showQuiz, signupOpen, signupInProgress, navigate]);
@@ -108,7 +134,13 @@ const Index = () => {
       
       <SignupFormInitial 
         open={signupOpen} 
-        onOpenChange={(open) => { setSignupOpen(open); if (!open && !showQuiz) setSignupInProgress(false); }}
+        onOpenChange={(open) => {
+          setSignupOpen(open);
+
+          if (!open && !showQuiz && !localStorage.getItem("pendingSignupData")) {
+            setSignupInProgress(false);
+          }
+        }}
         onSignupComplete={handleSignupComplete}
       />
       
