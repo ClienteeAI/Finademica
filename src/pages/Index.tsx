@@ -17,6 +17,7 @@ const Index = () => {
   const [signupOnly, setSignupOnly] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [signupInProgress, setSignupInProgress] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
   useEffect(() => {
