@@ -108,7 +108,7 @@ const Index = () => {
       
       <SignupFormInitial 
         open={signupOpen} 
-        onOpenChange={(open) => { setSignupOpen(open); if (!open) setSignupInProgress(false); }}
+        onOpenChange={(open) => { setSignupOpen(open); if (!open && !showQuiz) setSignupInProgress(false); }}
         onSignupComplete={handleSignupComplete}
       />
       
