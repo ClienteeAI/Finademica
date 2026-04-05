@@ -5,22 +5,21 @@ import BenefitsSection from "@/components/BenefitsSection";
 import HowItWorks from "@/components/HowItWorks";
 import CTASection from "@/components/CTASection";
 import SignupFormInitial, { SignupUserData } from "@/components/SignupFormInitial";
-import MandatoryQuizModal from "@/components/MandatoryQuizModal";
 import MetaPixel from "@/components/MetaPixel";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Mail } from "lucide-react";
 
 const Index = () => {
   const { client } = useClient();
   const [signupOnly, setSignupOnly] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
-  const [quizOpen, setQuizOpen] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
-  // Check if we should show signup-only mode (no landing page) - only run ONCE on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const signupParam = urlParams.get('signup');
     
-    // Show signup if ?signup=1 param OR client is configured to skip landing page
     if (signupParam === '1') {
       setSignupOnly(true);
       setSignupOpen(true);
@@ -29,24 +28,48 @@ const Index = () => {
       setSignupOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client?.skip_landing_page]); // Only depend on client config, not quizOpen
+  }, [client?.skip_landing_page]);
 
   const handleSignupComplete = (data: SignupUserData) => {
     setUserData(data);
     setSignupOpen(false);
-    // Quiz is currently disabled — send users straight to email confirmation / dashboard
-    // setQuizOpen(true);
-    // Show email confirmation message or redirect
-    setQuizOpen(true); // Still open quiz modal but it will handle the "no session" case and show email confirmation
+    setShowEmailConfirmation(true);
   };
 
-  // If signup-only mode, render just the signup form with premium dark styling
+  const EmailConfirmationModal = () => (
+    <Dialog open={showEmailConfirmation} onOpenChange={() => {}}>
+      <DialogContent className="max-w-md bg-[#1a1f2e] border-[#2a3142] text-white [&>button]:hidden">
+        <div className="flex flex-col items-center text-center py-6 space-y-4">
+          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
+            <Mail className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold">Check Your Email</h2>
+          <p className="text-[#94a3b8]">
+            We've sent a confirmation link to{" "}
+            <span className="text-white font-semibold">{userData?.email}</span>
+          </p>
+          <p className="text-[#94a3b8] text-sm">
+            Click the link in the email to activate your account and start learning.
+            Check your spam folder if you don't see it.
+          </p>
+          <div className="bg-[#0f1419] rounded-lg p-4 w-full mt-4">
+            <p className="text-xs text-[#94a3b8]">
+              Already confirmed?{" "}
+              <a href="/login" className="text-primary hover:underline font-semibold">
+                Sign in here
+              </a>
+            </p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+
   if (signupOnly) {
     return (
       <>
         <MetaPixel />
         <main className="min-h-screen bg-[#0f1419] flex items-center justify-center p-4 relative overflow-hidden">
-          {/* Background blur effects - matching login page */}
           <div className="fixed inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
             <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl" />
@@ -55,11 +78,9 @@ const Index = () => {
           <SignupFormInitial 
             open={signupOpen} 
             onOpenChange={(open) => {
-              // Don't allow closing when in signup-only mode *unless* we are transitioning to the quiz.
-              // (Fixes the issue where the quiz opens behind the signup modal overlay.)
               if (!open) {
                 const hasPendingSignupData = !!localStorage.getItem('pendingSignupData');
-                if (!quizOpen && !hasPendingSignupData) {
+                if (!showEmailConfirmation && !hasPendingSignupData) {
                   setSignupOpen(true);
                   return;
                 }
@@ -68,16 +89,12 @@ const Index = () => {
             }} 
             onSignupComplete={handleSignupComplete}
           />
-          <MandatoryQuizModal 
-            open={quizOpen} 
-            userData={userData}
-          />
+          <EmailConfirmationModal />
         </main>
       </>
     );
   }
 
-  // Normal landing page mode
   return (
     <main className="min-h-screen bg-background">
       <HeroSection onGetStarted={() => setSignupOpen(true)} />
@@ -85,18 +102,13 @@ const Index = () => {
       <HowItWorks />
       <CTASection onGetStarted={() => setSignupOpen(true)} />
       
-      {/* Signup Form Modal */}
       <SignupFormInitial 
         open={signupOpen} 
         onOpenChange={setSignupOpen}
         onSignupComplete={handleSignupComplete}
       />
       
-      {/* Quiz Modal (after signup) */}
-      <MandatoryQuizModal 
-        open={quizOpen} 
-        userData={userData}
-      />
+      <EmailConfirmationModal />
     </main>
   );
 };
