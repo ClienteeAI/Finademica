@@ -38,21 +38,21 @@ const Index = () => {
     setUserData(data);
     setSignupOpen(false);
     setShowQuiz(true);
+    setSignupInProgress(false);
   };
 
   const handleQuizComplete = () => {
     setShowQuiz(false);
     localStorage.removeItem('pendingSignupData');
-    // User is auto-confirmed and logged in, redirect to dashboard
     navigate('/dashboard');
   };
 
-  // If user is already logged in and quiz isn't showing, redirect
+  // If user is already logged in and not in signup/quiz flow, redirect
   useEffect(() => {
-    if (user && !showQuiz && !signupOpen) {
+    if (user && !showQuiz && !signupOpen && !signupInProgress) {
       navigate('/dashboard');
     }
-  }, [user, showQuiz, signupOpen, navigate]);
+  }, [user, showQuiz, signupOpen, signupInProgress, navigate]);
 
   if (signupOnly) {
     return (
