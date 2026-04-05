@@ -17,6 +17,7 @@ const Index = () => {
   const [signupOnly, setSignupOnly] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
+  const [signupInProgress, setSignupInProgress] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
   useEffect(() => {
@@ -37,21 +38,21 @@ const Index = () => {
     setUserData(data);
     setSignupOpen(false);
     setShowQuiz(true);
+    setSignupInProgress(false);
   };
 
   const handleQuizComplete = () => {
     setShowQuiz(false);
     localStorage.removeItem('pendingSignupData');
-    // User is auto-confirmed and logged in, redirect to dashboard
     navigate('/dashboard');
   };
 
-  // If user is already logged in and quiz isn't showing, redirect
+  // If user is already logged in and not in signup/quiz flow, redirect
   useEffect(() => {
-    if (user && !showQuiz && !signupOpen) {
+    if (user && !showQuiz && !signupOpen && !signupInProgress) {
       navigate('/dashboard');
     }
-  }, [user, showQuiz, signupOpen, navigate]);
+  }, [user, showQuiz, signupOpen, signupInProgress, navigate]);
 
   if (signupOnly) {
     return (
@@ -100,14 +101,14 @@ const Index = () => {
 
   return (
     <main className="min-h-screen bg-background">
-      <HeroSection onGetStarted={() => setSignupOpen(true)} />
+      <HeroSection onGetStarted={() => { setSignupOpen(true); setSignupInProgress(true); }} />
       <BenefitsSection />
       <HowItWorks />
-      <CTASection onGetStarted={() => setSignupOpen(true)} />
+      <CTASection onGetStarted={() => { setSignupOpen(true); setSignupInProgress(true); }} />
       
       <SignupFormInitial 
         open={signupOpen} 
-        onOpenChange={setSignupOpen}
+        onOpenChange={(open) => { setSignupOpen(open); if (!open && !showQuiz) setSignupInProgress(false); }}
         onSignupComplete={handleSignupComplete}
       />
       
