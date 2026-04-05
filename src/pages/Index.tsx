@@ -33,8 +33,11 @@ const Index = () => {
 
   const handleSignupComplete = (data: SignupUserData) => {
     setUserData(data);
-    setSignupOpen(false); // Close signup form first
-    setQuizOpen(true);    // Then open quiz
+    setSignupOpen(false);
+    // Quiz is currently disabled — send users straight to email confirmation / dashboard
+    // setQuizOpen(true);
+    // Show email confirmation message or redirect
+    setQuizOpen(true); // Still open quiz modal but it will handle the "no session" case and show email confirmation
   };
 
   // If signup-only mode, render just the signup form with premium dark styling
