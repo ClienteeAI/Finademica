@@ -1,19 +1,22 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useClient } from "@/lib/clientContext";
+import { useAuth } from "@/lib/AuthContext";
 import HeroSection from "@/components/HeroSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import HowItWorks from "@/components/HowItWorks";
 import CTASection from "@/components/CTASection";
 import SignupFormInitial, { SignupUserData } from "@/components/SignupFormInitial";
+import OnboardingQuiz from "@/components/OnboardingQuiz";
 import MetaPixel from "@/components/MetaPixel";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Mail } from "lucide-react";
 
 const Index = () => {
   const { client } = useClient();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [signupOnly, setSignupOnly] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
-  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
+  const [showQuiz, setShowQuiz] = useState(false);
   const [userData, setUserData] = useState<SignupUserData | null>(null);
 
   useEffect(() => {
@@ -33,37 +36,22 @@ const Index = () => {
   const handleSignupComplete = (data: SignupUserData) => {
     setUserData(data);
     setSignupOpen(false);
-    setShowEmailConfirmation(true);
+    setShowQuiz(true);
   };
 
-  const EmailConfirmationModal = () => (
-    <Dialog open={showEmailConfirmation} onOpenChange={() => {}}>
-      <DialogContent className="max-w-md bg-[#1a1f2e] border-[#2a3142] text-white [&>button]:hidden">
-        <div className="flex flex-col items-center text-center py-6 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-            <Mail className="w-8 h-8 text-primary" />
-          </div>
-          <h2 className="text-2xl font-bold">Check Your Email</h2>
-          <p className="text-[#94a3b8]">
-            We've sent a confirmation link to{" "}
-            <span className="text-white font-semibold">{userData?.email}</span>
-          </p>
-          <p className="text-[#94a3b8] text-sm">
-            Click the link in the email to activate your account and start learning.
-            Check your spam folder if you don't see it.
-          </p>
-          <div className="bg-[#0f1419] rounded-lg p-4 w-full mt-4">
-            <p className="text-xs text-[#94a3b8]">
-              Already confirmed?{" "}
-              <a href="/login" className="text-primary hover:underline font-semibold">
-                Sign in here
-              </a>
-            </p>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
+  const handleQuizComplete = () => {
+    setShowQuiz(false);
+    localStorage.removeItem('pendingSignupData');
+    // User is auto-confirmed and logged in, redirect to dashboard
+    navigate('/dashboard');
+  };
+
+  // If user is already logged in and quiz isn't showing, redirect
+  useEffect(() => {
+    if (user && !showQuiz && !signupOpen) {
+      navigate('/dashboard');
+    }
+  }, [user, showQuiz, signupOpen, navigate]);
 
   if (signupOnly) {
     return (
@@ -80,7 +68,7 @@ const Index = () => {
             onOpenChange={(open) => {
               if (!open) {
                 const hasPendingSignupData = !!localStorage.getItem('pendingSignupData');
-                if (!showEmailConfirmation && !hasPendingSignupData) {
+                if (!showQuiz && !hasPendingSignupData) {
                   setSignupOpen(true);
                   return;
                 }
@@ -89,7 +77,22 @@ const Index = () => {
             }} 
             onSignupComplete={handleSignupComplete}
           />
-          <EmailConfirmationModal />
+          <OnboardingQuiz
+            open={showQuiz}
+            onOpenChange={() => {}}
+            onComplete={handleQuizComplete}
+            userData={userData ? {
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              email: userData.email,
+              phone: userData.phone,
+            } : null}
+            clientData={client ? {
+              id: client.id,
+              subdomain: client.subdomain,
+              company_name: client.company_name,
+            } : null}
+          />
         </main>
       </>
     );
@@ -108,7 +111,22 @@ const Index = () => {
         onSignupComplete={handleSignupComplete}
       />
       
-      <EmailConfirmationModal />
+      <OnboardingQuiz
+        open={showQuiz}
+        onOpenChange={() => {}}
+        onComplete={handleQuizComplete}
+        userData={userData ? {
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          phone: userData.phone,
+        } : null}
+        clientData={client ? {
+          id: client.id,
+          subdomain: client.subdomain,
+          company_name: client.company_name,
+        } : null}
+      />
     </main>
   );
 };
