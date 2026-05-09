@@ -328,8 +328,27 @@ export function ClientProvider({ children }: ClientProviderProps) {
         applyClientTheme(firstClient as Client, getCurrentThemeMode());
         localStorage.setItem('client_id', firstClient.id);
       }
-    } else {
-      // Regular user - detect client from query param > custom_domain > subdomain > fallback
+    // PRIORITY 0: Hardcoded Brand ID for white-label deployments
+    const defaultClientId = import.meta.env.VITE_DEFAULT_CLIENT_ID;
+    if (defaultClientId && !isAdmin) {
+      const { data: defaultClient } = await supabase
+        .from('clients')
+        .select('*')
+        .eq('id', defaultClientId)
+        .eq('active', true)
+        .maybeSingle();
+
+      if (defaultClient) {
+        console.log('[ClientProvider] Using hardcoded white-label client:', defaultClient.subdomain);
+        setClient(defaultClient as Client);
+        applyClientTheme(defaultClient as Client, getCurrentThemeMode());
+        localStorage.setItem('client_id', defaultClient.id);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // Regular user - detect client from query param > custom_domain > subdomain > fallback
       const urlParams = new URLSearchParams(window.location.search);
       const clientParam = urlParams.get('client');
       const hostname = window.location.hostname;
