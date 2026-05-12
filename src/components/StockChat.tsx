@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Send, Loader2, MessageSquare, Bot, User } from "lucide-react";
 import { sendMentorMessageSentEvent } from "@/lib/crmWebhook";
 
-const CHAT_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/stock-analyser-chat";
+const CHAT_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/stock-analyser-chat-finademica";
 
 interface Message {
   id: string;
@@ -115,7 +115,7 @@ const StockChat = ({ symbol }: StockChatProps) => {
     <div className="flex flex-col h-full">
       {/* Chat Header */}
       <div className="flex items-center gap-3 pb-4 border-b border-[#D4E0EC]">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_15px_rgba(77,226,232,0.3)]">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center shadow-[0_0_15px_rgba(99, 102, 241,0.3)]">
           <MessageSquare className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -130,8 +130,8 @@ const StockChat = ({ symbol }: StockChatProps) => {
       <div className="flex-1 overflow-y-auto py-4 space-y-4 min-h-[300px] max-h-[400px]">
         {messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-3 py-8">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#4DE2E8]/10 to-[#A7E9FF]/10 flex items-center justify-center border border-[#D4E0EC]">
-              <Bot className="w-7 h-7 text-[#4DE2E8]" />
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#6366F1]/10 to-[#A7E9FF]/10 flex items-center justify-center border border-[#D4E0EC]">
+              <Bot className="w-7 h-7 text-[#6366F1]" />
             </div>
             <div>
               <p className="font-medium text-[#1D3557]">Start a conversation</p>
@@ -147,14 +147,14 @@ const StockChat = ({ symbol }: StockChatProps) => {
               className={`flex gap-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               {message.role === "assistant" && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center flex-shrink-0">
                   <Bot className="w-4 h-4 text-white" />
                 </div>
               )}
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                   message.role === "user"
-                    ? "bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6] text-white"
+                    ? "bg-gradient-to-r from-[#6366F1] to-[#4F46E5] text-white"
                     : "bg-white/60 backdrop-blur-sm border border-[#D4E0EC] text-[#4B5563]"
                 }`}
               >
@@ -170,12 +170,12 @@ const StockChat = ({ symbol }: StockChatProps) => {
         )}
         {isLoading && (
           <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center flex-shrink-0">
               <Bot className="w-4 h-4 text-white" />
             </div>
             <div className="bg-white/60 backdrop-blur-sm border border-[#D4E0EC] rounded-2xl px-4 py-3">
               <div className="flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-[#4DE2E8]" />
+                <Loader2 className="w-4 h-4 animate-spin text-[#6366F1]" />
                 <span className="text-sm text-[#6B7280]">Thinking...</span>
               </div>
             </div>
@@ -193,13 +193,13 @@ const StockChat = ({ symbol }: StockChatProps) => {
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
             placeholder={`Ask about ${symbol || "trading"}...`}
             disabled={isLoading}
-            className="flex-1 bg-white/60 border-[#D4E0EC] focus:border-[#4DE2E8]"
+            className="flex-1 bg-white/60 border-[#D4E0EC] focus:border-[#6366F1]"
           />
           <Button
             onClick={sendMessage}
             disabled={isLoading || !input.trim()}
             size="icon"
-            className="bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6] hover:opacity-90"
+            className="bg-gradient-to-r from-[#6366F1] to-[#4F46E5] hover:opacity-90"
           >
             <Send className="w-4 h-4" />
           </Button>

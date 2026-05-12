@@ -4,7 +4,7 @@ export const FEED_CONFIG = {
   MAX_BIO_LENGTH: 120,
   NICKNAME_MIN_LENGTH: 3,
   NICKNAME_MAX_LENGTH: 20,
-  WEBHOOK_URL: 'https://n8n.srv1474318.hstgr.cloud/webhook/progres-feed',
+  WEBHOOK_URL: 'https://n8n.srv1474318.hstgr.cloud/webhook/progres-feed-finademica',
   POSTS_PER_PAGE: 50,
 } as const;
 

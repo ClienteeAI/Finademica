@@ -118,21 +118,32 @@ export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) 
         return;
       }
 
-      // Award points for creating a post
+      // Count total posts to check for video reward
+      const { count: postCount } = await supabase
+        .from('feed_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userData.id);
+
+      const currentPostCount = (postCount || 0) + 1; // +1 for the current post
+      const shouldAwardVideo = currentPostCount % 5 === 0;
+
+      // Award points and potentially a video
       try {
         await supabase.rpc('increment_user_stats', {
           p_user_id: userData.id,
           p_points: 3,
-          p_videos: 0,
+          p_videos: shouldAwardVideo ? 1 : 0,
         });
       } catch (pointsError) {
         console.error('Error awarding points:', pointsError);
       }
 
-      // Show success toast
+      // Show success toast with reward info
       toast({
-        title: 'Posted! +3 points',
-        description: 'Your post has been submitted for review.',
+        title: shouldAwardVideo ? '🎉 VIDEO UNLOCKED!' : 'Posted! +3 points',
+        description: shouldAwardVideo 
+          ? `Congratulations! This was your ${currentPostCount}th post. You've earned a free video!`
+          : `Your post has been submitted. Post ${5 - (currentPostCount % 5)} more times to unlock a free video!`,
       });
 
       // Fire-and-forget webhook
@@ -149,13 +160,14 @@ export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) 
         source: 'lovable_feed',
       };
 
-      // Non-blocking webhook call
-      fetch(FEED_CONFIG.WEBHOOK_URL, {
+      // Webhook call
+      console.log('[Webhook] Sending Post to:', FEED_CONFIG.WEBHOOK_URL);
+      await fetch(FEED_CONFIG.WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(webhookPayload),
-      }).catch(() => {
-        // Silently ignore webhook errors
+      }).catch((e) => {
+        console.error('[Webhook] Post failed:', e);
       });
 
       // Clear and reset textarea height
@@ -232,9 +244,17 @@ export function FeedComposer({ onPostCreated, composerRef }: FeedComposerProps) 
         
         {/* Footer - simplified on mobile */}
         <div className="flex items-center justify-between gap-3 pt-2 border-t border-border/50">
-          <span className="text-[11px] md:text-xs text-muted-foreground tabular-nums">
-            {content.length}/{FEED_CONFIG.MAX_POST_LENGTH}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-[11px] md:text-xs text-muted-foreground tabular-nums">
+              {content.length}/{FEED_CONFIG.MAX_POST_LENGTH}
+            </span>
+            <div className="flex items-center gap-1 mt-0.5">
+              <Sparkles className="h-3 w-3 text-premium-gold" />
+              <span className="text-[10px] text-premium-gold/80 font-medium">
+                Post 5 times for a FREE video
+              </span>
+            </div>
+          </div>
           
           <Button
             onClick={handleSubmit}

@@ -9,7 +9,9 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useLogEvent } from "@/hooks/useLogEvent";
+import { useClient } from "@/lib/clientContext";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DiaryEntry {
   id: string;
@@ -32,7 +34,6 @@ interface EditTradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   trade: DiaryEntry | null;
-  isNasrTheme: boolean;
   onSuccess: () => void;
 }
 
@@ -40,9 +41,10 @@ export const EditTradeModal = ({
   open,
   onOpenChange,
   trade,
-  isNasrTheme,
   onSuccess,
 }: EditTradeModalProps) => {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'nasr' || client?.subdomain === 'finademica' || true;
   const { toast } = useToast();
   const navigate = useNavigate();
   const { logEvent } = useLogEvent();
@@ -71,13 +73,13 @@ export const EditTradeModal = ({
   }, [trade]);
 
   const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
-    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
-    inputBg: isNasrTheme ? 'bg-nasr-panel/60' : 'bg-white/60',
-    inputBorder: isNasrTheme ? 'border-gold/20 focus:border-gold/50' : 'border-ice focus:border-aqua/50',
-    toggleActive: isNasrTheme ? 'bg-gold text-nasr-bg' : 'bg-aqua text-white',
-    toggleInactive: isNasrTheme ? 'bg-nasr-bg/60 text-nasr-text-muted' : 'bg-muted/60 text-ocean-muted',
+    heading: isPremiumTheme ? 'text-premium-gold font-serif' : 'text-ocean',
+    subtext: isPremiumTheme ? 'text-premium-text-muted' : 'text-ocean-muted',
+    primary: isPremiumTheme ? 'text-premium-gold' : 'text-aqua',
+    inputBg: isPremiumTheme ? 'bg-premium-panel/60' : 'bg-white/60',
+    inputBorder: isPremiumTheme ? 'border-premium-gold/20 focus:border-premium-gold/50' : 'border-ice focus:border-aqua/50',
+    toggleActive: isPremiumTheme ? 'bg-premium-gold text-premium-bg' : 'bg-aqua text-white',
+    toggleInactive: isPremiumTheme ? 'bg-premium-bg/60 text-premium-text-muted' : 'bg-muted/60 text-ocean-muted',
   };
 
   const handleSubmit = async () => {
@@ -99,11 +101,39 @@ export const EditTradeModal = ({
         return;
       }
 
+      // 1. Update directly in Supabase
+      const { error: dbError } = await supabase
+        .from('trading_diary')
+        .update({
+          Symbol: symbol.toUpperCase(),
+          direction: side,
+          Status: status,
+          entry_price: parseFloat(entryPrice) || null,
+          Stop_loss: parseFloat(stopLossPrice) || null,
+          Take_profit: takeProfitPrice ? parseFloat(takeProfitPrice) : null,
+          Volume: lotsFinal ? parseFloat(lotsFinal) : null,
+          notes: notes || null,
+        })
+        .eq('id', trade.id);
+
+      if (dbError) {
+        console.error("Database update error:", dbError);
+        toast({
+          title: "Error",
+          description: `Database error: ${dbError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 2. Send to Webhook for CRM
       const tradeData = {
         auth_user_id: authUser.auth_user_id,
+        supabase_id: authUser.supabase_id,
         email: authUser.user_email,
+        phone: authUser.user_phone,
         trade_id: trade.id,
-        broker_key: "nasr_trade_mt5",
+        broker_key: "finademica_mt5",
         symbol: symbol.toUpperCase(),
         side,
         status,
@@ -119,16 +149,7 @@ export const EditTradeModal = ({
         notes: notes || null,
       };
 
-      const result = await sendDiaryWebhook("update", tradeData);
-
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: "Failed to update trade. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
+      await sendDiaryWebhook("update", tradeData);
 
       toast({
         title: "Trade updated",
@@ -158,8 +179,8 @@ export const EditTradeModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn(
         "max-w-md backdrop-blur-xl border",
-        isNasrTheme 
-          ? 'bg-nasr-panel/95 border-gold/20' 
+        isPremiumTheme 
+          ? 'bg-premium-panel/95 border-premium-gold/20' 
           : 'bg-white/95 border-ice'
       )}>
         <DialogHeader>
@@ -184,7 +205,7 @@ export const EditTradeModal = ({
             <Label className={themeColors.subtext}>Side</Label>
             <div className={cn(
               "flex gap-1 p-1 rounded-xl",
-              isNasrTheme ? 'bg-nasr-bg/60' : 'bg-muted/60'
+              isPremiumTheme ? 'bg-premium-bg/60' : 'bg-muted/60'
             )}>
               <button
                 type="button"
@@ -214,7 +235,7 @@ export const EditTradeModal = ({
             <Label className={themeColors.subtext}>Status</Label>
             <div className={cn(
               "flex gap-1 p-1 rounded-xl",
-              isNasrTheme ? 'bg-nasr-bg/60' : 'bg-muted/60'
+              isPremiumTheme ? 'bg-premium-bg/60' : 'bg-muted/60'
             )}>
               <button
                 type="button"
@@ -317,8 +338,8 @@ export const EditTradeModal = ({
             disabled={isSubmitting}
             className={cn(
               "w-full h-12 text-base font-semibold rounded-xl transition-all",
-              isNasrTheme 
-                ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
+              isPremiumTheme 
+                ? 'bg-premium-gold text-premium-bg hover:opacity-90 premium-gold-glow' 
                 : 'success-gradient text-white hover:opacity-90 success-glow'
             )}
           >

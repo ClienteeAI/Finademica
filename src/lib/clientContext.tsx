@@ -107,6 +107,17 @@ function applyClientTheme(client: Client, mode: 'light' | 'dark' = 'dark') {
     Object.entries(vars).forEach(([key, value]) => {
       root.style.setProperty(`--${key}`, String(value));
     });
+
+    // CRITICAL FIX: Ensure sidebar variables are set even if not in DB
+    // If background is dark, sidebar must be dark
+    if (mode === 'dark' || mode === 'theme-nasr') {
+      const bg = String(vars.background || '229 84% 5%');
+      root.style.setProperty('--sidebar', bg);
+      root.style.setProperty('--sidebar-foreground', '210 40% 98%');
+      root.style.setProperty('--sidebar-border', '217 33% 17%');
+      root.style.setProperty('--sidebar-primary', String(vars.primary || '239 84% 67%'));
+      root.style.setProperty('--sidebar-ring', String(vars.primary || '239 84% 67%'));
+    }
   }
 
   // Apply font variables
@@ -148,7 +159,8 @@ function applyClientTheme(client: Client, mode: 'light' | 'dark' = 'dark') {
   
   // Apply appropriate background gradient based on mode
   if (mode === 'dark') {
-    document.body.style.background = 'linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%)';
+    const bgColor = client.secondary_color || '#020617';
+    document.body.style.background = `linear-gradient(145deg, ${bgColor} 0%, #000000 50%, #0B0F16 100%)`;
   } else {
     document.body.style.background = 'linear-gradient(145deg, #F6F9FB 0%, #EDF2F7 50%, #F6F9FB 100%)';
   }
@@ -198,66 +210,39 @@ function hexToHSL(hex: string): string {
 
 export function ClientProvider({ children }: ClientProviderProps) {
   const [client, setClient] = useState<Client | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [allClients, setAllClients] = useState<any[]>([]);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Watch for dark mode changes from next-themes and reapply theme
-  // Use a flag to prevent infinite loops when applyClientTheme modifies classes
   useEffect(() => {
     if (!client) return;
-
     let isApplyingTheme = false;
-
     const observer = new MutationObserver((mutations) => {
-      // Skip if we're currently applying theme (prevents infinite loop)
       if (isApplyingTheme) return;
-      
       mutations.forEach((mutation) => {
         if (mutation.attributeName === 'class') {
-          // Check if the change is a dark mode toggle (not our own theme class changes)
           const target = mutation.target as HTMLElement;
           const hasDarkClass = target.classList.contains('dark');
           const previouslyHadDark = (mutation.oldValue || '').includes('dark');
-          
-          // Only reapply if dark mode actually changed
           if (hasDarkClass !== previouslyHadDark) {
             isApplyingTheme = true;
-            const newMode = hasDarkClass ? 'dark' : 'light';
-            applyClientTheme(client, newMode);
-            // Reset flag after a microtask to allow DOM to settle
-            queueMicrotask(() => {
-              isApplyingTheme = false;
-            });
+            applyClientTheme(client, hasDarkClass ? 'dark' : 'light');
+            queueMicrotask(() => { isApplyingTheme = false; });
           }
         }
       });
     });
-
-    observer.observe(document.documentElement, { 
-      attributes: true, 
-      attributeOldValue: true,
-      attributeFilter: ['class']
-    });
-
+    observer.observe(document.documentElement, { attributes: true, attributeOldValue: true, attributeFilter: ['class'] });
     return () => observer.disconnect();
   }, [client]);
 
   useEffect(() => {
     let cancelled = false;
-
     const run = async () => {
-      if (cancelled) return;
-      await initializeClient();
+      if (!cancelled) await initializeClient();
     };
-
     run();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      run();
-    });
-
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => { run(); });
     return () => {
       cancelled = true;
       subscription.unsubscribe();
@@ -266,80 +251,64 @@ export function ClientProvider({ children }: ClientProviderProps) {
 
   async function initializeClient() {
     setLoading(true);
+    const hostname = window.location.hostname;
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientParam = urlParams.get('client');
 
-    // Check if user is Super Admin via secure Supabase RPC
     let isAdmin = false;
-
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        const { data, error } = await supabase.rpc('is_super_admin', {
-          p_auth_user_id: session.user.id,
-        });
-
-        if (!error && data === true) {
-          isAdmin = true;
-        }
+        const { data, error } = await supabase.rpc('is_super_admin', { p_auth_user_id: session.user.id });
+        if (!error && data === true) isAdmin = true;
       }
-    } catch (err) {
-      console.error('Error checking super admin status:', err);
-    }
-
+    } catch (err) { console.error('Error checking super admin status:', err); }
     setIsAdminMode(isAdmin);
 
-    if (isAdmin) {
-      // Load ALL clients for admin
-      const { data } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('active', true)
-        .order('company_name');
+    const { data: allClientsData } = await supabase.from('clients').select('*').eq('active', true).order('company_name');
+    const clients = allClientsData || [];
+    setAllClients(clients);
+
+    // EMERGENCY FALLBACK: Hardcoded Finademica branding if DB is locked by RLS
+    const finademicaFallback: Client = {
+      id: "a6151fd9-1513-4ae0-b960-25454f3a9bf2",
+      company_name: "Finademica",
+      subdomain: "finademica",
+      primary_color: "#6366F1",
+      secondary_color: "#020617",
+      company_tagline: "The Architecture of Mastery.",
+      theme_config: {
+        dark: {
+          primary: "239 84% 67%",
+          background: "229 84% 5%",
+          surface: "222 47% 11%",
+          foreground: "210 40% 98%",
+          "primary-foreground": "0 0% 100%",
+          sidebar: "229 84% 5%",
+          "sidebar-foreground": "210 40% 98%",
+          "sidebar-border": "217 33% 17%",
+          "sidebar-primary": "239 84% 67%"
+        },
+        fonts: {
+          serif: "Bodoni Moda, Georgia, serif",
+          sans: "Jost, Helvetica Neue, sans-serif",
+          mono: "JetBrains Mono, monospace"
+        },
+        radius: 0.5
+      }
+    };
+
+    const defaultClientId = import.meta.env.VITE_DEFAULT_CLIENT_ID || finademicaFallback.id;
+    if (defaultClientId) {
+      let defaultClient = clients.find(c => c.id === defaultClientId);
       
-      setAllClients(data || []);
-
-      // PRIORITY 1: Match by custom_domain (so admin sees correct client on white-label domains)
-      const hostname = window.location.hostname;
-      const domainMatchedClient = data?.find(c => c.custom_domain === hostname);
-      if (domainMatchedClient) {
-        setClient(domainMatchedClient as Client);
-        applyClientTheme(domainMatchedClient as Client, getCurrentThemeMode());
-        localStorage.setItem('client_id', domainMatchedClient.id);
-        setLoading(false);
-        return;
+      // If DB returned nothing, use our fallback
+      if (!defaultClient && defaultClientId === finademicaFallback.id) {
+        console.log('[ClientProvider] DB locked. Using Emergency Fallback for Finademica.');
+        defaultClient = finademicaFallback;
       }
-
-      // PRIORITY 2: Check if client override in localStorage (for Lovable/admin domain)
-      const savedClient = localStorage.getItem('admin_selected_client');
-      if (savedClient) {
-        const selectedClient = data?.find(c => c.subdomain === savedClient);
-        if (selectedClient) {
-          setClient(selectedClient as Client);
-          applyClientTheme(selectedClient as Client, getCurrentThemeMode());
-          localStorage.setItem('client_id', selectedClient.id);
-          setLoading(false);
-          return;
-        }
-      }
-
-      // PRIORITY 3: Default to first client
-      const firstClient = data?.[0];
-      if (firstClient) {
-        setClient(firstClient as Client);
-        applyClientTheme(firstClient as Client, getCurrentThemeMode());
-        localStorage.setItem('client_id', firstClient.id);
-      }
-    // PRIORITY 0: Hardcoded Brand ID for white-label deployments
-    const defaultClientId = import.meta.env.VITE_DEFAULT_CLIENT_ID;
-    if (defaultClientId && !isAdmin) {
-      const { data: defaultClient } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('id', defaultClientId)
-        .eq('active', true)
-        .maybeSingle();
 
       if (defaultClient) {
-        console.log('[ClientProvider] Using hardcoded white-label client:', defaultClient.subdomain);
         setClient(defaultClient as Client);
         applyClientTheme(defaultClient as Client, getCurrentThemeMode());
         localStorage.setItem('client_id', defaultClient.id);
@@ -348,119 +317,37 @@ export function ClientProvider({ children }: ClientProviderProps) {
       }
     }
 
-    // Regular user - detect client from query param > custom_domain > subdomain > fallback
-      const urlParams = new URLSearchParams(window.location.search);
-      const clientParam = urlParams.get('client');
-      const hostname = window.location.hostname;
-      
-      // PRIORITY 1: Query param override (for testing)
-      if (clientParam) {
-        const { data } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('subdomain', clientParam)
-          .eq('active', true)
-          .single();
+    const trimmedHostname = hostname.trim().toLowerCase();
+    const domainMatchedClient = allClientsData?.find(c => 
+      c.custom_domain?.toLowerCase() === trimmedHostname || 
+      c.subdomain.toLowerCase() === trimmedHostname.split('.')[0]
+    );
 
-        if (data) {
-          setClient(data as Client);
-          applyClientTheme(data as Client, getCurrentThemeMode());
-          localStorage.setItem('client_id', data.id);
-          setLoading(false);
-          return;
-        }
-      }
+    if (domainMatchedClient) {
+      setClient(domainMatchedClient as Client);
+      applyClientTheme(domainMatchedClient as Client, getCurrentThemeMode());
+      localStorage.setItem('client_id', domainMatchedClient.id);
+      setLoading(false);
+      return;
+    }
 
-      // PRIORITY 2: Custom domain lookup FIRST (for white-label domains like trade.nallio.io)
-      // Use trimmed and lowercased hostname for robust matching
-      const trimmedHostname = hostname.trim().toLowerCase();
-      const { data: customDomainClient } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('custom_domain', trimmedHostname)
-        .eq('active', true)
-        .maybeSingle();
-      
-      if (customDomainClient) {
-        console.log('[ClientProvider] Matched custom domain:', trimmedHostname, '-> client:', customDomainClient.subdomain);
-        // Clear any stale localStorage overrides when on a custom domain
-        localStorage.removeItem('user_client_subdomain');
-        localStorage.removeItem('admin_selected_client');
-        setClient(customDomainClient as Client);
-        applyClientTheme(customDomainClient as Client, getCurrentThemeMode());
-        localStorage.setItem('client_id', customDomainClient.id);
+    if (clientParam) {
+      const paramClient = allClientsData?.find(c => c.subdomain === clientParam);
+      if (paramClient) {
+        setClient(paramClient as Client);
+        applyClientTheme(paramClient as Client, getCurrentThemeMode());
+        localStorage.setItem('client_id', paramClient.id);
         setLoading(false);
         return;
       }
-
-      // PRIORITY 3: Try subdomain extraction for multi-tenant subdomains
-      const isLocalhostOrIp = hostname.includes('localhost') || hostname.match(/^\d+\.\d+\.\d+\.\d+$/);
-      const isLovablePreview = hostname.includes('lovable.app') || hostname.includes('lovableproject.com');
-
-      if (!isLocalhostOrIp && !isLovablePreview) {
-        const parts = hostname.split('.');
-        if (parts.length > 2) {
-          const subdomain = parts[0];
-          const { data } = await supabase
-            .from('clients')
-            .select('*')
-            .eq('subdomain', subdomain)
-            .eq('active', true)
-            .single();
-
-          if (data) {
-            setClient(data as Client);
-            applyClientTheme(data as Client, getCurrentThemeMode());
-            localStorage.setItem('client_id', data.id);
-            setLoading(false);
-            return;
-          }
-        }
-      }
-
-      // PRIORITY 4: Saved client override ONLY for localhost
-      // (Preview domains should stay deterministic; otherwise you can get “stuck” on another client)
-      const savedUserClient = localStorage.getItem('user_client_subdomain');
-
-      if (savedUserClient && isLovablePreview) {
-        localStorage.removeItem('user_client_subdomain');
-      }
-
-      if (savedUserClient && isLocalhostOrIp) {
-        const { data: userClientData } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('subdomain', savedUserClient)
-          .eq('active', true)
-          .maybeSingle();
-
-        if (userClientData) {
-          console.log('[ClientProvider] Using saved user client:', savedUserClient);
-          setClient(userClientData as Client);
-          applyClientTheme(userClientData as Client, getCurrentThemeMode());
-          localStorage.setItem('client_id', userClientData.id);
-          setLoading(false);
-          return;
-        }
-      }
-
-      // PRIORITY 5: Fallback to 'nallio' for testing / preview environments
-      const { data: fallbackClient } = await supabase
-        .from('clients')
-        .select('*')
-        .eq('subdomain', 'nallio')
-        .eq('active', true)
-        .single();
-
-      if (fallbackClient) {
-        setClient(fallbackClient as Client);
-        applyClientTheme(fallbackClient as Client, getCurrentThemeMode());
-        localStorage.setItem('client_id', fallbackClient.id);
-      } else {
-        console.error('Client not found: nallio (fallback)');
-      }
     }
-    
+
+    const fallbackClient = allClientsData?.find(c => c.subdomain === 'finademica') || allClientsData?.[0];
+    if (fallbackClient) {
+      setClient(fallbackClient as Client);
+      applyClientTheme(fallbackClient as Client, getCurrentThemeMode());
+      localStorage.setItem('client_id', fallbackClient.id);
+    }
     setLoading(false);
   }
 
@@ -471,8 +358,6 @@ export function ClientProvider({ children }: ClientProviderProps) {
       applyClientTheme(newClient as Client, getCurrentThemeMode());
       localStorage.setItem('admin_selected_client', subdomain);
       localStorage.setItem('client_id', newClient.id);
-      
-      // Reload page to apply changes everywhere
       window.location.reload();
     }
   }
@@ -488,7 +373,6 @@ export function ClientProvider({ children }: ClientProviderProps) {
     );
   }
 
-  // Allow login page to render without a valid client
   const currentPath = window.location.pathname;
   const publicRoutes = ['/login'];
   const isPublicRoute = publicRoutes.includes(currentPath);
@@ -498,9 +382,7 @@ export function ClientProvider({ children }: ClientProviderProps) {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4 max-w-md p-8">
           <h1 className="text-2xl font-bold text-foreground">Client Not Found</h1>
-          <p className="text-muted-foreground">
-            The trading academy you're looking for doesn't exist. Please check the URL and try again.
-          </p>
+          <p className="text-muted-foreground">The academy you're looking for doesn't exist.</p>
         </div>
       </div>
     );

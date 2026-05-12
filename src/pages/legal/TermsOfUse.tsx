@@ -36,7 +36,7 @@ const TermsOfUse = () => {
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>1. Acceptance of Terms</h2>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            These Terms of Use ("Terms") govern your use of the Nallio Trade academy platform, including the website and mobile applications (the "Service").
+            These Terms of Use ("Terms") govern your use of the Finademica platform, including the website and mobile applications (the "Service").
           </p>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
             By accessing or using the Service, you agree to these Terms. If you do not agree, you must not use the Service.
@@ -145,7 +145,7 @@ const TermsOfUse = () => {
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>16. Operator Information</h2>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            Brand: Nallio Trade<br />
+            Brand: Finademica<br />
             Owner & Operator:<br />
             Clientee AI, s.r.o.<br />
             Příčná 1892/4<br />
@@ -153,7 +153,7 @@ const TermsOfUse = () => {
             110 00 Praha<br />
             Czech Republic<br />
             IČO: 234 35 186<br />
-            support@nallio.io
+            hey@finademica.com
           </p>
         </div>
       </div>

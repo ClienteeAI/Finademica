@@ -12,6 +12,7 @@ import { BookOpen, Search, TrendingUp, TrendingDown, X, Loader2, Plus, MoreVerti
 import { useClient } from "@/lib/clientContext";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { EditTradeModal } from "@/components/EditTradeModal";
 import { DeleteTradeDialog } from "@/components/DeleteTradeDialog";
@@ -43,7 +44,7 @@ const TradingDiary = () => {
   const navigate = useNavigate();
   const { client } = useClient();
   const { user, loading: authLoading } = useAuth();
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'nasr' || true; // Force premium as per project standard
 
   const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,13 +67,11 @@ const TradingDiary = () => {
   const [tradeToDelete, setTradeToDelete] = useState<{ id: string; symbol: string } | null>(null);
 
   const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
-    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
-    primaryBg: isNasrTheme ? 'bg-gold' : 'bg-aqua',
-    cardBorder: isNasrTheme ? 'border-gold/20' : 'border-ice',
-    inputBg: isNasrTheme ? 'bg-nasr-panel/60' : 'bg-white/60',
-    inputBorder: isNasrTheme ? 'border-gold/20 focus:border-gold/50' : 'border-ice focus:border-aqua/50',
+    heading: isPremiumTheme ? 'text-premium-gold font-playfair' : 'text-ocean',
+    subtext: isPremiumTheme ? 'text-premium-text-muted' : 'text-ocean-muted',
+    primary: isPremiumTheme ? 'text-premium-gold' : 'text-aqua',
+    inputBg: isPremiumTheme ? 'bg-premium-bg/50' : 'bg-muted/50',
+    inputBorder: isPremiumTheme ? 'border-premium-gold/20' : 'border-border',
   };
 
   useEffect(() => {
@@ -90,16 +89,33 @@ const TradingDiary = () => {
     setIsLoading(true);
 
     try {
+      console.log('🔍 Fetching trades for user:', authUserId);
       const { data, error } = await supabase
-        .from('trading_diary_trades')
-        .select('*')
-        .eq('auth_user_id', authUserId)
+        .from('trading_diary')
+        .select(`
+          id,
+          created_at,
+          symbol:Symbol,
+          side:direction,
+          status:Status,
+          lots_final:Volume,
+          risk_total_usd:Total_risk,
+          entry_price,
+          exit_price,
+          stop_loss_price:Stop_loss,
+          take_profit_price:Take_profit,
+          notes,
+          open_time:trade_date
+        `)
+        .eq('user_id', authUserId)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Failed to fetch diary entries:', error);
+        console.error('❌ Failed to fetch diary entries:', error);
+        toast.error(`Database error: ${error.message}`);
       } else if (data) {
-        setEntries(data as DiaryEntry[]);
+        console.log('✅ Successfully fetched trades:', data.length);
+        setEntries(data as unknown as DiaryEntry[]);
       }
     } catch (error) {
       console.error('Failed to fetch diary entries:', error);
@@ -118,7 +134,7 @@ const TradingDiary = () => {
   const filteredEntries = entries.filter(entry => {
     if (sideFilter !== "all" && entry.side !== sideFilter) return false;
     if (statusFilter !== "all" && entry.status !== statusFilter) return false;
-    if (symbolSearch && !entry.symbol.toLowerCase().includes(symbolSearch.toLowerCase())) return false;
+    if (symbolSearch && !(entry.symbol || "").toLowerCase().includes(symbolSearch.toLowerCase())) return false;
     if (startDate && new Date(entry.created_at) < new Date(startDate)) return false;
     if (endDate && new Date(entry.created_at) > new Date(endDate + 'T23:59:59')) return false;
     return true;
@@ -137,13 +153,15 @@ const TradingDiary = () => {
     setEndDate("");
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | null) => {
+    if (!status) return isPremiumTheme ? 'bg-premium-bg/40 text-premium-text-muted' : 'bg-muted text-muted-foreground';
+    const s = status.toLowerCase();
     const styles = {
-      planned: isNasrTheme ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-500/20 text-amber-600',
-      open: isNasrTheme ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-500/20 text-emerald-600',
-      closed: isNasrTheme ? 'bg-slate-500/20 text-slate-400' : 'bg-slate-500/20 text-slate-600',
+      planned: isPremiumTheme ? 'bg-amber-500/20 text-amber-400' : 'bg-amber-500/20 text-amber-600',
+      open: isPremiumTheme ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-500/20 text-emerald-600',
+      closed: isPremiumTheme ? 'bg-slate-500/20 text-slate-400' : 'bg-slate-500/20 text-slate-600',
     };
-    return styles[status as keyof typeof styles] || styles.planned;
+    return styles[s as keyof typeof styles] || (isPremiumTheme ? 'bg-premium-bg/40 text-premium-text-muted' : 'bg-muted text-muted-foreground');
   };
 
   const handleEdit = (entry: DiaryEntry, e: React.MouseEvent) => {
@@ -170,8 +188,8 @@ const TradingDiary = () => {
 
   return (
     <SidebarLayout>
-      {/* Nasr Trade Academy Video Background */}
-      {isNasrTheme && (
+      {/* Premium Academy Video Background */}
+      {isPremiumTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
           <video
             autoPlay
@@ -180,9 +198,9 @@ const TradingDiary = () => {
             playsInline
             className="absolute w-full h-full object-cover opacity-30"
           >
-            <source src="/nasr-background.mp4" type="video/mp4" />
+            <source src="/premium-background.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+          <div className="absolute inset-0 bg-gradient-to-b from-premium-bg/70 via-premium-bg/85 to-premium-bg" />
         </div>
       )}
 
@@ -192,7 +210,7 @@ const TradingDiary = () => {
           <div className="flex items-center gap-3">
             <div className={cn(
               "w-12 h-12 rounded-xl flex items-center justify-center",
-              isNasrTheme ? 'bg-gold/10' : 'bg-aqua/10'
+              isPremiumTheme ? 'bg-premium-gold/10' : 'bg-aqua/10'
             )}>
               <BookOpen className={cn("w-6 h-6", themeColors.primary)} />
             </div>
@@ -206,8 +224,8 @@ const TradingDiary = () => {
                     <TooltipTrigger asChild>
                       <Info className={cn("w-5 h-5 cursor-help opacity-60 hover:opacity-100 transition-opacity", themeColors.subtext)} />
                     </TooltipTrigger>
-                    <TooltipContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
-                      <p className="text-sm">Trades are filtered by your account (auth_user_id)</p>
+                    <TooltipContent className={cn(isPremiumTheme && "bg-premium-panel border-premium-gold/20")}>
+                      <p className="text-sm">Trades are filtered by your account</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -221,8 +239,8 @@ const TradingDiary = () => {
             onClick={() => setAddModalOpen(true)}
             className={cn(
               "h-11 px-5 text-base font-semibold rounded-xl transition-all",
-              isNasrTheme 
-                ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
+              isPremiumTheme 
+                ? 'premium-gradient text-premium-bg hover:opacity-90 premium-premium-gold-glow' 
                 : 'success-gradient text-white hover:opacity-90 success-glow'
             )}
           >
@@ -231,44 +249,8 @@ const TradingDiary = () => {
           </Button>
         </div>
 
-        {/* Live Trading CTA Banner */}
-        <Card className={cn(
-          "relative overflow-hidden",
-          isNasrTheme ? "bg-gradient-to-r from-emerald-900/80 to-green-800/80 border-emerald-500/30" : "bg-gradient-to-r from-emerald-600 to-green-500 border-emerald-400/30"
-        )}>
-          {/* Animated glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-400 opacity-20 blur-xl animate-pulse" />
-          
-          <div className="relative p-5 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className={cn(
-                "w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-sm",
-                isNasrTheme ? "bg-emerald-500/20" : "bg-white/20"
-              )}>
-                <Sparkles className="w-6 h-6 text-white" />
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-lg md:text-xl font-bold text-white">
-                  Ready to Execute Your Trades?
-                </h3>
-                <p className="text-white/80 text-sm">
-                  Open a live trading account and start trading with real capital
-                </p>
-              </div>
-            </div>
-            <Button
-              onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
-              size="lg"
-              className="h-12 px-6 text-base font-bold bg-white text-emerald-600 hover:bg-white/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 rounded-xl whitespace-nowrap"
-            >
-              <TrendingUp className="w-5 h-5 mr-2" />
-              Start Trading Now
-            </Button>
-          </div>
-        </Card>
-
         {/* Filters */}
-        <Card className={cn("p-5", isNasrTheme && "bg-nasr-panel/80 border-gold/20")}>
+        <Card className={cn("p-5", isPremiumTheme && "bg-premium-panel/80 border-premium-gold/20")}>
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 min-w-[180px]">
               <label className={cn("text-sm mb-1.5 block", themeColors.subtext)}>Symbol</label>
@@ -289,7 +271,7 @@ const TradingDiary = () => {
                 <SelectTrigger className={cn("h-10", themeColors.inputBg, themeColors.inputBorder)}>
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
-                <SelectContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                <SelectContent className={cn(isPremiumTheme && "bg-premium-panel border-premium-gold/20")}>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="long">Long</SelectItem>
                   <SelectItem value="short">Short</SelectItem>
@@ -303,7 +285,7 @@ const TradingDiary = () => {
                 <SelectTrigger className={cn("h-10", themeColors.inputBg, themeColors.inputBorder)}>
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
-                <SelectContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                <SelectContent className={cn(isPremiumTheme && "bg-premium-panel border-premium-gold/20")}>
                   <SelectItem value="all">All</SelectItem>
                   <SelectItem value="planned">Planned</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
@@ -344,7 +326,7 @@ const TradingDiary = () => {
         </Card>
 
         {/* Desktop Table / Mobile Cards */}
-        <Card className={cn("overflow-hidden", isNasrTheme && "bg-nasr-panel/80 border-gold/20")}>
+        <Card className={cn("overflow-hidden shadow-2xl", isPremiumTheme && "bg-premium-panel/80 border-premium-gold/20")}>
           {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className={cn("w-8 h-8 animate-spin", themeColors.primary)} />
@@ -354,19 +336,20 @@ const TradingDiary = () => {
               <BookOpen className={cn("w-12 h-12 mx-auto mb-4 opacity-30", themeColors.subtext)} />
               <p className={cn("text-lg font-medium", themeColors.heading)}>No trades yet</p>
               <p className={cn("text-sm mt-1 mb-4", themeColors.subtext)}>
-                Save your first one from the calculator.
+                Track and analyze your trades
               </p>
-              <Link to="/calculator">
-                <Button className={cn(
+              <Button 
+                onClick={() => setAddModalOpen(true)}
+                className={cn(
                   "h-10 px-4 font-semibold rounded-xl",
-                  isNasrTheme 
-                    ? 'gold-gradient text-nasr-bg hover:opacity-90' 
+                  isPremiumTheme 
+                    ? 'premium-gradient text-premium-bg hover:opacity-90' 
                     : 'success-gradient text-white hover:opacity-90'
-                )}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Trade
-                </Button>
-              </Link>
+                )}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                New Trade
+              </Button>
             </div>
           ) : (
             <>
@@ -376,7 +359,7 @@ const TradingDiary = () => {
                   <thead>
                     <tr className={cn(
                       "border-b",
-                      isNasrTheme ? 'border-gold/10 bg-nasr-bg/40' : 'border-border bg-muted/40'
+                      isPremiumTheme ? 'border-premium-gold/10 bg-premium-bg/40' : 'border-border bg-muted/40'
                     )}>
                       <th className={cn("text-left py-3 px-4 text-sm font-medium", themeColors.subtext)}>Date</th>
                       <th className={cn("text-left py-3 px-4 text-sm font-medium", themeColors.subtext)}>Symbol</th>
@@ -385,7 +368,7 @@ const TradingDiary = () => {
                       <th className={cn("text-right py-3 px-4 text-sm font-medium", themeColors.subtext)}>Lots</th>
                       <th className={cn("text-right py-3 px-4 text-sm font-medium", themeColors.subtext)}>Entry / SL / TP</th>
                       <th className={cn("text-right py-3 px-4 text-sm font-medium", themeColors.subtext)}>Risk ($)</th>
-                      <th className={cn("text-right py-3 px-4 text-sm font-medium", themeColors.subtext)}>Profit ($)</th>
+                      <th className={cn("text-right py-3 px-4 text-sm font-medium", themeColors.subtext)}>P/L ($)</th>
                       <th className={cn("text-right py-3 px-4 text-sm font-medium", themeColors.subtext)}>RR</th>
                       <th className={cn("text-center py-3 px-4 text-sm font-medium", themeColors.subtext)}></th>
                     </tr>
@@ -397,13 +380,13 @@ const TradingDiary = () => {
                         onClick={() => handleRowClick(entry)}
                         className={cn(
                           "border-b cursor-pointer transition-colors",
-                          isNasrTheme 
-                            ? 'border-gold/5 hover:bg-gold/5' 
+                          isPremiumTheme 
+                            ? 'border-premium-gold/5 hover:bg-premium-gold/5' 
                             : 'border-border/50 hover:bg-muted/50'
                         )}
                       >
                         <td className={cn("py-3 px-4 text-sm", themeColors.heading)}>
-                          {format(new Date(entry.created_at), 'MMM d, yyyy')}
+                          {entry.created_at ? format(new Date(entry.created_at), 'MMM d, yyyy') : '—'}
                         </td>
                         <td className={cn("py-3 px-4 text-sm font-mono font-semibold", themeColors.primary)}>
                           {entry.symbol}
@@ -414,7 +397,7 @@ const TradingDiary = () => {
                             entry.side === 'long' ? 'text-emerald-500' : 'text-red-500'
                           )}>
                             {entry.side === 'long' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                            {entry.side.charAt(0).toUpperCase() + entry.side.slice(1)}
+                            {entry.side ? (entry.side.charAt(0).toUpperCase() + entry.side.slice(1)) : 'Unknown'}
                           </span>
                         </td>
                         <td className="py-3 px-4">
@@ -437,35 +420,17 @@ const TradingDiary = () => {
                         </td>
                         <td className={cn(
                           "py-3 px-4 text-sm text-right font-mono",
-                          entry.profit_total_usd !== null 
+                          entry.profit_total_usd != null 
                             ? entry.profit_total_usd >= 0 ? 'text-emerald-500' : 'text-red-500'
                             : themeColors.subtext
                         )}>
-                          {entry.profit_total_usd !== null ? `$${entry.profit_total_usd.toFixed(2)}` : '—'}
+                          {entry.profit_total_usd != null ? `$${entry.profit_total_usd.toFixed(2)}` : '—'}
                         </td>
                         <td className={cn("py-3 px-4 text-sm text-right font-mono", themeColors.heading)}>
                           {entry.rr_ratio?.toFixed(2) ?? '—'}
                         </td>
                         <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-1">
-                            {entry.status === 'planned' && (
-                              <Button
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank');
-                                }}
-                                className={cn(
-                                  "h-7 px-3 text-xs font-semibold rounded-lg",
-                                  isNasrTheme 
-                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
-                                    : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                                )}
-                              >
-                                <TrendingUp className="w-3 h-3 mr-1" />
-                                Open Trade
-                              </Button>
-                            )}
                             {entry.notes && (
                               <FileText className={cn("w-4 h-4", themeColors.subtext)} />
                             )}
@@ -475,13 +440,13 @@ const TradingDiary = () => {
                                   onClick={(e) => e.stopPropagation()}
                                   className={cn(
                                     "p-1 rounded-lg transition-colors",
-                                    isNasrTheme ? 'hover:bg-gold/10' : 'hover:bg-muted'
+                                    isPremiumTheme ? 'hover:bg-premium-gold/10' : 'hover:bg-muted'
                                   )}
                                 >
                                   <MoreVertical className={cn("w-4 h-4", themeColors.subtext)} />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                              <DropdownMenuContent className={cn(isPremiumTheme && "bg-premium-panel border-premium-gold/20")}>
                                 <DropdownMenuItem onClick={(e) => handleEdit(entry, e as unknown as React.MouseEvent)}>
                                   <Edit2 className="w-4 h-4 mr-2" /> Edit
                                 </DropdownMenuItem>
@@ -509,8 +474,8 @@ const TradingDiary = () => {
                     onClick={() => handleRowClick(entry)}
                     className={cn(
                       "p-4 rounded-xl border cursor-pointer transition-all",
-                      isNasrTheme 
-                        ? 'bg-nasr-bg/40 border-gold/10 hover:border-gold/30' 
+                      isPremiumTheme 
+                        ? 'bg-premium-bg/40 border-premium-gold/10 hover:border-premium-gold/30' 
                         : 'bg-muted/40 border-border hover:border-aqua/30'
                     )}
                   >
@@ -520,7 +485,7 @@ const TradingDiary = () => {
                           {entry.symbol}
                         </p>
                         <p className={cn("text-xs", themeColors.subtext)}>
-                          {format(new Date(entry.created_at), 'MMM d, yyyy')}
+                          {entry.created_at ? format(new Date(entry.created_at), 'MMM d, yyyy') : '—'}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -531,7 +496,7 @@ const TradingDiary = () => {
                             : 'bg-red-500/20 text-red-500'
                         )}>
                           {entry.side === 'long' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                          {entry.side.charAt(0).toUpperCase() + entry.side.slice(1)}
+                          {entry.side ? (entry.side.charAt(0).toUpperCase() + entry.side.slice(1)) : '—'}
                         </span>
                         <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", getStatusBadge(entry.status))}>
                           {entry.status}
@@ -560,25 +525,7 @@ const TradingDiary = () => {
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-2 mt-3 pt-3 border-t" style={{ borderColor: isNasrTheme ? 'rgba(212,175,55,0.1)' : 'rgba(0,0,0,0.1)' }}>
-                      {entry.status === 'planned' && (
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank');
-                          }}
-                          className={cn(
-                            "h-8 px-3 text-xs font-semibold",
-                            isNasrTheme 
-                              ? 'bg-emerald-600 hover:bg-emerald-500 text-white' 
-                              : 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                          )}
-                        >
-                          <TrendingUp className="w-3.5 h-3.5 mr-1" />
-                          Open Trade
-                        </Button>
-                      )}
+                    <div className="flex justify-end gap-2 mt-3 pt-3 border-t" style={{ borderColor: isPremiumTheme ? 'rgba(212,175,55,0.1)' : 'rgba(0,0,0,0.1)' }}>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -607,90 +554,80 @@ const TradingDiary = () => {
       {/* Detail Drawer */}
       <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
         <SheetContent className={cn(
-          "w-[400px] sm:w-[540px] backdrop-blur-xl overflow-y-auto",
-          isNasrTheme 
-            ? 'bg-nasr-panel/95 border-gold/20' 
-            : 'bg-white/95 border-ice'
+          "w-full sm:max-w-[540px] overflow-y-auto",
+          isPremiumTheme ? 'bg-premium-bg/95 border-l border-premium-gold/20' : 'bg-white/95 border-l border-ice'
         )}>
-          <SheetHeader>
-            <SheetTitle className={cn("text-xl", themeColors.heading)}>
+          <SheetHeader className="mb-6">
+            <SheetTitle className={cn("text-2xl font-bold", themeColors.heading)}>
               Trade Details
             </SheetTitle>
           </SheetHeader>
 
           {selectedEntry && (
-            <div className="mt-6 space-y-6">
-              {/* Symbol & Side */}
+            <div className="space-y-8 pb-10">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className={cn("text-2xl font-bold font-mono", themeColors.primary)}>
+                  <h3 className={cn("text-3xl font-mono font-bold tracking-tight", themeColors.primary)}>
                     {selectedEntry.symbol}
-                  </p>
-                  <span className={cn(
-                    "inline-flex items-center gap-1 text-sm mt-1",
-                    selectedEntry.side === 'long' ? 'text-emerald-500' : 'text-red-500'
-                  )}>
-                    {selectedEntry.side === 'long' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                    {selectedEntry.side.charAt(0).toUpperCase() + selectedEntry.side.slice(1)}
-                  </span>
+                  </h3>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={cn(
+                      "flex items-center gap-1",
+                      selectedEntry.side === 'long' ? 'text-emerald-500' : 'text-red-500'
+                    )}>
+                      {selectedEntry.side === 'long' ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                      {selectedEntry.side ? (selectedEntry.side.charAt(0).toUpperCase() + selectedEntry.side.slice(1)) : 'Unknown'}
+                    </span>
+                    <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium capitalize", getStatusBadge(selectedEntry.status))}>
+                      {selectedEntry.status}
+                    </span>
+                  </div>
                 </div>
-                <span className={cn("px-3 py-1 rounded-full text-sm font-medium capitalize", getStatusBadge(selectedEntry.status))}>
-                  {selectedEntry.status}
-                </span>
+                <div className="text-right">
+                  <p className={cn("text-xs font-medium uppercase tracking-wider", themeColors.subtext)}>Date</p>
+                  <p className={cn("font-mono", themeColors.heading)}>
+                    {selectedEntry.created_at ? format(new Date(selectedEntry.created_at), 'MMM d, yyyy') : '—'}
+                  </p>
+                </div>
               </div>
 
-              {/* Key Metrics */}
-              <div className={cn(
-                "grid grid-cols-2 gap-4 p-4 rounded-xl",
-                isNasrTheme ? 'bg-nasr-bg/40 border border-gold/10' : 'bg-muted/40 border border-border'
-              )}>
-                <div>
-                  <p className={cn("text-xs uppercase tracking-wider", themeColors.subtext)}>Lots</p>
-                  <p className={cn("text-lg font-mono font-semibold", themeColors.heading)}>
+              <div className="grid grid-cols-2 gap-4">
+                <Card className={cn("p-4 border", isPremiumTheme ? 'bg-premium-panel/40 border-premium-gold/10' : 'bg-muted/40')}>
+                  <p className={cn("text-xs font-medium uppercase tracking-wider mb-1", themeColors.subtext)}>Lots</p>
+                  <p className={cn("text-xl font-mono font-bold", themeColors.heading)}>
                     {selectedEntry.lots_final?.toFixed(2) ?? '—'}
                   </p>
-                </div>
-                <div>
-                  <p className={cn("text-xs uppercase tracking-wider", themeColors.subtext)}>Risk</p>
-                  <p className={cn("text-lg font-mono font-semibold", themeColors.heading)}>
+                </Card>
+                <Card className={cn("p-4 border", isPremiumTheme ? 'bg-premium-panel/40 border-premium-gold/10' : 'bg-muted/40')}>
+                  <p className={cn("text-xs font-medium uppercase tracking-wider mb-1", themeColors.subtext)}>Total Risk</p>
+                  <p className={cn("text-xl font-mono font-bold", themeColors.heading)}>
                     ${selectedEntry.risk_total_usd?.toFixed(2) ?? '—'}
                   </p>
-                </div>
-                <div>
-                  <p className={cn("text-xs uppercase tracking-wider", themeColors.subtext)}>Entry</p>
-                  <p className={cn("text-lg font-mono font-semibold", themeColors.heading)}>
-                    {selectedEntry.entry_price ?? '—'}
+                </Card>
+                <Card className={cn("p-4 border", isPremiumTheme ? 'bg-premium-panel/40 border-premium-gold/10' : 'bg-muted/40')}>
+                  <p className={cn("text-xs font-medium uppercase tracking-wider mb-1", themeColors.subtext)}>P/L Result</p>
+                  <p className={cn(
+                    "text-xl font-mono font-bold",
+                    selectedEntry.profit_total_usd != null 
+                      ? selectedEntry.profit_total_usd >= 0 ? 'text-emerald-500' : 'text-red-500'
+                      : themeColors.subtext
+                  )}>
+                    {selectedEntry.profit_total_usd != null ? `$${selectedEntry.profit_total_usd.toFixed(2)}` : '—'}
                   </p>
-                </div>
-                <div>
-                  <p className={cn("text-xs uppercase tracking-wider", themeColors.subtext)}>Stop Loss</p>
-                  <p className={cn("text-lg font-mono font-semibold", themeColors.heading)}>
-                    {selectedEntry.stop_loss_price ?? '—'}
+                </Card>
+                <Card className={cn("p-4 border", isPremiumTheme ? 'bg-premium-panel/40 border-premium-gold/10' : 'bg-muted/40')}>
+                  <p className={cn("text-xs font-medium uppercase tracking-wider mb-1", themeColors.subtext)}>R:R Ratio</p>
+                  <p className={cn("text-xl font-mono font-bold", themeColors.primary)}>
+                    {selectedEntry.rr_ratio?.toFixed(2) ?? '—'}
                   </p>
-                </div>
-                {selectedEntry.take_profit_price && (
-                  <div>
-                    <p className={cn("text-xs uppercase tracking-wider", themeColors.subtext)}>Take Profit</p>
-                    <p className={cn("text-lg font-mono font-semibold", themeColors.heading)}>
-                      {selectedEntry.take_profit_price}
-                    </p>
-                  </div>
-                )}
-                {selectedEntry.rr_ratio && (
-                  <div>
-                    <p className={cn("text-xs uppercase tracking-wider", themeColors.subtext)}>Risk/Reward</p>
-                    <p className={cn("text-lg font-mono font-semibold", themeColors.primary)}>
-                      {selectedEntry.rr_ratio.toFixed(2)}
-                    </p>
-                  </div>
-                )}
+                </Card>
               </div>
 
               {/* Position Sensitivity */}
               {(selectedEntry.tick_value_position_usd || selectedEntry.pip_value_position_usd) && (
                 <div className={cn(
                   "p-4 rounded-xl space-y-3",
-                  isNasrTheme ? 'bg-nasr-bg/40 border border-gold/10' : 'bg-muted/40 border border-border'
+                  isPremiumTheme ? 'bg-premium-bg/40 border border-premium-gold/10' : 'bg-muted/40 border border-border'
                 )}>
                   <p className={cn("text-xs uppercase tracking-wider font-medium", themeColors.subtext)}>
                     Position Sensitivity
@@ -699,7 +636,7 @@ const TradingDiary = () => {
                     {selectedEntry.tick_value_position_usd && (
                       <div>
                         <p className={cn("text-xs", themeColors.subtext)}>1 Tick</p>
-                        <p className={cn("text-lg font-mono font-semibold", isNasrTheme ? 'text-amber-400' : 'text-amber-600')}>
+                        <p className={cn("text-lg font-mono font-semibold", isPremiumTheme ? 'text-amber-400' : 'text-amber-600')}>
                           ${selectedEntry.tick_value_position_usd.toFixed(2)}
                         </p>
                       </div>
@@ -740,8 +677,8 @@ const TradingDiary = () => {
                         key={i}
                         className={cn(
                           "px-2.5 py-1 rounded-full text-xs font-medium",
-                          isNasrTheme 
-                            ? 'bg-gold/20 text-gold' 
+                          isPremiumTheme 
+                            ? 'bg-premium-gold/20 text-premium-gold' 
                             : 'bg-aqua/20 text-aqua'
                         )}
                       >
@@ -755,7 +692,7 @@ const TradingDiary = () => {
               {/* Timestamps */}
               <div className={cn(
                 "pt-4 border-t text-xs",
-                isNasrTheme ? 'border-gold/10' : 'border-border'
+                isPremiumTheme ? 'border-premium-gold/10' : 'border-border'
               )}>
                 <p className={themeColors.subtext}>
                   Created: {format(new Date(selectedEntry.created_at), 'PPpp')}
@@ -773,8 +710,8 @@ const TradingDiary = () => {
                   onClick={(e) => handleEdit(selectedEntry, e)}
                   className={cn(
                     "flex-1 h-11 font-semibold rounded-xl",
-                    isNasrTheme 
-                      ? 'gold-gradient text-nasr-bg hover:opacity-90' 
+                    isPremiumTheme 
+                      ? 'premium-gradient text-premium-bg hover:opacity-90' 
                       : 'success-gradient text-white hover:opacity-90'
                   )}
                 >
@@ -812,7 +749,7 @@ const TradingDiary = () => {
           lots_final: tradeToEdit.lots_final ?? undefined,
           notes: tradeToEdit.notes ?? undefined,
         } : null}
-        isNasrTheme={isNasrTheme}
+        isPremiumTheme={isPremiumTheme}
         onSuccess={handleEditSuccess}
       />
 
@@ -822,7 +759,7 @@ const TradingDiary = () => {
         onOpenChange={setDeleteDialogOpen}
         tradeId={tradeToDelete?.id || null}
         tradeSymbol={tradeToDelete?.symbol || ""}
-        isNasrTheme={isNasrTheme}
+        isPremiumTheme={isPremiumTheme}
         onSuccess={handleDeleteSuccess}
       />
 
@@ -831,7 +768,7 @@ const TradingDiary = () => {
         open={addModalOpen}
         onOpenChange={setAddModalOpen}
         onSuccess={refreshEntries}
-        isNasrTheme={isNasrTheme}
+        isPremiumTheme={isPremiumTheme}
       />
 
     </SidebarLayout>

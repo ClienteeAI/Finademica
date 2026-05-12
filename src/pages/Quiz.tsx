@@ -4,13 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/AuthContext";
 import { useClient } from "@/lib/clientContext";
-import { Loader2, Trophy, Play, TrendingUp, BarChart3, Bitcoin, Package, CheckCircle2, Circle, Send } from "lucide-react";
+import { Loader2, Trophy, Play, TrendingUp, BarChart3, Bitcoin, Package, CheckCircle2, Circle, Send, XCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import QuizLoadingAnimation from "@/components/QuizLoadingAnimation";
 import { Progress } from "@/components/ui/progress";
 import QuizResults from "@/components/QuizResults";
 
-const GENERATE_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/quiz-generation";
+// No generation webhook needed, fetching from Supabase directly
+// const GENERATE_WEBHOOK_URL = "...";
 
 type Module = "forex" | "stocks" | "crypto" | "commodities";
 
@@ -20,6 +23,7 @@ interface QuizQuestion {
   options: string[];
   correct_index?: number;
   correct_answer?: string;
+  explanation?: string;
 }
 
 interface WebhookResponse {
@@ -67,12 +71,12 @@ const moduleOptions: { id: Module; label: string; icon: React.ReactNode }[] = [
   { id: "commodities", label: "Commodities", icon: <Package className="h-10 w-10" /> },
 ];
 
-const SUBMIT_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/quiz/submit";
+const SUBMIT_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/quiz-attemt-res-finademica";
 
 const Quiz = () => {
   const { user, profile } = useAuth();
   const { client } = useClient();
-  const isNasrTheme = client?.subdomain === "nasr";
+  const isPremiumTheme = client?.subdomain === "finademica";
 
   const [step, setStep] = useState<"intro" | "select-module" | "loading" | "quiz" | "submitting" | "results">("intro");
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
@@ -81,8 +85,34 @@ const Quiz = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [submitResponse, setSubmitResponse] = useState<SubmitResponse | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const [isAnswering, setIsAnswering] = useState(false);
+  const [quizLevel, setQuizLevel] = useState<string>("Beginner");
+  const [unlockedCount, setUnlockedCount] = useState(0);
 
-  const handleAttemptQuiz = () => {
+  const checkDailyLimit = async () => {
+    if (!user?.id) return false;
+    const { data, error } = await supabase.rpc('check_quiz_daily_limit', { p_user_id: user.id });
+    if (error) {
+      console.error("Error checking daily limit:", error);
+      return false;
+    }
+    return data === true;
+  };
+
+  const handleAttemptQuiz = async () => {
+    const isLocked = await checkDailyLimit();
+    if (isLocked) {
+      setStep("results");
+      setSubmitResponse({
+        status: "daily_locked",
+        score_percent: 100,
+        message: "You have already passed a quiz today! Come back tomorrow for more.",
+        passed: true
+      });
+      return;
+    }
     setStep("select-module");
   };
 
@@ -91,42 +121,68 @@ const Quiz = () => {
     setStep("loading");
 
     try {
-      const payload = {
-        user_id: user?.id || null,
-        client_id: client?.id || null,
-        asset_type: module,
-        module: module,
-        level: 1,
-      };
-
-      const response = await fetch(GENERATE_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const text = await response.text();
-
-      if (text) {
-        try {
-          const data: WebhookResponse = JSON.parse(text);
-          // Handle both { quiz: { questions: [...] } } and { questions: [...] } formats
-          const questionsData = data.quiz?.questions || data.questions || [];
-          setQuizId(data.quiz_id || null);
-          setQuestions(questionsData);
-          setStep("quiz");
-          toast.success(`Quiz loaded! ${questionsData.length} questions`);
-        } catch {
-          toast.error("Invalid response from server");
-          setStep("select-module");
-        }
+      // Determine question count based on experience level
+      const rawLevel = (profile?.quiz_answers as any)?.experience_level || "beginner";
+      
+      let questionCount = 5;
+      let levelLabel = "Beginner";
+      
+      if (rawLevel === "regular") {
+        questionCount = 15;
+        levelLabel = "Elite";
+      } else if (rawLevel === "few-trades") {
+        questionCount = 10;
+        levelLabel = "Intermediate";
       } else {
-        toast.error("Empty response from server");
+        questionCount = 5;
+        levelLabel = "Beginner";
+      }
+
+      setQuizLevel(levelLabel);
+
+      // Fetch questions from Supabase
+      const { data, error } = await supabase
+        .from("ai_quiz_questions")
+        .select("*")
+        .eq("module", module)
+        .eq("level", levelLabel);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        // Shuffle questions and options
+        const shuffledQuestions = [...data].sort(() => Math.random() - 0.5);
+        const selectedQuestions = shuffledQuestions.slice(0, questionCount).map(q => {
+          const originalOptions = Array.isArray(q.options) ? [...q.options] : [];
+          const correctOptionText = originalOptions[q.correct_option];
+          
+          // Shuffle the options array
+          const shuffledOptions = [...originalOptions].sort(() => Math.random() - 0.5);
+          
+          // Find the new index of the correct answer
+          const newCorrectIndex = shuffledOptions.indexOf(correctOptionText);
+          
+          return {
+            id: q.id,
+            question: q.question,
+            options: shuffledOptions,
+            correct_index: newCorrectIndex !== -1 ? newCorrectIndex : q.correct_option,
+            explanation: q.explanation
+          };
+        });
+
+        setQuizId(`quiz_${module}_${levelLabel}_${Date.now()}`);
+        setQuestions(selectedQuestions);
+        setStep("quiz");
+        toast.success(`${selectedQuestions.length} questions loaded from library!`);
+      } else {
+        console.warn(`No questions found for ${module} at ${levelLabel} level.`);
+        toast.error(`Library is empty for ${module} ${levelLabel}. Seeding in progress...`);
         setStep("select-module");
       }
     } catch (error) {
-      console.error("Quiz generation error:", error);
-      toast.error("Failed to load quiz. Please try again.");
+      console.error("Quiz Fetch Error:", error);
+      toast.error("Failed to load questions from database.");
       setStep("select-module");
     }
   };
@@ -142,7 +198,36 @@ const Quiz = () => {
   };
 
   const handleSelectAnswer = (questionIndex: number, answer: string) => {
+    if (isAnswering) return; // Prevent multiple clicks during feedback
+    
+    setIsAnswering(true);
     setAnswers((prev) => ({ ...prev, [questionIndex]: answer }));
+    
+    // Evaluate instantly
+    const currentQ = questions[questionIndex];
+    const isCorrect = currentQ.correct_index !== undefined 
+      ? currentQ.options[currentQ.correct_index] === answer
+      : currentQ.correct_answer !== undefined
+        ? currentQ.correct_answer === answer
+        : null;
+
+    if (isCorrect !== null) {
+      setLastCorrect(isCorrect);
+      setShowFeedback(true);
+      
+      // Auto-advance after a delay
+      setTimeout(() => {
+        setShowFeedback(false);
+        setLastCorrect(null);
+        setIsAnswering(false);
+        
+        if (questionIndex < questions.length - 1) {
+          setCurrentQuestionIndex(questionIndex + 1);
+        }
+      }, 1500);
+    } else {
+      setIsAnswering(false);
+    }
   };
 
   const handleNextQuestion = () => {
@@ -210,36 +295,148 @@ const Quiz = () => {
     };
 
     try {
-      const response = await fetch(SUBMIT_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const score = questions.reduce((acc, q, idx) => {
+        const isCorrect = q.correct_index !== undefined 
+          ? q.options[q.correct_index] === answers[idx]
+          : q.correct_answer !== undefined
+            ? q.correct_answer === answers[idx]
+            : false;
+        return acc + (isCorrect ? 1 : 0);
+      }, 0);
 
-      const text = await response.text();
-      console.log("Quiz webhook raw response:", text);
-      
-      if (text) {
-        try {
-          const data: SubmitResponse = JSON.parse(text);
-          console.log("Quiz webhook parsed response:", data);
-          setSubmitResponse(data);
-        } catch {
-          // Non-JSON response, store as message
-          console.log("Quiz webhook non-JSON response");
-          setSubmitResponse({ message: text });
+      const scorePercent = Math.round((score / questions.length) * 100);
+      const isPassed = scorePercent >= 75;
+
+      // Add results to payload
+      const finalPayload = {
+        ...payload,
+        results: {
+          score,
+          score_percent: scorePercent,
+          passed: isPassed,
+          min_pass_score: 75
         }
-      } else {
-        console.log("Quiz webhook empty response");
-        setSubmitResponse({ message: "Quiz submitted successfully!" });
+      };
+
+      // 1. Save to Supabase
+      try {
+        await supabase.from("quiz_attempts").insert({
+          user_id: user?.id,
+          client_id: client?.id,
+          quiz_key: selectedModule || "general",
+          score_percent: scorePercent,
+          passed: isPassed,
+          metadata: {
+            answers: answers,
+            questions: questions.map(q => ({
+              id: q.id,
+              question: q.question,
+              correct: q.correct_answer || (q.correct_index !== undefined ? q.options[q.correct_index] : null)
+            })),
+            level: quizLevel
+          },
+          started_at: new Date(Date.now() - 60000).toISOString(), // Estimated
+          submitted_at: new Date().toISOString()
+        });
+
+        // 1b. Unlock videos if passed
+        if (isPassed && user?.id && client?.id) {
+          console.log("Unlocking videos for user:", user.id);
+          const { data: unlockCount, error: unlockError } = await supabase.rpc('unlock_videos_after_quiz', {
+            p_client_id: client.id,
+            p_quiz_id: quizId || "general",
+            p_quiz_score: scorePercent,
+            p_user_id: user.id
+          });
+          
+          if (unlockError) {
+            console.error("Video unlock error:", unlockError);
+          } else {
+            const count = Number(unlockCount || 0);
+            console.log(`Successfully unlocked ${count} videos`);
+            setUnlockedCount(count);
+            if (count > 0) {
+              toast.success(`Congratulations! You unlocked ${count} new videos!`);
+            } else {
+              console.log("No new videos were available to unlock for this user/quiz.");
+            }
+          }
+        }
+      } catch (dbError) {
+        console.error("Database save error:", dbError);
+      }
+
+      // 2. Prepare Local Results (Fallback/Primary)
+      const localResults = {
+        status: isPassed ? "passed" : "failed",
+        score_percent: scorePercent,
+        score: score,
+        passed: isPassed,
+        pass_score: 75,
+        questions_count: questions.length,
+        message: isPassed ? "Congratulations! You passed the quiz." : "Keep learning! You need 75% to pass.",
+      };
+
+      // 3. Send to Webhook (CRM) - Non-blocking for the UI
+      try {
+        const response = await fetch(SUBMIT_WEBHOOK_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(finalPayload),
+        });
+
+        if (response.ok) {
+          const text = await response.text();
+          if (text) {
+            try {
+              const serverData = JSON.parse(text);
+              // Merge server data into local results
+              setSubmitResponse({ ...localResults, ...serverData });
+            } catch {
+              setSubmitResponse({ ...localResults, message: text });
+            }
+          } else {
+            setSubmitResponse(localResults);
+          }
+        } else {
+          console.warn("Webhook returned non-OK status");
+          setSubmitResponse(localResults);
+        }
+      } catch (webhookError) {
+        console.error("Webhook submission failed:", webhookError);
+        // Still show results locally even if webhook fails
+        setSubmitResponse(localResults);
+        toast.error("Could not sync results to CRM, but your progress was saved locally.");
+      }
+
+      // 4. Award XP points if passed
+      if (isPassed && user?.id && client?.id) {
+        try {
+          const xpAmount = 100;
+          await supabase.from("activity_log").insert({
+            user_id: user.id,
+            client_id: client.id,
+            activity_type: "quiz_pass",
+            points_awarded: xpAmount,
+            activity_data: {
+              module: selectedModule,
+              level: quizLevel,
+              score: scorePercent
+            }
+          });
+          console.log(`Awarded ${xpAmount} XP for passing quiz`);
+          toast.success(`+${xpAmount} XP earned!`);
+        } catch (xpError) {
+          console.error("Error awarding XP:", xpError);
+        }
       }
 
       setStep("results");
       toast.success("Quiz submitted!");
     } catch (error) {
       console.error("Quiz submit error:", error);
-      toast.error("Failed to submit quiz. Please try again.");
-      setStep("quiz");
+      toast.error("There was an error processing your quiz results.");
+      setStep("results"); // Fallback to showing results if we have them
     }
   };
 
@@ -252,46 +449,46 @@ const Quiz = () => {
       <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto">
         {/* Header - more compact on mobile */}
         <div className="text-center space-y-1 md:space-y-2">
-          <h1 className={`text-2xl md:text-3xl font-bold ${isNasrTheme ? "font-playfair text-nasr-text" : "text-foreground"}`}>
+          <h1 className={`text-2xl md:text-3xl font-bold ${isPremiumTheme ? "font-playfair text-premium-text" : "text-foreground"}`}>
             Unlock More Videos
           </h1>
-          <p className={`text-sm md:text-lg ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+          <p className={`text-sm md:text-lg ${isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}`}>
             Complete this quiz to unlock additional content
           </p>
         </div>
 
         {/* Main Content */}
-        <Card className={`${isNasrTheme ? "bg-nasr-panel border-gold/20" : "bg-card border-border"}`}>
+        <Card className={`${isPremiumTheme ? "bg-premium-panel border-premium-gold/20" : "bg-card border-border"}`}>
           <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6">
             <div className="flex items-center justify-between">
-              <CardTitle className={`text-lg md:text-xl ${isNasrTheme ? "text-nasr-text font-playfair" : "text-foreground"}`}>
+              <CardTitle className={`text-lg md:text-xl ${isPremiumTheme ? "text-premium-text font-playfair" : "text-foreground"}`}>
                 {step === "intro" && "Ready to Start?"}
                 {step === "select-module" && "Choose Your Module"}
                 {step === "loading" && "Loading Quiz..."}
                 {step === "quiz" && `${selectedModule?.charAt(0).toUpperCase()}${selectedModule?.slice(1)} Quiz`}
               </CardTitle>
-              <Trophy className={`h-5 w-5 md:h-6 md:w-6 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+              <Trophy className={`h-5 w-5 md:h-6 md:w-6 ${isPremiumTheme ? "text-premium-gold" : "text-primary"}`} />
             </div>
           </CardHeader>
           <CardContent className="space-y-4 md:space-y-6 px-4 md:px-6 pb-5 md:pb-6">
             {/* Step: Intro */}
             {step === "intro" && (
               <div className="text-center py-8 md:py-12 space-y-4 md:space-y-6">
-                <div className={`mx-auto w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center ${isNasrTheme ? "bg-gold/20" : "bg-primary/20"}`}>
-                  <Play className={`h-8 w-8 md:h-10 md:w-10 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+                <div className={`mx-auto w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center ${isPremiumTheme ? "bg-premium-gold/20" : "bg-primary/20"}`}>
+                  <Play className={`h-8 w-8 md:h-10 md:w-10 ${isPremiumTheme ? "text-premium-gold" : "text-primary"}`} />
                 </div>
                 <div className="space-y-1.5 md:space-y-2">
-                  <h3 className={`text-lg md:text-xl font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                  <h3 className={`text-lg md:text-xl font-semibold ${isPremiumTheme ? "text-premium-text" : "text-foreground"}`}>
                     Start Your Quiz
                   </h3>
-                  <p className={`text-sm md:text-base max-w-md mx-auto px-4 ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+                  <p className={`text-sm md:text-base max-w-md mx-auto px-4 ${isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}`}>
                     Answer a few questions to unlock videos tailored to your goals.
                   </p>
                 </div>
                 <Button
                   onClick={handleAttemptQuiz}
                   size="lg"
-                  className={`px-6 md:px-8 h-12 md:h-11 text-base ${isNasrTheme ? "bg-gold hover:bg-gold-dark text-nasr-bg" : ""}`}
+                  className={`px-6 md:px-8 h-12 md:h-11 text-base ${isPremiumTheme ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" : ""}`}
                 >
                   <Play className="h-5 w-5 mr-2" />
                   Attempt Quiz
@@ -302,7 +499,7 @@ const Quiz = () => {
             {/* Step: Select Module */}
             {step === "select-module" && (
               <div className="space-y-4 md:space-y-6">
-                <p className={`text-center text-sm md:text-base ${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+                <p className={`text-center text-sm md:text-base ${isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}`}>
                   Select a module:
                 </p>
                 <div className="grid grid-cols-2 gap-3 md:gap-6">
@@ -312,12 +509,12 @@ const Quiz = () => {
                       onClick={() => handleModuleSelect(option.id)}
                       variant="outline"
                       className={`h-28 md:h-36 lg:h-44 flex flex-col items-center justify-center gap-2 md:gap-4 transition-all border-2 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] ${
-                        isNasrTheme
-                          ? "border-gold/40 text-nasr-text hover:bg-gold/20 hover:border-gold bg-nasr-bg/50"
+                        isPremiumTheme
+                          ? "border-premium-gold/40 text-premium-text hover:bg-premium-gold/20 hover:border-premium-gold bg-premium-bg/50"
                           : "border-primary/30 hover:bg-primary/10 hover:border-primary bg-card"
                       }`}
                     >
-                      <span className={`${isNasrTheme ? "text-gold" : "text-primary"} [&>svg]:h-8 [&>svg]:w-8 md:[&>svg]:h-10 md:[&>svg]:w-10`}>{option.icon}</span>
+                      <span className={`${isPremiumTheme ? "text-premium-gold" : "text-primary"} [&>svg]:h-8 [&>svg]:w-8 md:[&>svg]:h-10 md:[&>svg]:w-10`}>{option.icon}</span>
                       <span className="font-bold text-base md:text-xl lg:text-2xl">{option.label}</span>
                     </Button>
                   ))}
@@ -326,7 +523,7 @@ const Quiz = () => {
                   <Button
                     onClick={handleReset}
                     variant="ghost"
-                    className={`h-11 ${isNasrTheme ? "text-nasr-text-muted hover:text-nasr-text" : ""}`}
+                    className={`h-11 ${isPremiumTheme ? "text-premium-text-muted hover:text-premium-text" : ""}`}
                   >
                     Back
                   </Button>
@@ -338,15 +535,15 @@ const Quiz = () => {
             {step === "loading" && (
               <QuizLoadingAnimation 
                 module={selectedModule || "trading"} 
-                isNasrTheme={isNasrTheme} 
+                isPremiumTheme={isPremiumTheme} 
               />
             )}
 
             {/* Step: Submitting */}
             {step === "submitting" && (
               <div className="text-center py-12 space-y-4">
-                <Loader2 className={`h-12 w-12 mx-auto animate-spin ${isNasrTheme ? "text-gold" : "text-primary"}`} />
-                <p className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
+                <Loader2 className={`h-12 w-12 mx-auto animate-spin ${isPremiumTheme ? "text-premium-gold" : "text-primary"}`} />
+                <p className={isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}>
                   Submitting your answers...
                 </p>
               </div>
@@ -358,50 +555,94 @@ const Quiz = () => {
                 {/* Progress Header */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
+                    <span className={isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}>
                       Question {currentQuestionIndex + 1} of {questions.length}
                     </span>
-                    <span className={isNasrTheme ? "text-gold" : "text-primary"}>
+                    <span className={isPremiumTheme ? "text-premium-gold" : "text-primary"}>
                       {answeredCount}/{questions.length} answered
                     </span>
                   </div>
                   <Progress 
                     value={progress} 
-                    className={`h-2 ${isNasrTheme ? "bg-gold/20" : ""}`}
+                    className={`h-2 ${isPremiumTheme ? "bg-premium-gold/20" : ""}`}
                   />
                 </div>
 
                 {/* Question Card */}
                 <div className={`p-6 rounded-xl border animate-fade-in ${
-                  isNasrTheme ? "bg-nasr-bg/50 border-gold/20" : "bg-muted/30 border-border"
+                  isPremiumTheme ? "bg-premium-bg/50 border-premium-gold/20" : "bg-muted/30 border-border"
                 }`}>
-                  <h3 className={`text-lg font-semibold mb-6 ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                  <h3 className={`text-lg font-semibold mb-6 ${isPremiumTheme ? "text-premium-text" : "text-foreground"}`}>
                     {currentQuestion.question}
                   </h3>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-3 relative">
+                    {/* Feedback Overlay */}
+                    <AnimatePresence>
+                      {showFeedback && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          className={`absolute inset-0 z-10 flex items-center justify-center rounded-xl backdrop-blur-[2px] ${
+                            lastCorrect ? "bg-emerald-500/10" : "bg-red-500/10"
+                          }`}
+                        >
+                          <div className={`flex flex-col items-center gap-2 p-4 rounded-2xl shadow-2xl ${
+                            lastCorrect ? "bg-emerald-500 text-white" : "bg-red-500 text-white"
+                          }`}>
+                            {lastCorrect ? (
+                              <motion.div
+                                animate={{ scale: [1, 1.2, 1] }}
+                                transition={{ repeat: Infinity, duration: 0.5 }}
+                              >
+                                <CheckCircle2 className="h-12 w-12" />
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                animate={{ x: [0, -10, 10, -10, 10, 0] }}
+                                transition={{ duration: 0.4 }}
+                              >
+                                <XCircle className="h-12 w-12" />
+                              </motion.div>
+                            )}
+                            <span className="font-bold text-lg">{lastCorrect ? "CORRECT!" : "WRONG!"}</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
                     {currentQuestion.options?.map((option, optIndex) => {
                       const isSelected = answers[currentQuestionIndex] === option;
+                      const isCorrect = currentQuestion.correct_index === optIndex || currentQuestion.correct_answer === option;
+                      
+                      let feedbackStyle = "";
+                      if (showFeedback) {
+                        if (isCorrect) feedbackStyle = "border-emerald-500 bg-emerald-500/20 text-emerald-400";
+                        else if (isSelected && !isCorrect) feedbackStyle = "border-red-500 bg-red-500/20 text-red-400";
+                      }
+
                       return (
                         <button
                           key={optIndex}
                           onClick={() => handleSelectAnswer(currentQuestionIndex, option)}
+                          disabled={isAnswering}
                           className={`w-full p-4 rounded-lg border text-left transition-all duration-200 flex items-center gap-3 ${
-                            isSelected
-                              ? isNasrTheme
-                                ? "border-gold bg-gold/20 shadow-md"
+                            feedbackStyle || (isSelected
+                              ? isPremiumTheme
+                                ? "border-premium-gold bg-premium-gold/20 shadow-md"
                                 : "border-primary bg-primary/10 shadow-md"
-                              : isNasrTheme
-                                ? "border-gold/20 hover:border-gold/50 hover:bg-gold/5"
-                                : "border-border hover:border-primary/50 hover:bg-muted/50"
+                              : isPremiumTheme
+                                ? "border-premium-gold/20 hover:border-premium-gold/50 hover:bg-premium-gold/5"
+                                : "border-border hover:border-primary/50 hover:bg-muted/50")
                           }`}
                         >
                           {isSelected ? (
-                            <CheckCircle2 className={`h-5 w-5 flex-shrink-0 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+                            <CheckCircle2 className={`h-5 w-5 flex-shrink-0 ${isPremiumTheme ? "text-premium-gold" : "text-primary"}`} />
                           ) : (
-                            <Circle className={`h-5 w-5 flex-shrink-0 ${isNasrTheme ? "text-gold/40" : "text-muted-foreground"}`} />
+                            <Circle className={`h-5 w-5 flex-shrink-0 ${isPremiumTheme ? "text-premium-gold/40" : "text-muted-foreground"}`} />
                           )}
-                          <span className={`${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                          <span className={isPremiumTheme ? "text-premium-text" : "text-foreground"}>
                             {option}
                           </span>
                         </button>
@@ -418,15 +659,15 @@ const Quiz = () => {
                       onClick={() => setCurrentQuestionIndex(idx)}
                       className={`w-8 h-8 rounded-full text-xs font-medium transition-all ${
                         idx === currentQuestionIndex
-                          ? isNasrTheme
-                            ? "bg-gold text-nasr-bg"
+                          ? isPremiumTheme
+                            ? "bg-premium-gold text-premium-bg"
                             : "bg-primary text-primary-foreground"
                           : answers[idx]
-                            ? isNasrTheme
-                              ? "bg-gold/30 text-nasr-text"
+                            ? isPremiumTheme
+                              ? "bg-premium-gold/30 text-premium-text"
                               : "bg-primary/30 text-foreground"
-                            : isNasrTheme
-                              ? "bg-gold/10 text-nasr-text-muted hover:bg-gold/20"
+                            : isPremiumTheme
+                              ? "bg-premium-gold/10 text-premium-text-muted hover:bg-premium-gold/20"
                               : "bg-muted text-muted-foreground hover:bg-muted/80"
                       }`}
                     >
@@ -441,7 +682,7 @@ const Quiz = () => {
                     onClick={handlePrevQuestion}
                     variant="outline"
                     disabled={currentQuestionIndex === 0}
-                    className={isNasrTheme ? "border-gold/30 text-nasr-text hover:bg-gold/10 disabled:opacity-30" : ""}
+                    className={isPremiumTheme ? "border-premium-gold/30 text-premium-text hover:bg-premium-gold/10 disabled:opacity-30" : ""}
                   >
                     Previous
                   </Button>
@@ -450,14 +691,14 @@ const Quiz = () => {
                     {currentQuestionIndex < questions.length - 1 ? (
                       <Button
                         onClick={handleNextQuestion}
-                        className={isNasrTheme ? "bg-gold hover:bg-gold-dark text-nasr-bg" : ""}
+                        className={isPremiumTheme ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" : ""}
                       >
                         Next
                       </Button>
                     ) : (
                       <Button
                         onClick={handleSubmitQuiz}
-                        className={isNasrTheme ? "bg-gold hover:bg-gold-dark text-nasr-bg" : ""}
+                        className={isPremiumTheme ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" : ""}
                       >
                         <Send className="h-4 w-4 mr-2" />
                         Submit Quiz
@@ -471,7 +712,7 @@ const Quiz = () => {
                     onClick={handleReset}
                     variant="ghost"
                     size="sm"
-                    className={isNasrTheme ? "text-nasr-text-muted hover:text-nasr-text" : "text-muted-foreground"}
+                    className={isPremiumTheme ? "text-premium-text-muted hover:text-premium-text" : "text-muted-foreground"}
                   >
                     Cancel Quiz
                   </Button>
@@ -482,13 +723,13 @@ const Quiz = () => {
             {/* Step: No Questions */}
             {step === "quiz" && questions.length === 0 && (
               <div className="text-center py-12 space-y-4">
-                <p className={isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}>
+                <p className={isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}>
                   No questions received from the server.
                 </p>
                 <Button
                   onClick={handleReset}
                   variant="outline"
-                  className={isNasrTheme ? "border-gold/30 text-nasr-text hover:bg-gold/10" : ""}
+                  className={isPremiumTheme ? "border-premium-gold/30 text-premium-text hover:bg-premium-gold/10" : ""}
                 >
                   Try Again
                 </Button>
@@ -509,7 +750,7 @@ const Quiz = () => {
                   attempt_id: submitResponse.attempt_id ?? quizId ?? "",
                   attempted_at: submitResponse.attempted_at ?? new Date().toISOString(),
                   next_allowed_at: submitResponse.next_allowed_at ?? null,
-                  unlocked_count: submitResponse.unlocked_count ?? 0,
+                  unlocked_count: unlockedCount || submitResponse.unlocked_count || 0,
                   review: submitResponse.review ?? questions.map((q, idx) => ({
                     question_id: String(q.id),
                     question: q.question,
@@ -524,28 +765,28 @@ const Quiz = () => {
                   }))
                 }}
                 onRetry={handleReset}
-                isNasrTheme={isNasrTheme}
+                isPremiumTheme={isPremiumTheme}
               />
             )}
 
             {/* Step: Results - No response */}
             {step === "results" && !submitResponse && (
               <div className="text-center py-12 space-y-6">
-                <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${isNasrTheme ? "bg-gold/20" : "bg-primary/20"}`}>
-                  <Trophy className={`h-10 w-10 ${isNasrTheme ? "text-gold" : "text-primary"}`} />
+                <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ${isPremiumTheme ? "bg-premium-gold/20" : "bg-primary/20"}`}>
+                  <Trophy className={`h-10 w-10 ${isPremiumTheme ? "text-premium-gold" : "text-primary"}`} />
                 </div>
                 <div className="space-y-2">
-                  <h3 className={`text-2xl font-semibold ${isNasrTheme ? "text-nasr-text" : "text-foreground"}`}>
+                  <h3 className={`text-2xl font-semibold ${isPremiumTheme ? "text-premium-text" : "text-foreground"}`}>
                     Quiz Submitted
                   </h3>
-                  <p className={`${isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground"}`}>
+                  <p className={`${isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground"}`}>
                     No detailed results received from server.
                   </p>
                 </div>
                 <Button
                   onClick={handleReset}
                   size="lg"
-                  className={`px-8 ${isNasrTheme ? "bg-gold hover:bg-gold-dark text-nasr-bg" : ""}`}
+                  className={`px-8 ${isPremiumTheme ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" : ""}`}
                 >
                   Take Another Quiz
                 </Button>

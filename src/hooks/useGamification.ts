@@ -65,6 +65,8 @@ export function useGamification() {
         return;
       }
 
+      let profileId = user.id; // Fallback to auth ID
+      
       // Step 2: Get public.users.id (profile_id) from auth_user_id
       const { data: publicUser, error: userError } = await supabase
         .from("users")
@@ -72,19 +74,17 @@ export function useGamification() {
         .eq("auth_user_id", user.id)
         .maybeSingle();
 
-      if (userError || !publicUser?.id) {
-        console.error("Error fetching public user:", userError);
-        setState(prev => ({ ...prev, isLoading: false, error: "User profile not found" }));
-        return;
+      if (!userError && publicUser?.id) {
+        profileId = publicUser.id;
+      } else if (userError) {
+        console.warn("Could not fetch profile from public.users (potentially RLS), using auth.uid:", userError);
       }
 
-      const profileId = publicUser.id;
-
       // Step 3: Fetch user_gamification by user_id = profile_id
-      // Read experience_points (the active XP column), NOT xp_total
+      // Read xp (the active XP column)
       const { data: gamification, error: gamError } = await supabase
         .from("user_gamification")
-        .select("experience_points, streak_days, level")
+        .select("xp, streak_days, level")
         .eq("user_id", profileId)
         .maybeSingle();
 
@@ -94,8 +94,8 @@ export function useGamification() {
         return;
       }
 
-      // Use experience_points as the single source of truth for XP
-      const xp = Number(gamification?.experience_points ?? 0);
+      // Use xp as the single source of truth for XP
+      const xp = Number(gamification?.xp ?? 0);
       const streakDays = gamification?.streak_days ?? 0;
 
       // Step 4: Get all xp_levels to determine current and next level

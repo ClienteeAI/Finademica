@@ -1,0 +1,45 @@
+
+-- BATCH 3: INTERMEDIATE & ELITE CRYPTO/COMMODITIES
+-- Copy and paste this into your Supabase SQL Editor
+
+INSERT INTO ai_quiz_questions (module, level, question, options, correct_answer, quiz_id)
+VALUES 
+-- CRYPTO INTERMEDIATE
+('crypto', 'Intermediate', 'What is "Proof of Stake" (PoS)?', '["A consensus mechanism where validators are chosen based on holdings", "A way to prove you own a physical coin", "A law requiring crypto to be stored in a bank", "A measure of how fast a block is mined"]', 'A consensus mechanism where validators are chosen based on holdings', 'crypto_master'),
+('crypto', 'Intermediate', 'What is a "Smart Contract"?', '["A self-executing contract with terms written in code", "A contract signed by a computer", "A digital lawyer service", "A way to track company employees on blockchain"]', 'A self-executing contract with terms written in code', 'crypto_master'),
+('crypto', 'Intermediate', 'What is a "DEX"?', '["Decentralized Exchange", "Digital Entry X-change", "Data Execution X-ray", "Dual Energy X-form"]', 'Decentralized Exchange', 'crypto_master'),
+('crypto', 'Intermediate', 'What is "Gas Fee"?', '["The cost to perform a transaction on the network", "A tax on crypto mining electricity", "The profit made by an exchange", "A fee for using a physical wallet"]', 'The cost to perform a transaction on the network', 'crypto_master'),
+('crypto', 'Intermediate', 'What is "Staking"?', '["Locking up crypto to support a network and earn rewards", "Selling all your coins at once", "Betting on the price of Bitcoin", "Storing coins in a physical vault"]', 'Locking up crypto to support a network and earn rewards', 'crypto_master'),
+('crypto', 'Intermediate', 'What is a "Layer 2" solution?', '["A protocol built on top of a blockchain to improve scaling", "A second backup of your private key", "A different type of crypto wallet", "A group of miners working together"]', 'A protocol built on top of a blockchain to improve scaling', 'crypto_master'),
+('crypto', 'Intermediate', 'What is "Burning" in crypto?', '["Permanently removing coins from circulation", "Hacking a crypto wallet", "Selling coins for a loss", "A physical process to destroy hardware"]', 'Permanently removing coins from circulation', 'crypto_master'),
+('crypto', 'Intermediate', 'What is "Yield Farming"?', '["Lending crypto to earn interest or more crypto", "Growing food using crypto profits", "A type of crypto mining pool", "Buying low and selling high"]', 'Lending crypto to earn interest or more crypto', 'crypto_master'),
+('crypto', 'Intermediate', 'What is a "Hard Fork"?', '["A major update to a blockchain that creates a new version", "A physical tool used in mining", "A crash in the crypto market", "When a private key is lost"]', 'A major update to a blockchain that creates a new version', 'crypto_master'),
+('crypto', 'Intermediate', 'What is a "Whitepaper"?', '["A document explaining a crypto project goal and technology", "A blank piece of paper for notes", "A legal contract for crypto buyers", "A list of all coin owners"]', 'A document explaining a crypto project goal and technology', 'crypto_master'),
+
+-- CRYPTO ELITE
+('crypto', 'Elite', 'What is "Zero-Knowledge Proof" (ZKP)?', '["A method to prove something is true without revealing the data", "A trade with zero risk", "A wallet with no coins", "A blockchain with no transactions"]', 'A method to prove something is true without revealing the data', 'crypto_master'),
+('crypto', 'Elite', 'What is "MEV" (Maximal Extractable Value)?', '["The profit a miner/validator can make by reordering transactions", "The total value of the crypto market", "The maximum amount you can withdraw", "A measure of network security"]', 'The profit a miner/validator can make by reordering transactions', 'crypto_master'),
+('crypto', 'Elite', 'What is "Sharding"?', '["Splitting a blockchain into smaller parts to increase speed", "A type of cyber attack", "A method to delete old transactions", "A way to divide private keys"]', 'Splitting a blockchain into smaller parts to increase speed', 'crypto_master'),
+('crypto', 'Elite', 'What is a "DAO"?', '["Decentralized Autonomous Organization", "Digital Asset Online", "Detailed Account Operations", "Dual Asset Optimization"]', 'Decentralized Autonomous Organization', 'crypto_master'),
+('crypto', 'Elite', 'What is "Byzantine Fault Tolerance"?', '["A system ability to function despite failing components", "A type of encryption used in 1990", "A method to hack a blockchain", "A legal requirement for exchanges"]', 'A system ability to function despite failing components', 'crypto_master'),
+
+-- COMMODITIES INTERMEDIATE
+('commodities', 'Intermediate', 'What is "Contango" in commodities?', '["When the future price is higher than the spot price", "A type of market dance", "When prices are falling rapidly", "A measure of oil purity"]', 'When the future price is higher than the spot price', 'comm_master'),
+('commodities', 'Intermediate', 'What is "Backwardation"?', '["When the spot price is higher than the future price", "A market moving backwards in time", "A decrease in commodity demand", "A specific type of oil refinery"]', 'When the spot price is higher than the future price', 'comm_master'),
+('commodities', 'Intermediate', 'What is the "WTI" benchmark?', '["West Texas Intermediate (Oil)", "World Trade Interest", "Western Timber Index", "World Treasury Information"]', 'West Texas Intermediate (Oil)', 'comm_master'),
+('commodities', 'Intermediate', 'What is "Brent Crude"?', '["Oil extracted from the North Sea", "A brand of engine oil", "Oil found in Saudi Arabia", "A measure of oil volatility"]', 'Oil extracted from the North Sea', 'comm_master'),
+('commodities', 'Intermediate', 'What is "Hedging" in commodities?', '["Using futures to lock in prices and reduce risk", "Buying as much gold as possible", "Trading only on news", "Reducing the quality of the product"]', 'Using futures to lock in prices and reduce risk', 'comm_master'),
+('commodities', 'Intermediate', 'What is a "Spot Price"?', '["The current market price for immediate delivery", "The price of a commodity in 10 years", "The average price of the year", "A price determined by a specific broker"]', 'The current market price for immediate delivery', 'comm_master'),
+('commodities', 'Intermediate', 'What is the "Gold-to-Silver Ratio"?', '["The amount of silver it takes to buy one ounce of gold", "The total volume of gold traded daily", "The purity level of gold", "A measure of market inflation"]', 'The amount of silver it takes to buy one ounce of gold', 'comm_master'),
+('commodities', 'Intermediate', 'What is "Speculation" in commodities?', '["Trading to profit from price movements without owning the asset", "Studying the chemical properties of oil", "A type of physical delivery contract", "A tax on commodity trading"]', 'Trading to profit from price movements without owning the asset', 'comm_master'),
+('commodities', 'Intermediate', 'What are "Exchange-Traded Commodities" (ETCs)?', '["Investment vehicles that track commodity prices", "Commodities traded on a street market", "A type of crypto coin", "A list of all oil wells"]', 'Investment vehicles that track commodity prices', 'comm_master'),
+('commodities', 'Intermediate', 'What is "Base Metal"?', '["Industrial metals like copper, lead, and zinc", "Metals used only for jewelry", "Metals found in the ocean", "Metals with no value"]', 'Industrial metals like copper, lead, and zinc', 'comm_master'),
+
+-- COMMODITIES ELITE
+('commodities', 'Elite', 'What is "Crack Spread"?', '["The difference between the price of crude oil and refined products", "A technical pattern in gold charts", "The cost of transporting oil via pipeline", "A type of market volatility"]', 'The difference between the price of crude oil and refined products', 'comm_master'),
+('commodities', 'Elite', 'What is "Basis Risk"?', '["The risk that the spot and futures price do not converge", "The risk of a company going bankrupt", "The risk of losing your trading password", "A measure of currency fluctuation"]', 'The risk that the spot and futures price do not converge', 'comm_master'),
+('commodities', 'Elite', 'What is "Physical Delivery"?', '["The actual transfer of the commodity at contract maturity", "Sending a digital file to a client", "A type of fast trading execution", "When a trader visits a bank"]', 'The actual transfer of the commodity at contract maturity', 'comm_master'),
+('commodities', 'Elite', 'What is a "Margin of Safety" in commodity investing?', '["Buying below the intrinsic value or production cost", "Using very low leverage", "Having a lot of cash in the bank", "Using multiple stop losses"]', 'Buying below the intrinsic value or production cost', 'comm_master'),
+('commodities', 'Elite', 'What is the "LME" (London Metal Exchange)?', '["The world center for industrial metals trading", "A museum for old coins", "A bank for commodity traders", "A type of gold bar"]', 'The world center for industrial metals trading', 'comm_master');
+
+ON CONFLICT DO NOTHING;

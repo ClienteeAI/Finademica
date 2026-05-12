@@ -32,15 +32,15 @@ interface Video {
 }
 
 const categoryColors: Record<string, string> = {
-  "Getting Started": "bg-blue-500",
+  "Getting Started": "bg-indigo-500",
   "Trading Strategies": "bg-purple-500",
-  "Risk Management": "bg-red-500",
-  "Technical Analysis": "bg-green-500",
-  "Forex": "bg-emerald-500",
-  "Stocks": "bg-blue-500",
-  "Crypto": "bg-orange-500",
-  "Psychology": "bg-pink-500",
-  "Fundamentals": "bg-cyan-500",
+  "Risk Management": "bg-rose-500",
+  "Technical Analysis": "bg-emerald-500",
+  "Forex": "bg-indigo-600",
+  "Stocks": "bg-blue-600",
+  "Crypto": "bg-orange-600",
+  "Psychology": "bg-pink-600",
+  "Fundamentals": "bg-indigo-400",
 };
 
 const formatDuration = (seconds: number | null): string => {
@@ -126,21 +126,47 @@ const MyVideos = () => {
   const fetchVideos = async (userId: string) => {
     setLoading(true);
     try {
-      // Step A: Load unlocks for current user
+      let profileId = userId; // Fallback to auth ID if profile fetch fails
+      
+      const { data: publicUser, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("auth_user_id", userId)
+        .maybeSingle();
+
+      if (!userError && publicUser?.id) {
+        profileId = publicUser.id;
+      } else if (userError) {
+        console.warn("Could not fetch profile from public.users (possibly RLS), using auth.uid directly:", userError);
+      }
+
+      // Step A: Load unlocked videos for this specific profile
       const { data: unlockedData, error: unlocksError } = await supabase
         .from("user_video_unlocks")
         .select("video_id")
-        .eq("user_id", userId);
+        .eq("user_id", profileId);
 
       if (unlocksError) {
-        console.error("Error fetching unlocks:", unlocksError);
+        console.error("Error fetching unlocks (potentially RLS):", unlocksError);
       }
 
       const unlockedVideoIds = new Set(
         (unlockedData || []).map((u) => u.video_id)
       );
 
-      // Step B: Load videos
+      // Step B: Load videos linked to this client
+      const { data: clientVideoLinks, error: linkError } = await supabase
+        .from("client_videos")
+        .select("video_id")
+        .eq("client_id", "a6151fd9-1513-4ae0-b960-25454f3a9bf2")
+        .eq("is_active", true);
+
+      if (linkError) {
+        console.error("Error fetching client video links:", linkError);
+      }
+
+      const clientVideoIds = new Set((clientVideoLinks || []).map(l => l.video_id));
+
       const { data: allVideos, error: videosError } = await supabase
         .from("videos")
         .select(`
@@ -158,7 +184,6 @@ const MyVideos = () => {
           mandatory,
           created_at
         `)
-        .eq("is_active", true)
         .order("order_priority", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: true });
 
@@ -180,6 +205,9 @@ const MyVideos = () => {
       const locked: Video[] = [];
 
       allVideos.forEach((video) => {
+        // Only show if linked to client (or if no links exist yet, show all for debugging - but for prod we filter)
+        if (clientVideoIds.size > 0 && !clientVideoIds.has(video.id)) return;
+
         const isMandatory = video.mandatory === true;
         const isUnlocked = unlockedVideoIds.has(video.id);
         const isPlayable = isMandatory || isUnlocked;
@@ -390,11 +418,11 @@ const MyVideos = () => {
     <SidebarLayout>
       <div className="space-y-6 md:space-y-8 animate-fade-in">
         {/* Header */}
-        <div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 md:mb-2">
+        <div className="space-y-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight text-foreground">
             My Video Library
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground">
+          <p className="text-sm md:text-base text-muted-foreground font-medium uppercase tracking-widest">
             {playableVideos.length} playable • {lockedVideos.length} locked
           </p>
         </div>
@@ -430,10 +458,10 @@ const MyVideos = () => {
                 size="sm"
                 onClick={() => setSelectedCategory(category)}
                 className={cn(
-                  "h-9 px-4 font-medium transition-all duration-200",
+                  "h-10 px-6 font-semibold transition-all duration-300 rounded-xl",
                   selectedCategory === category
-                    ? "bg-primary text-primary-foreground shadow-md"
-                    : "bg-card/50 border-2 border-border text-muted-foreground hover:text-foreground hover:border-primary/50 hover:bg-card"
+                    ? "bg-[#6366F1] text-white shadow-[0_0_20px_rgba(99,102,241,0.4)] border-none"
+                    : "bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-[#6366F1]/50 hover:bg-white/10"
                 )}
               >
                 {category}
@@ -547,7 +575,7 @@ const MyVideos = () => {
             <p className="text-muted-foreground mt-1">
               {searchQuery || selectedCategory !== "All"
                 ? "Try adjusting your filters"
-                : "Complete quizzes to unlock more videos"}
+                : "Use the Stock Analyzer, Calculator or Arena to earn more free videos"}
             </p>
           </div>
         )}

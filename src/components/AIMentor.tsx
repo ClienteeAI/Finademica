@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { sendMentorMessageSentEvent } from "@/lib/crmWebhook";
+import { useClient } from "@/lib/clientContext";
 
 interface Message {
   id: string;
@@ -13,6 +14,8 @@ interface Message {
 }
 
 export function AIMentor() {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -174,7 +177,7 @@ export function AIMentor() {
       
       // Send to n8n webhook
       const response = await fetch(
-        "https://n8n.srv1474318.hstgr.cloud/webhook/AI-mentor",
+        "https://n8n.srv1474318.hstgr.cloud/webhook/AI-mentor-finademica",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -276,21 +279,20 @@ export function AIMentor() {
           "fixed z-[9999]",
           "bottom-[calc(76px+env(safe-area-inset-bottom))] right-4 md:bottom-6 md:right-6",
           "w-[52px] h-[52px] md:w-[60px] md:h-[60px] rounded-full",
-          "bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6]",
+          isPremiumTheme 
+            ? "bg-premium-gold border-2 border-premium-gold/60 hover:border-premium-gold hover:shadow-[0_0_25px_rgba(212,175,55,0.5)] shadow-[0_4px_20px_rgba(212,175,55,0.3)]" 
+            : "bg-gradient-to-br from-[#6366F1] to-[#4F46E5] border-2 border-[#6366F1]/60 hover:border-[#818CF8] hover:shadow-[0_0_25px_rgba(99,102,241,0.5)] shadow-[0_4px_20px_rgba(99,102,241,0.3)]",
           "flex items-center justify-center",
-          "border-2 border-[#4DE2E8]/60",
-          "hover:border-[#A7E9FF] hover:shadow-[0_0_25px_rgba(77,226,232,0.5)]",
-          "shadow-[0_4px_20px_rgba(77,226,232,0.3)]",
           "transition-all duration-300 ease-out",
           "hover:scale-110 hover:-translate-y-1",
-          "animate-pulse-subtle"
+          isPremiumTheme ? "animate-gold-pulse" : "animate-pulse-subtle"
         )}
         aria-label="Open AI Mentor"
       >
         {isOpen ? (
-          <X className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <X className={cn("w-5 h-5 md:w-6 md:h-6", isPremiumTheme ? "text-premium-bg" : "text-white")} />
         ) : (
-          <MessageCircle className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <MessageCircle className={cn("w-5 h-5 md:w-6 md:h-6", isPremiumTheme ? "text-premium-bg" : "text-white")} />
         )}
       </button>
 
@@ -308,8 +310,8 @@ export function AIMentor() {
             className={cn(
               "fixed z-[9999]",
               "w-full h-[90vh] bottom-0 left-0 md:w-[380px] md:h-[600px] md:bottom-6 md:right-6 md:left-auto md:top-auto",
-              "bg-white/90 backdrop-blur-xl",
-              "border border-[#D4E0EC]",
+              isPremiumTheme ? "bg-premium-bg/95 border-premium-gold/20" : "bg-[#0F172A]/90 border-white/10",
+              "backdrop-blur-xl border",
               "rounded-t-[26px] md:rounded-[26px]",
               "overflow-hidden",
               "flex flex-col",
@@ -318,20 +320,28 @@ export function AIMentor() {
             )}
           >
             {/* Header */}
-            <div className="relative p-6 border-b border-[#D4E0EC] bg-gradient-to-r from-[#4DE2E8]/10 to-[#A7E9FF]/10">
+            <div className={cn(
+              "relative p-6 border-b",
+              isPremiumTheme ? "border-premium-gold/10 bg-premium-gold/5" : "border-white/10 bg-gradient-to-r from-[#6366F1]/10 to-[#818CF8]/10"
+            )}>
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_15px_rgba(77,226,232,0.4)]">
-                  <Sparkles className="w-5 h-5 text-white" />
+                <div className={cn(
+                  "w-10 h-10 rounded-full flex items-center justify-center",
+                  isPremiumTheme 
+                    ? "bg-premium-gold shadow-[0_0_15px_rgba(212,175,55,0.4)]" 
+                    : "bg-gradient-to-br from-[#6366F1] to-[#4F46E5] shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                )}>
+                  <Sparkles className={cn("w-5 h-5", isPremiumTheme ? "text-premium-bg" : "text-white")} />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-[#1D3557]">AI Trading Mentor</h3>
-                  <p className="text-sm text-[#6B7280]">
+                  <h3 className={cn("text-lg font-bold", isPremiumTheme ? "text-premium-gold font-serif" : "text-white font-serif")}>AI Trading Mentor</h3>
+                  <p className={cn("text-sm", isPremiumTheme ? "text-premium-text-muted" : "text-white/60")}>
                     Ask anything about trading, learning, or mindset.
                   </p>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="text-[#6B7280] hover:text-[#1D3557] transition-colors"
+                  className={cn("transition-colors", isPremiumTheme ? "text-premium-text-muted hover:text-premium-gold" : "text-[#6B7280] hover:text-[#1D3557]")}
                   aria-label="Close"
                 >
                   <X className="w-5 h-5" />
@@ -343,10 +353,15 @@ export function AIMentor() {
             <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-4 space-y-4">
               {messages.length === 0 && !isLoading && (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
-                    <Sparkles className="w-8 h-8 text-[#2FB3C6]" />
+                  <div className={cn(
+                    "w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center border",
+                    isPremiumTheme 
+                      ? "bg-premium-gold/10 border-premium-gold/30" 
+                      : "bg-gradient-to-br from-[#6366F1]/20 to-[#818CF8]/20 border-[#6366F1]/30"
+                  )}>
+                    <Sparkles className={cn("w-8 h-8", isPremiumTheme ? "text-premium-gold" : "text-[#6366F1]")} />
                   </div>
-                  <p className="text-[#6B7280] text-sm">
+                  <p className={cn("text-sm font-medium", isPremiumTheme ? "text-premium-text-muted" : "text-white/60")}>
                     Hi! I'm your AI Trading Mentor. Ask me anything!
                   </p>
                 </div>
@@ -364,13 +379,17 @@ export function AIMentor() {
                     className={cn(
                       "max-w-[85%] rounded-[18px] px-4 py-3",
                       message.role === "user"
-                        ? "bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6] text-white shadow-[0_0_15px_rgba(77,226,232,0.3)]"
-                        : "bg-white/80 backdrop-blur-sm text-[#1D3557] border border-[#D4E0EC]"
+                        ? (isPremiumTheme 
+                          ? "bg-premium-gold text-premium-bg shadow-[0_0_15px_rgba(212,175,55,0.3)]" 
+                          : "bg-gradient-to-r from-[#6366F1] to-[#4F46E5] text-white shadow-[0_0_15px_rgba(99,102,241,0.3)]")
+                        : (isPremiumTheme 
+                          ? "bg-premium-panel text-premium-text border border-premium-gold/10" 
+                          : "bg-[#1E293B]/80 backdrop-blur-sm text-white border border-white/10")
                     )}
                   >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-sm font-medium whitespace-pre-wrap">{message.content}</p>
                   </div>
-                  <p className="text-[10px] text-[#9CA3AF] mt-1 px-1">
+                  <p className={cn("text-[10px] mt-1 px-1", isPremiumTheme ? "text-premium-text-muted" : "text-[#9CA3AF]")}>
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -378,13 +397,16 @@ export function AIMentor() {
 
               {isLoading && (
                 <div className="flex justify-start animate-fade-in">
-                  <div className="bg-white/80 backdrop-blur-sm rounded-[18px] px-4 py-3 border border-[#D4E0EC]">
+                  <div className={cn(
+                    "rounded-[18px] px-4 py-3 border",
+                    isPremiumTheme ? "bg-premium-panel text-premium-text border-premium-gold/10" : "bg-[#1E293B]/80 border-white/10 backdrop-blur-sm"
+                  )}>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-[#6B7280]">Mentor is typing</span>
+                      <span className={cn("text-sm", isPremiumTheme ? "text-premium-text-muted" : "text-white/60")}>Mentor is typing</span>
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse" />
-                        <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse delay-150" />
-                        <div className="w-2 h-2 rounded-full bg-[#4DE2E8] animate-pulse delay-300" />
+                        <div className={cn("w-2 h-2 rounded-full animate-pulse", isPremiumTheme ? "bg-premium-gold" : "bg-[#6366F1]")} />
+                        <div className={cn("w-2 h-2 rounded-full animate-pulse delay-150", isPremiumTheme ? "bg-premium-gold" : "bg-[#6366F1]")} />
+                        <div className={cn("w-2 h-2 rounded-full animate-pulse delay-300", isPremiumTheme ? "bg-premium-gold" : "bg-[#6366F1]")} />
                       </div>
                     </div>
                   </div>
@@ -395,7 +417,10 @@ export function AIMentor() {
             </div>
 
             {/* Input Area */}
-            <div className="p-4 border-t border-[#D4E0EC] bg-white/70 backdrop-blur-xl">
+            <div className={cn(
+              "p-4 border-t backdrop-blur-xl",
+              isPremiumTheme ? "border-premium-gold/10 bg-premium-bg/70" : "border-white/10 bg-[#0F172A]/70"
+            )}>
               <div className="flex gap-2">
                 <input
                   ref={inputRef}
@@ -407,11 +432,10 @@ export function AIMentor() {
                   disabled={isLoading || !authUserId}
                   className={cn(
                     "flex-1 px-4 py-3 rounded-full",
-                    "bg-white/80 border border-[#D4E0EC]",
-                    "text-[#1D3557] placeholder:text-[#9CA3AF]",
-                    "focus:outline-none focus:border-[#4DE2E8] focus:shadow-[0_0_15px_rgba(77,226,232,0.2)]",
-                    "transition-all duration-300",
-                    "backdrop-blur-xl"
+                    "backdrop-blur-xl transition-all duration-300",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/80 border-premium-gold/20 text-premium-text placeholder:text-premium-text-muted/40 focus:border-premium-gold focus:shadow-[0_0_15px_rgba(212,175,55,0.2)]" 
+                      : "bg-[#1E293B]/80 border-white/10 text-white placeholder:text-white/40 focus:border-[#6366F1] focus:shadow-[0_0_15px_rgba(99,102,241,0.2)]"
                   )}
                 />
                 <button
@@ -419,15 +443,16 @@ export function AIMentor() {
                   disabled={!input.trim() || isLoading || !authUserId}
                   className={cn(
                     "w-12 h-12 rounded-full",
-                    "bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6]",
-                    "flex items-center justify-center",
-                    "hover:scale-110 hover:shadow-[0_0_20px_rgba(77,226,232,0.5)]",
-                    "transition-all duration-300",
+                    "flex items-center justify-center transition-all duration-300",
+                    isPremiumTheme 
+                      ? "bg-premium-gold hover:shadow-[0_0_20px_rgba(212,175,55,0.5)]" 
+                      : "bg-gradient-to-r from-[#6366F1] to-[#4F46E5] hover:shadow-[0_0_20px_rgba(99,102,241,0.5)]",
+                    "hover:scale-110",
                     "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                   )}
                   aria-label="Send message"
                 >
-                  <Send className="w-5 h-5 text-white" />
+                  <Send className={cn("w-5 h-5", isPremiumTheme ? "text-premium-bg" : "text-white")} />
                 </button>
               </div>
             </div>

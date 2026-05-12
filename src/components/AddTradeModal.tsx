@@ -11,18 +11,21 @@ import { Loader2, CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { useClient } from "@/lib/clientContext";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 
 interface AddTradeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-  isNasrTheme?: boolean;
 }
 
-export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: AddTradeModalProps) => {
+export const AddTradeModal = ({ open, onOpenChange, onSuccess }: AddTradeModalProps) => {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'nasr' || client?.subdomain === 'finademica';
   const navigate = useNavigate();
   const { logEvent } = useLogEvent();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,10 +62,38 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
         return;
       }
 
+      // 1. Save directly to Supabase
+      const { data: dbData, error: dbError } = await supabase
+        .from('trading_diary')
+        .insert({
+          user_id: authUser.auth_user_id,
+          Symbol: formData.symbol.toUpperCase(),
+          direction: formData.side,
+          Status: formData.status,
+          entry_price: formData.entry_price ? parseFloat(formData.entry_price) : null,
+          Stop_loss: formData.stop_loss_price ? parseFloat(formData.stop_loss_price) : null,
+          Take_profit: formData.take_profit_price ? parseFloat(formData.take_profit_price) : null,
+          Volume: formData.lots_final ? parseFloat(formData.lots_final) : null,
+          Total_risk: formData.risk_total_usd ? parseFloat(formData.risk_total_usd) : null,
+          notes: formData.notes || null,
+          trade_date: openTime ? openTime.toISOString() : new Date().toISOString(),
+        })
+        .select()
+        .single();
+
+      if (dbError) {
+        console.error("Database save error:", dbError);
+        toast.error(`Database error: ${dbError.message}`);
+        return;
+      }
+
+      // 2. Send to Webhook for CRM
       const tradeData = {
         auth_user_id: authUser.auth_user_id,
+        supabase_id: authUser.supabase_id,
         email: authUser.user_email,
-        broker_key: "nasr_trade_mt5",
+        phone: authUser.user_phone,
+        broker_key: "finademica_mt5",
         symbol: formData.symbol.toUpperCase(),
         side: formData.side,
         entry_price: formData.entry_price ? parseFloat(formData.entry_price) : null,
@@ -73,16 +104,12 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
         notes: formData.notes || null,
         status: formData.status,
         open_time: openTime ? openTime.toISOString() : null,
+        db_id: dbData.id // Pass the new DB ID to n8n
       };
 
       const result = await sendDiaryWebhook("create", tradeData);
 
-      if (!result.success) {
-        toast.error("Failed to save trade. Please try again.");
-        return;
-      }
-
-      toast.success("Saved to diary");
+      toast.success("Trade saved and synced");
       
       await logEvent("diary_trade_created", {
         symbol: formData.symbol.toUpperCase(),
@@ -117,10 +144,12 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={cn(
         "max-w-md",
-        isNasrTheme && "bg-nasr-panel border-gold/20"
+        isPremiumTheme 
+          ? "bg-premium-panel border-premium-gold/20 text-premium-text" 
+          : ""
       )}>
         <DialogHeader>
-          <DialogTitle className={cn(isNasrTheme && "text-nasr-text font-playfair")}>
+          <DialogTitle className={cn(isPremiumTheme ? "text-premium-gold font-serif" : "text-foreground")}>
             Add New Trade
           </DialogTitle>
         </DialogHeader>
@@ -128,21 +157,21 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Symbol *</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Symbol *</Label>
               <Input
                 placeholder="e.g., EURUSD"
                 value={formData.symbol}
                 onChange={(e) => setFormData({ ...formData, symbol: e.target.value })}
-                className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+                className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
               />
             </div>
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Side</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Side</Label>
               <Select value={formData.side} onValueChange={(v) => setFormData({ ...formData, side: v as "long" | "short" })}>
-                <SelectTrigger className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}>
+                <SelectTrigger className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20" : "bg-background border-border")}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                <SelectContent className={cn(isPremiumTheme ? "bg-premium-panel border-premium-gold/20" : "")}>
                   <SelectItem value="long">Long</SelectItem>
                   <SelectItem value="short">Short</SelectItem>
                 </SelectContent>
@@ -152,12 +181,12 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Status</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Status</Label>
               <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
-                <SelectTrigger className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}>
+                <SelectTrigger className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20" : "bg-background border-border")}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className={cn(isNasrTheme && "bg-nasr-panel border-gold/20")}>
+                <SelectContent className={cn(isPremiumTheme ? "bg-premium-panel border-premium-gold/20" : "")}>
                   <SelectItem value="planned">Planned</SelectItem>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="closed">Closed</SelectItem>
@@ -165,14 +194,14 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
               </Select>
             </div>
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Date</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Date</Label>
               <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      isNasrTheme && "bg-nasr-bg/60 border-gold/20",
+                      isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20" : "bg-background border-border",
                       !openTime && "text-muted-foreground"
                     )}
                   >
@@ -198,73 +227,73 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
 
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Entry</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Entry</Label>
               <Input
                 type="number"
                 step="any"
                 placeholder="0.00"
                 value={formData.entry_price}
                 onChange={(e) => setFormData({ ...formData, entry_price: e.target.value })}
-                className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+                className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
               />
             </div>
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Stop Loss</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Stop Loss</Label>
               <Input
                 type="number"
                 step="any"
                 placeholder="0.00"
                 value={formData.stop_loss_price}
                 onChange={(e) => setFormData({ ...formData, stop_loss_price: e.target.value })}
-                className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+                className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
               />
             </div>
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Take Profit</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Take Profit</Label>
               <Input
                 type="number"
                 step="any"
                 placeholder="0.00"
                 value={formData.take_profit_price}
                 onChange={(e) => setFormData({ ...formData, take_profit_price: e.target.value })}
-                className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+                className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Lots</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Lots</Label>
               <Input
                 type="number"
                 step="0.01"
                 placeholder="0.00"
                 value={formData.lots_final}
                 onChange={(e) => setFormData({ ...formData, lots_final: e.target.value })}
-                className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+                className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
               />
             </div>
             <div className="space-y-2">
-              <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Risk ($)</Label>
+              <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Risk ($)</Label>
               <Input
                 type="number"
                 step="0.01"
                 placeholder="0.00"
                 value={formData.risk_total_usd}
                 onChange={(e) => setFormData({ ...formData, risk_total_usd: e.target.value })}
-                className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+                className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className={cn(isNasrTheme && "text-nasr-text-muted")}>Notes</Label>
+            <Label className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>Notes</Label>
             <Textarea
               placeholder="Trade notes..."
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={3}
-              className={cn(isNasrTheme && "bg-nasr-bg/60 border-gold/20")}
+              className={cn(isPremiumTheme ? "bg-premium-bg/60 border-premium-gold/20 focus:border-premium-gold/50" : "bg-background border-border")}
             />
           </div>
 
@@ -273,7 +302,7 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              className={cn("flex-1", isNasrTheme && "border-gold/20")}
+              className={cn("flex-1", isPremiumTheme ? "border-premium-gold/20 text-premium-text hover:bg-premium-gold/10" : "")}
               disabled={isSubmitting}
             >
               Cancel
@@ -283,8 +312,8 @@ export const AddTradeModal = ({ open, onOpenChange, onSuccess, isNasrTheme }: Ad
               disabled={isSubmitting}
               className={cn(
                 "flex-1",
-                isNasrTheme 
-                  ? "gold-gradient text-nasr-bg hover:opacity-90" 
+                isPremiumTheme 
+                  ? "bg-premium-gold text-premium-bg hover:opacity-90 premium-gold-glow" 
                   : "success-gradient text-white hover:opacity-90"
               )}
             >

@@ -15,13 +15,14 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useLogEvent } from "@/hooks/useLogEvent";
 import { sendDiaryWebhook, getAuthUser } from "@/lib/diaryWebhook";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DeleteTradeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   tradeId: string | null;
   tradeSymbol: string;
-  isNasrTheme: boolean;
+  isPremiumTheme: boolean;
   onSuccess: () => void;
 }
 
@@ -30,7 +31,7 @@ export const DeleteTradeDialog = ({
   onOpenChange,
   tradeId,
   tradeSymbol,
-  isNasrTheme,
+  isPremiumTheme,
   onSuccess,
 }: DeleteTradeDialogProps) => {
   const { toast } = useToast();
@@ -65,21 +66,29 @@ export const DeleteTradeDialog = ({
         return;
       }
 
+      // 1. Delete directly from Supabase
+      const { error: dbError } = await supabase
+        .from('trading_diary')
+        .delete()
+        .eq('id', tradeId);
+
+      if (dbError) {
+        console.error("Database delete error:", dbError);
+        toast({
+          title: "Error",
+          description: `Database error: ${dbError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // 2. Send to Webhook for CRM
       const result = await sendDiaryWebhook("delete", {
         auth_user_id: authUser.auth_user_id,
         email: authUser.user_email,
         trade_id: tradeId,
         symbol: tradeSymbol,
       });
-
-      if (!result.success) {
-        toast({
-          title: "Error",
-          description: "Failed to delete trade. Please try again.",
-          variant: "destructive",
-        });
-        return;
-      }
 
       toast({
         title: "Trade deleted",
@@ -107,27 +116,27 @@ export const DeleteTradeDialog = ({
     <AlertDialog open={open} onOpenChange={handleClose}>
       <AlertDialogContent className={cn(
         "backdrop-blur-xl border",
-        isNasrTheme 
-          ? 'bg-nasr-panel/95 border-gold/20' 
+        isPremiumTheme 
+          ? 'bg-premium-panel/95 border-premium-gold/20' 
           : 'bg-white/95 border-ice'
       )}>
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
             <div className={cn(
               "p-2 rounded-full",
-              isNasrTheme ? 'bg-red-500/20' : 'bg-destructive/10'
+              isPremiumTheme ? 'bg-red-500/20' : 'bg-destructive/10'
             )}>
               <AlertTriangle className="w-5 h-5 text-destructive" />
             </div>
             <AlertDialogTitle className={cn(
-              isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean'
+              isPremiumTheme ? 'text-premium-text font-serif' : 'text-ocean'
             )}>
               Delete Trade
             </AlertDialogTitle>
           </div>
           <AlertDialogDescription className={cn(
             "pt-2",
-            isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'
+            isPremiumTheme ? 'text-premium-text-muted' : 'text-ocean-muted'
           )}>
             Are you sure you want to delete the trade for <span className="font-semibold">{tradeSymbol}</span>? This action cannot be undone.
           </AlertDialogDescription>
@@ -136,7 +145,7 @@ export const DeleteTradeDialog = ({
         <div className="py-4 space-y-2">
           <p className={cn(
             "text-sm",
-            isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted'
+            isPremiumTheme ? 'text-premium-text-muted' : 'text-ocean-muted'
           )}>
             Type <span className="font-mono font-bold text-destructive">DELETE</span> to confirm:
           </p>
@@ -146,8 +155,8 @@ export const DeleteTradeDialog = ({
             placeholder="Type DELETE here"
             className={cn(
               "font-mono",
-              isNasrTheme 
-                ? 'bg-nasr-bg/60 border-gold/20 text-nasr-text' 
+              isPremiumTheme 
+                ? 'bg-premium-bg/60 border-premium-gold/20 text-premium-text' 
                 : 'bg-white/60 border-ice'
             )}
           />
@@ -158,8 +167,8 @@ export const DeleteTradeDialog = ({
             disabled={isDeleting}
             className={cn(
               "rounded-xl",
-              isNasrTheme 
-                ? 'border-gold/20 text-nasr-text hover:bg-gold/10' 
+              isPremiumTheme 
+                ? 'border-premium-gold/20 text-premium-text hover:bg-premium-gold/10' 
                 : 'border-ice text-ocean hover:bg-muted'
             )}
           >

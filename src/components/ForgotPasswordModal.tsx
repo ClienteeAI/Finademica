@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Mail, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useClient } from '@/lib/clientContext';
+import { cn } from '@/lib/utils';
 
 interface ForgotPasswordModalProps {
   open: boolean;
@@ -13,6 +15,8 @@ interface ForgotPasswordModalProps {
 }
 
 export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: ForgotPasswordModalProps) {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [email, setEmail] = useState(defaultEmail);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -54,20 +58,31 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="bg-card/95 backdrop-blur-xl border-border/50 sm:max-w-md">
+      <DialogContent className={cn(
+        "backdrop-blur-xl sm:max-w-md",
+        isPremiumTheme 
+          ? "bg-premium-bg/95 border-premium-gold/20" 
+          : "bg-card/95 border-border/50"
+      )}>
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-foreground">
+          <DialogTitle className={cn(
+            "text-xl font-bold",
+            isPremiumTheme ? "text-premium-gold" : "text-foreground"
+          )}>
             Reset Password
           </DialogTitle>
-          <DialogDescription className="text-muted-foreground">
+          <DialogDescription className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
             Enter your email address and we'll send you a password reset link.
           </DialogDescription>
         </DialogHeader>
 
         {success ? (
           <div className="flex flex-col items-center py-6 gap-4">
-            <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center">
-              <CheckCircle className="w-8 h-8 text-success" />
+            <div className={cn(
+              "w-16 h-16 rounded-full flex items-center justify-center",
+              isPremiumTheme ? "bg-premium-gold/20" : "bg-success/20"
+            )}>
+              <CheckCircle className={cn("w-8 h-8", isPremiumTheme ? "text-premium-gold" : "text-success")} />
             </div>
             <div className="text-center">
               <p className="text-foreground font-medium">Link Sent!</p>
@@ -75,7 +90,10 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
                 Check your inbox and click the link to reset your password.
               </p>
             </div>
-            <Button onClick={handleClose} className="mt-2">
+            <Button 
+              onClick={handleClose} 
+              className={cn("mt-2", isPremiumTheme && "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg")}
+            >
               Close
             </Button>
           </div>
@@ -93,7 +111,12 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your@email.com"
-                  className="pr-10 bg-background/50 border-border/50 focus:border-primary"
+                  className={cn(
+                    "pr-10 focus:outline-none",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold text-premium-text placeholder:text-premium-text-muted/50" 
+                      : "bg-background/50 border-border/50 focus:border-primary"
+                  )}
                   required
                   dir="ltr"
                 />
@@ -119,7 +142,12 @@ export function ForgotPasswordModal({ open, onOpenChange, defaultEmail = '' }: F
               </Button>
               <Button
                 type="submit"
-                className="flex-1"
+                className={cn(
+                  "flex-1",
+                  isPremiumTheme 
+                    ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" 
+                    : ""
+                )}
                 disabled={loading || !email}
               >
                 {loading ? (

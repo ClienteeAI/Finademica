@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const CRM_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/all-inf-to-CRM";
+const CRM_WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/all-inf-to-CRM-finademica";
 
 export type CrmEventName = 
   | "user_login"
@@ -95,7 +95,7 @@ export async function getCrmUser(): Promise<CrmUser> {
         last_name: userRow.last_name || null,
         role: userRow.role || null,
         client_id: userRow.client_id || null,
-        broker_key: "nasr_trade_mt5", // Default broker key
+        broker_key: "finademica_mt5", // Default broker key
       };
     }
 
@@ -147,7 +147,7 @@ export async function sendCrmWebhook(
       event_name: eventName,
       occurred_at: new Date().toISOString(),
       source: "lovable_app",
-      app: "NASR Trade Academy",
+      app: "Finademica Academy",
       environment: "production",
       user: finalUser,
       action,
@@ -262,7 +262,7 @@ export async function sendCalculatorUsedEvent(
     entity: "trade_calculation",
     entity_id: calculationId,
     data: {
-      broker_key: formData.broker_key || "nasr_trade_mt5",
+      broker_key: formData.broker_key || "finademica_mt5",
       symbol: formData.symbol,
       side: formData.side,
       entry_price: formData.entry_price,
@@ -312,7 +312,7 @@ export async function sendDiaryTradeSavedEvent(
     entity_id: tradeData.trade_id,
     data: {
       trade_id: tradeData.trade_id,
-      broker_key: tradeData.broker_key || "nasr_trade_mt5",
+      broker_key: tradeData.broker_key || "finademica_mt5",
       symbol: tradeData.symbol,
       side: tradeData.side,
       entry_price: tradeData.entry_price,

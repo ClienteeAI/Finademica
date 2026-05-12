@@ -433,7 +433,7 @@ export function LiveAccountRegistrationModal({ open, onOpenChange }: LiveAccount
 
       console.log('Submitting registration:', payload);
 
-      const response = await fetch('https://n8n.srv1474318.hstgr.cloud/webhook/live-reg', {
+      const response = await fetch('https://n8n.srv1474318.hstgr.cloud/webhook/live-reg-finademica', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

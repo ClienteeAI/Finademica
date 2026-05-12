@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Video, Clock, ChevronDown, ChevronUp, Play, CheckCircle, Lock } from "lucide-react";
+import { Video, Clock, ChevronDown, ChevronUp, Play, CheckCircle, Lock, Trophy } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -71,18 +71,18 @@ const Dashboard = () => {
   const { xp, level, currentLevelXp, nextLevelXp, streakDays, videosCompleted } = useGamification();
 
   // Theme detection
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'finademica';
   
   // Theme-aware color classes - use semantic tokens for proper contrast
   const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-foreground',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-muted-foreground',
-    primary: isNasrTheme ? 'text-gold' : 'text-primary',
-    primaryBg: isNasrTheme ? 'bg-gold' : 'bg-primary',
-    cardBorder: isNasrTheme ? 'border-gold/20' : 'border-border',
-    accentGlow: isNasrTheme ? 'shadow-gold' : 'shadow-primary/20',
-    progressBar: isNasrTheme ? 'from-gold-light to-gold' : 'from-primary to-primary/80',
-    badge: isNasrTheme ? 'bg-gold/10 border-gold/30 text-gold' : 'bg-primary/10 border-primary/30 text-primary',
+    heading: isPremiumTheme ? 'text-premium-text font-playfair' : 'text-foreground',
+    subtext: isPremiumTheme ? 'text-premium-text-muted' : 'text-muted-foreground',
+    primary: isPremiumTheme ? 'text-premium-gold' : 'text-primary',
+    primaryBg: isPremiumTheme ? 'bg-premium-gold' : 'bg-primary',
+    cardBorder: isPremiumTheme ? 'border-premium-gold/20' : 'border-border',
+    accentGlow: isPremiumTheme ? 'shadow-premium-gold' : 'shadow-primary/20',
+    progressBar: isPremiumTheme ? 'from-premium-gold-light to-premium-gold' : 'from-primary to-primary/80',
+    badge: isPremiumTheme ? 'bg-premium-gold/10 border-premium-gold/30 text-premium-gold' : 'bg-primary/10 border-primary/30 text-primary',
   };
 
   // Derive userData from profile
@@ -257,8 +257,8 @@ const Dashboard = () => {
 
   return (
     <SidebarLayout>
-      {/* Nasr Trade Academy Video Background */}
-      {isNasrTheme && (
+      {/* Premium Academy Video Background */}
+      {isPremiumTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
           <video
             autoPlay
@@ -267,9 +267,9 @@ const Dashboard = () => {
             playsInline
             className="absolute w-full h-full object-cover opacity-30"
           >
-            <source src="/nasr-background.mp4" type="video/mp4" />
+            <source src="/premium-background.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+          <div className="absolute inset-0 bg-gradient-to-b from-premium-bg/70 via-premium-bg/85 to-premium-bg" />
         </div>
       )}
       
@@ -287,7 +287,7 @@ const Dashboard = () => {
         <div className="space-y-6 md:space-y-8 animate-slide-up">
           <div className="space-y-3 md:space-y-4">
             <h1 className={cn(
-              "text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight",
+              "text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif tracking-tight",
               themeColors.heading
             )}>
               Welcome back, {userData.firstName}!
@@ -297,7 +297,7 @@ const Dashboard = () => {
             </p>
           </div>
 
-          {/* Progress Bar */}
+          {/* Progress Bar & Streak */}
           {(() => {
             const progressPercent = nextLevelXp > 0 ? Math.min((xp / nextLevelXp) * 100, 100) : 0;
             
@@ -313,11 +313,11 @@ const Dashboard = () => {
                 </div>
                 <Progress value={progressPercent} className="h-2" />
                 <div className={cn(
-                  "inline-flex items-center gap-3 px-5 py-3 rounded-full backdrop-blur-sm border",
-                  isNasrTheme ? 'bg-nasr-panel/60 border-gold/20' : 'bg-white/60 border-aqua/40'
+                  "inline-flex items-center gap-3 px-5 py-3 rounded-xl backdrop-blur-sm border",
+                  isPremiumTheme ? 'bg-premium-gold/10 border-premium-gold/30' : 'bg-indigo-500/10 border-indigo-500/30'
                 )}>
                   <span className="text-xl animate-pulse-subtle">🔥</span>
-                  <span className={cn("text-sm", themeColors.subtext)}>
+                  <span className={cn("text-sm font-medium text-foreground")}>
                     {streakDays > 0 
                       ? `${streakDays} day${streakDays !== 1 ? 's' : ''} streak - Keep it up!` 
                       : 'Start your streak - Watch your first video!'}
@@ -338,10 +338,6 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 max-w-2xl">
           <Card
             className="p-5 md:p-8 space-y-4 md:space-y-5 group cursor-pointer"
-            style={{
-              animationDelay: `0.2s`,
-              animationFillMode: "backwards",
-            }}
           >
             <div className="flex items-center justify-between">
               <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-success/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
@@ -370,7 +366,7 @@ const Dashboard = () => {
             <Card className="overflow-hidden">
               <CollapsibleTrigger asChild>
                 <button className="w-full p-6 flex items-center justify-between hover:bg-muted/30 transition-colors duration-200 cursor-pointer">
-                  <h2 className="text-xl font-semibold text-foreground flex items-center gap-3">
+                  <h2 className="text-2xl font-serif text-foreground flex items-center gap-3">
                     <span className="text-2xl">📋</span>
                     Your Trading Profile
                   </h2>
@@ -399,7 +395,6 @@ const Dashboard = () => {
                       </div>
                     ))}
                   </div>
-                  {/* Edit button hidden for v1 - quiz editing flow not implemented */}
                 </div>
               </CollapsibleContent>
             </Card>
@@ -409,7 +404,7 @@ const Dashboard = () => {
         {/* Personalized Video Playlist */}
         <div className="space-y-5 md:space-y-8">
           <div className="space-y-2 md:space-y-3">
-            <h2 className="text-2xl md:text-4xl font-bold text-foreground tracking-tight flex items-center gap-2 md:gap-3">
+            <h2 className="text-3xl md:text-5xl font-serif text-foreground tracking-tight flex items-center gap-2 md:gap-3">
               <span className="text-xl md:text-3xl">🎥</span>
               Start Learning
             </h2>
@@ -432,10 +427,10 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Show only first 2 free videos */}
+              {/* Show free videos */}
               {freeVideos.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {freeVideos.slice(0, 2).map((rec, index) => {
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {freeVideos.map((rec, index) => {
                     if (!rec.video) return null;
                     const video = rec.video;
                     const isCompleted = completedVideoIds.has(video.id);
@@ -444,10 +439,6 @@ const Dashboard = () => {
                         key={rec.id}
                         className="overflow-hidden cursor-pointer group"
                         onClick={() => navigate(`/video/${video.id}`)}
-                        style={{
-                          animationDelay: `${0.1 * index}s`,
-                          animationFillMode: "backwards",
-                        }}
                       >
                         {/* Thumbnail */}
                         <div className="relative aspect-video bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
@@ -520,29 +511,52 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {/* See More Free Videos Button */}
-              {freeVideos.length > 2 && (
-                <Button 
-                  onClick={() => navigate("/videos")}
-                  size="lg"
-                  className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-6 text-lg"
-                >
-                  See {Math.max(0, freeVideos.length - 2)} More Free Videos →
-                </Button>
-              )}
+              {/* Full Library Link */}
+              <Button 
+                onClick={() => navigate("/videos")}
+                size="lg"
+                className="w-full py-6 text-lg font-semibold"
+                variant="primary"
+              >
+                Go to Full Academy Library →
+              </Button>
 
               {/* Empty state */}
               {freeVideos.length === 0 && (
-                <Card className="p-12 text-center">
-                  <p className="text-muted-foreground">No personalized videos available yet. Complete the quiz to get recommendations.</p>
+                <Card className={cn(
+                  "p-8 md:p-16 text-center space-y-6 md:space-y-8 border-2 border-dashed",
+                  isPremiumTheme ? "bg-premium-bg/40 border-premium-gold/30" : "bg-card border-border"
+                )}>
+                  <div className="space-y-3 md:space-y-4 max-w-md mx-auto">
+                    <div className={cn(
+                      "mx-auto w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center mb-4 md:mb-6",
+                      isPremiumTheme ? "bg-premium-gold/20" : "bg-primary/20"
+                    )}>
+                      <Trophy className={cn("h-8 w-8 md:h-10 md:w-10", isPremiumTheme ? "text-premium-gold" : "text-primary")} />
+                    </div>
+                    <h3 className={cn("text-xl md:text-2xl font-bold", themeColors.heading)}>
+                      Ready to Start Learning?
+                    </h3>
+                    <p className={cn("text-sm md:text-base", themeColors.subtext)}>
+                      Take our AI-powered quiz to unlock a personalized video library tailored to your goals and experience level.
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={() => navigate("/quiz")}
+                    size="lg"
+                    className={cn(
+                      "px-8 md:px-10 py-5 md:py-6 text-base md:text-lg font-bold shadow-2xl transition-all hover:scale-105 active:scale-95",
+                      isPremiumTheme ? "bg-premium-gold hover:bg-premium-gold/90 text-premium-bg" : "bg-primary"
+                    )}
+                  >
+                    <Play className="h-5 w-5 mr-2" />
+                    Take Quiz Now →
+                  </Button>
                 </Card>
               )}
             </div>
           )}
         </div>
-
-        {/* Roadmap and Analyzer sections hidden for v1 - backend logic not fully connected */}
-
       </div>
     </SidebarLayout>
   );

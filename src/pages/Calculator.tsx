@@ -80,24 +80,24 @@ const TickPipInfoContent = () => (
 );
 
 // Info Tooltip Component (Popover on desktop, Drawer on mobile)
-const InfoTooltip = () => {
+const InfoTooltip = ({ title, content }: { title: string; content: React.ReactNode }) => {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
 
   const triggerButton = (
-    <button className="w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 bg-muted border border-border hover:border-primary/50 hover:shadow-[0_0_8px] hover:shadow-primary/30">
-      <Info className="w-3.5 h-3.5 text-primary/70" />
+    <button className="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 bg-muted/50 border border-border/50 hover:border-primary/50 hover:bg-primary/5">
+      <Info className="w-3 h-3 text-primary/60" />
     </button>
   );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={setOpen}>
-        <button onClick={() => setOpen(true)}>{triggerButton}</button>
+        <button onClick={() => setOpen(true)} type="button">{triggerButton}</button>
         <DrawerContent className="bg-card border-border">
           <DrawerHeader className="relative">
             <DrawerTitle className="text-lg font-semibold text-foreground">
-              Tick vs Pip
+              {title}
             </DrawerTitle>
             <DrawerClose asChild>
               <button className="absolute right-4 top-4 w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:bg-muted text-muted-foreground">
@@ -105,8 +105,8 @@ const InfoTooltip = () => {
               </button>
             </DrawerClose>
           </DrawerHeader>
-          <div className="px-4 pb-6">
-            <TickPipInfoContent />
+          <div className="px-4 pb-8">
+            {typeof content === 'string' ? <p className="text-sm text-muted-foreground leading-relaxed">{content}</p> : content}
           </div>
         </DrawerContent>
       </Drawer>
@@ -115,19 +115,15 @@ const InfoTooltip = () => {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>{triggerButton}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0 backdrop-blur-xl bg-card/95 border-border" align="end">
+      <PopoverTrigger asChild>
+        <button onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} type="button">
+          {triggerButton}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-72 p-0 backdrop-blur-xl bg-card/95 border-border shadow-2xl" align="center" side="top">
         <div className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-foreground">Tick vs Pip</h3>
-            <button 
-              onClick={() => setOpen(false)}
-              className="w-6 h-6 rounded-full flex items-center justify-center transition-colors hover:bg-muted text-muted-foreground"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <TickPipInfoContent />
+          <h3 className="font-semibold text-foreground mb-2 text-sm">{title}</h3>
+          {typeof content === 'string' ? <p className="text-xs text-muted-foreground leading-relaxed">{content}</p> : content}
         </div>
       </PopoverContent>
     </Popover>
@@ -249,7 +245,7 @@ const Calculator = () => {
     const payload = {
       calculator_type: "position_size",
       user_id: userId || "unknown",
-      broker_key: "nasr_trade_mt5",
+      broker_key: "finademica_mt5",
       account_currency: "USD",
       symbol: symbol.toUpperCase().trim(),
       side: side,
@@ -265,7 +261,7 @@ const Calculator = () => {
 
     try {
       const response = await fetch(
-        "https://n8n.srv1474318.hstgr.cloud/webhook/trading-calc",
+        "https://n8n.srv1474318.hstgr.cloud/webhook/trading-calc-finademica",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -352,7 +348,7 @@ const Calculator = () => {
         // Send CRM webhook for calculator usage
         sendCalculatorUsedEvent(
           {
-            broker_key: "nasr_trade_mt5",
+            broker_key: "finademica_mt5",
             symbol: symbol.toUpperCase().trim(),
             side,
             entry_price: parseFloat(entryPrice) || null,
@@ -652,7 +648,13 @@ const Calculator = () => {
 
             {/* Risk Type Toggle */}
             <div className="space-y-2">
-              <Label className="text-muted-foreground text-sm font-medium">Risk Type *</Label>
+              <div className="flex items-center gap-2">
+                <Label className="text-muted-foreground text-sm font-medium">Risk Type *</Label>
+                <InfoTooltip 
+                  title="Risk Type" 
+                  content="Percent: Risks a percentage of your total balance. Amount: Risks a fixed dollar amount regardless of balance." 
+                />
+              </div>
               <div className="flex gap-2 p-1.5 rounded-xl bg-muted/30 border border-border/50">
                 <ToggleButton active={riskType === "percent"} onClick={() => setRiskType("percent")}>
                   Percent %
@@ -778,7 +780,7 @@ const Calculator = () => {
           )}
         </div>
 
-        {/* Results Section */}
+        {/* Results Section */}        {/* Results Section */}
         {result && (
           <div className="space-y-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             {/* Primary Results - 2 Cards */}
@@ -790,9 +792,15 @@ const Calculator = () => {
                   <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-primary/10 border border-primary/20">
                     <Target className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
-                    Recommended Lots
-                  </p>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                      Recommended Lots
+                    </p>
+                    <InfoTooltip 
+                      title="Recommended Lots" 
+                      content="This is the number you type into MetaTrader. It's the 'Size' of your trade. If you use this number, your risk is controlled." 
+                    />
+                  </div>
                   <p className="text-5xl md:text-6xl font-bold font-mono text-primary drop-shadow-[0_0_20px] drop-shadow-primary/50">
                     {(result.recommended_lots ?? result.lots_calculated)?.toFixed(2) ?? "—"}
                   </p>
@@ -800,107 +808,136 @@ const Calculator = () => {
               </div>
 
               {/* Actual Risk Card */}
-              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-1">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl p-6 md:p-8 text-center relative overflow-hidden group hover:shadow-2xl hover:shadow-green-500/10 transition-all duration-500 hover:-translate-y-1">
+                <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-primary/10 border border-primary/20">
-                    <DollarSign className="w-8 h-8 text-primary" />
+                  <div className="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center bg-green-500/10 border border-green-500/20">
+                    <DollarSign className="w-8 h-8 text-green-500" />
                   </div>
-                  <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">
-                    Actual Risk
-                  </p>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground">
+                      Actual Risk
+                    </p>
+                    <InfoTooltip 
+                      title="Actual Risk" 
+                      content="This is the real money you are putting on the table. If the trade goes wrong and hits your Stop Loss, you will lose exactly this amount." 
+                    />
+                  </div>
                   <p className={cn(
-                    "text-5xl md:text-6xl font-bold font-mono",
-                    getRiskColor(result.risk_total_usd, accountBalance ? parseFloat(accountBalance) : null)
+                    "text-5xl md:text-6xl font-bold font-mono drop-shadow-[0_0_20px]",
+                    getRiskColor(result.risk_total_usd, parseFloat(accountBalance))
                   )}>
-                    ${result.risk_total_usd?.toFixed(2) ?? "—"}
+                    ${result.risk_total_usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Additional Details - 3 Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-xl p-5 group hover:bg-card hover:-translate-y-1 transition-all duration-300">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Ticks to Stop Loss</p>
-                <p className="text-2xl font-semibold text-foreground font-mono">
-                  {result.ticks_to_sl?.toFixed(2) ?? "—"}
-                </p>
+            {/* Secondary Results Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-muted/30 border border-border/50 rounded-xl p-5 hover:bg-muted/40 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Ticks to Stop Loss</p>
+                  <InfoTooltip 
+                    title="Ticks to Stop Loss" 
+                    content="The distance between entry and SL measured in 'ticks' (the smallest possible price move). This shows how many tiny steps the price has to move to hit your exit." 
+                  />
+                </div>
+                <p className="text-xl font-mono font-bold text-foreground">{result.ticks_to_sl.toLocaleString()}</p>
               </div>
-              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-xl p-5 group hover:bg-card hover:-translate-y-1 transition-all duration-300">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Risk per 1 Lot (USD)</p>
-                <p className="text-2xl font-semibold text-foreground font-mono">
-                  ${result.risk_per_1lot_usd?.toFixed(2) ?? "—"}
-                </p>
+
+              <div className="bg-muted/30 border border-border/50 rounded-xl p-5 hover:bg-muted/40 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Risk per 1 Lot (USD)</p>
+                  <InfoTooltip 
+                    title="Risk per 1 Lot" 
+                    content="If you traded a full 1.00 Lot, you would be risking this many dollars for this same distance. It helps you see why the recommended size is safer." 
+                  />
+                </div>
+                <p className="text-xl font-mono font-bold text-foreground">${result.risk_per_1lot_usd.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
               </div>
-              <div className="backdrop-blur-xl bg-card/80 border border-border rounded-xl p-5 group hover:bg-card hover:-translate-y-1 transition-all duration-300">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Calculated Lots (raw)</p>
-                <p className="text-2xl font-semibold text-foreground font-mono">
-                  {result.lots_calculated?.toFixed(4) ?? "—"}
-                </p>
+
+              <div className="bg-muted/30 border border-border/50 rounded-xl p-5 hover:bg-muted/40 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Calculated Lots (Raw)</p>
+                  <InfoTooltip 
+                    title="Calculated Lots (Raw)" 
+                    content="The exact mathematical result. We round this down to the nearest allowed lot size for your safety." 
+                  />
+                </div>
+                <p className="text-xl font-mono font-bold text-foreground">{result.lots_calculated.toFixed(4)}</p>
               </div>
             </div>
 
-            {/* Position Sensitivity Section */}
-            <div className="backdrop-blur-xl bg-card/80 border border-border rounded-2xl p-6 md:p-8 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-primary" />
+            {/* Position Sensitivity */}
+            <div className="backdrop-blur-xl bg-card/40 border border-border rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground">Position Sensitivity</h3>
-                  <p className="text-sm text-muted-foreground">Understand how price movement affects your P/L</p>
+                  <h3 className="text-sm font-semibold text-foreground">Position Sensitivity</h3>
+                  <p className="text-[10px] text-muted-foreground">Understand how price movement affects your P/L at this lot size</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* 1 Tick Movement */}
-                <div className="p-5 rounded-xl bg-primary/5 border-l-4 border-primary group hover:bg-primary/10 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">📊</span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground/80">1 Tick Movement</p>
-                        <p className="text-xs text-muted-foreground">↑↓ Per tick change</p>
-                      </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-blue-500" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <InfoTooltip />
-                      <span className="text-2xl font-bold font-mono text-primary">
-                        {result.tick_value_position_usd != null 
-                          ? `$${result.tick_value_position_usd.toFixed(2)}` 
-                          : '—'}
-                      </span>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">1 Tick Movement</p>
+                      <p className="text-[10px] text-muted-foreground">Per tick change</p>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-mono font-bold text-blue-500">${result.tick_value_position_usd?.toFixed(2) ?? "0.00"}</p>
+                    <InfoTooltip 
+                      title="Tick Movement" 
+                      content="Your Speedometer. For every tiny flicker (1 tick) the price moves, your account balance will change by this amount." 
+                    />
                   </div>
                 </div>
 
-                {/* 1 Pip Movement */}
-                <div className="p-5 rounded-xl bg-primary/5 border-l-4 border-primary group hover:bg-primary/10 transition-all">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">📈</span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground/80">1 Pip Movement</p>
-                        <p className="text-xs text-muted-foreground">↑↓ Per pip change</p>
-                      </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-background/50 border border-border/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-indigo-500" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <InfoTooltip />
-                      <span className="text-2xl font-bold font-mono text-primary">
-                        {result.pip_value_position_usd != null 
-                          ? `$${result.pip_value_position_usd.toFixed(2)}` 
-                          : '—'}
-                      </span>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground">1 Pip Movement</p>
+                      <p className="text-[10px] text-muted-foreground">Per pip change</p>
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-mono font-bold text-indigo-500">${result.pip_value_position_usd?.toFixed(2) ?? "0.00"}</p>
+                    <InfoTooltip 
+                      title="Pip Movement" 
+                      content="A Pip is usually 10 ticks. This shows that for every standard 'Pip' move, you make or lose this amount." 
+                    />
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Micro-detail footer */}
-              <p className="text-xs text-center text-muted-foreground pt-4 border-t border-border/50">
-                Calculated for <span className="font-mono font-semibold text-foreground/80">{result.lots_final?.toFixed(2)}</span> lots on <span className="font-mono font-semibold text-foreground/80">{result.symbol || symbol.toUpperCase()}</span>
-              </p>
+            {/* Smart Summary Card */}
+            <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 animate-fade-in">
+              <div className="flex gap-4 items-center">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-6 h-6 text-primary" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-bold text-primary uppercase tracking-widest">Smart Summary</h4>
+                  <p className="text-foreground leading-relaxed">
+                    You are risking <span className="font-bold text-green-500">${result.risk_total_usd.toFixed(2)}</span> to find out if 
+                    <span className="font-bold"> {result.symbol || symbol.toUpperCase()}</span> goes 
+                    <span className={cn("font-bold", side === "long" ? "text-blue-500" : "text-red-500")}> {side === "long" ? "UP" : "DOWN"}</span>. 
+                    Set your MetaTrader volume to <span className="font-bold underline text-primary">{(result.recommended_lots ?? result.lots_calculated)?.toFixed(2)}</span>.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Warnings */}
@@ -936,42 +973,6 @@ const Calculator = () => {
                 <BookOpen className="w-5 h-5 mr-2" />
                 View Diary
               </Button>
-            </div>
-
-            {/* Live Trading CTA */}
-            <div className="relative overflow-hidden rounded-2xl mt-6">
-              {/* Animated gradient background */}
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600 via-green-500 to-emerald-600" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent" />
-              
-              {/* Glowing effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-green-400 opacity-30 blur-xl" />
-              
-              <div className="relative p-6 md:p-8">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                      <Sparkles className="w-7 h-7 text-white" />
-                    </div>
-                    <div className="text-center md:text-left">
-                      <h3 className="text-xl md:text-2xl font-bold text-white">
-                        Ready to Trade {symbol.toUpperCase() || 'Live'}?
-                      </h3>
-                      <p className="text-white/80 text-sm md:text-base">
-                        Open a live trading account and start executing your calculated positions
-                      </p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
-                    size="lg"
-                    className="h-14 px-8 text-lg font-bold bg-white text-emerald-600 hover:bg-white/90 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 rounded-xl whitespace-nowrap"
-                  >
-                    <TrendingUp className="w-5 h-5 mr-2" />
-                    Start Trading Now
-                  </Button>
-                </div>
-              </div>
             </div>
           </div>
         )}

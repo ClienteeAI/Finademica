@@ -18,7 +18,7 @@ interface SaveAnalysisToDiaryModalProps {
   symbol: string;
   currentPrice: number;
   aiMessage?: string;
-  isNasrTheme?: boolean;
+  isPremiumTheme?: boolean;
 }
 
 export const SaveAnalysisToDiaryModal = ({
@@ -27,7 +27,7 @@ export const SaveAnalysisToDiaryModal = ({
   symbol,
   currentPrice,
   aiMessage,
-  isNasrTheme = false,
+  isPremiumTheme = false,
 }: SaveAnalysisToDiaryModalProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -42,13 +42,13 @@ export const SaveAnalysisToDiaryModal = ({
   const [showSuccess, setShowSuccess] = useState(false);
 
   const themeColors = {
-    heading: isNasrTheme ? 'text-nasr-text font-playfair' : 'text-ocean',
-    subtext: isNasrTheme ? 'text-nasr-text-muted' : 'text-ocean-muted',
-    primary: isNasrTheme ? 'text-gold' : 'text-aqua',
-    inputBg: isNasrTheme ? 'bg-nasr-panel/60' : 'bg-white/60',
-    inputBorder: isNasrTheme ? 'border-gold/20 focus:border-gold/50' : 'border-ice focus:border-aqua/50',
-    toggleActive: isNasrTheme ? 'bg-gold text-nasr-bg' : 'bg-aqua text-white',
-    toggleInactive: isNasrTheme ? 'bg-nasr-bg/60 text-nasr-text-muted' : 'bg-muted/60 text-ocean-muted',
+    heading: isPremiumTheme ? 'text-premium-text font-playfair' : 'text-ocean',
+    subtext: isPremiumTheme ? 'text-premium-text-muted' : 'text-ocean-muted',
+    primary: isPremiumTheme ? 'text-premium-gold' : 'text-aqua',
+    inputBg: isPremiumTheme ? 'bg-premium-panel/60' : 'bg-white/60',
+    inputBorder: isPremiumTheme ? 'border-premium-gold/20 focus:border-premium-gold/50' : 'border-ice focus:border-aqua/50',
+    toggleActive: isPremiumTheme ? 'bg-premium-gold text-premium-bg' : 'bg-aqua text-white',
+    toggleInactive: isPremiumTheme ? 'bg-premium-bg/60 text-premium-text-muted' : 'bg-muted/60 text-ocean-muted',
   };
 
   const handleSubmit = async () => {
@@ -84,7 +84,7 @@ export const SaveAnalysisToDiaryModal = ({
       const tradeData = {
         auth_user_id: authUser.auth_user_id,
         email: authUser.user_email,
-        broker_key: "nasr_trade_mt5",
+        broker_key: "finademica_mt5",
         symbol: symbol.toUpperCase(),
         side,
         entry_price: entryPriceNum,
@@ -119,7 +119,7 @@ export const SaveAnalysisToDiaryModal = ({
       // Send CRM webhook for diary trade saved
       sendDiaryTradeSavedEvent({
         trade_id: `trade_${Date.now()}`,
-        broker_key: "nasr_trade_mt5",
+        broker_key: "finademica_trade_mt5",
         symbol: symbol.toUpperCase(),
         side,
         entry_price: entryPriceNum,
@@ -174,14 +174,14 @@ export const SaveAnalysisToDiaryModal = ({
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className={cn(
           "max-w-md backdrop-blur-xl border",
-          isNasrTheme 
-            ? 'bg-nasr-panel/95 border-gold/20' 
+          isPremiumTheme 
+            ? 'bg-premium-panel/95 border-premium-gold/20' 
             : 'bg-white/95 border-ice'
         )}>
           <div className="text-center py-6 space-y-4">
             <div className={cn(
               "w-16 h-16 rounded-full mx-auto flex items-center justify-center",
-              isNasrTheme ? 'bg-gold/20' : 'bg-emerald-500/20'
+              isPremiumTheme ? 'bg-premium-gold/20' : 'bg-emerald-500/20'
             )}>
               <span className="text-3xl">✅</span>
             </div>
@@ -197,8 +197,8 @@ export const SaveAnalysisToDiaryModal = ({
                 onClick={handleClose}
                 className={cn(
                   "flex-1 h-11 rounded-xl",
-                  isNasrTheme 
-                    ? 'border-gold/30 text-gold hover:bg-gold/10' 
+                  isPremiumTheme 
+                    ? 'border-premium-gold/30 text-premium-gold hover:bg-premium-gold/10' 
                     : 'border-aqua/30 text-aqua hover:bg-aqua/10'
                 )}
               >
@@ -209,8 +209,8 @@ export const SaveAnalysisToDiaryModal = ({
                   onClick={handleClose}
                   className={cn(
                     "w-full h-11 font-semibold rounded-xl",
-                    isNasrTheme 
-                      ? 'gold-gradient text-nasr-bg hover:opacity-90' 
+                    isPremiumTheme 
+                      ? 'bg-premium-gold text-premium-bg hover:opacity-90' 
                       : 'success-gradient text-white hover:opacity-90'
                   )}
                 >
@@ -229,8 +229,8 @@ export const SaveAnalysisToDiaryModal = ({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className={cn(
         "max-w-md backdrop-blur-xl border",
-        isNasrTheme 
-          ? 'bg-nasr-panel/95 border-gold/20' 
+        isPremiumTheme 
+          ? 'bg-premium-panel/95 border-premium-gold/20' 
           : 'bg-white/95 border-ice'
       )}>
         <DialogHeader>
@@ -245,7 +245,7 @@ export const SaveAnalysisToDiaryModal = ({
             <Label className={themeColors.subtext}>Direction</Label>
             <div className={cn(
               "flex gap-1 p-1 rounded-xl",
-              isNasrTheme ? 'bg-nasr-bg/60' : 'bg-muted/60'
+              isPremiumTheme ? 'bg-premium-bg/60' : 'bg-muted/60'
             )}>
               <button
                 type="button"
@@ -348,8 +348,8 @@ export const SaveAnalysisToDiaryModal = ({
             disabled={isSubmitting || !entryPrice}
             className={cn(
               "w-full h-12 text-base font-semibold rounded-xl transition-all",
-              isNasrTheme 
-                ? 'gold-gradient text-nasr-bg hover:opacity-90 gold-glow' 
+              isPremiumTheme 
+                ? 'bg-premium-gold text-premium-bg hover:opacity-90 premium-gold-glow' 
                 : 'success-gradient text-white hover:opacity-90 success-glow'
             )}
           >

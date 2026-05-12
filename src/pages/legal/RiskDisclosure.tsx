@@ -41,7 +41,7 @@ const RiskDisclosure = () => {
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>2. Educational Purpose Only</h2>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            Nallio Trade is an educational platform. All content, tools, AI-generated explanations, and materials are provided for learning purposes only and do not constitute financial advice or investment recommendations.
+            Finademica is an educational platform. All content, tools, AI-generated explanations, and materials are provided for learning purposes only and do not constitute financial advice or investment recommendations.
           </p>
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>3. No Guarantees</h2>
@@ -96,14 +96,14 @@ const RiskDisclosure = () => {
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>Platform Operator</h2>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            Nallio Trade<br />
+            Finademica<br />
             Owned and operated by Clientee AI, s.r.o.<br />
             Příčná 1892/4<br />
             Nové Město (Praha 1)<br />
             110 00 Praha<br />
             Czech Republic<br />
             IČO: 234 35 186<br />
-            support@nallio.io
+            hey@finademica.com
           </p>
         </div>
       </div>

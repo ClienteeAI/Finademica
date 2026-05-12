@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useClient } from '@/lib/clientContext';
+import { cn } from '@/lib/utils';
 
 type ClientType = {
   logo_url?: string | null;
@@ -14,7 +15,8 @@ type ClientType = {
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  const { client } = useClient() as { client: ClientType | null };
+  const { client } = useClient() as { client: (ClientType & { subdomain: string }) | null };
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -76,7 +78,7 @@ export default function ResetPassword() {
   if (checkingSession) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className={cn("w-8 h-8 animate-spin", isPremiumTheme ? "text-premium-gold" : "text-primary")} />
       </div>
     );
   }
@@ -85,15 +87,26 @@ export default function ResetPassword() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="w-full max-w-md text-center">
-          <div className="bg-card/90 backdrop-blur-xl rounded-2xl p-8 border border-border/50 shadow-xl">
+          <div className={cn(
+          "backdrop-blur-xl rounded-2xl p-8 border shadow-xl",
+          isPremiumTheme 
+            ? "bg-premium-bg/90 border-premium-gold/20" 
+            : "bg-card/90 border-border/50"
+        )}>
             <div className="w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-8 h-8 text-destructive" />
             </div>
-            <h1 className="text-xl font-bold text-foreground mb-2">Invalid Link</h1>
-            <p className="text-muted-foreground mb-6">
+            <h1 className={cn(
+              "text-xl font-bold mb-2",
+              isPremiumTheme ? "text-premium-gold" : "text-foreground"
+            )}>Invalid Link</h1>
+            <p className={cn("mb-6", isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
               The password reset link is invalid or has expired. Please request a new link.
             </p>
-            <Button onClick={() => navigate('/login')}>
+            <Button 
+              onClick={() => navigate('/login')}
+              className={isPremiumTheme ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" : ""}
+            >
               Back to Login
             </Button>
           </div>
@@ -106,8 +119,14 @@ export default function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       {/* Background effects */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-success/5 rounded-full blur-3xl" />
+        <div className={cn(
+          "absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl",
+          isPremiumTheme ? "bg-premium-gold/5" : "bg-primary/5"
+        )} />
+        <div className={cn(
+          "absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl",
+          isPremiumTheme ? "bg-premium-gold/3" : "bg-success/5"
+        )} />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -122,15 +141,26 @@ export default function ResetPassword() {
           </div>
         )}
 
-        <div className="bg-card/90 backdrop-blur-xl rounded-2xl p-8 border border-border/50 shadow-xl">
+        <div className={cn(
+          "backdrop-blur-xl rounded-2xl p-8 border shadow-xl",
+          isPremiumTheme 
+            ? "bg-premium-bg/90 border-premium-gold/20" 
+            : "bg-card/90 border-border/50"
+        )}>
           {success ? (
             <div className="flex flex-col items-center py-4 gap-4">
-              <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-success" />
+              <div className={cn(
+                "w-16 h-16 rounded-full flex items-center justify-center",
+                isPremiumTheme ? "bg-premium-gold/20" : "bg-success/20"
+              )}>
+                <CheckCircle className={cn("w-8 h-8", isPremiumTheme ? "text-premium-gold" : "text-success")} />
               </div>
               <div className="text-center">
-                <h2 className="text-xl font-bold text-foreground">Password Updated!</h2>
-                <p className="text-muted-foreground text-sm mt-2">
+                <h2 className={cn(
+                  "text-xl font-bold",
+                  isPremiumTheme ? "text-premium-gold" : "text-foreground"
+                )}>Password Updated!</h2>
+                <p className={cn("text-sm mt-2", isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
                   Redirecting you to login...
                 </p>
               </div>
@@ -138,10 +168,13 @@ export default function ResetPassword() {
           ) : (
             <>
               <div className="text-center mb-6">
-                <h1 className="text-2xl font-bold text-foreground mb-2">
+                <h1 className={cn(
+                  "text-2xl font-bold mb-2",
+                  isPremiumTheme ? "text-premium-gold" : "text-foreground"
+                )}>
                   Set New Password
                 </h1>
-                <p className="text-muted-foreground text-sm">
+                <p className={cn("text-sm", isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
                   Enter your new password
                 </p>
               </div>
@@ -159,7 +192,12 @@ export default function ResetPassword() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="pr-10 pl-10 bg-background/50 border-border/50 focus:border-primary"
+                      className={cn(
+                        "pr-10 pl-10 focus:outline-none",
+                        isPremiumTheme 
+                          ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold text-premium-text placeholder:text-premium-text-muted/50" 
+                          : "bg-background/50 border-border/50 focus:border-primary"
+                      )}
                       required
                       minLength={6}
                       dir="ltr"
@@ -186,7 +224,12 @@ export default function ResetPassword() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="pr-10 pl-10 bg-background/50 border-border/50 focus:border-primary"
+                      className={cn(
+                        "pr-10 pl-10 focus:outline-none",
+                        isPremiumTheme 
+                          ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold text-premium-text placeholder:text-premium-text-muted/50" 
+                          : "bg-background/50 border-border/50 focus:border-primary"
+                      )}
                       required
                       minLength={6}
                       dir="ltr"
@@ -210,7 +253,12 @@ export default function ResetPassword() {
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className={cn(
+                    "w-full",
+                    isPremiumTheme 
+                      ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" 
+                      : ""
+                  )}
                   disabled={loading || password.length < 6 || confirmPassword.length < 6 || password !== confirmPassword}
                 >
                   {loading ? (

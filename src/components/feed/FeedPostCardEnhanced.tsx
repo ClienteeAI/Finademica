@@ -135,7 +135,9 @@ export function FeedPostCardEnhanced({
                 .maybeSingle(),
             ]);
 
-            fetch('https://n8n.srv1474318.hstgr.cloud/webhook/feed-likes', {
+            const webhookUrl = 'https://n8n.srv1474318.hstgr.cloud/webhook/feed-likes-finademica';
+            console.log('[Webhook] Sending Like to:', webhookUrl);
+            await fetch(webhookUrl, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({

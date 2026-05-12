@@ -15,7 +15,7 @@ import { useLogEvent } from "@/hooks/useLogEvent";
 import { SaveAnalysisToDiaryModal } from "@/components/SaveAnalysisToDiaryModal";
 import { shouldHideTradingCTAs } from "@/lib/featureFlags";
 
-const WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/live-chat-analyser";
+const WEBHOOK_URL = "https://n8n.srv1474318.hstgr.cloud/webhook/live-chat-analyser-finademica";
 
 const popularSymbols = ["AAPL", "TSLA", "GOOGL", "BTC", "ETH", "NVDA", "MSFT", "AMZN"];
 
@@ -23,7 +23,7 @@ const StockAnalyzer = () => {
   const navigate = useNavigate();
   const { client } = useClient();
   const { logEvent } = useLogEvent();
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'finademica';
 
   // ACCESS CONTROL: Must be logged in
   useEffect(() => {
@@ -108,8 +108,8 @@ const StockAnalyzer = () => {
 
   return (
     <SidebarLayout>
-      {/* Nasr Trade Academy Video Background */}
-      {isNasrTheme && (
+      {/* Premium Academy Video Background */}
+      {isPremiumTheme && (
         <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
           <video
             autoPlay
@@ -118,9 +118,9 @@ const StockAnalyzer = () => {
             playsInline
             className="absolute w-full h-full object-cover opacity-30"
           >
-            <source src="/nasr-analyzer-background.mp4" type="video/mp4" />
+            <source src="/premium-analyzer-background.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-nasr-bg/70 via-nasr-bg/85 to-nasr-bg" />
+          <div className="absolute inset-0 bg-gradient-to-b from-premium-bg/70 via-premium-bg/85 to-premium-bg" />
         </div>
       )}
       
@@ -172,8 +172,8 @@ const StockAnalyzer = () => {
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center space-y-6 py-12">
                   <div className="relative">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
-                      <Loader2 className="w-10 h-10 text-[#4DE2E8] animate-spin" />
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6366F1]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#6366F1]/30">
+                      <Loader2 className="w-10 h-10 text-[#6366F1] animate-spin" />
                     </div>
                   </div>
                   <div className="text-center space-y-2">
@@ -190,43 +190,13 @@ const StockAnalyzer = () => {
                   {/* Analysis Results */}
                   <StockAnalysisCard data={analysisData as any} symbol={analyzedSymbol || symbol} />
                   
-                  {/* Prominent Trade CTA Banner - Only shown for NASR client */}
-                  {!shouldHideTradingCTAs(client?.subdomain) && (
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 p-8 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
-                      {/* Animated background glow */}
-                      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.15),transparent_50%)]" />
-                      <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" />
-                      <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-white/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-                      
-                      <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="text-center md:text-left">
-                          <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                            Ready to Trade {analyzedSymbol}?
-                          </h3>
-                          <p className="text-white/80 text-lg">
-                            Open a position now with our trusted trading platform
-                          </p>
-                        </div>
-                        
-                        <button
-                          onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
-                          className="group relative inline-flex items-center gap-3 px-10 py-5 bg-white text-emerald-600 font-bold text-xl rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.2)] hover:shadow-[0_15px_50px_rgba(0,0,0,0.3)] hover:scale-105 transition-all duration-300"
-                        >
-                          <TrendingUp className="w-6 h-6 group-hover:animate-pulse" />
-                          Trade {analyzedSymbol} Now
-                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full animate-ping" />
-                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-400 rounded-full" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
 
                   {/* Save to Diary Button */}
                   <div className="flex justify-center">
                     <Button
                       onClick={() => setShowDiaryModal(true)}
                       size="lg"
-                      className="gap-2 px-10 py-6 text-lg font-semibold bg-gradient-to-r from-[#4DE2E8] to-[#2FB3C6] text-white hover:opacity-90 shadow-[0_4px_20px_rgba(77,226,232,0.4)] hover:shadow-[0_6px_25px_rgba(77,226,232,0.5)] transition-all"
+                      className="gap-2 px-10 py-6 text-lg font-semibold bg-gradient-to-r from-[#6366F1] to-[#4F46E5] text-white hover:opacity-90 shadow-[0_4px_20px_rgba(99,102,241,0.4)] hover:shadow-[0_6px_25px_rgba(99,102,241,0.5)] transition-all"
                     >
                       <BookOpen className="w-6 h-6" />
                       Save to Trading Diary
@@ -241,7 +211,7 @@ const StockAnalyzer = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center space-y-6 py-12">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#4DE2E8]/10 to-[#A7E9FF]/10 flex items-center justify-center border border-[#D4E0EC]">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6366F1]/10 to-[#A7E9FF]/10 flex items-center justify-center border border-[#D4E0EC]">
                     <TrendingUp className="w-10 h-10 text-[#6B7280]" />
                   </div>
                   <div className="text-center space-y-2">
@@ -271,7 +241,7 @@ const StockAnalyzer = () => {
                     size="sm"
                     onClick={() => setSymbol(sym)}
                     disabled={isLoading}
-                    className="hover:bg-[#4DE2E8]/10 hover:text-[#2FB3C6] hover:border-[#4DE2E8]"
+                    className="hover:bg-[#6366F1]/10 hover:text-[#6366F1] hover:border-[#6366F1]"
                   >
                     {sym}
                   </Button>
@@ -291,7 +261,7 @@ const StockAnalyzer = () => {
                       size="sm"
                       onClick={() => setSymbol(sym)}
                       disabled={isLoading}
-                      className="text-[#4DE2E8] hover:bg-[#4DE2E8]/10"
+                      className="text-[#6366F1] hover:bg-[#6366F1]/10"
                     >
                       {sym}
                     </Button>
@@ -303,7 +273,7 @@ const StockAnalyzer = () => {
             </Card>
 
             {/* Info Card */}
-            <Card className="p-4 bg-[#4DE2E8]/10 border-[#4DE2E8]/30">
+            <Card className="p-4 bg-[#6366F1]/10 border-[#6366F1]/30">
               <div className="space-y-2">
                 <h4 className="font-semibold text-[#1D3557]">AI-Powered Analysis</h4>
                 <p className="text-sm text-[#6B7280]">
@@ -322,7 +292,7 @@ const StockAnalyzer = () => {
         symbol={analyzedSymbol || symbol}
         currentPrice={(analysisData as any)?.output?.expectedFields?.currentPrice || 0}
         aiMessage={(analysisData as any)?.output?.expectedFields?.aiMessage || ""}
-        isNasrTheme={isNasrTheme}
+        isPremiumTheme={isPremiumTheme}
       />
     </SidebarLayout>
   );

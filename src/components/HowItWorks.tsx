@@ -1,4 +1,6 @@
 import { Sparkles, Brain, Rocket, TrendingUp } from "lucide-react";
+import { useClient } from "@/lib/clientContext";
+import { cn } from "@/lib/utils";
 
 const steps = [
   {
@@ -28,6 +30,8 @@ const steps = [
 ];
 
 const HowItWorks = () => {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   return (
     <section className="py-20 px-4 relative overflow-hidden">
       {/* Background gradient */}
@@ -54,18 +58,34 @@ const HowItWorks = () => {
               >
                 {/* Connector line */}
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-12 left-[60%] w-full h-0.5 bg-gradient-to-r from-primary/50 to-transparent" />
+                  <div className={cn(
+                    "hidden lg:block absolute top-12 left-[60%] w-full h-0.5 bg-gradient-to-r transparent",
+                    isPremiumTheme ? "from-premium-gold/50" : "from-primary/50"
+                  )} />
                 )}
                 
-                <div className="relative bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-6 hover:bg-card/70 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20">
+                <div className={cn(
+                  "relative bg-card/50 backdrop-blur-sm border rounded-2xl p-6 transition-all duration-300 hover:scale-105 hover:shadow-lg",
+                  isPremiumTheme 
+                    ? "border-premium-gold/20 hover:bg-premium-gold/5 hover:border-premium-gold/40 hover:shadow-premium-gold/20" 
+                    : "border-border hover:bg-card/70 hover:shadow-primary/20"
+                )}>
                   {/* Number badge */}
-                  <div className="absolute -top-4 -right-4 w-12 h-12 bg-primary rounded-full flex items-center justify-center font-bold text-primary-foreground shadow-lg">
+                  <div className={cn(
+                    "absolute -top-4 -right-4 w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-lg",
+                    isPremiumTheme ? "bg-premium-gold text-premium-bg" : "bg-primary text-primary-foreground"
+                  )}>
                     {step.number}
                   </div>
                   
                   {/* Icon */}
-                  <div className="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-colors">
-                    <Icon className="w-8 h-8 text-primary" />
+                  <div className={cn(
+                    "w-16 h-16 rounded-xl flex items-center justify-center mb-4 transition-colors",
+                    isPremiumTheme 
+                      ? "bg-premium-gold/20 group-hover:bg-premium-gold/30" 
+                      : "bg-primary/20 group-hover:bg-primary/30"
+                  )}>
+                    <Icon className={cn("w-8 h-8", isPremiumTheme ? "text-premium-gold" : "text-primary")} />
                   </div>
                   
                   {/* Content */}

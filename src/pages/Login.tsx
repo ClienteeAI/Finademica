@@ -6,6 +6,7 @@ import { Eye, EyeOff, Mail, Lock, AlertTriangle, Check, Loader2 } from 'lucide-r
 import { ForgotPasswordModal } from '@/components/ForgotPasswordModal';
 import { Button } from '@/components/ui/button';
 import MetaPixel from '@/components/MetaPixel';
+import { cn } from '@/lib/utils';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -18,13 +19,14 @@ function Login() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
   const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const { signIn, user } = useAuth();
 
   // Handle ?signup=1 parameter - redirect to signup flow
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('signup') === '1') {
-      navigate('/landing?signup=1', { replace: true });
+      navigate('/signup', { replace: true });
       return;
     }
   }, [navigate]);
@@ -91,8 +93,14 @@ function Login() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       {/* Background effects - using semantic tokens */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-success/10 rounded-full blur-3xl" />
+        <div className={cn(
+          "absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl",
+          isPremiumTheme ? "bg-premium-gold/10" : "bg-primary/10"
+        )} />
+        <div className={cn(
+          "absolute bottom-1/4 left-1/4 w-80 h-80 rounded-full blur-3xl",
+          isPremiumTheme ? "bg-premium-gold/5" : "bg-success/10"
+        )} />
       </div>
 
       {/* Login Card */}
@@ -108,13 +116,21 @@ function Login() {
           </div>
         )}
 
-        <div className="bg-card/90 backdrop-blur-xl rounded-2xl p-8 border border-border/50 shadow-xl">
+        <div className={cn(
+          "backdrop-blur-xl rounded-2xl p-8 border shadow-xl",
+          isPremiumTheme 
+            ? "bg-premium-bg/90 border-premium-gold/20" 
+            : "bg-card/90 border-border/50"
+        )}>
           {/* Header */}
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-foreground mb-2">
+            <h1 className={cn(
+              "text-2xl font-bold mb-2",
+              isPremiumTheme ? "text-premium-gold" : "text-foreground"
+            )}>
               Welcome Back
             </h1>
-            <p className="text-muted-foreground">
+            <p className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
               Sign in to {client?.company_name || 'your trading academy'}
             </p>
           </div>
@@ -144,10 +160,12 @@ function Login() {
                   placeholder="you@company.com"
                   required
                   autoFocus
-                  className="w-full h-12 pl-12 pr-4 bg-card border border-border rounded-xl
-                           text-foreground placeholder:text-muted-foreground
-                           transition-all duration-200
-                           focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className={cn(
+                    "w-full h-12 pl-12 pr-4 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/50 border-premium-gold/20 text-premium-text placeholder:text-premium-text-muted/50 focus:border-premium-gold focus:ring-premium-gold/20" 
+                      : "bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
+                  )}
                 />
               </div>
             </div>
@@ -165,10 +183,12 @@ function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="w-full h-12 pl-12 pr-12 bg-card border border-border rounded-xl
-                           text-foreground placeholder:text-muted-foreground
-                           transition-all duration-200
-                           focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  className={cn(
+                    "w-full h-12 pl-12 pr-12 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/50 border-premium-gold/20 text-premium-text placeholder:text-premium-text-muted/50 focus:border-premium-gold focus:ring-premium-gold/20" 
+                      : "bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20"
+                  )}
                 />
                 <button
                   type="button"
@@ -185,7 +205,10 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShowForgotPassword(true)}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                className={cn(
+                  "text-sm transition-colors",
+                  isPremiumTheme ? "text-premium-text-muted hover:text-premium-gold" : "text-muted-foreground hover:text-primary"
+                )}
               >
                 Forgot password?
               </button>
@@ -195,7 +218,12 @@ function Login() {
             <Button
               type="submit"
               disabled={loading || success}
-              className="w-full h-12 text-base font-semibold"
+              className={cn(
+                "w-full h-12 text-base font-semibold",
+                isPremiumTheme 
+                  ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" 
+                  : ""
+              )}
             >
               {loading && <Loader2 className="w-5 h-5 animate-spin mr-2" />}
               {success && <Check size={20} className="mr-2" />}
@@ -205,11 +233,14 @@ function Login() {
 
           {/* Signup Link */}
           <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
+            <p className={cn("text-sm", isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
               Don't have an account?{' '}
               <button
-                onClick={() => navigate('/landing?signup=1')}
-                className="text-primary hover:text-primary/80 hover:underline font-medium transition-colors"
+                onClick={() => navigate('/signup')}
+                className={cn(
+                  "font-medium transition-colors hover:underline",
+                  isPremiumTheme ? "text-premium-gold hover:text-premium-gold/80" : "text-primary hover:text-primary/80"
+                )}
               >
                 Sign up
               </button>
@@ -222,7 +253,7 @@ function Login() {
       {loading && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <Loader2 className="w-10 h-10 mx-auto animate-spin text-primary" />
+            <Loader2 className={cn("w-10 h-10 mx-auto animate-spin", isPremiumTheme ? "text-premium-gold" : "text-primary")} />
             <p className="text-foreground text-sm font-medium">Preparing your dashboard...</p>
           </div>
         </div>

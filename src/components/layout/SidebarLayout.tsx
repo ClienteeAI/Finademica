@@ -14,6 +14,7 @@ import {
   Wrench,
   ChevronDown,
   Swords,
+  Trophy,
 } from 'lucide-react';
 import { useClient } from '@/lib/clientContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -51,8 +52,8 @@ const mainNavItems = [
   { path: '/feed', label: 'Home', icon: Users },
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/videos', label: 'My Videos', icon: Video },
-  
   { path: '/arena', label: 'Arena', icon: Swords },
+  { path: '/quiz', label: 'Quizzes', icon: Trophy },
 ];
 
 // Tools are grouped in collapsible
@@ -71,14 +72,14 @@ function SidebarNavContent() {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <>
       <SidebarHeader className="p-4 pb-3">
         <Link to="/feed" className="flex items-center gap-3 group">
-          {client?.logo_url && !isNasrTheme ? (
+          {client?.logo_url && !isPremiumTheme ? (
             <img
               src={client.logo_url}
               alt={client.company_name}
@@ -87,11 +88,11 @@ function SidebarNavContent() {
           ) : (
             <span
               className={cn(
-                'text-lg font-medium tracking-tight transition-all duration-300',
-                'font-playfair text-sidebar-foreground group-hover:text-primary'
+                'text-xl font-medium tracking-tight transition-all duration-300',
+                'font-serif text-sidebar-foreground group-hover:text-premium-gold'
               )}
             >
-              {collapsed ? (isNasrTheme ? 'N' : client?.company_name?.[0] || 'L') : (isNasrTheme ? 'NASR Lector' : client?.company_name)}
+              {collapsed ? (isPremiumTheme ? 'F' : client?.company_name?.[0] || 'F') : (isPremiumTheme ? 'Finademica' : client?.company_name || 'Finademica')}
             </span>
           )}
         </Link>
@@ -132,14 +133,14 @@ function SidebarNavContent() {
                     isActive={isActive(item.path)}
                     tooltip={item.label}
                     className={cn(
-                      'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
+                      'rounded-[10px] px-3 py-2.5 transition-all duration-300 ease-in-out',
                       isActive(item.path)
-                        ? 'bg-primary/12 text-primary shadow-[inset_3px_0_0] shadow-primary'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent/20',
+                        ? 'bg-premium-gold/15 text-premium-gold shadow-[inset_3px_0_0] shadow-premium-gold'
+                        : 'text-sidebar-foreground/70 hover:bg-white/5 hover:text-white',
                       '[&>svg]:transition-colors [&>svg]:duration-200',
                       isActive(item.path)
-                        ? '[&>svg]:text-primary'
-                        : '[&>svg]:text-muted-foreground hover:[&>svg]:text-sidebar-foreground'
+                        ? '[&>svg]:text-premium-gold'
+                        : '[&>svg]:text-muted-foreground hover:[&>svg]:text-white'
                     )}
                   >
                     <Link to={item.path}>
@@ -185,14 +186,14 @@ function SidebarNavContent() {
                         isActive={isActive(item.path)}
                         tooltip={item.label}
                         className={cn(
-                          'rounded-[10px] px-3 py-2.5 transition-all duration-200 ease-in-out',
+                          'rounded-[10px] px-3 py-2.5 transition-all duration-300 ease-in-out',
                           isActive(item.path)
-                            ? 'bg-primary/12 text-primary shadow-[inset_3px_0_0] shadow-primary'
-                            : 'text-sidebar-foreground hover:bg-sidebar-accent/20',
+                            ? 'bg-[#6366F1]/15 text-[#6366F1] shadow-[inset_3px_0_0] shadow-[#6366F1]'
+                            : 'text-sidebar-foreground/70 hover:bg-white/5 hover:text-white',
                           '[&>svg]:transition-colors [&>svg]:duration-200',
                           isActive(item.path)
-                            ? '[&>svg]:text-primary'
-                            : '[&>svg]:text-muted-foreground hover:[&>svg]:text-sidebar-foreground'
+                            ? '[&>svg]:text-[#6366F1]'
+                            : '[&>svg]:text-muted-foreground hover:[&>svg]:text-white'
                         )}
                       >
                         <Link to={item.path}>
@@ -235,24 +236,24 @@ function TopHeader() {
         {/* Left: Sidebar trigger for mobile */}
         <div className="flex items-center gap-2 md:gap-3">
           <SidebarTrigger className="md:hidden text-foreground hover:text-primary hover:bg-primary/12 h-9 w-9" />
-          <XPNavIndicator isNasrTheme={true} />
+          <XPNavIndicator isPremiumTheme={true} />
         </div>
 
         {/* Right: Profile button - more compact on mobile */}
         <Button
           variant="ghost"
-          className="flex items-center gap-1.5 md:gap-2 h-auto py-1 md:py-1.5 px-2 md:px-3 rounded-full bg-card/80 backdrop-blur-sm border border-border shadow-md transition-all duration-200 hover:bg-accent/80 hover:border-accent"
+          className="flex items-center gap-1.5 md:gap-2 h-auto py-1 md:py-1.5 px-2 md:px-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 shadow-xl transition-all duration-300 hover:bg-white/10 hover:border-[#6366F1]/50"
           onClick={() => setProfileSheetOpen(true)}
         >
           <div
-            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-semibold text-xs md:text-sm transition-all bg-gradient-to-br from-primary to-primary/80 text-primary-foreground ring-2 ring-primary/30"
+            className="w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-semibold text-xs md:text-sm transition-all bg-premium-gold text-premium-bg shadow-[0_0_15px_rgba(212,175,55,0.5)]"
           >
             {firstName.charAt(0).toUpperCase()}
           </div>
-          <span className="hidden sm:inline text-sm font-medium text-foreground">
+          <span className="hidden sm:inline text-sm font-medium text-white/90">
             {firstName}
           </span>
-          <User className="h-4 w-4 text-muted-foreground hidden sm:block" />
+          <User className="h-4 w-4 text-white/40 hidden sm:block" />
         </Button>
       </header>
 
@@ -266,7 +267,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
   const { client } = useClient();
   const navigate = useNavigate();
 
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'finademica';
 
   // Redirect to login if not authenticated (after loading completes)
   useEffect(() => {
@@ -293,8 +294,8 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
           collapsible="icon"
           variant="floating"
           className={cn(
-            "hidden md:flex rounded-[18px] shadow-lg border border-sidebar-border",
-            isNasrTheme ? "bg-[hsl(222,47%,11%)]" : "bg-sidebar"
+            "hidden md:flex rounded-[24px] shadow-2xl border border-white/5",
+            isPremiumTheme ? "bg-[#020617]" : "bg-[#020617]/95"
           )}
         >
           <SidebarNavContent />
@@ -315,7 +316,7 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
             <div className="max-w-[1440px] mx-auto">{children}</div>
           </main>
 
-          <TradingDisclaimer isNasrTheme={true} />
+          <TradingDisclaimer isPremiumTheme={true} />
         </SidebarInset>
 
         {/* Mobile Bottom Navigation */}

@@ -64,7 +64,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
       {/* Header with Price and Score */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#D4E0EC]">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center shadow-[0_0_20px_rgba(77,226,232,0.3)]">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center shadow-[0_0_20px_rgba(99, 102, 241,0.3)]">
             <TrendingUp className="w-7 h-7 text-white" />
           </div>
           <div>
@@ -86,7 +86,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
         {/* AI Score */}
         <Card className="p-4 bg-gradient-to-br from-white/80 to-[#F6F9FB] border-[#D4E0EC]">
           <div className="flex items-center gap-2 mb-2">
-            <Target className="w-4 h-4 text-[#4DE2E8]" />
+            <Target className="w-4 h-4 text-[#6366F1]" />
             <span className="text-sm text-[#6B7280]">AI Score</span>
           </div>
           <p className={`text-3xl font-bold ${getScoreColor(aiScore)}`}>{aiScore}</p>
@@ -96,7 +96,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
         {/* Risk Level */}
         <Card className="p-4 bg-gradient-to-br from-white/80 to-[#F6F9FB] border-[#D4E0EC]">
           <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-4 h-4 text-[#4DE2E8]" />
+            <AlertTriangle className="w-4 h-4 text-[#6366F1]" />
             <span className="text-sm text-[#6B7280]">Risk Level</span>
           </div>
           <Badge className={`${getRiskColor(fields.riskLevel || '')} text-base px-3 py-1`}>
@@ -107,7 +107,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
         {/* Sentiment Distribution */}
         <Card className="p-4 bg-gradient-to-br from-white/80 to-[#F6F9FB] border-[#D4E0EC] col-span-2 md:col-span-1">
           <div className="flex items-center gap-2 mb-2">
-            <BarChart3 className="w-4 h-4 text-[#4DE2E8]" />
+            <BarChart3 className="w-4 h-4 text-[#6366F1]" />
             <span className="text-sm text-[#6B7280]">Sentiment</span>
           </div>
           <div className="space-y-1">
@@ -135,9 +135,9 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
 
       {/* AI Message */}
       {fields.aiMessage && (
-        <Card className="p-4 bg-gradient-to-r from-[#4DE2E8]/10 to-[#A7E9FF]/10 border-[#4DE2E8]/30">
+        <Card className="p-4 bg-gradient-to-r from-[#6366F1]/10 to-[#A7E9FF]/10 border-[#6366F1]/30">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4DE2E8] to-[#2FB3C6] flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6366F1] to-[#4F46E5] flex items-center justify-center flex-shrink-0">
               <MessageSquare className="w-4 h-4 text-white" />
             </div>
             <div>
@@ -153,7 +153,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
         {fields.trendAnalysis && (
           <Card className="p-4 border-[#D4E0EC]">
             <h4 className="font-semibold text-[#1D3557] mb-2 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#4DE2E8]" />
+              <TrendingUp className="w-4 h-4 text-[#6366F1]" />
               Trend Analysis
             </h4>
             <p className="text-sm text-[#4B5563] leading-relaxed">{fields.trendAnalysis}</p>
@@ -163,7 +163,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
         {fields.keyFactors && (
           <Card className="p-4 border-[#D4E0EC]">
             <h4 className="font-semibold text-[#1D3557] mb-2 flex items-center gap-2">
-              <Target className="w-4 h-4 text-[#4DE2E8]" />
+              <Target className="w-4 h-4 text-[#6366F1]" />
               Key Factors
             </h4>
             <p className="text-sm text-[#4B5563] leading-relaxed">{fields.keyFactors}</p>
@@ -174,7 +174,7 @@ const StockAnalysisCard = ({ data, symbol }: StockAnalysisCardProps) => {
       {fields.forecast && (
         <Card className="p-4 border-[#D4E0EC]">
           <h4 className="font-semibold text-[#1D3557] mb-2 flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-[#4DE2E8]" />
+            <BarChart3 className="w-4 h-4 text-[#6366F1]" />
             Forecast
           </h4>
           <p className="text-sm text-[#4B5563] leading-relaxed">{fields.forecast}</p>

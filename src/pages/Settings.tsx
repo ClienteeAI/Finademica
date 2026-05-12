@@ -341,7 +341,7 @@ const Settings = () => {
                           </div>
                           
                           <p className="text-sm italic text-primary/80">
-                            If something isn't working for you, we'd love to hear about it! Contact us at support@nallio.io
+                            If something isn't working for you, we'd love to hear about it! Contact us at hey@finademica.com
                           </p>
                         </div>
                       </AlertDialogDescription>

@@ -36,10 +36,10 @@ const PrivacyPolicy = () => {
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>1. Introduction</h2>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            This Privacy Policy explains how personal data is collected, used, and protected when you access or use the Nallio Trade academy platform, including the website and mobile applications (the "Service").
+            This Privacy Policy explains how personal data is collected, used, and protected when you access or use the Finademica platform, including the website and mobile applications (the "Service").
           </p>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            The Service operates under the Nallio Trade brand and is owned and managed by Clientee AI, s.r.o..
+            The Service operates under the Finademica brand and is owned and managed by Clientee AI, s.r.o..
           </p>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
             We respect your privacy and process personal data in accordance with applicable data protection laws, including the General Data Protection Regulation (GDPR).
@@ -54,7 +54,7 @@ const PrivacyPolicy = () => {
             110 00 Praha<br />
             Czech Republic<br />
             IČO: 234 35 186<br />
-            support@nallio.io
+            hey@finademica.com
           </p>
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>3. Personal Data We Collect</h2>
@@ -154,7 +154,7 @@ const PrivacyPolicy = () => {
 
           <h2 className={`text-xl font-semibold mt-6 mb-3 ${isNasrTheme ? 'text-nasr-text' : 'text-white'}`}>12. Contact</h2>
           <p className={`${isNasrTheme ? 'text-nasr-text/90' : 'text-white/90'} leading-relaxed`}>
-            support@nallio.io
+            hey@finademica.com
           </p>
         </div>
       </div>

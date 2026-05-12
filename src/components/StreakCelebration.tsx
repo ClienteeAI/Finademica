@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { Flame, Sparkles, Star, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import confetti from "canvas-confetti";
+import { useClient } from "@/lib/clientContext";
 
 interface StreakCelebrationProps {
   streakDays: number;
-  isNasrTheme?: boolean;
 }
 
 // Milestone definitions
@@ -37,7 +37,9 @@ const getStreakLevel = (days: number): { level: number; color: string; icon: str
   return { level: 0, color: "from-gray-500 to-gray-400", icon: "💤" };
 };
 
-export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCelebrationProps) {
+export function StreakCelebration({ streakDays }: StreakCelebrationProps) {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [showCelebration, setShowCelebration] = useState(false);
   const [animateFlame, setAnimateFlame] = useState(false);
   
@@ -51,9 +53,9 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
       setShowCelebration(true);
       
       // Fire confetti for milestones
-      const colors = isNasrTheme 
-        ? ['#D4AF37', '#F2C94C', '#FFD700'] 
-        : ['#4DE2E8', '#A7E9FF', '#B5A7FF'];
+      const colors = isPremiumTheme 
+        ? ['#D4AF37', '#B8860B', '#FFD700'] 
+        : ['#6366F1', '#A7E9FF', '#B5A7FF'];
       
       confetti({
         particleCount: 80,
@@ -66,7 +68,7 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
       const timer = setTimeout(() => setShowCelebration(false), 5000);
       return () => clearTimeout(timer);
     }
-  }, [streakDays, milestone, isNasrTheme]);
+  }, [streakDays, milestone, isPremiumTheme]);
 
   // Animate flame continuously for active streaks
   useEffect(() => {
@@ -83,8 +85,8 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
           {/* Radial glow */}
           <div className={cn(
             "absolute inset-0 animate-pulse",
-            isNasrTheme 
-              ? "bg-gradient-radial from-gold/20 via-transparent to-transparent" 
+            isPremiumTheme 
+              ? "bg-gradient-radial from-premium-gold/20 via-transparent to-transparent" 
               : "bg-gradient-radial from-cyan-500/20 via-transparent to-transparent"
           )} />
           
@@ -94,7 +96,7 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
               key={i}
               className={cn(
                 "absolute w-2 h-2 rounded-full animate-float-up",
-                isNasrTheme ? "bg-gold" : "bg-cyan-400"
+                isPremiumTheme ? "bg-premium-gold" : "bg-cyan-400"
               )}
               style={{
                 left: `${15 + i * 15}%`,
@@ -110,8 +112,8 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
       <div className={cn(
         "flex items-center justify-between p-4 rounded-xl transition-all duration-500",
         showCelebration && "scale-[1.02]",
-        isNasrTheme 
-          ? "bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-gray-700/50" 
+        isPremiumTheme 
+          ? "bg-premium-panel/80 border border-premium-gold/20" 
           : "bg-card"
       )}>
         <div className="flex items-center gap-4">
@@ -159,7 +161,7 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
             </div>
             <p className={cn(
               "text-xs transition-all duration-300",
-              showCelebration ? (isNasrTheme ? "text-gold" : "text-cyan-400") : "text-muted-foreground"
+              showCelebration ? (isPremiumTheme ? "text-premium-gold" : "text-cyan-400") : "text-muted-foreground"
             )}>
               {showCelebration && message 
                 ? message 
@@ -180,7 +182,7 @@ export function StreakCelebration({ streakDays, isNasrTheme = false }: StreakCel
             "text-3xl font-bold font-mono",
             streakDays > 0 
               ? showCelebration 
-                ? (isNasrTheme ? "text-gold" : "text-cyan-400") 
+                ? (isPremiumTheme ? "text-premium-gold" : "text-cyan-400") 
                 : "text-foreground"
               : "text-muted-foreground"
           )}>

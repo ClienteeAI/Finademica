@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { SIGNUP_WEBHOOK_URL } from "@/lib/onboardingWebhook";
 import CountryCodeSelect from "@/components/CountryCodeSelect";
+import { cn } from "@/lib/utils";
 
 export interface SignupUserData {
   firstName: string;
@@ -29,6 +30,7 @@ interface SignupFormInitialProps {
 const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormInitialProps) => {
   const navigate = useNavigate();
   const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const { signUp, signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,7 +115,7 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           client_id: client.id,
           client_subdomain: client.subdomain,
           client_name: client.company_name,
-          source: "lovable_signup"
+          source: "Finademica_signup"
         };
 
         await fetch(SIGNUP_WEBHOOK_URL, {
@@ -176,9 +178,17 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md bg-[#1a1f2e] border-[#2a3142] text-white">
+      <DialogContent className={cn(
+        "max-w-md",
+        isPremiumTheme 
+          ? "bg-premium-bg border-premium-gold/20 text-premium-text" 
+          : "bg-[#1a1f2e] border-[#2a3142] text-white"
+      )}>
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-center text-white">
+          <DialogTitle className={cn(
+            "text-2xl font-bold text-center",
+            isPremiumTheme ? "text-premium-gold" : "text-white"
+          )}>
             Create Your Free Account
           </DialogTitle>
           <p className="text-center text-gray-400 mt-2">
@@ -196,26 +206,38 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName" className="text-white">First Name</Label>
-              <Input
-                id="firstName"
-                placeholder="John"
-                value={formData.firstName}
-                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.firstName ? "border-destructive" : ""}`}
-                disabled={isSubmitting}
-              />
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  className={cn(
+                    "text-white placeholder:text-gray-500",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold" 
+                      : "bg-[#2a3142] border-[#3a4152] focus:border-primary",
+                    errors.firstName && "border-destructive"
+                  )}
+                  disabled={isSubmitting}
+                />
               {errors.firstName && <p className="text-xs text-destructive">{errors.firstName}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName" className="text-white">Last Name</Label>
-              <Input
-                id="lastName"
-                placeholder="Doe"
-                value={formData.lastName}
-                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.lastName ? "border-destructive" : ""}`}
-                disabled={isSubmitting}
-              />
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  className={cn(
+                    "text-white placeholder:text-gray-500",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold" 
+                      : "bg-[#2a3142] border-[#3a4152] focus:border-primary",
+                    errors.lastName && "border-destructive"
+                  )}
+                  disabled={isSubmitting}
+                />
               {errors.lastName && <p className="text-xs text-destructive">{errors.lastName}</p>}
             </div>
           </div>
@@ -227,7 +249,13 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
               placeholder="TraderJohn"
               value={formData.nickname}
               onChange={(e) => setFormData({ ...formData, nickname: e.target.value })}
-              className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.nickname ? "border-destructive" : ""}`}
+              className={cn(
+                "text-white placeholder:text-gray-500",
+                isPremiumTheme 
+                  ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold" 
+                  : "bg-[#2a3142] border-[#3a4152] focus:border-primary",
+                errors.nickname && "border-destructive"
+              )}
               disabled={isSubmitting}
             />
             {errors.nickname && <p className="text-xs text-destructive">{errors.nickname}</p>}
@@ -241,7 +269,13 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
               placeholder="john@example.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.email ? "border-destructive" : ""}`}
+              className={cn(
+                "text-white placeholder:text-gray-500",
+                isPremiumTheme 
+                  ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold" 
+                  : "bg-[#2a3142] border-[#3a4152] focus:border-primary",
+                errors.email && "border-destructive"
+              )}
               disabled={isSubmitting}
             />
             {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
@@ -263,7 +297,13 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="123 456 789"
                 value={phoneNumber}
                 onChange={(e) => setPhoneNumber(e.target.value)}
-                className={`flex-1 bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.phone ? "border-destructive" : ""}`}
+                className={cn(
+                  "flex-1 text-white placeholder:text-gray-500",
+                  isPremiumTheme 
+                    ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold" 
+                    : "bg-[#2a3142] border-[#3a4152] focus:border-primary",
+                  errors.phone && "border-destructive"
+                )}
                 disabled={isSubmitting}
               />
             </div>
@@ -279,7 +319,13 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
                 placeholder="Create a secure password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={`bg-[#2a3142] text-white placeholder:text-gray-500 border-[#3a4152] focus:border-primary ${errors.password ? "border-destructive pr-10" : "pr-10"}`}
+                className={cn(
+                  "text-white placeholder:text-gray-500",
+                  isPremiumTheme 
+                    ? "bg-premium-panel/50 border-premium-gold/20 focus:border-premium-gold pr-10" 
+                    : "bg-[#2a3142] border-[#3a4152] focus:border-primary pr-10",
+                  errors.password && "border-destructive"
+                )}
                 disabled={isSubmitting}
               />
               <button
@@ -311,7 +357,12 @@ const SignupFormInitial = ({ open, onOpenChange, onSignupComplete }: SignupFormI
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full h-12 text-base font-semibold"
+            className={cn(
+              "w-full h-12 text-base font-semibold",
+              isPremiumTheme 
+                ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" 
+                : ""
+            )}
           >
             {isSubmitting ? (
               <>

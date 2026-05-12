@@ -5,12 +5,10 @@
  * - Opening live trading accounts
  * - Trade now buttons
  * - Broker-related promotions
- * - Links to external trading platforms (e.g., nasrtrade.com)
+ * - Links to external trading platforms
  * 
- * This is used for App Store compliance to show the app is educational,
+ * This is used for compliance to show the app is educational,
  * not a broker application.
- * 
- * NOTE: NASR client shows CTAs, all other clients hide them.
  */
 
 // Static flag for backwards compatibility (default: hide CTAs)
@@ -24,10 +22,6 @@ export const HIDE_TRADING_CTAS = true;
  * @returns true if CTAs should be hidden, false if they should be shown
  */
 export function shouldHideTradingCTAs(clientSubdomain: string | undefined | null): boolean {
-  // NASR client shows CTAs (return false = don't hide)
-  if (clientSubdomain === 'nasr') {
-    return false;
-  }
-  // All other clients hide CTAs
+  // All clients hide CTAs by default for compliance
   return true;
 }

@@ -25,11 +25,11 @@ interface AchievementData {
 
 // Skill colors mapped by skill key
 const skillColors: Record<string, string> = {
-  risk: "from-[#4DE2E8] to-[#2FB3C6]",
+  risk: "from-[#6366F1] to-[#4F46E5]",
   mindset: "from-[#B5A7FF] to-[#D4CBFF]",
-  technical: "from-[#1D3557] to-[#3D5A80]",
-  fundamental: "from-[#A7E9FF] to-[#D4E0EC]",
-  money_management: "from-[#4DE2E8] to-[#A7E9FF]",
+  technical: "from-[#020617] to-[#1D3557]",
+  fundamental: "from-[#6366F1] to-[#D4E0EC]",
+  money_management: "from-[#6366F1] to-[#4F46E5]",
 };
 
 // Calculate skill progress: 100 XP per level (display only)
@@ -46,7 +46,7 @@ export function GamificationSection() {
   const [detailsLoading, setDetailsLoading] = useState(true);
   
   // Theme detection
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'finademica';
 
   // Fetch skills and achievements
   const fetchDetails = async () => {
@@ -144,16 +144,16 @@ export function GamificationSection() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 flex items-center justify-center border border-[#4DE2E8]/30">
-            <Sparkles className="w-5 h-5 text-[#2FB3C6]" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1]/20 to-[#4F46E5]/20 flex items-center justify-center border border-[#6366F1]/30">
+            <Sparkles className="w-5 h-5 text-[#6366F1]" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-[#1D3557] tracking-tight">Trader Progress</h2>
-            <p className="text-sm text-[#6B7280]">Your trading RPG journey</p>
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">Trader Progress</h2>
+            <p className="text-sm text-muted-foreground">Your trading RPG journey</p>
           </div>
         </div>
         <Card className="p-8">
-          <p className="text-sm text-[#6B7280] text-center">{error}</p>
+          <p className="text-sm text-muted-foreground text-center">{error}</p>
         </Card>
       </div>
     );
@@ -165,11 +165,11 @@ export function GamificationSection() {
       <div className="flex items-center gap-2 md:gap-3">
         <div className={cn(
           "w-8 h-8 md:w-10 md:h-10 rounded-xl flex items-center justify-center border",
-          isNasrTheme 
-            ? "bg-gradient-to-br from-gold/20 to-gold-light/20 border-gold/30" 
-            : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 border-[#4DE2E8]/30"
+          isPremiumTheme 
+            ? "bg-premium-gold/20 border-premium-gold/30" 
+            : "bg-gradient-to-br from-[#6366F1]/20 to-[#4F46E5]/20 border-[#6366F1]/30"
         )}>
-          <Sparkles className={cn("w-4 h-4 md:w-5 md:h-5", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
+          <Sparkles className={cn("w-4 h-4 md:w-5 md:h-5", isPremiumTheme ? "text-premium-gold" : "text-[#6366F1]")} />
         </div>
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Trader Progress</h2>
@@ -187,11 +187,11 @@ export function GamificationSection() {
             </h3>
             <div className={cn(
               "w-7 h-7 md:w-8 md:h-8 rounded-lg flex items-center justify-center border",
-              isNasrTheme 
-                ? "bg-gradient-to-br from-gold/20 to-gold-light/20 border-gold/30" 
-                : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#A7E9FF]/20 border-[#4DE2E8]/30"
+              isPremiumTheme 
+                ? "bg-premium-gold/20 border-premium-gold/30" 
+                : "bg-gradient-to-br from-[#6366F1]/20 to-[#4F46E5]/20 border-[#6366F1]/30"
             )}>
-              <Target className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isNasrTheme ? "text-gold" : "text-[#2FB3C6]")} />
+              <Target className={cn("w-3.5 h-3.5 md:w-4 md:h-4", isPremiumTheme ? "text-premium-gold" : "text-[#6366F1]")} />
             </div>
           </div>
 
@@ -205,11 +205,11 @@ export function GamificationSection() {
             ) : (
               <>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl md:text-4xl font-bold text-foreground font-mono">
+                  <span className={cn("text-2xl md:text-4xl font-bold font-mono", isPremiumTheme ? "text-premium-gold" : "text-foreground")}>
                     Level {level}
                   </span>
                 </div>
-                <p className={cn("text-base md:text-lg font-medium", isNasrTheme ? "text-gold" : "text-[#4DE2E8]")}>{levelName}</p>
+                <p className={cn("text-base md:text-lg font-medium", isPremiumTheme ? "text-premium-text" : "text-[#6366F1]")}>{levelName}</p>
                 <p className="text-xs md:text-sm text-muted-foreground font-mono">
                   {xp} / {nextLevelXp} XP to next level
                 </p>
@@ -221,7 +221,7 @@ export function GamificationSection() {
           <div className="space-y-2">
             <div className={cn(
               "h-3 rounded-full overflow-hidden backdrop-blur-sm border",
-              isNasrTheme ? "bg-white/5 border-white/10" : "bg-[#D4E0EC]/40 border-[#D4E0EC]/60"
+              isPremiumTheme ? "bg-premium-gold/10 border-premium-gold/20" : "bg-indigo-500/10 border-indigo-500/20"
             )}>
               {isLoading ? (
                 <div className="h-full w-0" />
@@ -229,9 +229,9 @@ export function GamificationSection() {
                 <div
                   className={cn(
                     "h-full bg-gradient-to-r relative overflow-hidden transition-all duration-1000",
-                    isNasrTheme 
-                      ? "from-gold-light to-gold shadow-[0_0_12px_rgba(212,175,55,0.4)]" 
-                      : "from-[#4DE2E8] to-[#A7E9FF] shadow-[0_0_12px_rgba(77,226,232,0.4)]"
+                    isPremiumTheme 
+                      ? "bg-premium-gold shadow-[0_0_12px_rgba(212,175,55,0.4)]" 
+                      : "from-[#6366F1] to-[#4F46E5] shadow-[0_0_12px_rgba(99,102,241,0.4)]"
                   )}
                   style={{ width: `${xpPercentage}%` }}
                 >
@@ -247,12 +247,12 @@ export function GamificationSection() {
         </Card>
 
         {/* Avatar Card */}
-        <Card className="p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden">
+        <Card className={cn("p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300 relative overflow-hidden", isPremiumTheme ? "bg-premium-panel/50 border-premium-gold/20" : "")}>
           <div className={cn(
             "absolute inset-0 pointer-events-none",
-            isNasrTheme 
-              ? "bg-gradient-to-br from-gold/5 via-transparent to-gold-light/10" 
-              : "bg-gradient-to-br from-[#4DE2E8]/5 via-transparent to-[#B5A7FF]/10"
+            isPremiumTheme 
+              ? "bg-gradient-to-br from-premium-gold/5 via-transparent to-premium-gold/10" 
+              : "bg-gradient-to-br from-[#6366F1]/5 via-transparent to-[#B5A7FF]/10"
           )} />
           
           <div className="flex items-center justify-between relative">
@@ -262,7 +262,7 @@ export function GamificationSection() {
             {isLoading ? (
               <Skeleton className="h-5 w-16" />
             ) : (
-              <Badge variant="success" className="text-xs">Stage {Math.floor(level / 3) + 1}</Badge>
+              <Badge variant="success" className={cn("text-xs", isPremiumTheme ? "bg-premium-gold/20 text-premium-gold border-premium-gold/30" : "")}>Stage {Math.floor(level / 3) + 1}</Badge>
             )}
           </div>
 
@@ -270,22 +270,22 @@ export function GamificationSection() {
             <div className="relative">
               <div className={cn(
                 "absolute inset-0 w-24 h-24 rounded-full blur-xl animate-pulse",
-                isNasrTheme ? "bg-gradient-to-br from-gold/30 to-gold-light/20" : "bg-gradient-to-br from-[#4DE2E8]/30 to-[#A7E9FF]/20"
+                isPremiumTheme ? "bg-gradient-to-br from-premium-gold/30 to-premium-gold/20" : "bg-gradient-to-br from-[#6366F1]/30 to-[#A7E9FF]/20"
               )} />
               <div className={cn(
                 "absolute inset-2 w-20 h-20 rounded-full blur-lg animate-pulse",
-                isNasrTheme ? "bg-gradient-to-br from-gold/20 to-gold-light/20" : "bg-gradient-to-br from-[#4DE2E8]/20 to-[#B5A7FF]/20"
+                isPremiumTheme ? "bg-gradient-to-br from-premium-gold/20 to-premium-gold/20" : "bg-gradient-to-br from-[#6366F1]/20 to-[#B5A7FF]/20"
               )} style={{ animationDelay: '0.5s' }} />
               
               <div className={cn(
                 "relative w-24 h-24 rounded-full flex items-center justify-center transition-all duration-500",
-                isNasrTheme 
-                  ? "bg-gradient-to-br from-gold/30 via-white/10 to-gold-light/30 border-2 border-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.25),inset_0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_40px_rgba(212,175,55,0.4),inset_0_0_25px_rgba(255,255,255,0.3)]"
-                  : "bg-gradient-to-br from-[#4DE2E8]/30 via-white/60 to-[#A7E9FF]/30 border-2 border-[#4DE2E8]/50 shadow-[0_0_30px_rgba(77,226,232,0.25),inset_0_0_20px_rgba(255,255,255,0.5)] group-hover:shadow-[0_0_40px_rgba(77,226,232,0.4),inset_0_0_25px_rgba(255,255,255,0.6)]"
+                isPremiumTheme 
+                  ? "bg-gradient-to-br from-premium-gold/30 via-white/10 to-premium-gold/30 border-2 border-premium-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.25),inset_0_0_20px_rgba(255,255,255,0.2)] group-hover:shadow-[0_0_40px_rgba(212,175,55,0.4),inset_0_0_25px_rgba(255,255,255,0.3)]"
+                  : "bg-gradient-to-br from-[#6366F1]/30 via-white/60 to-[#4F46E5]/30 border-2 border-[#6366F1]/50 shadow-[0_0_30px_rgba(99,102,241,0.25),inset_0_0_20px_rgba(255,255,255,0.5)] group-hover:shadow-[0_0_40px_rgba(99,102,241,0.4),inset_0_0_25px_rgba(255,255,255,0.6)]"
               )}>
                 <Sparkles className={cn(
                   "w-10 h-10",
-                  isNasrTheme ? "text-gold drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" : "text-[#2FB3C6] drop-shadow-[0_0_8px_rgba(77,226,232,0.6)]"
+                  isPremiumTheme ? "text-premium-gold drop-shadow-[0_0_8px_rgba(212,175,55,0.6)]" : "text-[#6366F1] drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]"
                 )} />
               </div>
             </div>
@@ -299,7 +299,7 @@ export function GamificationSection() {
               </>
             ) : (
               <>
-                <p className="text-lg font-semibold text-foreground">{levelName}</p>
+                <p className={cn("text-lg font-semibold", isPremiumTheme ? "text-premium-text" : "text-foreground")}>{levelName}</p>
                 <p className="text-xs text-muted-foreground">
                   Keep learning to evolve your avatar.
                 </p>
@@ -309,14 +309,14 @@ export function GamificationSection() {
 
           <p className={cn(
             "text-xs text-muted-foreground text-center border-t pt-3",
-            isNasrTheme ? "border-white/10" : "border-[#D4E0EC]/60"
+            isPremiumTheme ? "border-premium-gold/10" : "border-white/5"
           )}>
             Next stage unlocks at Level {(Math.floor(level / 3) + 1) * 3 + 1}
           </p>
         </Card>
 
         {/* Skill Tree Card */}
-        <Card className="p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300">
+        <Card className={cn("p-4 md:p-6 space-y-4 md:space-y-5 group hover:-translate-y-1 hover:scale-[1.01] transition-all duration-300", isPremiumTheme ? "bg-premium-panel/50 border-premium-gold/20" : "")}>
           <div className="flex items-center justify-between">
             <h3 className="text-xs md:text-sm uppercase tracking-widest text-muted-foreground font-semibold">
               Your Skill Tree
@@ -336,16 +336,16 @@ export function GamificationSection() {
               ))
             ) : skills.length > 0 ? (
               skills.map((skill) => {
-                const color = isNasrTheme 
-                  ? "from-gold-light to-gold" 
-                  : skillColors[skill.key] || "from-[#4DE2E8] to-[#A7E9FF]";
+                const color = isPremiumTheme 
+                  ? "bg-premium-gold" 
+                  : skillColors[skill.key] || "from-[#6366F1] to-[#A7E9FF]";
                 const progress = getSkillProgress(skill.xp);
                 const hasProgress = skill.xp > 0;
                 
                 return (
                   <div key={skill.skill_id} className={cn("space-y-1.5", !hasProgress && "opacity-60")}>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-foreground capitalize">
+                      <span className={cn("text-xs font-semibold capitalize", isPremiumTheme ? "text-premium-text" : "text-foreground")}>
                         {skill.name.replace(/_/g, ' ')}
                       </span>
                       <span className="text-xs text-muted-foreground font-mono">
@@ -354,13 +354,13 @@ export function GamificationSection() {
                     </div>
                     <div className={cn(
                       "h-2 rounded-full overflow-hidden border",
-                      isNasrTheme ? "bg-white/5 border-white/10" : "bg-[#D4E0EC]/40 border-[#D4E0EC]/50"
+                      isPremiumTheme ? "bg-premium-gold/10 border-premium-gold/10" : "bg-indigo-500/5 border-indigo-500/10"
                     )}>
                       <div
                         className={cn(
-                          "h-full rounded-full bg-gradient-to-r transition-all duration-1000",
+                          "h-full rounded-full transition-all duration-1000",
                           color,
-                          hasProgress && (isNasrTheme ? "shadow-[0_0_8px_rgba(212,175,55,0.3)]" : "shadow-[0_0_8px_rgba(77,226,232,0.3)]")
+                          hasProgress && (isPremiumTheme ? "shadow-[0_0_8px_rgba(212,175,55,0.3)]" : "shadow-[0_0_8px_rgba(99,102,241,0.3)]")
                         )}
                         style={{ width: `${progress}%` }}
                       />
@@ -377,7 +377,7 @@ export function GamificationSection() {
 
           <p className={cn(
             "text-xs text-muted-foreground leading-relaxed border-t pt-3",
-            isNasrTheme ? "border-white/10" : "border-[#D4E0EC]/60"
+            isPremiumTheme ? "border-premium-gold/10" : "border-white/5"
           )}>
             Skill XP grows as you complete new lessons.
           </p>

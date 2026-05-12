@@ -48,13 +48,6 @@ export const ConversionBanner = () => {
           ))}
         </div>
         
-        <Button 
-          size="lg"
-          className="w-full sm:w-auto bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold text-sm sm:text-lg px-4 sm:px-8 py-4 sm:py-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-          onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
-        >
-          Open Live Account - Start with $100 →
-        </Button>
       </div>
     </div>
   );

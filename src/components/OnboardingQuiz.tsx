@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Loader2 } from "lucide-react";
 import { QUIZ_WEBHOOK_URL } from "@/lib/onboardingWebhook";
+import { cn } from "@/lib/utils";
+import { useClient } from "@/lib/clientContext";
 
 export interface OnboardingAnswers {
   experience: string;
@@ -14,6 +16,7 @@ export interface OnboardingAnswers {
   goal: string;
   concern: string;
   timeCommitment: string;
+  riskTolerance: string;
 }
 
 interface OnboardingQuizProps {
@@ -95,6 +98,18 @@ const questions = [
       { value: "10+", label: "🔥 10+ hours (full-time focus)" },
     ],
   },
+  {
+    id: 6,
+    title: "What's your risk tolerance?",
+    type: "single" as const,
+    key: "riskTolerance",
+    options: [
+      { value: "conservative", label: "🛡️ Conservative (Low risk, steady growth)" },
+      { value: "moderate", label: "⚖️ Moderate (Balanced risk and reward)" },
+      { value: "aggressive", label: "🚀 Aggressive (Higher risk for faster growth)" },
+      { value: "speculative", label: "🎰 Speculative (High risk, high potential)" },
+    ],
+  },
 ];
 
 const OnboardingQuiz = ({
@@ -104,6 +119,8 @@ const OnboardingQuiz = ({
   userData,
   clientData,
 }: OnboardingQuizProps) => {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [answers, setAnswers] = useState<OnboardingAnswers>({
@@ -112,6 +129,7 @@ const OnboardingQuiz = ({
     goal: "",
     concern: "",
     timeCommitment: "",
+    riskTolerance: "",
   });
 
   const question = questions[currentQuestion];
@@ -134,6 +152,7 @@ const OnboardingQuiz = ({
     if (currentQuestion === 2) return answers.goal !== "";
     if (currentQuestion === 3) return answers.concern !== "";
     if (currentQuestion === 4) return answers.timeCommitment !== "";
+    if (currentQuestion === 5) return answers.riskTolerance !== "";
     return false;
   };
 
@@ -162,6 +181,7 @@ const OnboardingQuiz = ({
           primary_goal: answers.goal,
           main_concern: answers.concern,
           time_available: answers.timeCommitment,
+          risk_tolerance: answers.riskTolerance,
         },
         ...(userData && {
           first_name: userData.firstName,
@@ -191,28 +211,29 @@ const OnboardingQuiz = ({
     }
   };
 
-  const currentValue =
-    currentQuestion === 0
-      ? answers.experience
-      : currentQuestion === 2
-        ? answers.goal
-        : currentQuestion === 3
-          ? answers.concern
-          : answers.timeCommitment;
+  const currentValue = question.type === "single" ? (answers as any)[question.key] : "";
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="max-w-3xl bg-card/95 backdrop-blur-lg border-border p-0 [&>button]:hidden">
+      <DialogContent className={cn(
+        "max-w-3xl p-0 [&>button]:hidden",
+        isPremiumTheme 
+          ? "bg-premium-bg border-premium-gold/20 text-premium-text" 
+          : "bg-card/95 backdrop-blur-lg border-border"
+      )}>
         <div className="p-6 pb-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-medium text-muted-foreground">
               Question {currentQuestion + 1} of {questions.length}
             </span>
-            <span className="text-sm font-medium text-primary">
+            <span className={cn(
+              "text-sm font-medium",
+              isPremiumTheme ? "text-premium-gold" : "text-primary"
+            )}>
               {Math.round(progress)}% Complete
             </span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress value={progress} className={cn("h-2", isPremiumTheme && "bg-premium-gold/20")} />
         </div>
 
         <div className="p-8 animate-fade-in">
@@ -229,7 +250,12 @@ const OnboardingQuiz = ({
               {question.options.map((option) => (
                 <div
                   key={option.value}
-                  className="flex items-center space-x-3 bg-background/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors cursor-pointer"
+                  className={cn(
+                    "flex items-center space-x-3 p-4 rounded-lg border transition-colors cursor-pointer",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/30 border-premium-gold/10 hover:border-premium-gold/50" 
+                      : "bg-background/50 border-border hover:border-primary/50"
+                  )}
                 >
                   <RadioGroupItem value={option.value} id={`ob-${option.value}`} />
                   <Label
@@ -246,7 +272,12 @@ const OnboardingQuiz = ({
               {question.options.map((option) => (
                 <div
                   key={option.value}
-                  className="flex items-center space-x-3 bg-background/50 p-4 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                  className={cn(
+                    "flex items-center space-x-3 p-4 rounded-lg border transition-colors",
+                    isPremiumTheme 
+                      ? "bg-premium-panel/30 border-premium-gold/10 hover:border-premium-gold/50" 
+                      : "bg-background/50 border-border hover:border-primary/50"
+                  )}
                 >
                   <Checkbox
                     id={`ob-${option.value}`}
@@ -280,7 +311,12 @@ const OnboardingQuiz = ({
             <Button
               onClick={handleSubmit}
               disabled={!canProceed() || submitting}
-              className="bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white font-semibold px-8"
+              className={cn(
+                "font-semibold px-8",
+                isPremiumTheme 
+                  ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" 
+                  : "bg-gradient-to-r from-primary to-purple hover:opacity-90 text-white"
+              )}
             >
               {submitting ? (
                 <>
@@ -295,7 +331,12 @@ const OnboardingQuiz = ({
             <Button
               onClick={handleNext}
               disabled={!canProceed()}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-8"
+              className={cn(
+                "px-8",
+                isPremiumTheme 
+                  ? "bg-premium-gold hover:bg-premium-gold-dark text-premium-bg" 
+                  : "bg-primary hover:bg-primary/90 text-primary-foreground"
+              )}
             >
               Next
             </Button>

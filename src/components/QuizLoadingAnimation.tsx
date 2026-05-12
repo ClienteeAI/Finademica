@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
+import { useClient } from "@/lib/clientContext";
 
 interface QuizLoadingAnimationProps {
   module: string;
-  isNasrTheme?: boolean;
 }
 
-const QuizLoadingAnimation = ({ module, isNasrTheme = false }: QuizLoadingAnimationProps) => {
+const QuizLoadingAnimation = ({ module }: QuizLoadingAnimationProps) => {
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [dots, setDots] = useState("");
   
   useEffect(() => {
@@ -15,10 +17,10 @@ const QuizLoadingAnimation = ({ module, isNasrTheme = false }: QuizLoadingAnimat
     return () => clearInterval(interval);
   }, []);
 
-  const accentColor = isNasrTheme ? "text-gold" : "text-primary";
-  const mutedColor = isNasrTheme ? "text-nasr-text-muted" : "text-muted-foreground";
-  const trackBg = isNasrTheme ? "bg-gold/20" : "bg-primary/20";
-  const runnerColor = isNasrTheme ? "#E4C776" : "hsl(var(--primary))";
+  const accentColor = isPremiumTheme ? "text-premium-gold" : "text-primary";
+  const mutedColor = isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground";
+  const trackBg = isPremiumTheme ? "bg-premium-gold/20" : "bg-primary/20";
+  const runnerColor = isPremiumTheme ? "#D4AF37" : "hsl(var(--primary))";
 
   return (
     <div className="py-12 space-y-8">
@@ -90,7 +92,7 @@ const QuizLoadingAnimation = ({ module, isNasrTheme = false }: QuizLoadingAnimat
           {[...Array(6)].map((_, i) => (
             <div
               key={i}
-              className={`sparkle-particle absolute w-2 h-2 rounded-full ${isNasrTheme ? "bg-gold" : "bg-primary"}`}
+              className={`sparkle-particle absolute w-2 h-2 rounded-full ${isPremiumTheme ? "bg-premium-gold" : "bg-primary"}`}
               style={{
                 left: `${15 + i * 15}%`,
                 animationDelay: `${i * 0.3}s`,
@@ -106,7 +108,7 @@ const QuizLoadingAnimation = ({ module, isNasrTheme = false }: QuizLoadingAnimat
             <div
               key={i}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                isNasrTheme ? "bg-gold" : "bg-primary"
+                isPremiumTheme ? "bg-premium-gold" : "bg-primary"
               }`}
               style={{
                 animation: `pulse-dot 1.5s ease-in-out infinite`,
@@ -128,7 +130,7 @@ const QuizLoadingAnimation = ({ module, isNasrTheme = false }: QuizLoadingAnimat
       </div>
 
       {/* Fun Facts / Tips while loading */}
-      <div className={`max-w-md mx-auto text-center p-4 rounded-xl ${isNasrTheme ? "bg-gold/10" : "bg-primary/10"}`}>
+      <div className={`max-w-md mx-auto text-center p-4 rounded-xl ${isPremiumTheme ? "bg-premium-gold/10" : "bg-primary/10"}`}>
         <p className={`text-xs ${mutedColor}`}>
           💡 Tip: Take your time with each question. Understanding is more important than speed!
         </p>

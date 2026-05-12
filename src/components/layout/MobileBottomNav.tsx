@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Video, Users, HelpCircle, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useClient } from '@/lib/clientContext';
 import {
   Sheet,
   SheetContent,
@@ -19,6 +20,7 @@ const mainNavItems = [
 
 const moreItems = [
   { path: '/arena', label: 'Arena' },
+  { path: '/quiz', label: 'Quizzes' },
   { path: '/analyzer', label: 'Stock Analyzer' },
   { path: '/calculator', label: 'Calculator' },
   { path: '/diary', label: 'Trading Diary' },
@@ -31,6 +33,8 @@ const moreItems = [
 export function MobileBottomNav() {
   const location = useLocation();
   const [moreOpen, setMoreOpen] = useState(false);
+  const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
 
   const isActive = (path: string) => location.pathname === path;
   const isMoreActive = moreItems.some(item => isActive(item.path));
@@ -45,13 +49,13 @@ export function MobileBottomNav() {
             className={cn(
               'flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[56px] transition-all duration-200',
               isActive(item.path)
-                ? 'text-[#38bdf8]'
+                ? isPremiumTheme ? 'text-premium-gold' : 'text-[#38bdf8]'
                 : 'text-[#64748b] active:text-[#94a3b8]'
             )}
           >
             <div className={cn(
               'flex items-center justify-center w-10 h-7 rounded-full transition-colors',
-              isActive(item.path) ? 'bg-[#38bdf8]/15' : ''
+              isActive(item.path) ? (isPremiumTheme ? 'bg-premium-gold/15' : 'bg-[#38bdf8]/15') : ''
             )}>
               <item.icon className="h-[22px] w-[22px]" />
             </div>
@@ -66,13 +70,13 @@ export function MobileBottomNav() {
               className={cn(
                 'flex flex-col items-center justify-center gap-0.5 flex-1 min-h-[56px] transition-all duration-200',
                 isMoreActive
-                  ? 'text-[#38bdf8]'
+                  ? isPremiumTheme ? 'text-premium-gold' : 'text-[#38bdf8]'
                   : 'text-[#64748b] active:text-[#94a3b8]'
               )}
             >
               <div className={cn(
                 'flex items-center justify-center w-10 h-7 rounded-full transition-colors',
-                isMoreActive ? 'bg-[#38bdf8]/15' : ''
+                isMoreActive ? (isPremiumTheme ? 'bg-premium-gold/15' : 'bg-[#38bdf8]/15') : ''
               )}>
                 <MoreHorizontal className="h-[22px] w-[22px]" />
               </div>
@@ -95,7 +99,9 @@ export function MobileBottomNav() {
                   className={cn(
                     'flex items-center justify-center px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-150 min-h-[48px]',
                     isActive(item.path)
-                      ? 'bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30'
+                      ? isPremiumTheme 
+                        ? 'bg-premium-gold/15 text-premium-gold border border-premium-gold/30'
+                        : 'bg-[#38bdf8]/15 text-[#38bdf8] border border-[#38bdf8]/30'
                       : 'bg-[#252d3d] text-[#cbd5e1] active:bg-[#3a4152] active:scale-[0.98]'
                   )}
                 >

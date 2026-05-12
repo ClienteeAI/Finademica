@@ -126,15 +126,15 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
         .from('feed_post_comments')
         .select('id, content, created_at, user_id, status')
         .eq('post_id', postId)
+        .eq('status', 'approved')
         .order('created_at', { ascending: true });
 
       if (error) throw error;
 
-      const approvedComments = (data || []).filter(c => c.status === 'approved' || c.status === 'pending');
-      setComments(approvedComments);
+      setComments(data || []);
 
       // Fetch profiles
-      const userIds = [...new Set(approvedComments.map((c) => c.user_id))];
+      const userIds = [...new Set((data || []).map((c) => c.user_id))];
       if (userIds.length > 0) {
         const { data: profileData } = await supabase
           .from('user_profiles')
@@ -160,12 +160,20 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
     setSubmitting(true);
     const commentContent = newComment.trim();
     try {
+      const { data: userRoles } = await supabase
+        .from('users')
+        .select('is_admin')
+        .eq('id', currentUserId)
+        .maybeSingle();
+
+      const initialStatus = userRoles?.is_admin ? 'approved' : 'pending';
+
       const { error } = await supabase.from('feed_post_comments').insert({
         post_id: postId,
         user_id: currentUserId,
         client_id: currentClientId,
         content: commentContent,
-        status: 'pending',
+        status: initialStatus,
       });
 
       if (error) {
@@ -197,14 +205,26 @@ export function PostComments({ postId, commentCount, onClose, inputRef }: PostCo
               .maybeSingle(),
           ]);
 
-          fetch('https://n8n.srv1474318.hstgr.cloud/webhook/feed-commennts', {
+          const { data: userRoles } = await supabase
+            .from('users')
+            .select('is_admin')
+            .eq('id', currentUserId)
+            .maybeSingle();
+
+          const initialStatus = userRoles?.is_admin ? 'approved' : 'pending';
+
+          const webhookUrl = 'https://n8n.srv1474318.hstgr.cloud/webhook/feed-commennts-finademica';
+          console.log('[Webhook] Sending Comment to:', webhookUrl);
+          await fetch(webhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
+              type: 'comment',
               post_id: postId,
               user_id: currentUserId,
               client_id: currentClientId,
               content: commentContent,
+              status: initialStatus,
               created_at: new Date().toISOString(),
               first_name: userData?.first_name || null,
               last_name: userData?.last_name || null,

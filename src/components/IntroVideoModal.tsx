@@ -9,6 +9,7 @@ import { useClient } from "@/lib/clientContext";
 import { useMemo } from "react";
 import { useVideoCompletion } from "@/hooks/useVideoCompletion";
 import { CheckCircle, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface IntroVideoModalProps {
   isOpen: boolean;
@@ -22,7 +23,7 @@ const INTRO_VIDEOS = [
 
 export const IntroVideoModal = ({ isOpen, onClose }: IntroVideoModalProps) => {
   const { client } = useClient();
-  const isNasrTheme = client?.subdomain === 'nasr';
+  const isPremiumTheme = client?.subdomain === 'finademica';
 
   // Randomly select a video when the modal opens
   const selectedVideo = useMemo(() => {
@@ -42,18 +43,20 @@ export const IntroVideoModal = ({ isOpen, onClose }: IntroVideoModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`sm:max-w-3xl p-0 overflow-hidden ${
-        isNasrTheme 
-          ? 'bg-nasr-panel border-gold/30' 
+      <DialogContent className={cn(
+        "sm:max-w-3xl p-0 overflow-hidden",
+        isPremiumTheme 
+          ? 'bg-premium-panel border-premium-gold/30' 
           : 'bg-background border-border'
-      }`}>
-        <DialogHeader className={`p-6 pb-0 ${isNasrTheme ? 'text-nasr-text' : ''}`}>
-          <DialogTitle className={`text-xl font-semibold ${
-            isNasrTheme 
-              ? 'text-gold' 
+      )}>
+        <DialogHeader className={cn("p-6 pb-0", isPremiumTheme ? 'text-premium-text' : '')}>
+          <DialogTitle className={cn(
+            "text-xl font-semibold",
+            isPremiumTheme 
+              ? 'text-premium-gold font-serif' 
               : 'text-foreground'
-          }`}>
-            Welcome to NASR Trade Academy
+          )}>
+            Welcome to Finademica Academy
           </DialogTitle>
         </DialogHeader>
         
@@ -71,11 +74,12 @@ export const IntroVideoModal = ({ isOpen, onClose }: IntroVideoModalProps) => {
           <Button
             onClick={handleMarkComplete}
             disabled={isCompleting}
-            className={`w-full ${
-              isNasrTheme 
-                ? 'bg-gradient-to-r from-gold to-gold-light text-nasr-bg hover:shadow-gold/30' 
+            className={cn(
+              "w-full",
+              isPremiumTheme 
+                ? 'bg-premium-gold text-premium-bg hover:shadow-premium-gold/30 premium-gold-glow' 
                 : 'bg-gradient-to-r from-aqua to-aqua-deep text-white hover:shadow-aqua/30'
-            }`}
+            )}
           >
             {isCompleting ? (
               <>

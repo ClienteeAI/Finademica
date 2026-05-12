@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { CheckCircle, Clock, Lock, Play, ChevronRight, Trophy, Flame, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useClient } from "@/lib/clientContext";
 import { supabase } from "@/integrations/supabase/client";
 import AchievementCard from "@/components/AchievementCard";
@@ -48,6 +49,7 @@ interface RoadmapDialogProps {
 export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
   const navigate = useNavigate();
   const { client } = useClient();
+  const isPremiumTheme = client?.subdomain === 'finademica';
   const [locations, setLocations] = useState<MountainLocation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { achievements, loading: achievementsLoading } = useAchievements();
@@ -204,51 +206,85 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-gray-950/95 border-gray-800 backdrop-blur-xl overflow-hidden">
+      <DialogContent className={cn(
+        "max-w-4xl max-h-[90vh] p-0 overflow-hidden",
+        isPremiumTheme 
+          ? "bg-premium-panel border-premium-gold/30 backdrop-blur-xl" 
+          : "bg-gray-950/95 border-gray-800 backdrop-blur-xl"
+      )}>
         <DialogHeader className="px-6 pt-6 pb-2">
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <DialogTitle className={cn(
+            "text-2xl font-bold",
+            isPremiumTheme 
+              ? "text-premium-gold font-serif" 
+              : "bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
+          )}>
             Your Trading Journey
           </DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <p className={cn("text-sm", isPremiumTheme ? "text-premium-text-muted" : "text-muted-foreground")}>
             Climb to trading mastery — one phase at a time
           </p>
         </DialogHeader>
 
         <ScrollArea className="max-h-[calc(90vh-100px)] px-6 pb-6">
           {/* User Stats Card */}
-          <Card className="p-4 mb-6 bg-gray-900/80 backdrop-blur-xl border border-gray-700/50">
+          <Card className={cn(
+            "p-4 mb-6 backdrop-blur-xl border",
+            isPremiumTheme 
+              ? "bg-premium-bg/50 border-premium-gold/20" 
+              : "bg-gray-900/80 border-gray-700/50"
+          )}>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border border-cyan-500/50 flex items-center justify-center">
-                    <span className="text-xl font-black text-cyan-400">{level}</span>
+                  <div className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center border",
+                    isPremiumTheme 
+                      ? "bg-premium-gold/20 border-premium-gold/50" 
+                      : "bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border-cyan-500/50"
+                  )}>
+                    <span className={cn("text-xl font-black", isPremiumTheme ? "text-premium-gold" : "text-cyan-400")}>{level}</span>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-cyan-500 text-white text-xs font-bold px-1.5 py-0.5 rounded">
+                  <div className={cn(
+                    "absolute -bottom-1 -right-1 text-xs font-bold px-1.5 py-0.5 rounded",
+                    isPremiumTheme ? "bg-premium-gold text-premium-bg" : "bg-cyan-500 text-white"
+                  )}>
                     LV
                   </div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">Level {level} - {levelName}</h2>
-                  <p className="text-sm text-gray-400">{xp.toLocaleString()} XP total</p>
+                  <h2 className={cn("text-lg font-bold", isPremiumTheme ? "text-premium-text" : "text-white")}>Level {level} - {levelName}</h2>
+                  <p className={cn("text-sm", isPremiumTheme ? "text-premium-text-muted" : "text-gray-400")}>{xp.toLocaleString()} XP total</p>
                 </div>
               </div>
 
               {streakDays > 0 && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30">
-                  <Flame className="w-4 h-4 text-orange-500" />
-                  <span className="font-bold text-sm text-orange-400">{streakDays} Day Streak</span>
+                <div className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-full border",
+                  isPremiumTheme 
+                    ? "bg-premium-gold/10 border-premium-gold/30" 
+                    : "bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/30"
+                )}>
+                  <Flame className={cn("w-4 h-4", isPremiumTheme ? "text-premium-gold" : "text-orange-500")} />
+                  <span className={cn("font-bold text-sm", isPremiumTheme ? "text-premium-gold" : "text-orange-400")}>{streakDays} Day Streak</span>
                 </div>
               )}
             </div>
 
             <div className="mt-3 space-y-1">
               <div className="flex justify-between text-xs">
-                <span className="text-gray-400">Progress to Level {level + 1}</span>
-                <span className="text-cyan-400">{xp} / {nextLevelXp} XP</span>
+                <span className={cn(isPremiumTheme ? "text-premium-text-muted" : "text-gray-400")}>Progress to Level {level + 1}</span>
+                <span className={cn(isPremiumTheme ? "text-premium-gold" : "text-cyan-400")}>{xp} / {nextLevelXp} XP</span>
               </div>
-              <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden border border-gray-700/50">
+              <div className={cn(
+                "h-2 rounded-full overflow-hidden border",
+                isPremiumTheme ? "bg-premium-gold/10 border-premium-gold/20" : "bg-gray-800/50 border-gray-700/50"
+              )}>
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 rounded-full transition-all duration-1000"
+                  className={cn(
+                    "h-full rounded-full transition-all duration-1000",
+                    isPremiumTheme ? "bg-premium-gold" : "bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500"
+                  )}
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -261,8 +297,8 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
           {/* Achievements Section */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-yellow-500" />
+              <h2 className={cn("text-lg font-bold flex items-center gap-2", isPremiumTheme ? "text-premium-text" : "text-white")}>
+                <Trophy className={cn("w-4 h-4", isPremiumTheme ? "text-premium-gold" : "text-yellow-500")} />
                 Your Achievements
               </h2>
               <span className="text-xs text-gray-400">
@@ -292,7 +328,7 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
 
           {/* Mountain Path Section */}
           <div className="mb-4">
-            <h2 className="text-lg font-bold text-white mb-3">Your Path</h2>
+            <h2 className={cn("text-lg font-bold mb-3", isPremiumTheme ? "text-premium-text" : "text-white")}>Your Path</h2>
           </div>
 
           {isLoading ? (
@@ -311,14 +347,14 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                 return (
                   <div
                     key={location.id}
-                    className={`relative rounded-xl overflow-hidden transition-all duration-300
-                      ${isActive 
-                        ? 'bg-gradient-to-br from-gray-900/90 to-gray-800/90 border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/10' 
+                    className={cn(
+                      "relative rounded-xl overflow-hidden transition-all duration-300 border",
+                      isActive 
+                        ? (isPremiumTheme ? 'bg-premium-panel border-premium-gold/50 shadow-lg shadow-premium-gold/10' : 'bg-gradient-to-br from-gray-900/90 to-gray-800/90 border-2 border-cyan-500/50 shadow-lg shadow-cyan-500/10') 
                         : isCompleted
-                        ? 'bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-green-500/30'
-                        : 'bg-gray-900/60 border border-gray-700/50'
-                      }
-                    `}
+                        ? (isPremiumTheme ? 'bg-premium-bg/80 border-green-500/30' : 'bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-green-500/30')
+                        : (isPremiumTheme ? 'bg-premium-panel/60 border-premium-gold/10' : 'bg-gray-900/60 border border-gray-700/50')
+                    )}
                   >
                     {isLocked && (
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-10 flex items-center justify-center">
@@ -340,11 +376,17 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                           <span className="text-3xl">{location.emoji}</span>
                           <div>
                             <div className="flex items-center gap-2">
-                              <h3 className={`text-base font-bold ${isActive ? 'text-cyan-400' : isCompleted ? 'text-green-400' : 'text-gray-400'}`}>
+                              <h3 className={cn(
+                                "text-base font-bold",
+                                isActive ? (isPremiumTheme ? 'text-premium-gold' : 'text-cyan-400') : isCompleted ? 'text-green-400' : 'text-gray-400'
+                              )}>
                                 {location.name}
                               </h3>
                               {isActive && (
-                                <span className="px-2 py-0.5 text-xs font-semibold bg-cyan-500 text-white rounded-full">
+                                <span className={cn(
+                                  "px-2 py-0.5 text-xs font-semibold rounded-full",
+                                  isPremiumTheme ? "bg-premium-gold text-premium-bg" : "bg-cyan-500 text-white"
+                                )}>
                                   Current
                                 </span>
                               )}
@@ -352,25 +394,31 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                                 <CheckCircle className="w-4 h-4 text-green-500" />
                               )}
                             </div>
-                            <p className="text-xs text-gray-400">{location.subtitle}</p>
+                            <p className={cn("text-xs", isPremiumTheme ? "text-premium-text-muted" : "text-gray-400")}>{location.subtitle}</p>
                           </div>
                         </div>
 
                         {!isLocked && (
                           <div className="relative w-12 h-12">
                             <svg className="w-12 h-12 transform -rotate-90">
-                              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="none" className="text-gray-700" />
+                              <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3" fill="none" className={isPremiumTheme ? "text-premium-gold/10" : "text-gray-700"} />
                               <circle
                                 cx="24" cy="24" r="20"
                                 stroke="currentColor" strokeWidth="3" fill="none"
                                 strokeDasharray={`${2 * Math.PI * 20}`}
                                 strokeDashoffset={`${2 * Math.PI * 20 * (1 - location.progress / 100)}`}
-                                className={`${isCompleted ? 'text-green-500' : 'text-cyan-500'} transition-all duration-1000`}
+                                className={cn(
+                                  "transition-all duration-1000",
+                                  isCompleted ? 'text-green-500' : (isPremiumTheme ? 'text-premium-gold' : 'text-cyan-500')
+                                )}
                                 strokeLinecap="round"
                               />
                             </svg>
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <span className={`text-xs font-bold ${isCompleted ? 'text-green-400' : 'text-cyan-400'}`}>
+                              <span className={cn(
+                                "text-xs font-bold",
+                                isCompleted ? 'text-green-400' : (isPremiumTheme ? 'text-premium-gold' : 'text-cyan-400')
+                              )}>
                                 {location.progress}%
                               </span>
                             </div>
@@ -390,7 +438,12 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                         <Button 
                           onClick={() => handleNavigate("/videos")}
                           size="sm"
-                          className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-semibold"
+                          className={cn(
+                            "w-full font-semibold",
+                            isPremiumTheme 
+                              ? "bg-premium-gold text-premium-bg hover:opacity-90 premium-gold-glow" 
+                              : "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white"
+                          )}
                         >
                           Continue Learning
                           <ChevronRight className="w-4 h-4 ml-1" />
@@ -409,16 +462,6 @@ export function RoadmapDialog({ open, onOpenChange }: RoadmapDialogProps) {
                         </Button>
                       )}
 
-                      {isLocked && location.requiresLiveAccount && !shouldHideTradingCTAs(client?.subdomain) && (
-                        <Button 
-                          size="sm"
-                          className="w-full bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-black font-semibold z-20 relative"
-                          onClick={() => window.open('https://client.nasrtrade.com/client.add/?promocode=NTPP', '_blank')}
-                        >
-                          Open Live Account
-                          <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                      )}
                     </div>
                   </div>
                 );

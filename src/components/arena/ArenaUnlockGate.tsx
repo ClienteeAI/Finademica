@@ -1,31 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Lock, ShieldAlert, ExternalLink } from "lucide-react";
+import { Lock, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
-import { useClient } from "@/lib/clientContext";
-import { shouldHideTradingCTAs } from "@/lib/featureFlags";
 
 interface ArenaUnlockGateProps {
   onUnlock: () => void;
 }
 
-const NASR_REGISTRATION_URL = "https://client.nasrtrade.com/client.add/?promocode=NTPP";
-
 export default function ArenaUnlockGate({ onUnlock }: ArenaUnlockGateProps) {
-  const { client } = useClient();
   const [agreed, setAgreed] = useState(false);
-  const [accountNumber, setAccountNumber] = useState("");
-  const isNasr = !shouldHideTradingCTAs(client?.subdomain);
 
-  const canUnlock = agreed && (!isNasr || accountNumber.trim().length > 0);
+  const canUnlock = agreed;
 
   const handleUnlock = () => {
     if (!canUnlock) return;
-    if (isNasr && accountNumber.trim()) {
-      localStorage.setItem("nasr_account_number", accountNumber.trim());
-    }
     onUnlock();
   };
 
@@ -50,30 +39,6 @@ export default function ArenaUnlockGate({ onUnlock }: ArenaUnlockGateProps) {
           </p>
         </div>
       </div>
-
-      {/* NASR Account Section */}
-      {isNasr && (
-        <div className="space-y-3 border-t border-border/50 pt-4">
-          <label className="text-sm font-medium text-foreground block">
-            Enter your NASR account number
-          </label>
-          <Input
-            placeholder="e.g. 12345678"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            className="bg-background/50"
-          />
-          <a
-            href={NASR_REGISTRATION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
-          >
-            Don't have an account? Open one here
-            <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
-      )}
 
       {/* Disclaimer */}
       <div className="space-y-3 border-t border-border/50 pt-4">
@@ -117,9 +82,7 @@ export default function ArenaUnlockGate({ onUnlock }: ArenaUnlockGateProps) {
         className="w-full h-11 text-sm font-semibold disabled:opacity-40"
       >
         <Lock className="w-4 h-4 mr-2" />
-        {isNasr && !accountNumber.trim()
-          ? "Enter account number to unlock"
-          : "Unlock Full Evaluation"}
+        Unlock Full Evaluation
       </Button>
     </motion.div>
   );

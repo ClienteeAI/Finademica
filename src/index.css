@@ -15,94 +15,94 @@
   ============================================ */
   :root {
     /* Client Theme Variables (Dynamically Set by ClientProvider) */
-    --client-primary: #4DE2E8;
+    --client-primary: #6366F1;
     --client-secondary: #D4E0EC;
 
     /* Luminous Ice Color System - Complete color functions for OKLCH/HSL compatibility */
-    --background: hsl(205 33% 98%);
-    --foreground: hsl(217 91% 10%);
+    --background: 205 33% 98%;
+    --foreground: 217 91% 10%;
 
     /* Glass card surfaces - Arctic */
-    --card: hsl(210 33% 97%);
-    --card-foreground: hsl(217 91% 10%);
+    --card: 210 33% 97%;
+    --card-foreground: 217 91% 10%;
 
-    --popover: hsl(210 33% 97%);
-    --popover-foreground: hsl(217 91% 10%);
+    --popover: 210 33% 97%;
+    --popover-foreground: 217 91% 10%;
 
-    /* Primary: Luminous Aqua */
-    --primary: hsl(181 75% 60%);
-    --primary-foreground: hsl(0 0% 98%);
+    /* Primary: Electric Indigo */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 98%;
 
     /* Secondary surfaces - Cloud Mist */
-    --secondary: hsl(214 32% 94%);
-    --secondary-foreground: hsl(220 9% 46%);
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 220 9% 46%;
 
     /* Muted elements */
-    --muted: hsl(210 25% 96%);
-    --muted-foreground: hsl(220 9% 46%);
+    --muted: 210 25% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    /* Accent: Neon Cyan */
-    --accent: hsl(195 100% 83%);
-    --accent-foreground: hsl(217 91% 22%);
+    /* Accent: Indigo Glow */
+    --accent: 239 84% 85%;
+    --accent-foreground: 239 84% 20%;
 
     /* Danger */
-    --destructive: hsl(0 72% 71%);
-    --destructive-foreground: hsl(0 0% 98%);
+    --destructive: 0 72% 71%;
+    --destructive-foreground: 0 0% 98%;
 
     /* Borders and inputs - Icy Slate */
-    --border: hsl(210 30% 88%);
-    --input: hsl(210 25% 96%);
-    --ring: hsl(181 75% 60%);
+    --border: 210 30% 88%;
+    --input: 210 25% 96%;
+    --ring: 239 84% 67%;
 
     --radius: 1.375rem;
 
-    /* Success: Luminous Aqua */
-    --success: hsl(181 75% 60%);
-    --success-from: hsl(181 75% 60%);
-    --success-to: hsl(195 100% 83%);
+    /* Success: Indigo */
+    --success: 239 84% 67%;
+    --success-from: 239 84% 67%;
+    --success-to: 239 84% 85%;
     
-    /* Premium gradient: Aqua to Cyan */
-    --premium-from: hsl(181 75% 60%);
-    --premium-to: hsl(181 60% 55%);
+    /* Premium gradient: Indigo */
+    --premium-from: 239 84% 67%;
+    --premium-to: 239 84% 60%;
     
     /* Danger gradient */
-    --danger-from: hsl(0 72% 71%);
-    --danger-to: hsl(15 70% 65%);
+    --danger-from: 0 72% 71%;
+    --danger-to: 15 70% 65%;
     
     /* Info: Deep Ocean Blue */
-    --info: hsl(212 61% 23%);
-    --warning: hsl(38 80% 55%);
-    --error: hsl(0 72% 71%);
+    --info: 212 61% 23%;
+    --warning: 38 80% 55%;
+    --error: 0 72% 71%;
     
     /* Text hierarchy - Deep Ocean to Cool Graphite */
-    --text-primary: hsl(220 25% 9%);
-    --text-secondary: hsl(220 9% 46%);
-    --text-tertiary: hsl(220 13% 69%);
+    --text-primary: 220 25% 9%;
+    --text-secondary: 220 9% 46%;
+    --text-tertiary: 220 13% 69%;
     
     /* Borders with transparency */
-    --border-subtle: hsl(210 30% 88%);
-    --border-hover: hsl(181 75% 60%);
-    --border-glass: hsl(210 30% 90%);
+    --border-subtle: 210 30% 88%;
+    --border-hover: 239 84% 67%;
+    --border-glass: 210 30% 90%;
 
     /* Lavender Ice for secondary tags */
-    --purple: hsl(255 55% 83%);
+    --purple: 255 55% 83%;
 
-    /* Gold accent (RGB format for Tailwind v4 opacity support) */
-    --gold-rgb: 212 175 55;
-    --gold-light-rgb: 244 217 140;
-    --gold: hsl(43 69% 53%);
-    --gold-light: hsl(45 85% 62%);
-    --gold-glow: hsl(43 69% 53%);
+    /* Premium Gold accent (RGB format for Tailwind v4 opacity support) */
+    --premium-gold-rgb: 212 175 55;
+    --premium-gold-light-rgb: 244 217 140;
+    --premium-gold: 43 69% 53%;
+    --premium-gold-light: 45 85% 62%;
+    --premium-gold-glow: 43 69% 53%;
 
     /* Sidebar */
-    --sidebar: hsl(210 33% 97%);
-    --sidebar-foreground: hsl(217 91% 10%);
-    --sidebar-primary: hsl(181 75% 60%);
-    --sidebar-primary-foreground: hsl(0 0% 98%);
-    --sidebar-accent: hsl(210 25% 96%);
-    --sidebar-accent-foreground: hsl(220 9% 46%);
-    --sidebar-border: hsl(210 30% 88%);
-    --sidebar-ring: hsl(181 75% 60%);
+    --sidebar: 210 33% 97%;
+    --sidebar-foreground: 217 91% 10%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 210 25% 96%;
+    --sidebar-accent-foreground: 220 9% 46%;
+    --sidebar-border: 210 30% 88%;
+    --sidebar-ring: 239 84% 67%;
   }
 
   /* ============================================
@@ -117,11 +117,33 @@
      No hardcoded theme blocks are needed here.
      The :root defaults above serve as fallbacks.
   ============================================ */
+
+  .dark {
+    --background: 229 84% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 229 84% 8%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 47% 11%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 239 84% 67%;
+    --accent-foreground: 0 0% 100%;
+    --border: 217 33% 17%;
+    --sidebar: 229 84% 5%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 239 84% 67%;
+    --sidebar-border: 217 33% 17%;
+    --sidebar-ring: 239 84% 67%;
+    --radius: 0.75rem;
+  }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border) / 0.3);
   }
 
   /* Safe area CSS variables for iOS notch/home bar */
@@ -156,12 +178,13 @@
   /* Dark mode body background (via next-themes .dark class) */
   .dark body,
   body.dark {
-    background: linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%);
+    background: radial-gradient(circle at 50% 0%, #1E293B 0%, #020617 50%, #020617 100%);
+    background-attachment: fixed;
   }
 
-  /* Nasr theme body background (same as dark, but with gold accents in other CSS) */
-  .theme-nasr body,
-  body.theme-nasr {
+  /* Premium theme body background (same as dark, but with gold accents in other CSS) */
+  .theme-premium body,
+  body.theme-premium {
     background: linear-gradient(145deg, #000000 0%, #02040A 50%, #0B0F16 100%);
   }
 
@@ -172,7 +195,7 @@
     inset: 0;
     pointer-events: none;
     background-image:
-      radial-gradient(circle at 10% 10%, rgba(77, 226, 232, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 10% 10%, rgba(99, 102, 241, 0.06) 0%, transparent 40%),
       radial-gradient(circle at 90% 20%, rgba(181, 167, 255, 0.05) 0%, transparent 45%),
       radial-gradient(circle at 50% 90%, rgba(167, 233, 255, 0.04) 0%, transparent 50%);
     opacity: 1;
@@ -188,9 +211,9 @@
       radial-gradient(circle at 50% 90%, rgba(77, 180, 255, 0.03) 0%, transparent 50%);
   }
 
-  /* Nasr theme: Gold particles background effect (overrides .dark) */
-  .theme-nasr body::before,
-  body.theme-nasr::before {
+  /* Premium theme: Gold particles background effect (overrides .dark) */
+  .theme-premium body::before,
+  body.theme-premium::before {
     background-image:
       radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
       radial-gradient(circle at 90% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 45%),
@@ -236,8 +259,8 @@
   .premium-card:hover {
     transform: translateY(-3px) scale(1.01);
     box-shadow: 0 15px 50px rgba(15, 23, 42, 0.1),
-                0 0 30px rgba(77, 226, 232, 0.12);
-    border-color: rgba(77, 226, 232, 0.5);
+                0 0 30px rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.5);
   }
 
   /* ============================================
@@ -270,15 +293,15 @@
      NASR THEME UTILITIES (Dark Luxury with Gold)
   ============================================ */
   
-  /* Nasr Premium Cards - Dark with gold accents (overrides .dark) */
-  .theme-nasr .premium-card {
+  /* Premium Cards - Dark with gold accents (overrides .dark) */
+  .theme-premium .premium-card {
     background: rgba(11, 15, 22, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
                 0 0 1px rgba(212, 175, 55, 0.3);
   }
 
-  .theme-nasr .premium-card::before {
+  .theme-premium .premium-card::before {
     background: linear-gradient(
       to bottom,
       rgba(212, 175, 55, 0.08),
@@ -286,7 +309,7 @@
     );
   }
 
-  .theme-nasr .premium-card:hover {
+  .theme-premium .premium-card:hover {
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5),
                 0 0 30px rgba(212, 175, 55, 0.15);
     border-color: rgba(212, 175, 55, 0.4);
@@ -294,19 +317,19 @@
   
   /* Success/Aqua gradient */
   .success-gradient {
-    background: linear-gradient(135deg, #4DE2E8 0%, #2FB3C6 100%);
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   }
 
-  .theme-nasr .success-gradient {
+  .theme-premium .success-gradient {
     background: linear-gradient(135deg, #F2C94C 0%, #D4AF37 100%);
   }
   
   /* Premium gradient */
   .premium-gradient {
-    background: linear-gradient(135deg, #4DE2E8 0%, #2FB3C6 100%);
+    background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   }
 
-  .theme-nasr .premium-gradient {
+  .theme-premium .premium-gradient {
     background: linear-gradient(135deg, #F2C94C 0%, #D4AF37 100%);
   }
 
@@ -322,10 +345,10 @@
   
   /* Glow effects */
   .success-glow {
-    box-shadow: 0 0 18px rgba(77, 226, 232, 0.45);
+    box-shadow: 0 0 18px rgba(99, 102, 241, 0.45);
   }
 
-  .theme-nasr .success-glow {
+  .theme-premium .success-glow {
     box-shadow: 0 0 18px rgba(212, 175, 55, 0.45);
   }
 
@@ -348,8 +371,8 @@
     border-bottom: 1px solid rgba(100, 150, 255, 0.12);
   }
 
-  /* NASR glass nav (gold accent) */
-  .theme-nasr .glass-nav {
+  /* Premium glass nav (gold accent) */
+  .theme-premium .glass-nav {
     background: rgba(11, 15, 22, 0.95);
     border-bottom: 1px solid rgba(212, 175, 55, 0.15);
   }
@@ -364,12 +387,12 @@
     height: 1px;
     background: linear-gradient(90deg, 
       transparent 0%,
-      rgba(77, 226, 232, 0.4) 50%,
+      rgba(99, 102, 241, 0.4) 50%,
       transparent 100%
     );
   }
 
-  .theme-nasr .glass-nav::after {
+  .theme-premium .glass-nav::after {
     background: linear-gradient(90deg, 
       transparent 0%,
       rgba(212, 175, 55, 0.4) 50%,
@@ -460,10 +483,10 @@
 
   @keyframes cyan-glow {
     0%, 100% {
-      box-shadow: 0 0 18px rgba(77, 226, 232, 0.4);
+      box-shadow: 0 0 18px rgba(99, 102, 241, 0.4);
     }
     50% {
-      box-shadow: 0 0 28px rgba(77, 226, 232, 0.6);
+      box-shadow: 0 0 28px rgba(99, 102, 241, 0.6);
     }
   }
 
@@ -548,7 +571,6 @@
   }
   
   .animate-slide-up {
-    animation: slideUp 0.6s ease-out;
   }
   
   .animate-fade-in {
@@ -571,7 +593,7 @@
     animation: cyan-glow 2s ease-in-out infinite;
   }
 
-  .theme-nasr .animate-neon-glow {
+  .theme-premium .animate-neon-glow {
     animation: gold-glow 2s ease-in-out infinite;
   }
 
@@ -588,10 +610,10 @@
     color: hsl(var(--text-primary));
   }
 
-  /* Nasr theme: Serif headings */
-  .theme-nasr h1,
-  .theme-nasr h2,
-  .theme-nasr h3 {
+  /* Premium theme: Serif headings */
+  .theme-premium h1,
+  .theme-premium h2,
+  .theme-premium h3 {
     font-family: 'Playfair Display', Georgia, serif;
   }
 
@@ -617,13 +639,13 @@
     width: 100%;
     height: 2px;
     background: linear-gradient(90deg, 
-      #4DE2E8, 
+      #6366F1, 
       #A7E9FF
     );
-    box-shadow: 0 0 8px rgba(77, 226, 232, 0.4);
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
   }
 
-  .theme-nasr .neon-underline::after {
+  .theme-premium .neon-underline::after {
     background: linear-gradient(90deg, 
       #D4AF37, 
       #F2C94C
@@ -651,11 +673,11 @@
   /* Left border accent */
   .neon-border-left {
     border-left: 2px solid hsl(var(--primary));
-    box-shadow: -2px 0 8px rgba(77, 226, 232, 0.3);
+    box-shadow: -2px 0 8px rgba(99, 102, 241, 0.3);
     padding-left: 1rem;
   }
 
-  .theme-nasr .neon-border-left {
+  .theme-premium .neon-border-left {
     box-shadow: -2px 0 8px rgba(212, 175, 55, 0.3);
   }
 
@@ -663,29 +685,39 @@
      FORM ELEMENTS
   ============================================ */
   input, textarea, select {
-    background: rgba(255, 255, 255, 0.7) !important;
-    border: 1px solid rgba(212, 224, 236, 0.6) !important;
+    background: hsl(var(--background) / 0.5) !important;
+    border: 1px solid hsl(var(--border) / 0.5) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    color: hsl(var(--text-primary)) !important;
+    color: hsl(var(--foreground)) !important;
+    transition: all 0.2s ease;
   }
 
-  .theme-nasr input,
-  .theme-nasr textarea,
-  .theme-nasr select {
-    background: rgba(11, 15, 22, 0.8) !important;
-    border: 1px solid rgba(212, 175, 55, 0.2) !important;
-    color: hsl(0 0% 96%) !important;
+  .theme-premium input,
+  .theme-premium textarea,
+  .theme-premium select,
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background: rgba(11, 15, 22, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: hsl(0 0% 98%) !important;
+  }
+
+  .theme-premium input,
+  .theme-premium textarea,
+  .theme-premium select {
+    border-color: rgba(212, 175, 55, 0.2) !important;
   }
 
   input:focus, textarea:focus, select:focus {
-    border-color: rgba(77, 226, 232, 0.7) !important;
-    box-shadow: 0 0 15px rgba(77, 226, 232, 0.2) !important;
+    border-color: rgba(99, 102, 241, 0.7) !important;
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.2) !important;
   }
 
-  .theme-nasr input:focus,
-  .theme-nasr textarea:focus,
-  .theme-nasr select:focus {
+  .theme-premium input:focus,
+  .theme-premium textarea:focus,
+  .theme-premium select:focus {
     border-color: rgba(212, 175, 55, 0.5) !important;
     box-shadow: 0 0 15px rgba(212, 175, 55, 0.15) !important;
   }
@@ -698,44 +730,44 @@
      NASR THEME SPECIFIC UTILITIES
   ============================================ */
   
-  /* Gold text color */
-  .text-gold {
+  /* Premium Gold text color */
+  .text-premium-gold {
     color: #D4AF37;
   }
 
-  .text-gold-light {
+  .text-premium-gold-light {
     color: #F2C94C;
   }
 
-  /* Gold background */
-  .bg-gold {
+  /* Premium Gold background */
+  .bg-premium-gold {
     background-color: #D4AF37;
   }
 
-  .bg-gold-light {
+  .bg-premium-gold-light {
     background-color: #F2C94C;
   }
 
-  /* Gold border */
-  .border-gold {
+  /* Premium Gold border */
+  .border-premium-gold {
     border-color: #D4AF37;
   }
 
-  .border-gold-glow {
+  .border-premium-gold-glow {
     border-color: rgba(212, 175, 55, 0.3);
   }
 
-  /* Dark panel backgrounds for Nasr */
-  .bg-nasr-panel {
+  /* Premium panel backgrounds */
+  .bg-premium-panel {
     background: #0B0F16;
   }
 
-  .bg-nasr-dark {
+  .bg-premium-dark {
     background: #02040A;
   }
 
-  /* Nasr card styling override - neutral border (gold on hover only) */
-  .nasr-card {
+  /* Premium card styling override - neutral border (gold on hover only) */
+  .premium-card {
     background: rgba(11, 15, 22, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
@@ -744,15 +776,15 @@
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .nasr-card:hover {
+  .premium-card:hover {
     border-color: rgba(212, 175, 55, 0.3);
     box-shadow: 0 15px 50px rgba(0, 0, 0, 0.5),
                 0 0 30px rgba(212, 175, 55, 0.1),
                 inset 0 1px 0 rgba(212, 175, 55, 0.15);
   }
 
-  /* Grid lines background effect for Nasr */
-  .nasr-grid-bg {
+  /* Grid lines background effect */
+  .premium-grid-bg {
     background-image: 
       linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
@@ -780,7 +812,7 @@
   ============================================ */
   @media (max-width: 768px) {
     /* Increase text contrast on mobile */
-    .theme-nasr {
+    .theme-premium {
       --muted-foreground: 0 0% 90%;
       --text-secondary: 0 0% 92%;
       --text-tertiary: 0 0% 75%;
@@ -880,8 +912,8 @@
     border-radius: 16px;
   }
 
-  /* Theme overrides for nasr/dark theme */
-  .theme-nasr .glass-card-light,
+  /* Theme overrides for premium/dark theme */
+  .theme-premium .glass-card-light,
   .dark .glass-card-light {
     background: rgba(26, 31, 46, 0.92);
     border-color: rgba(71, 85, 105, 0.5);
@@ -890,7 +922,7 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
-  .theme-nasr .glass-card-light:hover,
+  .theme-premium .glass-card-light:hover,
   .dark .glass-card-light:hover {
     border-color: rgba(56, 189, 248, 0.3);
   }
@@ -930,17 +962,17 @@
   }
 
   /* Theme-aware card text */
-  .theme-nasr .card-text-primary,
+  .theme-premium .card-text-primary,
   .dark .card-text-primary {
     color: hsl(210 40% 96%);
   }
 
-  .theme-nasr .card-text-secondary,
+  .theme-premium .card-text-secondary,
   .dark .card-text-secondary {
     color: hsl(215 20% 75%);
   }
 
-  .theme-nasr .card-text-muted,
+  .theme-premium .card-text-muted,
   .dark .card-text-muted {
     color: hsl(215 16% 60%);
   }
@@ -955,7 +987,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .theme-nasr .progress-track-contrast,
+  .theme-premium .progress-track-contrast,
   .dark .progress-track-contrast {
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.05);
@@ -964,7 +996,7 @@
   /* Glowing progress bar fill */
   .progress-fill-glow {
     background: linear-gradient(90deg, hsl(var(--primary)), hsl(195 100% 70%));
-    box-shadow: 0 0 12px rgba(77, 226, 232, 0.5);
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
   }
 
   /* ===========================================
@@ -1099,11 +1131,11 @@
   }
 
   /* Ensure inactive states are readable but clearly inactive */
-  .theme-nasr .filter-pill-inactive {
+  .theme-premium .filter-pill-inactive {
     @apply bg-white/5 border-white/15 text-white/70;
   }
 
-  .theme-nasr .filter-pill-inactive:hover {
+  .theme-premium .filter-pill-inactive:hover {
     @apply text-white/90;
     border-color: rgba(212, 175, 55, 0.4);
   }
@@ -1123,16 +1155,16 @@
     @apply text-muted-foreground/70;
   }
 
-  .theme-nasr .search-input {
+  .theme-premium .search-input {
     @apply bg-white/5 border-white/15;
   }
 
-  .theme-nasr .search-input:focus {
+  .theme-premium .search-input:focus {
     border-color: #D4AF37;
     box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
   }
 
-  .theme-nasr .search-input::placeholder {
+  .theme-premium .search-input::placeholder {
     @apply text-white/50;
   }
 
