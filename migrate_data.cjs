@@ -1,10 +1,11 @@
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 const OLD_URL = 'https://tcqrhihgxslpzdqcdwbg.supabase.co';
-const OLD_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjcXJoaWhneHNscHpkcWNkd2JnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDM1MTg1NCwiZXhwIjoyMDc5OTI3ODU0fQ.OcDNKhS_vwRZqqShcLftoIfqGKtaCjryohDYn4CyvQE';
+const OLD_KEY = process.env.OLD_SUPABASE_SERVICE_ROLE_KEY;
 
 const NEW_URL = 'https://esdeyoadcgyjppfeqaky.supabase.co';
-const NEW_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZGV5b2FkY2d5anBwZmVxYWt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODMyMjAyMCwiZXhwIjoyMDkzODk4MDIwfQ.CXYZ6YgUgyB3ToRSpxsoPrGCFPSN7e_rh8vx4JfstZg';
+const NEW_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const NEW_CLIENT_ID = 'a6151fd9-1513-4ae0-b960-25454f3a9bf2';
 

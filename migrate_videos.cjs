@@ -1,15 +1,16 @@
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 // OLD Project (Source)
 const oldSupabase = createClient(
   'https://tcqrhihgxslpzdqcdwbg.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjcXJoaWhneHNscHpkcWNkd2JnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDM1MTg1NCwiZXhwIjoyMDc5OTI3ODU0fQ.OcDNKhS_vwRZqqShcLftoIfqGKtaCjryohDYn4CyvQE'
+  process.env.OLD_SUPABASE_SERVICE_ROLE_KEY
 );
 
 // NEW Project (Finademica)
 const newSupabase = createClient(
   'https://esdeyoadcgyjppfeqaky.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZGV5b2FkY2d5anBwZmVxYWt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODMyMjAyMCwiZXhwIjoyMDkzODk4MDIwfQ.CXYZ6YgUgyB3ToRSpxsoPrGCFPSN7e_rh8vx4JfstZg'
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 const FINADEMICA_CLIENT_ID = 'a6151fd9-1513-4ae0-b960-25454f3a9bf2';

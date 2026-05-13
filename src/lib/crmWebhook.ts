@@ -159,7 +159,8 @@ export async function sendCrmWebhook(
       JSON.stringify(payload, (_, value) => (value === undefined ? null : value))
     );
 
-    console.log(`[CRM] Sending ${eventName} event:`, sanitizedPayload);
+    console.log(`🚀 [CRM] Attempting to send ${eventName} event to: ${CRM_WEBHOOK_URL}`);
+    console.log(`[CRM] Payload:`, sanitizedPayload);
 
     const response = await fetch(CRM_WEBHOOK_URL, {
       method: "POST",
@@ -175,16 +176,19 @@ export async function sendCrmWebhook(
 
     // Optionally insert into crm_events table (if it exists)
     try {
-      await supabase.from("crm_events").insert({
+      const { error: dbError } = await supabase.from("crm_events").insert({
         user_id: finalUser.user_id,
-        email: finalUser.email,
-        phone: finalUser.phone,
+        client_id: finalUser.client_id,
         event_name: eventName,
-        props: sanitizedPayload,
-        occurred_at: new Date().toISOString(),
+        payload: sanitizedPayload
       });
+      
+      if (dbError) {
+        console.warn("[CRM] Could not save to crm_events table:", dbError.message);
+      } else {
+        console.log("[CRM] Event successfully backed up to database.");
+      }
     } catch (dbError) {
-      // Silently ignore if table doesn't exist or insert fails
       console.log("[CRM] crm_events insert skipped:", dbError);
     }
   } catch (error) {

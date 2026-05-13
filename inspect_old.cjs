@@ -1,7 +1,8 @@
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
 const OLD_URL = 'https://tcqrhihgxslpzdqcdwbg.supabase.co';
-const OLD_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjcXJoaWhneHNscHpkcWNkd2JnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDM1MTg1NCwiZXhwIjoyMDc5OTI3ODU0fQ.OcDNKhS_vwRZqqShcLftoIfqGKtaCjryohDYn4CyvQE';
+const OLD_KEY = process.env.OLD_SUPABASE_SERVICE_ROLE_KEY;
 
 const oldSupabase = createClient(OLD_URL, OLD_KEY);
 

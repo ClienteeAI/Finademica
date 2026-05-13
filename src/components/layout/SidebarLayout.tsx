@@ -262,6 +262,8 @@ function TopHeader() {
   );
 }
 
+import { AIMentor } from '@/components/AIMentor';
+
 export default function SidebarLayout({ children }: SidebarLayoutProps) {
   const { user, loading } = useAuth();
   const { client } = useClient();
@@ -321,6 +323,9 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
 
         {/* Mobile Bottom Navigation */}
         <MobileBottomNav />
+
+        {/* Global AI Mentor Chat Button */}
+        <AIMentor />
       </div>
     </SidebarProvider>
   );

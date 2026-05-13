@@ -1,8 +1,13 @@
+require('dotenv').config();
 const { createClient } = require('@supabase/supabase-js');
 
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error('❌ Error: SUPABASE_SERVICE_ROLE_KEY is not defined');
+    process.exit(1);
+}
 const supabase = createClient(
   'https://esdeyoadcgyjppfeqaky.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzZGV5b2FkY2d5anBwZmVxYWt5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODMyMjAyMCwiZXhwIjoyMDkzODk4MDIwfQ.CXYZ6YgUgyB3ToRSpxsoPrGCFPSN7e_rh8vx4JfstZg'
+  process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
 async function checkSchema() {

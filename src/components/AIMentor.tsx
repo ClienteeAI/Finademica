@@ -362,7 +362,7 @@ export function AIMentor() {
                     <Sparkles className={cn("w-8 h-8", isPremiumTheme ? "text-premium-gold" : "text-[#6366F1]")} />
                   </div>
                   <p className={cn("text-sm font-medium", isPremiumTheme ? "text-premium-text-muted" : "text-white/60")}>
-                    Hi! I'm your AI Trading Mentor. Ask me anything!
+                    Hi, my name is Finn. How can I help?
                   </p>
                 </div>
               )}
